@@ -1,0 +1,18 @@
+[package]
+name = "tracecon"
+version = "0.1.0"
+authors = ["Magnus Kulke <mkulke@gmail.com>"]
+edition = "2018"
+license = "GPL-2.0 OR BSD-3-Clause"
+
+[dependencies]
+anyhow = "1.0"
+libbpf-rs = "0.14.0"
+libc = "0.2"
+structopt = "0.3"
+ctrlc = "3.1"
+object = "0.25"
+plain = "0.2"
+
+[build-dependencies]
+libbpf-cargo = "0.9.3"
