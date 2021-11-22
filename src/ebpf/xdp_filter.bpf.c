@@ -24,19 +24,19 @@
 
 char LICENSE[] SEC("license") = "Dual BSD/GPL";
 
-/*//BPF map
-struct {
+//BPF map
+/*struct {
 	__uint(type, BPF_MAP_TYPE_HASH);
 	__uint(max_entries, 8192);
 	__type(key, pid_t);
-	__type(value, uint64_t);
+	__type(value, char[5]);
 } exec_start SEC(".maps");*/
 
 //Ring buffer
-struct {
+/*struct {
 	__uint(type, BPF_MAP_TYPE_RINGBUF);
 	__uint(max_entries, 256 * 1024);
-} rb SEC(".maps");
+} rb SEC(".maps");*/
 
 //Ethernet frame struct
 struct eth_hdr {
@@ -45,9 +45,11 @@ struct eth_hdr {
 	unsigned short  h_proto;
 };
 
-SEC("xdp")
+SEC("xdp_prog")
 int xdp_receive(struct xdp_md *ctx)
 {
+    bpf_printk("BPF triggered\n");
+    
     void *data_end = (void *)(long)ctx->data_end;
     void *data = (void *)(long)ctx->data;
     char match_pattern[] = "test";
@@ -56,11 +58,11 @@ int xdp_receive(struct xdp_md *ctx)
     unsigned char *payload;
     struct udphdr *udp;
     struct iphdr *ip;
+    
+	/*struct event *rb_event;
 
-	struct event *rb_event;
-
-	/* Reserve a ring buffer event from BPF ringbuf to be filled later*/
-	/*rb_event = bpf_ringbuf_reserve(&rb, sizeof(*rb_event), 0);
+	Reserve a ring buffer event from BPF ringbuf to be filled later*/
+	/*rb_event = bpf_ringbuf_reserve(&rb, sizeof(struct event), 0);
 	if (!rb_event)
 		return 0;*/
 
@@ -92,12 +94,14 @@ int xdp_receive(struct xdp_md *ctx)
     if ((void *)payload + payload_size > data_end)
         return XDP_PASS;
 
+	
     // Compare each byte, exit if a difference is found.
     for (i = 0; i < payload_size; i++)
         if (payload[i] != match_pattern[i])
             return XDP_PASS;
 
-	/*if(!payload){
+    bpf_printk("BPF finished\n ");
+    /*if(!payload){
 		bpf_probe_read_str(&rb_event->payload, sizeof(rb_event->payload), (void *)payload);
 		bpf_ringbuf_submit(rb_event, 0);	
 	}else{

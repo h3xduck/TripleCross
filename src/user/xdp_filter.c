@@ -4,8 +4,10 @@
 #include <signal.h>
 #include <sys/resource.h>
 #include <bpf/libbpf.h>
+#include <linux/if_link.h>
 #include "xdp_filter.skel.h"
 #include "xdp_filter.h"
+#include <net/if.h>
 
 static struct env {
 	bool verbose;
@@ -76,7 +78,7 @@ static void sig_handler(int sig){
 	exiting = true;
 }
 
-static int handle_event(void *ctx, void *data, size_t data_sz){
+/*static int handle_event(void *ctx, void *data, size_t data_sz){
 	const struct event *e = data;
 	struct tm *tm;
 	char ts[32];
@@ -90,18 +92,20 @@ static int handle_event(void *ctx, void *data, size_t data_sz){
             e->payload);
 
 	return 0;
-}
+}*/
 
 
 int main(int argc, char**argv){
-    struct ring_buffer *rb = NULL;
+    //struct ring_buffer *rb = NULL;
     struct xdp_filter_bpf *skel;
     int err;
+	
+	unsigned int ifindex = if_nametoindex(argv[1]);
 
 	/* Parse command line arguments */
-	err = argp_parse(&argp, argc, argv, 0, NULL, NULL);
+	/*err = argp_parse(&argp, argc, argv, 0, NULL, NULL);
 	if (err)
-		return err;
+		return err;*/
 
 	/* Set up libbpf errors and debug info callback */
 	libbpf_set_print(libbpf_print_fn);
@@ -134,19 +138,24 @@ int main(int argc, char**argv){
 		goto cleanup;
 	}
 
+	int flags = XDP_FLAGS_SKB_MODE;
+    int fd = bpf_program__fd(skel->progs.xdp_receive);
+
+    err = bpf_set_link_xdp_fd(ifindex, fd, flags);
+
     /* Set up ring buffer polling */
-	rb = ring_buffer__new(bpf_map__fd(skel->maps.rb), handle_event, NULL, NULL);
+	/*rb = ring_buffer__new(bpf_map__fd(skel->maps.rb), handle_event, NULL, NULL);
 	if (!rb) {
 		err = -1;
 		fprintf(stderr, "Failed to create ring buffer\n");
 		goto cleanup;
-	}
+	}*/
 
     	/* Process events */
 	printf("%-8s %-5s %-16s %-7s %-7s %s\n",
 	       "TIME", "EVENT", "COMM", "PID", "PPID", "FILENAME/EXIT CODE");
 	while (!exiting) {
-		err = ring_buffer__poll(rb, 100 /* timeout, ms */);
+		//err = ring_buffer__poll(rb, 100 /* timeout, ms */);
 		/* Ctrl-C will cause -EINTR */
 		if (err == -EINTR) {
 			err = 0;
@@ -158,9 +167,12 @@ int main(int argc, char**argv){
 		}
 	}
 
+	fd = -1;
+    err = bpf_set_link_xdp_fd(ifindex, fd, flags);
+
     cleanup:
         /* Clean up */
-        ring_buffer__free(rb);
+        //ring_buffer__free(rb);
         xdp_filter_bpf__destroy(skel);
 
         return err < 0 ? -err : 0;

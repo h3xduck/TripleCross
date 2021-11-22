@@ -5,7 +5,7 @@
 
 struct event {
 	char payload[MAX_PAYLOAD_LEN];
-	bool exit_event;
+	//bool exit_event;
 };
 
 #endif
