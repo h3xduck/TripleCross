@@ -5,49 +5,31 @@
 #include <sys/resource.h>
 #include <bpf/libbpf.h>
 #include <linux/if_link.h>
+#include <net/if.h>
+#include <unistd.h>
+
 #include "xdp_filter.skel.h"
 #include "xdp_filter.h"
-#include <net/if.h>
+#include "../constants/constants.h"
 
 static struct env {
 	bool verbose;
 } env;
 
-const char *argp_program_version = "xdp_filter 0.1";
-const char *argp_program_bug_address = "<marcossanchezbajo@gmail.com>";
-const char argp_program_doc[] =
-"My first eBPF packet filter using Express Data Path (XDP)\n"
-"\n"
-"TODO DESCRIPTION\n"
-"\n"
-"USAGE: ./xdp_filter [-v]\n";
+void print_help_dialog(const char* arg){
+    printf("\nUsage: %s ./xdp_filter OPTION\n\n", arg);
+    printf("Program OPTIONs\n");
+    char* line = "-t[NETWORK INTERFACE]";
+    char* desc = "Activate XDP filter";
+    printf("\t%-40s %-50s\n\n", line, desc);
+	line = "-v";
+    desc = "Verbose mode";
+    printf("\t%-40s %-50s\n\n", line, desc);
+    line = "-h";
+    desc = "Print this help";
+    printf("\t%-40s %-50s\n\n", line, desc);
 
-/*Options for argp*/
-static const struct argp_option opts[] = {
-	{ "verbose", 'v', NULL, 0, "Verbose debug output" },
-	{},
-};
-
-/*Command argument parsing, similar to getopt*/
-static error_t parse_arg(int key, char *arg, struct argp_state *state){
-	switch (key) {
-	case 'v':
-		env.verbose = true;
-		break;
-	case ARGP_KEY_ARG:
-		argp_usage(state);
-		break;
-	default:
-		return ARGP_ERR_UNKNOWN;
-	}
-	return 0;
 }
-
-static const struct argp argp = {
-	.options = opts,
-	.parser = parse_arg,
-	.doc = argp_program_doc,
-};
 
 /*Wrapper for printing into stderr when debug active*/
 static int libbpf_print_fn(enum libbpf_print_level level, const char *format, va_list args){
@@ -100,79 +82,93 @@ int main(int argc, char**argv){
     struct xdp_filter_bpf *skel;
     int err;
 	
-	unsigned int ifindex = if_nametoindex(argv[1]);
+	unsigned int ifindex; 
 
 	/* Parse command line arguments */
-	/*err = argp_parse(&argp, argc, argv, 0, NULL, NULL);
-	if (err)
-		return err;*/
+	int opt;
+	while ((opt = getopt(argc, argv, ":t:vh")) != -1) {
+        switch (opt) {
+        case 't':
+            ifindex = if_nametoindex(optarg);
+            printf("Activating filter on network interface: %s\n", optarg);
+            if(ifindex == 0){
+				perror("Error on input interface");
+				exit(EXIT_FAILURE);
+			}
+			break;
+		case 'v':
+			//Verbose output
+			env.verbose = true;
+			break;
 
-	/* Set up libbpf errors and debug info callback */
+        case 'h':
+            print_help_dialog(argv[0]);
+            exit(0);
+            break;
+        case '?':
+            printf("Unknown option: %c\n", optopt);
+			exit(EXIT_FAILURE);
+            break;
+        case ':':
+            printf("Missing arguments for %c\n", optopt);
+            exit(EXIT_FAILURE);
+            break;
+        
+        default:
+            print_help_dialog(argv[0]);
+            exit(EXIT_FAILURE);
+        }
+    }
+	
+	// Set up libbpf errors and debug info callback
 	libbpf_set_print(libbpf_print_fn);
 
-	/* Bump RLIMIT_MEMLOCK to create BPF maps */
+	// Bump RLIMIT_MEMLOCK to be able to create BPF maps
 	bump_memlock_rlimit();
 
-	/* Cleaner handling of Ctrl-C */
+	// Cleaner handling of Ctrl-C
 	signal(SIGINT, sig_handler);
 	signal(SIGTERM, sig_handler);
 
-    /* Load and verify BPF application */
+    // Load and verify BPF application
 	skel = xdp_filter_bpf__open();
 	if (!skel) {
 		fprintf(stderr, "Failed to open and load BPF skeleton\n");
 		return 1;
 	}
 
-	/* Load & verify BPF programs */
+	// Load & verify BPF programs */
 	err = xdp_filter_bpf__load(skel);
 	if (err) {
 		fprintf(stderr, "Failed to load and verify BPF skeleton\n");
 		goto cleanup;
 	}
 
-    /* Attach tracepoints */
-	err = xdp_filter_bpf__attach(skel);
+    // Attach tracepoints
+	/*err = xdp_filter_bpf__attach(skel);
 	if (err) {
 		fprintf(stderr, "Failed to attach BPF skeleton\n");
 		goto cleanup;
-	}
-
-	int flags = XDP_FLAGS_SKB_MODE;
-    int fd = bpf_program__fd(skel->progs.xdp_receive);
-
-    err = bpf_set_link_xdp_fd(ifindex, fd, flags);
-
-    /* Set up ring buffer polling */
-	/*rb = ring_buffer__new(bpf_map__fd(skel->maps.rb), handle_event, NULL, NULL);
-	if (!rb) {
-		err = -1;
-		fprintf(stderr, "Failed to create ring buffer\n");
-		goto cleanup;
 	}*/
 
-    	/* Process events */
-	printf("%-8s %-5s %-16s %-7s %-7s %s\n",
-	       "TIME", "EVENT", "COMM", "PID", "PPID", "FILENAME/EXIT CODE");
+	//Attack BPF program to network interface
+	int flags = XDP_FLAGS_SKB_MODE;
+    int fd = bpf_program__fd(skel->progs.xdp_receive);
+    err = bpf_set_link_xdp_fd(ifindex, fd, flags);
+
+	printf("Filter set and ready\n");
 	while (!exiting) {
-		//err = ring_buffer__poll(rb, 100 /* timeout, ms */);
-		/* Ctrl-C will cause -EINTR */
-		if (err == -EINTR) {
-			err = 0;
-			break;
-		}
-		if (err < 0) {
-			printf("Error polling perf buffer: %d\n", err);
-			break;
-		}
+		/* trigger our BPF program */
+		fprintf(stderr, ".");
+		sleep(1);
 	}
 
+	//Received signal to stop, detach program from network interface
 	fd = -1;
     err = bpf_set_link_xdp_fd(ifindex, fd, flags);
 
+
     cleanup:
-        /* Clean up */
-        //ring_buffer__free(rb);
         xdp_filter_bpf__destroy(skel);
 
         return err < 0 ? -err : 0;

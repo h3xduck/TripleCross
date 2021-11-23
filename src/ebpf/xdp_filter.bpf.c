@@ -14,12 +14,14 @@
 #include <bpf/bpf_helpers.h>
 #include <bpf/bpf_tracing.h>
 #include <bpf/bpf_core_read.h>
-#include "../user/xdp_filter.h"
 #include <arpa/inet.h>
 #include <linux/bpf.h>
 #include <linux/if_ether.h>
 #include <linux/ip.h>
 #include <linux/udp.h>
+
+#include "../user/xdp_filter.h"
+#include "../constants/constants.h"
 
 
 char LICENSE[] SEC("license") = "Dual BSD/GPL";

