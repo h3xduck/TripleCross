@@ -1,28 +1,28 @@
 //#include "newvmlinux.h"
-#include <linux/ip.h>
-#include <linux/types.h>
 #include <unistd.h>
+#include <stdbool.h>
 #include <linux/tcp.h>
 #include <linux/udp.h>
-#include <linux/bpf.h>
-#include <stdbool.h>
+#include <linux/ip.h>
+#include <linux/types.h>
 #include <linux/unistd.h>
 #include <linux/if_ether.h>
 #include <linux/pkt_cls.h>
 #include <arpa/inet.h>
 #include <net/if.h>
-#include <bpf/bpf_helpers.h>
-#include <bpf/bpf_tracing.h>
-#include <bpf/bpf_core_read.h>
 #include <arpa/inet.h>
-#include <linux/bpf.h>
 #include <linux/if_ether.h>
 #include <linux/ip.h>
 #include <linux/udp.h>
 
+#include <linux/bpf.h>
+#include <bpf/bpf_helpers.h>
+#include <bpf/bpf_tracing.h>
+#include <bpf/bpf_core_read.h>
+
 #include "../user/xdp_filter.h"
 #include "../constants/constants.h"
-#include "../include/packet_manager.h"
+#include "../include/packet/packet_manager.h"
 
 
 char LICENSE[] SEC("license") = "Dual BSD/GPL";
@@ -62,29 +62,27 @@ int xdp_receive(struct xdp_md *ctx)
     unsigned char *payload;
     struct tcphdr *tcp;
     struct iphdr *ip;
-
-    if ((void *)eth + sizeof(*eth) > data_end){
-        return XDP_PASS;
-    }
     
+    //Bound checking the packet before operating with it
+    //Otherwise the bpf verifier will complain
     if(ethernet_header_bound_check(eth, data_end)<0){
         bpf_printk("Bound check fail A");
         return XDP_PASS;
     }
 
     ip = data + sizeof(*eth);
-    if ((void *)ip + sizeof(*ip) > data_end){
+    if (ip_header_bound_check(ip, data_end)<0){
         bpf_printk("B");
         return XDP_PASS;   
     }
 
-    if (ip->protocol != IPPROTO_TCP){
+    if (get_protocol(data) != IPPROTO_TCP){
         bpf_printk("C");
         return XDP_PASS;
     }
 
     tcp = (void *)ip + sizeof(*ip);
-    if ((void *)tcp + sizeof(*tcp) > data_end){
+    if (tcp_header_bound_check(tcp, data_end)){
         bpf_printk("D");
         return XDP_PASS;
     }
@@ -132,6 +130,7 @@ int xdp_receive(struct xdp_md *ctx)
 	// Same payload as secret one reeceived, pass it with modifications.
     return XDP_PASS;
 }
+
 
 
 
