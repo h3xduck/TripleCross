@@ -119,6 +119,8 @@ char* getLocalIpAddress(){
 }*/
 
 void send_secret_packet(char* argv){
+    //TODO revise this, in wireshark it is seen not to be a TCP packet??????
+    //Should be working, it did in other projects
     char* local_ip = getLocalIpAddress();
     printf("["KBLU"INFO"RESET"]""Victim IP selected: %s\n", argv);
     check_ip_address_format(argv);

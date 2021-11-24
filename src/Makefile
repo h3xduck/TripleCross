@@ -8,6 +8,7 @@ LIBBPF_OBJ := $(abspath $(OUTPUT)/libbpf.a)
 VMLINUX := ./vmlinux/newvmlinux.h
 USER := user
 EBPF := ebpf
+COMMON_INCLUDES := -I$(abspath ./include)
 # Use our own libbpf API headers and Linux UAPI headers distributed with
 # libbpf to avoid dependency on system-wide headers, which could be missing or
 # outdated
@@ -16,7 +17,7 @@ INCLUDES := -I$(OUTPUT) -I./libbpf/include/uapi -I/lib/modules/5.11.0-40-generic
 CFLAGS := -g -Wall #-I/lib/modules/5.11.0-40-generic/build/include
 ARCH := $(shell uname -m | sed 's/x86_64/x86/')
 
-APPS = xdp_filter bootstrap
+APPS = xdp_filter
 
 # Get Clang's default includes on this system. We'll explicitly add these dirs
 # to the includes list when compiling with `-target bpf` because otherwise some
@@ -66,7 +67,7 @@ $(LIBBPF_OBJ): $(wildcard $(LIBBPF_SRC)/*.[ch] $(LIBBPF_SRC)/Makefile) | $(OUTPU
 # Build BPF code
 $(OUTPUT)/%.bpf.o: $(EBPF)/%.bpf.c $(LIBBPF_OBJ) $(wildcard $(EBPF)/%.h) | $(OUTPUT)
 	$(call msg,BPF,$@)
-	$(Q)$(CLANG) -g -O2 -target bpf -D__TARGET_ARCH_$(ARCH) $(INCLUDES) $(CLANG_BPF_SYS_INCLUDES) -c $(filter %.c,$^) -o $@
+	$(Q)$(CLANG) -g -O2 -target bpf -D__TARGET_ARCH_$(ARCH) $(INCLUDES) $(COMMON_INCLUDES) $(CLANG_BPF_SYS_INCLUDES) -c $(filter %.c,$^) -o $@
 	$(Q)$(LLVM_STRIP) -g $@ # strip useless DWARF info
 
 # Generate BPF skeletons
@@ -79,7 +80,7 @@ $(patsubst %,$(OUTPUT)/%.o,$(APPS)): %.o: %.skel.h
 
 $(OUTPUT)/%.o: $(USER)/%.c $(wildcard $(USER)/%.h) | $(OUTPUT)
 	$(call msg,CC,$@)
-	$(Q)$(CC) $(CFLAGS) $(INCLUDES) -c $(filter $(USER)/%.c,$^) -o $@
+	$(Q)$(CC) $(CFLAGS) $(INCLUDES) $(COMMON_INCLUDES) -c $(filter $(USER)/%.c,$^) -o $@
 
 # Build application binary
 $(APPS): %: $(OUTPUT)/%.o $(LIBBPF_OBJ) | $(OUTPUT)

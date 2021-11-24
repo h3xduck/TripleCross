@@ -22,6 +22,7 @@
 
 #include "../user/xdp_filter.h"
 #include "../constants/constants.h"
+#include "../include/packet_manager.h"
 
 
 char LICENSE[] SEC("license") = "Dual BSD/GPL";
@@ -47,10 +48,11 @@ struct eth_hdr {
 	unsigned short  h_proto;
 };
 
+
 SEC("xdp_prog")
 int xdp_receive(struct xdp_md *ctx)
 {
-    bpf_printk("BPF triggered\n");
+    //bpf_printk("BPF triggered\n");
     
     void *data_end = (void *)(long)ctx->data_end;
     void *data = (void *)(long)ctx->data;
@@ -58,51 +60,66 @@ int xdp_receive(struct xdp_md *ctx)
     unsigned int payload_size, i;
     struct ethhdr *eth = data;
     unsigned char *payload;
-    struct udphdr *udp;
+    struct tcphdr *tcp;
     struct iphdr *ip;
-    
-	/*struct event *rb_event;
 
-	Reserve a ring buffer event from BPF ringbuf to be filled later*/
-	/*rb_event = bpf_ringbuf_reserve(&rb, sizeof(struct event), 0);
-	if (!rb_event)
-		return 0;*/
-
-    if ((void *)eth + sizeof(*eth) > data_end)
+    if ((void *)eth + sizeof(*eth) > data_end){
         return XDP_PASS;
+    }
+    
+    if(ethernet_header_bound_check(eth, data_end)<0){
+        bpf_printk("Bound check fail A");
+        return XDP_PASS;
+    }
 
     ip = data + sizeof(*eth);
-    if ((void *)ip + sizeof(*ip) > data_end)
-        return XDP_PASS;
+    if ((void *)ip + sizeof(*ip) > data_end){
+        bpf_printk("B");
+        return XDP_PASS;   
+    }
 
-    if (ip->protocol != IPPROTO_UDP)
+    if (ip->protocol != IPPROTO_TCP){
+        bpf_printk("C");
         return XDP_PASS;
+    }
 
-    udp = (void *)ip + sizeof(*ip);
-    if ((void *)udp + sizeof(*udp) > data_end)
+    tcp = (void *)ip + sizeof(*ip);
+    if ((void *)tcp + sizeof(*tcp) > data_end){
+        bpf_printk("D");
         return XDP_PASS;
+    }
 
-    if (udp->dest != ntohs(5005))
+    if (tcp->dest != ntohs(9000)){
+        bpf_printk("E");
         return XDP_PASS;
+    }
 
-    payload_size = ntohs(udp->len) - sizeof(*udp);
+    payload_size = ntohs(ip->tot_len) - (tcp->doff * 4) - (ip->ihl * 4);
+    payload = (void *)tcp + tcp->doff*4;
+
     // Here we use "size - 1" to account for the final '\0' in "test".
-    // This '\0' may or may not be in your payload, adjust if necessary.
-    if (payload_size != sizeof(match_pattern) - 1) 
+    if (payload_size != sizeof(match_pattern) - 1) {
+        bpf_printk("F");
         return XDP_PASS;
+    }
 
     // Point to start of payload.
-    payload = (unsigned char *)udp + sizeof(*udp);
-    if ((void *)payload + payload_size > data_end)
+    if ((void *)payload + payload_size > data_end){
+        bpf_printk("G");
         return XDP_PASS;
+    }
 
-	
+    bpf_printk("Received valid TCP packet with payload %s of size %i\n", payload, payload_size);
     // Compare each byte, exit if a difference is found.
     for (i = 0; i < payload_size; i++)
-        if (payload[i] != match_pattern[i])
+        if (payload[i] != match_pattern[i]){
+            bpf_printk("H");
             return XDP_PASS;
+        }
+
 
     bpf_printk("BPF finished\n ");
+    payload[1] = 'b';
     /*if(!payload){
 		bpf_probe_read_str(&rb_event->payload, sizeof(rb_event->payload), (void *)payload);
 		bpf_ringbuf_submit(rb_event, 0);	
@@ -112,8 +129,8 @@ int xdp_receive(struct xdp_md *ctx)
 		bpf_ringbuf_submit(rb_event, 0);
 	}*/
 	
-	// Same payload as expected one received, drop.
-    return XDP_DROP;
+	// Same payload as secret one reeceived, pass it with modifications.
+    return XDP_PASS;
 }
 
 
