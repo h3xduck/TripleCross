@@ -26,6 +26,7 @@
 
 #include "packet/packet_manager.h"
 #include "packet/protocol/tcp_helper.h"
+#include "xdp/xdp_helper.h"
 #include "common/common_utils.h"
 
 
@@ -118,9 +119,53 @@ int xdp_receive(struct xdp_md *ctx)
         bpf_printk("H");
         return XDP_PASS;
     }
+    int data_len_prev = data_end-data;
+    int data_len_next = -1;
 
-    bpf_printk("BPF finished\n ");
-    payload[1] = 'b';
+    struct expand_return ret = expand_tcp_packet_payload(ctx, eth, ip, tcp, 2);
+    if(ret.code == 0){
+        //We must check bounds again, otherwise the verifier gets angry
+        data = (void*)(long)ret.ret_md.data;
+        data_end = (void*)(long)ret.ret_md.data_end;
+        eth = data;
+        if(ethernet_header_bound_check(eth, data_end)<0){
+            bpf_printk("Bound check A failed while expanding\n");
+            return XDP_PASS; 
+        }
+
+        ip = data + sizeof(*eth);
+        if (ip_header_bound_check(ip, data_end)<0){
+            bpf_printk("Bound check B failed while expanding\n");
+            return XDP_PASS;  
+        }
+
+        tcp = (void *)ip + sizeof(*ip);
+        /*if (get_protocol(data_end) != IPPROTO_TCP){
+            bpf_printk("Bound check C failed while expanding\n");
+            return XDP_PASS; 
+        }*/
+
+        if (tcp_header_bound_check(tcp, data_end)){
+            bpf_printk("Bound check D failed while expanding\n");
+            return XDP_PASS;
+        }
+
+        payload_size = ntohs(ip->tot_len) - (tcp->doff * 4) - (ip->ihl * 4);
+        payload = (void *)tcp + tcp->doff*4;
+
+        /*if (tcp_payload_bound_check(payload, payload_size, data_end)){
+            bpf_printk("Bound check E failed while expanding\n");
+            return XDP_PASS;
+        }*/
+        bpf_printk("BPF finished with ret %i and payload %s of size %i\n ", ret.code, payload, payload_size);
+    }else{
+        bpf_printk("BPF finished with error on expansion\n");
+    }
+    data_len_next = data_end-data;
+    bpf_printk("Previous length: %i, current length: %i\n", data_len_prev, data_len_next);
+    //payload[4] = 'A';
+    //payload[6] = '\0';
+    //payload[1] = 'b';
     /*if(!payload){
 		bpf_probe_read_str(&rb_event->payload, sizeof(rb_event->payload), (void *)payload);
 		bpf_ringbuf_submit(rb_event, 0);	
