@@ -127,19 +127,19 @@ int xdp_receive(struct xdp_md *ctx)
         //We must check bounds again, otherwise the verifier gets angry
         data = (void*)(long)ret.ret_md.data;
         data_end = (void*)(long)ret.ret_md.data_end;
-        eth = data;
+        eth = ret.eth;
         if(ethernet_header_bound_check(eth, data_end)<0){
             bpf_printk("Bound check A failed while expanding\n");
             return XDP_PASS; 
         }
 
-        ip = data + sizeof(*eth);
+        ip = ret.ip;
         if (ip_header_bound_check(ip, data_end)<0){
             bpf_printk("Bound check B failed while expanding\n");
             return XDP_PASS;  
         }
 
-        tcp = (void *)ip + sizeof(*ip);
+        tcp = ret.tcp;
         /*if (get_protocol(data_end) != IPPROTO_TCP){
             bpf_printk("Bound check C failed while expanding\n");
             return XDP_PASS; 
@@ -163,8 +163,11 @@ int xdp_receive(struct xdp_md *ctx)
     }
     data_len_next = data_end-data;
     bpf_printk("Previous length: %i, current length: %i\n", data_len_prev, data_len_next);
-    //payload[4] = 'A';
-    //payload[6] = '\0';
+    
+    //char payload_to_write[] = "hello";
+    //__builtin_memcpy(payload, payload_to_write, strlen(payload_to_write));
+
+    //payload[5] = '\0';
     //payload[1] = 'b';
     /*if(!payload){
 		bpf_probe_read_str(&rb_event->payload, sizeof(rb_event->payload), (void *)payload);
