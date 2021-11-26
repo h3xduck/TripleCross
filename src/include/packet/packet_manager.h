@@ -3,6 +3,7 @@
 #include <linux/bpf.h>
 #include <linux/if_ether.h>
 #include <linux/if.h>
+#include <linux/limits.h>
 
 /* BOUND CHECKING*/
 
@@ -28,7 +29,7 @@ static __always_inline int tcp_header_bound_check(struct tcphdr* tcp, void* data
 }
 
 static __always_inline int tcp_payload_bound_check(char* payload, int payload_size, void* data_end){
-    if ((void *)payload + payload_size > data_end){
+    if ((void*)payload + payload_size > data_end){
         return -1;
     }
     return 0; //OK

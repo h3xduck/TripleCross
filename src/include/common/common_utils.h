@@ -31,5 +31,33 @@ static __always_inline int str_n_compare(char* str1, int str1len, char* str2, in
     return 0;
 }
 
+/**
+ * Implementation of strncpy from the Linux Kernel. 
+ * strncpy - Copy a length-limited, C-string
+ * @dest: Where to copy the string to
+ * @src: Where to copy the string from
+ * @count: The maximum number of bytes to copy
+ *
+ * The result is not %NUL-terminated if the source exceeds
+ * @count bytes.
+ *
+ * In the case where the length of @src is less than  that  of
+ * count, the remainder of @dest will be padded with %NUL.
+ *
+ */
+static __always_inline char* str_n_copy(char *dest, const char *src, int count){
+	char *tmp = dest;
+
+	while (count) {
+		if ((*tmp = *src) != 0)
+			src++;
+		tmp++;
+		count--;
+	}
+	return dest;
+}
+
+
+
 
 #endif

@@ -14,7 +14,6 @@
 #include <linux/if_ether.h>
 #include <linux/ip.h>
 #include <linux/udp.h>
-#include <string.h>
 
 #include <linux/bpf.h>
 #include <bpf/bpf_helpers.h>
@@ -62,7 +61,7 @@ int xdp_receive(struct xdp_md *ctx)
     void *data_end = (void *)(long)ctx->data_end;
     void *data = (void *)(long)ctx->data;
     char match_pattern[] = SECRET_PACKET_PAYLOAD;
-    int match_pattern_size = strlen(match_pattern);
+    int match_pattern_size = 5;
     unsigned int payload_size;
     struct ethhdr *eth = data;
     char *payload;
@@ -107,7 +106,6 @@ int xdp_receive(struct xdp_md *ctx)
         return XDP_PASS;
     }
 
-    // Point to start of payload.
     if (tcp_payload_bound_check(payload, payload_size, data_end)){
         bpf_printk("G");
         return XDP_PASS;
@@ -115,18 +113,20 @@ int xdp_receive(struct xdp_md *ctx)
 
     bpf_printk("Received valid TCP packet with payload %s of size %i\n", payload, payload_size);
     // Compare each byte, exit if a difference is found.
-    if(str_n_compare(payload, payload_size, match_pattern, match_pattern_size, payload_size)!=0){
+    if(str_n_compare(payload, payload_size, match_pattern, sizeof(match_pattern), payload_size)!=0){
         bpf_printk("H");
         return XDP_PASS;
     }
     int data_len_prev = data_end-data;
     int data_len_next = -1;
 
+    bpf_printk("OLD data_end: %i, payload: %i\n", data_end, payload);
     struct expand_return ret = expand_tcp_packet_payload(ctx, eth, ip, tcp, 2);
     if(ret.code == 0){
         //We must check bounds again, otherwise the verifier gets angry
-        data = (void*)(long)ret.ret_md.data;
-        data_end = (void*)(long)ret.ret_md.data_end;
+        ctx = ret.ret_md;
+        data = (void*)(long)ret.ret_md->data;
+        data_end = (void*)(long)ret.ret_md->data_end;
         eth = ret.eth;
         if(ethernet_header_bound_check(eth, data_end)<0){
             bpf_printk("Bound check A failed while expanding\n");
@@ -152,21 +152,49 @@ int xdp_receive(struct xdp_md *ctx)
 
         payload_size = ntohs(ip->tot_len) - (tcp->doff * 4) - (ip->ihl * 4);
         payload = (void *)tcp + tcp->doff*4;
+        
+        //Quite a trick to avoid the verifier complaining when it's clear we are OK with the payload
+        //Line 6367 https://lxr.missinglinkelectronics.com/linux/kernel/bpf/verifier.c
+        if(payload_size < 0|| payload_size>88888){
+            bpf_printk("exploding heavily\n");
+            return XDP_PASS;
+        }
+        if(payload_size -1 < data_end - (void*)payload ){
+            return XDP_PASS;
+        }
 
-        /*if (tcp_payload_bound_check(payload, payload_size, data_end)){
+        //Revise this, the idea is to use payload_size, but th everifier keeps thinking it will go out of bounds
+        //Also, note that sizeof(..) is returning strlen +1, but it's ok because
+        //we do not want to write at payload[6]
+        if((void*)payload + sizeof(SECRET_PACKET_PAYLOAD) +1 > data_end){
             bpf_printk("Bound check E failed while expanding\n");
             return XDP_PASS;
-        }*/
+        }
+
+        if (tcp_payload_bound_check(payload, payload_size, data_end)){
+            bpf_printk("Bound check F failed while expanding\n");
+            return XDP_PASS;
+        }
+        char* temp_data = (char*)payload;
+        payload[5] = 'a';
+
         bpf_printk("BPF finished with ret %i and payload %s of size %i\n ", ret.code, payload, payload_size);
     }else{
         bpf_printk("BPF finished with error on expansion\n");
     }
     data_len_next = data_end-data;
     bpf_printk("Previous length: %i, current length: %i\n", data_len_prev, data_len_next);
-    
-    //char payload_to_write[] = "hello";
-    //__builtin_memcpy(payload, payload_to_write, strlen(payload_to_write));
+    bpf_printk("NEW data_end: %i, payload: %i\n", data_end, payload);
+    bpf_printk("And on NEW CTX data_end: %i, payload: %i\n", ctx->data_end);
+    char payload_to_write[] = "hello";
 
+    /*if (tcp_payload_bound_check(payload, payload_size, data_end)){
+        bpf_printk("G");
+        return XDP_PASS;
+    }*/
+
+    //payload[1] = 'a';
+    //strncpy(payload, payload_to_write, sizeof(payload_to_write));
     //payload[5] = '\0';
     //payload[1] = 'b';
     /*if(!payload){

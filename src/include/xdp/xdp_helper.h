@@ -1,6 +1,8 @@
 #ifndef __XDP_HELPER_H__
 #define __XDP_HELPER_H__
 
+#include <linux/types.h>
+
 #include <bpf/bpf_helpers.h>
 
 #include "packet/protocol/ip_helper.h"
@@ -9,7 +11,7 @@
 
 static struct expand_return{
     int code;
-    struct xdp_md ret_md;
+    struct xdp_md *ret_md;
     void *data;
     void *data_end;
     struct ethhdr *eth;
@@ -81,10 +83,13 @@ static __always_inline struct expand_return expand_tcp_packet_payload(struct xdp
     
 
     //We modify the fields we care about of the headers
-    bpf_printk("before: %i\n", ret.ip->tot_len);
+    bpf_printk("before: %i, checksum %u\n", ret.ip->tot_len, ret.ip->check);
     ret.ip->tot_len = htons(ntohs(ret.ip->tot_len) + more_bytes);
-    bpf_printk("after: %i\n", ret.ip->tot_len);
-    ret.ret_md = *ctx;
+    uint32_t csum = 0;
+	ipv4_csum(ret.ip, sizeof(struct iphdr), &csum);
+	ret.ip->check = csum;
+    bpf_printk("after: %i, checksum %u\n", ret.ip->tot_len, ret.ip->check);
+    ret.ret_md = ctx;
     ret.code = 0;
     ret.data = (void *)(long)ctx->data;
     ret.data_end = (void *)(long)ctx->data_end;
