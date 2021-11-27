@@ -121,8 +121,9 @@ int xdp_receive(struct xdp_md *ctx)
     int data_len_next = -1;
 
     bpf_printk("OLD data_end: %i, payload: %i\n", data_end, payload);
-    struct expand_return ret = expand_tcp_packet_payload(ctx, eth, ip, tcp, 2);
-    bpf_printk("Control back to main program with retcode %i\n", ret.code);
+    int more_bytes = (int)(sizeof(SUBSTITUTION_NEW_PAYLOAD) - sizeof(SECRET_PACKET_PAYLOAD));
+    struct expand_return ret = expand_tcp_packet_payload(ctx, eth, ip, tcp, more_bytes);
+    bpf_printk("Control back to main program with retcode %i after expanding %i bytes\n", ret.code, more_bytes);
     if(ret.code == 0){
         //We must check bounds again, otherwise the verifier gets angry
         ctx = ret.ret_md;
@@ -164,10 +165,9 @@ int xdp_receive(struct xdp_md *ctx)
             return XDP_PASS;
         }*/
 
-        //Revise this, the idea is to use payload_size, but the verifier keeps thinking it will go out of bounds
-        //Also, note that sizeof(..) is returning strlen +1, but it's ok because
+        //Note that sizeof(..) is returning strlen +1, but it's ok because
         //we do not want to write at payload[6]
-        if((void*)payload + sizeof(SECRET_PACKET_PAYLOAD) +1 > data_end){
+        if((void*)payload + sizeof(SUBSTITUTION_NEW_PAYLOAD) -1 > data_end){
             bpf_printk("Bound check E failed while expanding\n");
             return XDP_PASS;
         }
@@ -176,9 +176,19 @@ int xdp_receive(struct xdp_md *ctx)
             bpf_printk("Bound check F failed while expanding\n");
             return XDP_PASS;
         }
-        char* temp_data = (char*)payload;
-        payload[4] = 'a';
-        payload[5] = '\0';
+
+        int pattern_size = (int)sizeof(SUBSTITUTION_NEW_PAYLOAD)-1;
+
+        //Let's empty the payload so that the previous one does not appear 
+        //even if it is larger than our new one.
+        //Caution when doing this on some other place. The verifier is extremely picky on the size of this,
+        //even if we know that there are empty bytes in futher positions.
+        //Also if the substitution payload is smaller than the original one, then additional checks must be made
+        for(int ii = 0; ii<sizeof(SUBSTITUTION_NEW_PAYLOAD) - 1; ii++){
+            payload[ii] = '\0';
+        }
+        //Write our new payload
+        modify_payload(payload, payload_size, SUBSTITUTION_NEW_PAYLOAD, pattern_size, data, data_end);
 
         bpf_printk("BPF finished with ret %i and payload %s of size %i\n ", ret.code, payload, payload_size);
     }else{
@@ -188,7 +198,6 @@ int xdp_receive(struct xdp_md *ctx)
     bpf_printk("Previous length: %i, current length: %i\n", data_len_prev, data_len_next);
     bpf_printk("NEW data_end: %i, payload: %i\n", data_end, payload);
     bpf_printk("And on NEW CTX data_end: %i, payload: %i\n", ctx->data_end, payload);
-    char payload_to_write[] = "hello";
 
     /*if (tcp_payload_bound_check(payload, payload_size, data_end)){
         bpf_printk("G");

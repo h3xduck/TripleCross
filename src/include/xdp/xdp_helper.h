@@ -97,6 +97,35 @@ static __always_inline struct expand_return expand_tcp_packet_payload(struct xdp
     return ret;
 }
 
+static __always_inline void modify_payload(char* payload_org, int payload_size, char* pattern, int pattern_size, void* packet_init, void* packet_limit){
+    if(pattern_size > payload_size || pattern_size + (void*)payload_org>packet_limit || payload_size + (void*)payload_org > packet_limit){
+        bpf_printk("Invalid attempt to substitute the payload A\n");
+        return; //Chicken check
+    }
+
+    if((void*)payload_org + pattern_size > (void*)packet_limit){
+        bpf_printk("Invalid attempt to substitute the payload B\n");
+        return;
+    }
+
+    if((void*)payload_org + pattern_size + (payload_size-pattern_size) > (void*)packet_limit){
+        bpf_printk("Invalid attempt to substitute the payload C\n");
+        return;
+    }
+
+    if(payload_size<1 || pattern_size<1){
+        bpf_printk("Invalid attempt to substitute the payload D\n");
+        return;
+    }
+
+    #pragma unroll
+    for (int ii=0; ii<pattern_size; ii++){
+        payload_org[ii] = pattern[ii];
+    }
+
+    
+}
+
 
 
 

@@ -67,7 +67,7 @@ $(LIBBPF_OBJ): $(wildcard $(LIBBPF_SRC)/*.[ch] $(LIBBPF_SRC)/Makefile) | $(OUTPU
 # Build BPF code
 $(OUTPUT)/%.bpf.o: $(EBPF)/%.bpf.c $(LIBBPF_OBJ) $(wildcard $(EBPF)/%.h) | $(OUTPUT)
 	$(call msg,BPF,$@)
-	$(Q)$(CLANG) -g -O2 -target bpf -D__TARGET_ARCH_$(ARCH) $(INCLUDES) $(COMMON_INCLUDES) $(CLANG_BPF_SYS_INCLUDES) -c $(filter %.c,$^) -o $@
+	$(Q)$(CLANG) -g -O2 -fno-builtin -target bpf -D__TARGET_ARCH_$(ARCH) $(INCLUDES) $(COMMON_INCLUDES) $(CLANG_BPF_SYS_INCLUDES) -c $(filter %.c,$^) -o $@
 	$(Q)$(LLVM_STRIP) -g $@ # strip useless DWARF info
 
 # Generate BPF skeletons

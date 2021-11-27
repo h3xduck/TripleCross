@@ -55,10 +55,10 @@ static __always_inline void ipv4_csum(void *data_start, int data_size, __u32 *cs
     //WITH EBPF HELPERS
     bpf_printk("csum: %u for data_start %u, data_size %i\n", *csum, data_start, data_size);
 	
-    unsigned char* p = (unsigned char*) data_start;
+    /*unsigned char* p = (unsigned char*) data_start;
     for(int ii = 0; ii<20; ii++){
         bpf_printk("B%i: %x\n", ii, p[ii]);
-    }
+    }*/
 
     *csum = bpf_csum_diff(0, 0, data_start, data_size, *csum);
     *csum = csum_fold_helper(*csum);
