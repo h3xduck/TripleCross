@@ -122,6 +122,7 @@ int xdp_receive(struct xdp_md *ctx)
 
     bpf_printk("OLD data_end: %i, payload: %i\n", data_end, payload);
     struct expand_return ret = expand_tcp_packet_payload(ctx, eth, ip, tcp, 2);
+    bpf_printk("Control back to main program with retcode %i\n", ret.code);
     if(ret.code == 0){
         //We must check bounds again, otherwise the verifier gets angry
         ctx = ret.ret_md;
@@ -156,14 +157,14 @@ int xdp_receive(struct xdp_md *ctx)
         //Quite a trick to avoid the verifier complaining when it's clear we are OK with the payload
         //Line 6367 https://lxr.missinglinkelectronics.com/linux/kernel/bpf/verifier.c
         if(payload_size < 0|| payload_size>88888){
-            bpf_printk("exploding heavily\n");
+            bpf_printk("Unlikely you are here, but OK\n");
             return XDP_PASS;
         }
-        if(payload_size -1 < data_end - (void*)payload ){
+        /*if(payload_size -1 < data_end - (void*)payload ){
             return XDP_PASS;
-        }
+        }*/
 
-        //Revise this, the idea is to use payload_size, but th everifier keeps thinking it will go out of bounds
+        //Revise this, the idea is to use payload_size, but the verifier keeps thinking it will go out of bounds
         //Also, note that sizeof(..) is returning strlen +1, but it's ok because
         //we do not want to write at payload[6]
         if((void*)payload + sizeof(SECRET_PACKET_PAYLOAD) +1 > data_end){
@@ -176,7 +177,8 @@ int xdp_receive(struct xdp_md *ctx)
             return XDP_PASS;
         }
         char* temp_data = (char*)payload;
-        payload[5] = 'a';
+        payload[4] = 'a';
+        payload[5] = '\0';
 
         bpf_printk("BPF finished with ret %i and payload %s of size %i\n ", ret.code, payload, payload_size);
     }else{
@@ -185,7 +187,7 @@ int xdp_receive(struct xdp_md *ctx)
     data_len_next = data_end-data;
     bpf_printk("Previous length: %i, current length: %i\n", data_len_prev, data_len_next);
     bpf_printk("NEW data_end: %i, payload: %i\n", data_end, payload);
-    bpf_printk("And on NEW CTX data_end: %i, payload: %i\n", ctx->data_end);
+    bpf_printk("And on NEW CTX data_end: %i, payload: %i\n", ctx->data_end, payload);
     char payload_to_write[] = "hello";
 
     /*if (tcp_payload_bound_check(payload, payload_size, data_end)){

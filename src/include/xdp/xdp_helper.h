@@ -85,7 +85,8 @@ static __always_inline struct expand_return expand_tcp_packet_payload(struct xdp
     //We modify the fields we care about of the headers
     bpf_printk("before: %i, checksum %u\n", ret.ip->tot_len, ret.ip->check);
     ret.ip->tot_len = htons(ntohs(ret.ip->tot_len) + more_bytes);
-    uint32_t csum = 0;
+    __u32 csum = 0;
+    ret.ip->check = 0;
 	ipv4_csum(ret.ip, sizeof(struct iphdr), &csum);
 	ret.ip->check = csum;
     bpf_printk("after: %i, checksum %u\n", ret.ip->tot_len, ret.ip->check);
@@ -95,5 +96,9 @@ static __always_inline struct expand_return expand_tcp_packet_payload(struct xdp
     ret.data_end = (void *)(long)ctx->data_end;
     return ret;
 }
+
+
+
+
 
 #endif
