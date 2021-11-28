@@ -7,7 +7,7 @@ sudo ./bin/xdp_filter -t <network interface>
 ```
 Network interface used for PoC: lo
 
-## PoC 0 - Modifing incoming traffic
+## PoC 0 - Modifying incoming traffic
 ### Option 1: With netcat
 Terminal 1:
 ```bash
