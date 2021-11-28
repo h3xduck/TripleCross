@@ -1,0 +1,12 @@
+# SPDX-License-Identifier: (LGPL-2.1 OR BSD-2-Clause)
+
+prefix=/usr
+libdir=${prefix}/lib64
+includedir=${prefix}/include
+
+Name: libbpf
+Description: BPF library
+Version: 0.6.0
+Libs: -L${libdir} -lbpf
+Requires.private: libelf zlib
+Cflags: -I${includedir}
