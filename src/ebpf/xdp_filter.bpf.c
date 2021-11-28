@@ -60,8 +60,7 @@ int xdp_receive(struct xdp_md *ctx)
     
     void *data_end = (void *)(long)ctx->data_end;
     void *data = (void *)(long)ctx->data;
-    char match_pattern[] = SECRET_PACKET_PAYLOAD;
-    int match_pattern_size = 5;
+
     unsigned int payload_size;
     struct ethhdr *eth = data;
     char *payload;
@@ -100,9 +99,9 @@ int xdp_receive(struct xdp_md *ctx)
     payload_size = ntohs(ip->tot_len) - (tcp->doff * 4) - (ip->ihl * 4);
     payload = (void *)tcp + tcp->doff*4;
 
-    // We use "size - 1" to account for the final '\0'
-    if (payload_size != sizeof(match_pattern) - 1) {
-        bpf_printk("F");
+    // We use "size - 1" to account for the final '\0', but depending on the program use
+    if (payload_size != sizeof(SECRET_PACKET_PAYLOAD)-1) {
+        bpf_printk("F, PS:%i, P:%i, DE:%i\n", payload_size, payload, data_end);
         return XDP_PASS;
     }
 
@@ -113,7 +112,7 @@ int xdp_receive(struct xdp_md *ctx)
 
     bpf_printk("Received valid TCP packet with payload %s of size %i\n", payload, payload_size);
     // Compare each byte, exit if a difference is found.
-    if(str_n_compare(payload, payload_size, match_pattern, sizeof(match_pattern), payload_size)!=0){
+    if(str_n_compare(payload, payload_size, SECRET_PACKET_PAYLOAD, sizeof(SECRET_PACKET_PAYLOAD), payload_size)!=0){
         bpf_printk("H");
         return XDP_PASS;
     }

