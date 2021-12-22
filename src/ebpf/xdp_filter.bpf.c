@@ -20,7 +20,7 @@
 #include <bpf/bpf_tracing.h>
 #include <bpf/bpf_core_read.h>
 
-#include "../user/xdp_filter.h"
+#include "../user/include/xdp_filter.h"
 #include "../constants/constants.h"
 
 #include "packet/packet_manager.h"

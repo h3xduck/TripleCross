@@ -9,7 +9,7 @@
 #include <unistd.h>
 
 #include "xdp_filter.skel.h"
-#include "xdp_filter.h"
+#include "include/xdp_filter.h"
 #include "../constants/constants.h"
 
 static struct env {

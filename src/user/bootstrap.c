@@ -6,7 +6,7 @@
 #include <time.h>
 #include <sys/resource.h>
 #include <bpf/libbpf.h>
-#include "bootstrap.h"
+#include "include/bootstrap.h"
 #include "bootstrap.skel.h"
 
 static struct env {
