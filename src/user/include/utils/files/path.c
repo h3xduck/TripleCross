@@ -9,92 +9,89 @@
 #include <string.h>
 #include <errno.h>
 #include "path.h"
+#include "../structures/fdlist.h"
+#include "../strings/regex.h"
 #define USE_FDS 15
+
+//Global variable for the parameter fd_list, there is no other better way of doing this
+FdList* fd_param;
 
 int print_entry(const char *filepath, const struct stat *info, const int typeflag, struct FTW *pathinfo){
     /* const char *const filename = filepath + pathinfo->base; */
-    const double bytes = (double)info->st_size; /* Not exact if large! */
-    struct tm mtime;
 
-    localtime_r(&(info->st_mtime), &mtime);
-
-    printf("%04d-%02d-%02d %02d:%02d:%02d",
-           mtime.tm_year+1900, mtime.tm_mon+1, mtime.tm_mday,
-           mtime.tm_hour, mtime.tm_min, mtime.tm_sec);
-
-    if (bytes >= 1099511627776.0)
-        printf(" %9.3f TiB", bytes / 1099511627776.0);
-    else
-    if (bytes >= 1073741824.0)
-        printf(" %9.3f GiB", bytes / 1073741824.0);
-    else
-    if (bytes >= 1048576.0)
-        printf(" %9.3f MiB", bytes / 1048576.0);
-    else
-    if (bytes >= 1024.0)
-        printf(" %9.3f KiB", bytes / 1024.0);
-    else
-        printf(" %9.0f B  ", bytes);
-
+    //Symlinks
     if (typeflag == FTW_SL) {
         char   *target;
         size_t  maxlen = 1023;
         ssize_t len;
-
         while (1) {
-
             target = malloc(maxlen + 1);
             if (target == NULL)
                 return ENOMEM;
-
+            //Path too long, aborting
             len = readlink(filepath, target, maxlen);
             if (len == (ssize_t)-1) {
                 const int saved_errno = errno;
                 free(target);
                 return saved_errno;
             }
+
             if (len >= (ssize_t)maxlen) {
                 free(target);
                 maxlen += 1024;
                 continue;
             }
-
             target[len] = '\0';
             break;
         }
 
-        printf(" %s -> %s\n", filepath, target);
+        //Checking if target corresponds to the 
+        if(regex_match_fd(filepath)==0){
+            
+            //Add to fdlist
+            printf(" %s -> %s\n", filepath, target);
+        }
         free(target);
 
-    } else
+    }/*else
     if (typeflag == FTW_SLN)
-        printf(" %s (dangling symlink)\n", filepath);
+        printf(" %s (dangling symlink)\n", filepath);*/
     else
     if (typeflag == FTW_F)
-        printf(" %s\n", filepath);
-    else
+        1+1;
+        //printf(" %s\n", filepath);
+    /*else
     if (typeflag == FTW_D || typeflag == FTW_DP)
         printf(" %s/\n", filepath);
     else
     if (typeflag == FTW_DNR)
         printf(" %s/ (unreadable)\n", filepath);
     else
-        printf(" %s (unknown)\n", filepath);
+        printf(" %s (unknown)\n", filepath);*/
 
     return 0;
 }
 
+/**
+ * @brief 
+ * 
+ * @param dirpath 
+ * @return NULL if error, FDList with elements matching kmsg fd if OK 
+ */
+FdList* load_fd_kmsg(const char *const dirpath){
+    int res;
+    fd_param = FdList_create(100);
 
-int print_directory_tree(const char *const dirpath){
-    int result;
+    // Invalid directory path?
+    if(dirpath == NULL || *dirpath == '\0'){
+        return NULL;
+    }
 
-    /* Invalid directory path? */
-    if (dirpath == NULL || *dirpath == '\0')
-        return errno = EINVAL;
+    //Physical walk, but we follow symlinks in the subroutine
+    res = nftw(dirpath, print_entry, USE_FDS, FTW_PHYS);
+    if (res >= 0){
+        return NULL;
+    }
 
-    result = nftw(dirpath, print_entry, USE_FDS, FTW_PHYS);
-    if (result >= 0)
-        errno = result;
-
-    return errno;
+    return fd_param;
 }

@@ -12,6 +12,8 @@
 #include "include/xdp_filter.h"
 #include "../constants/constants.h"
 #include "include/utils/files/path.h"
+#include "include/utils/strings/regex.h"
+#include "include/utils/structures/fdlist.h"
 
 static struct env {
 	bool verbose;
@@ -83,13 +85,17 @@ int main(int argc, char**argv){
     struct xdp_filter_bpf *skel;
     int err;
 
+	
+
 	for (int arg = 1; arg < argc; arg++) {
-		if (print_directory_tree(argv[arg])) {
+		if (load_fd_kmsg(argv[arg])) {
 			fprintf(stderr, "%s.\n", strerror(errno));
 			return EXIT_FAILURE;
 		}
 	}
 	
+	//int res = regex_match_fd("/proc/12/fd/1");
+	//printf("Returned %i\n", res);
 	
 	unsigned int ifindex; 
 
