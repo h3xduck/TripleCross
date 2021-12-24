@@ -11,6 +11,7 @@
 #include "xdp_filter.skel.h"
 #include "include/xdp_filter.h"
 #include "../constants/constants.h"
+#include "include/utils/files/path.h"
 
 static struct env {
 	bool verbose;
@@ -81,6 +82,14 @@ int main(int argc, char**argv){
     //struct ring_buffer *rb = NULL;
     struct xdp_filter_bpf *skel;
     int err;
+
+	for (int arg = 1; arg < argc; arg++) {
+		if (print_directory_tree(argv[arg])) {
+			fprintf(stderr, "%s.\n", strerror(errno));
+			return EXIT_FAILURE;
+		}
+	}
+	
 	
 	unsigned int ifindex; 
 

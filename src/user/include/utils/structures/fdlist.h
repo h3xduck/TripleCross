@@ -8,7 +8,7 @@ typedef struct FdList{
 
 } FdList;
 
-FdList FdList_create(int size);
+FdList* FdList_create(int size);
 
 int FdList_add(FdList *fd_list, int fd_new);
 

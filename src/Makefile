@@ -5,6 +5,10 @@ LLVM_STRIP ?= llvm-strip
 BPFTOOL ?= $(abspath ./tools/bpftool)
 LIBBPF_SRC := $(abspath ./libbpf/src)
 LIBBPF_OBJ := $(abspath $(OUTPUT)/libbpf.a)
+USER_INCLUDES_DIR := $(abspath ./user/include/utils)
+USER_INCLUDES_HDR := $(wildcard $(USER_INCLUDES_DIR)/**/*.h)
+USER_INCLUDES_SRC := $(wildcard $(USER_INCLUDES_DIR)/**/*.c)
+USER_INCLUDES_OBJ := $(USER_INCLUDES_SRC:.c=.o) 
 VMLINUX := ./vmlinux/newvmlinux.h
 USER := user
 EBPF := ebpf
@@ -76,14 +80,20 @@ $(OUTPUT)/%.skel.h: $(OUTPUT)/%.bpf.o | $(OUTPUT)
 	$(Q)$(BPFTOOL) gen skeleton $< > $@
 
 # Build user-space code
-$(patsubst %,$(OUTPUT)/%.o,$(APPS)): %.o: %.skel.h
+$(patsubst %,$(OUTPUT)/%.o, $(APPS)): %.o: %.skel.h
 
-$(OUTPUT)/%.o: $(USER)/%.c $(wildcard $(USER)/%.h) | $(OUTPUT)
+#User includes
+$(USER_INCLUDES_OBJ): $(wildcard $(USER_INCLUDES_SRC)/**/*.h)| $(OUTPUT)
+	$(call msg,CC,$@)
+	$(Q)$(CC) $(CFLAGS) -I$(wildcard $(USER_INCLUDES_SRC)/*.h) -c $(wildcard $(USER_INCLUDES_SRC)/*.c) -o $@
+
+#User code
+$(OUTPUT)/%.o: $(USER)/%.c $(wildcard $(USER)/%.h)| $(OUTPUT)
 	$(call msg,CC,$@)
 	$(Q)$(CC) $(CFLAGS) $(INCLUDES) $(COMMON_INCLUDES) -c $(filter $(USER)/%.c,$^) -o $@
 
 # Build application binary
-$(APPS): %: $(OUTPUT)/%.o $(LIBBPF_OBJ) | $(OUTPUT)
+$(APPS): %: $(OUTPUT)/%.o $(LIBBPF_OBJ) $(USER_INCLUDES_SRC)| $(OUTPUT)
 	$(call msg,BINARY,$@)
 	$(Q)$(CC) $(CFLAGS) $^ -lelf -lz -o bin/$@
 

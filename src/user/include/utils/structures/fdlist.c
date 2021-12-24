@@ -10,11 +10,12 @@
  * @param size 
  * @return FdList 
  */
-FdList FdList_create(int size){
+FdList* FdList_create(int size){
     FdList *fd_list = (FdList*)calloc(1, sizeof(FdList));
     fd_list->max_size = size;
     fd_list->size = 0;
     fd_list->list = (int*)calloc(size, sizeof(int));
+    return fd_list;
 }
 
 /**
@@ -28,6 +29,7 @@ int FdList_add(FdList *fd_list, int fd_new){
     if(fd_list->size+1 >= fd_list->max_size){
         return -1;
     }
+    return 0;
 }
 
 /**
@@ -51,4 +53,5 @@ int FdList_extend(FdList *fd_list, int new_size){
 int FdList_destroy(FdList *fd_list){
     free(fd_list->list);
     free(fd_list);
+    return 0;
 }
