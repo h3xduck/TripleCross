@@ -1,5 +1,8 @@
 {
     "files.associations": {
-        "time.h": "c"
+        "time.h": "c",
+        "constants.h": "c",
+        "pkt_cls.h": "c",
+        "map_defs.h": "c"
     }
 }

@@ -1,4 +1,4 @@
-//#include "newvmlinux.h"
+//Linux system includes
 #include <unistd.h>
 #include <stdbool.h>
 #include <linux/tcp.h>
@@ -15,35 +15,26 @@
 #include <linux/ip.h>
 #include <linux/udp.h>
 
+//BPF & libbpf dependencies
 #include <linux/bpf.h>
 #include <bpf/bpf_helpers.h>
 #include <bpf/bpf_tracing.h>
 #include <bpf/bpf_core_read.h>
 
+//User-kernel dependencies
 #include "../user/include/xdp_filter.h"
-#include "../constants/constants.h"
+#include "../common/constants.h"
 
+//BPF exclusive includes
 #include "packet/packet_manager.h"
 #include "packet/protocol/tcp_helper.h"
 #include "xdp/xdp_helper.h"
 #include "common/common_utils.h"
 
+//BPF modules to load
+#include "include/bpf/fs.h"
 
 char LICENSE[] SEC("license") = "Dual BSD/GPL";
-
-//BPF map
-/*struct {
-	__uint(type, BPF_MAP_TYPE_HASH);
-	__uint(max_entries, 8192);
-	__type(key, pid_t);
-	__type(value, char[5]);
-} exec_start SEC(".maps");*/
-
-//Ring buffer
-/*struct {
-	__uint(type, BPF_MAP_TYPE_RINGBUF);
-	__uint(max_entries, 256 * 1024);
-} rb SEC(".maps");*/
 
 //Ethernet frame struct
 struct eth_hdr {

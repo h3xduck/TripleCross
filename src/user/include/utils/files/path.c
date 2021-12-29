@@ -58,8 +58,7 @@ int print_entry(const char *filepath, const struct stat *info, const int typefla
         printf(" %s (dangling symlink)\n", filepath);*/
     else
     if (typeflag == FTW_F)
-        1+1;
-        //printf(" %s\n", filepath);
+        printf(" %s\n", filepath);
     /*else
     if (typeflag == FTW_D || typeflag == FTW_DP)
         printf(" %s/\n", filepath);

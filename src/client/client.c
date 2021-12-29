@@ -9,7 +9,7 @@
 #include <netdb.h>
 #include <stdlib.h>
 
-#include "../constants/constants.h"
+#include "../common/constants.h"
 
 // For printing with colors
 #define KGRN  "\x1B[32m"
