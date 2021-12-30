@@ -11,15 +11,9 @@
 #include <bpf/bpf_tracing.h>
 #include <bpf/bpf_core_read.h>
 
-#include "../common/constants.h"
-#include "../common/map_defs.h"
-
-#define RING_BUFFER_MAX_ELEMS 256
-//Ring buffer - For communication ebpf -> userspace
-struct {
-	__uint(type, BPF_MAP_TYPE_RINGBUF);
-	__uint(max_entries, RING_BUFFER_MAX_ELEMS * 1024); //Multiple struct rb_event(s) must fit here
-} rb_comm SEC(".maps");
+#include "../../../common/constants.h"
+#include "../../../common/map_defs.h"
+#include "../data/ring_buffer.h"
 
 //BPF map
 /*struct {
@@ -36,30 +30,14 @@ struct {
  */
 SEC("tp/sched/sched_process_exec")
 int handle_exec(struct trace_event_raw_sched_process_exec *ctx){
-	struct task_struct *task;
-	unsigned fname_off;
-	struct rb_event *e;
-	pid_t pid;
-	int ts;
+	pid_t pid = bpf_get_current_pid_tgid() >> 32;
+	char* message = "PROCESS ACTIVATED\0";
 
-	pid = bpf_get_current_pid_tgid() >> 32;
-	ts = bpf_ktime_get_ns();
+	//Just deactivated for now, but working
+	/*if(ring_buffer_send(&rb_comm, pid, INFO, 0, message)<0){
+		bpf_printk("ERROR printing in RB_COMM at fs module");
+	}*/
 
-	/* reserve sample from BPF ringbuf */
-	e = bpf_ringbuf_reserve(&rb_comm, sizeof(*e), 0);
-	if (!e){
-		return 0;
-	}
-
-	e->pid = pid;
-	e->event_type = INFO;
-	e->code = 0;
-	
-	char* message = "HOLA\0";
-	bpf_probe_read_str(&e->message, sizeof(message), message);
-
-	/* successfully submit it to user-space for post-processing */
-	bpf_ringbuf_submit(e, 0);
 	return 0;
 }
 
