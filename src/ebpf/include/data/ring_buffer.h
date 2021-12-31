@@ -25,7 +25,7 @@ struct ring_buffer rb_comm SEC(".maps");
  * 
  * @return 0 if ok, -1 if error
  */
-static __always_inline int ring_buffer_send(struct ring_buffer *rb, int pid, event_type_t event_type, int code, char* message){
+static __always_inline int ring_buffer_send(struct ring_buffer *rb, int pid, event_type_t event_type, int code, char* message, __u32 message_len){
     struct rb_event *event = (struct rb_event*) bpf_ringbuf_reserve(rb, sizeof(struct rb_event), 0);
     if(!event){
         return -1;
@@ -34,7 +34,7 @@ static __always_inline int ring_buffer_send(struct ring_buffer *rb, int pid, eve
     event->code = code;
     event->event_type = event_type;
     event->pid = pid;
-    bpf_probe_read_kernel_str(&event->message, sizeof(message), message);
+    bpf_probe_read_kernel_str(&event->message, message_len, message);
 
 	bpf_ringbuf_submit(event, 0);
     return 0;

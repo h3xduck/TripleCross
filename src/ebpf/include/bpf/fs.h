@@ -29,14 +29,14 @@
  * @ref https://elixir.bootlin.com/linux/latest/source/include/trace/events/sched.h#L397
  */
 SEC("tp/sched/sched_process_exec")
-int handle_exec(struct trace_event_raw_sched_process_exec *ctx){
+int handle_sched_process_exec(struct trace_event_raw_sched_process_exec *ctx){
 	pid_t pid = bpf_get_current_pid_tgid() >> 32;
-	char* message = "PROCESS ACTIVATED\0";
+	char message[] = "PROCESS ACTIVATED";
 
 	//Just deactivated for now, but working
-	/*if(ring_buffer_send(&rb_comm, pid, INFO, 0, message)<0){
+	if(ring_buffer_send(&rb_comm, pid, INFO, 0, message, sizeof(message))<0){
 		bpf_printk("ERROR printing in RB_COMM at fs module");
-	}*/
+	}
 
 	return 0;
 }

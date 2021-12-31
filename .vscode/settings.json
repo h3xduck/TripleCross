@@ -3,6 +3,7 @@
         "time.h": "c",
         "constants.h": "c",
         "pkt_cls.h": "c",
-        "map_defs.h": "c"
+        "map_defs.h": "c",
+        "regex.h": "c"
     }
 }
