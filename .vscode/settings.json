@@ -4,6 +4,10 @@
         "constants.h": "c",
         "pkt_cls.h": "c",
         "map_defs.h": "c",
-        "regex.h": "c"
+        "regex.h": "c",
+        "unistd.h": "c",
+        "xdp_filter.h": "c",
+        "module_manager.h": "c",
+        "modules.h": "c"
     }
 }

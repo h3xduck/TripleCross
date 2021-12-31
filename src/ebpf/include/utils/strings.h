@@ -1,5 +1,5 @@
-#ifndef __COMMON_UTILS_H__
-#define __COMMON_UTILS_H__
+#ifndef __UTILS_STRINGS_H__
+#define __UTILS_STRINGS_H__
 
 /**
 * Compares two strings.
