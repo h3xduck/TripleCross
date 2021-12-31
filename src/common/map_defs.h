@@ -3,6 +3,7 @@
 
 #define RB_EVENT_MAX_MESSAGE_SIZE 512
 
+// Ring buffer for kernel->user communication
 typedef enum {
     INFO,
     DEBUG,
@@ -16,7 +17,6 @@ struct rb_event {
     int code;
     event_type_t event_type;
 };
-
 
 //sched_process_exec tracepoint contents
 struct trace_entry {

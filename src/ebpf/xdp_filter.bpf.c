@@ -32,7 +32,6 @@
 #include "utils/strings.h"
 
 //BPF modules to load
-#include "include/utils/modules.h" //Config
 #include "include/bpf/sched.h"
 
 char LICENSE[] SEC("license") = "Dual BSD/GPL";
@@ -47,7 +46,6 @@ struct eth_hdr {
 
 SEC("xdp_prog")
 int xdp_receive(struct xdp_md *ctx){
-    CHECK_MODULE_ACTIVE(xdp, __FUNCTION__);
     //bpf_printk("BPF triggered\n");
     
     void *data_end = (void *)(long)ctx->data_end;
