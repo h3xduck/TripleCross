@@ -228,45 +228,15 @@ int main(int argc, char**argv){
 		perror("ERR");
 		goto cleanup;
 	}
-	printf("A:%i", err);fflush(stdout);
-	detach_xdp_all(ifindex, -1, flags);
-	
-	sleep(2);
-
-	err = attach_sched_all(skel);
+	detach_xdp_all(skel);
 	if(err<0){
 		perror("ERR");
 		goto cleanup;
 	}
-	printf("B:%i", err);fflush(stdout);
-
-	exiting = false;
-	while (!exiting) {
-		err = ring_buffer__poll(rb, 100 /* timeout, ms */);
-		
-		//Checking if a signal occured
-		if (err == -EINTR) {
-			err = 0;
-			break;
-		}
-		if (err < 0) {
-			printf("Error polling ring buffer: %d\n", err);
-			break;
-		}
-	}
-	
-	err = detach_sched_all(skel);
-	if(err<0){
-		perror("ERR");
-		goto cleanup;
-	}
-	printf("C:%i", err);fflush(stdout);
-
-	sleep(2);
 
     cleanup:
 		ring_buffer__free(rb);
-        xdp_filter_bpf__destroy(skel);
+        //xdp_filter_bpf__destroy(skel);
 
         return err < 0 ? -err : 0;
 

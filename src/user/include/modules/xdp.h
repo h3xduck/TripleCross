@@ -37,7 +37,8 @@ int attach_xdp_all(struct xdp_filter_bpf *skel, __u32 ifindex, __u32 flags){
 
     // Attach loaded xdp program
 	skel->links.xdp_receive = bpf_program__attach_xdp(skel->progs.xdp_receive, ifindex);
-	err = libbpf_get_error(skel->links.xdp_receive);
+
+    err = libbpf_get_error(skel->links.xdp_receive);
 	if (err<0) {
 		fprintf(stderr, "Failed to attach XDP program\n");
 		return -1;
@@ -46,10 +47,9 @@ int attach_xdp_all(struct xdp_filter_bpf *skel, __u32 ifindex, __u32 flags){
     return 0;
 }
 
-int detach_xdp_all(__u32 ifindex, __u32 fd, __u32 flags){
-    int err = bpf_set_link_xdp_fd(ifindex, fd, flags);
+int detach_xdp_all(struct xdp_filter_bpf *skel){
+    int err = bpf_link__destroy(skel->links.xdp_receive);
     if(err<0){
-        perror("j");
         fprintf(stderr, "Failed to detach XDP program\n");
 		return -1;
     }
