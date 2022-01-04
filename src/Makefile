@@ -82,20 +82,22 @@ $(OUTPUT)/%.skel.h: $(OUTPUT)/%.bpf.o | $(OUTPUT)
 # Build user-space code
 $(patsubst %,$(OUTPUT)/%.o, $(APPS)): %.o: %.skel.h
 
-#User includes
-$(USER_INCLUDES_OBJ): $(wildcard $(USER_INCLUDES_SRC)/**/*.h)| $(OUTPUT)
+
+#User includes and modules
+$(USER_INCLUDES_OBJ): $(wildcard $(USER_INCLUDES_SRC)/**/*.h) | $(OUTPUT)
 	$(call msg,CC,$@)
-	$(Q)$(CC) $(CFLAGS) -I$(wildcard $(USER_INCLUDES_SRC)/*.h) -c $(wildcard $(USER_INCLUDES_SRC)/*.c) -o $@
+	$(Q)$(CC) $(CFLAGS) $(INCLUDES) $(COMMON_INCLUDES) -c $(USER_INCLUDES_SRC) -o $@
 
 #User code
-$(OUTPUT)/%.o: $(USER)/%.c $(wildcard $(USER)/%.h)| $(OUTPUT)
+$(OUTPUT)/%.o: $(USER)/%.c $(wildcard $(USER)/*.h)| $(OUTPUT)
 	$(call msg,CC,$@)
 	$(Q)$(CC) $(CFLAGS) $(INCLUDES) $(COMMON_INCLUDES) -c $(filter $(USER)/%.c,$^) -o $@
 
 # Build application binary
-$(APPS): %: $(OUTPUT)/%.o $(LIBBPF_OBJ) $(USER_INCLUDES_SRC)| $(OUTPUT)
+$(APPS): %: $(OUTPUT)/%.o $(LIBBPF_OBJ) $(USER_INCLUDES_OBJ) | $(OUTPUT)
 	$(call msg,BINARY,$@)
-	$(Q)$(CC) $(CFLAGS) $^ -lelf -lz -o bin/$@
+	$(Q)$(CC) $(CFLAGS) $(INCLUDES) $^ -lelf -lbpf -lz -o bin/$@
+	$(Q)rm $(USER_INCLUDES_OBJ)
 
 # delete failed targets
 .DELETE_ON_ERROR:

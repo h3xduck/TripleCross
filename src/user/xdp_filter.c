@@ -18,8 +18,14 @@
 #include "include/utils/files/path.h"
 #include "include/utils/strings/regex.h"
 #include "include/utils/structures/fdlist.h"
-#include "include/modules/sched.h"
-#include "include/modules/xdp.h"
+#include "include/modules/module_manager.h"
+
+#define ABORT_IF_ERR(err, msg)\
+	if(err<0){\
+		fprintf(stderr, msg);\
+		goto cleanup\
+	}
+
 
 static struct env {
 	bool verbose;
@@ -183,20 +189,17 @@ int main(int argc, char**argv){
 		goto cleanup;
 	}
 
-	//Attach XDP module
-	__u32 flags = XDP_FLAGS_REPLACE;
-	err = attach_xdp_all(skel, ifindex, flags);
-	if(err<0){
-		goto cleanup;
-	}
-
-	//Attach sched module (testing)
-	err = attach_handle_sched_process_exec(skel);
-	if (err<0) {
-		fprintf(stderr, "Failed to attach sched module\n");
-		goto cleanup;
-	}
+	//Attach XDP and sched modules using module manager
+	//and setup the parameters for the installation
+	//XDP
+	module_config.xdp_module.all = ON;
+	module_config_attr.xdp_module.flags = XDP_FLAGS_REPLACE;
+	module_config_attr.xdp_module.ifindex = ifindex;
+	//SCHED
+	module_config.sched_module.all = ON;
 	
+	module_config_attr.skel = skel;
+	err = setup_all_modules();
 
 	// Set up ring buffer polling --> Main communication buffer kernel->user
 	rb = ring_buffer__new(bpf_map__fd(skel->maps.rb_comm), handle_rb_event, NULL, NULL);
@@ -223,7 +226,7 @@ int main(int argc, char**argv){
 	}
 
 	//Received signal to stop, detach program from network interface
-	err = detach_sched_all(skel);
+	/*err = detach_sched_all(skel);
 	if(err<0){
 		perror("ERR");
 		goto cleanup;
@@ -232,13 +235,12 @@ int main(int argc, char**argv){
 	if(err<0){
 		perror("ERR");
 		goto cleanup;
-	}
+	}*/
 
-    cleanup:
-		ring_buffer__free(rb);
-        //xdp_filter_bpf__destroy(skel);
-
-        return err < 0 ? -err : 0;
+cleanup:
+	ring_buffer__free(rb);
+	//xdp_filter_bpf__destroy(skel);
+	if(err!=0) return -1;
 
     return 0;
 }
