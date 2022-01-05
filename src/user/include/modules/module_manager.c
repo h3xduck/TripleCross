@@ -1,6 +1,7 @@
 #include "module_manager.h"
 #include "xdp.h"
 #include "sched.h"
+#include "fs.h"
 
 module_config_t module_config = {
     .xdp_module = {
@@ -10,7 +11,13 @@ module_config_t module_config = {
     .sched_module = {
         .all = ON,
         .handle_sched_process_exec = OFF
+    },
+    .fs_module = {
+        .all = ON,
+        .kprobe__64_compat_sys_read = OFF,
+        .kprobe__64_sys_read = OFF
     }
+
 };
 
 module_config_attr_t module_config_attr = {
@@ -42,6 +49,15 @@ int setup_all_modules(){
         ret = attach_sched_all(attr.skel);
     }else{
         if(config.sched_module.handle_sched_process_exec == ON) ret = attach_handle_sched_process_exec(attr.skel);
+    }
+    if(ret!=0) return -1;
+
+    //FS (File system)
+    if(config.fs_module.all == ON){
+        ret = attach_fs_all(attr.skel);
+    }else{
+        if(config.fs_module.kprobe__64_compat_sys_read == ON) ret = attach_kprobe__64_compat_sys_read(attr.skel);
+        if(config.fs_module.kprobe__64_sys_read == ON) ret = attach_kprobe__64_sys_read(attr.skel);
     }
     if(ret!=0) return -1;
 

@@ -55,6 +55,7 @@ clean:
 	$(Q)rm -rf $(OUTPUT) user/$(APPS)
 	$(Q)rm -rf $(OUTPUT) ebpf/$(APPS)
 	$(Q)rm -rf $(OUTPUT) bin/*
+	$(Q)rm $(USER_INCLUDES_OBJ)
 
 $(OUTPUT) $(OUTPUT)/libbpf:
 	$(call msg,MKDIR,$@)

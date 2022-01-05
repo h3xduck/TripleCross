@@ -33,6 +33,7 @@
 
 //BPF modules to load
 #include "include/bpf/sched.h"
+#include "include/bpf/fs.h"
 
 char LICENSE[] SEC("license") = "Dual BSD/GPL";
 

@@ -7,10 +7,6 @@
 #include "common.h"
 #include "xdp_filter.skel.h"
 
-//TODO RESOLVE THE FACT THAT THESE ARE NOT COMPILED WITH REFERENCE TO XDP_FILTER_BPF
-//COMPLETE CONFIG
-//CHECK EVERYTHING STILL WORKS
-
 //Connections
 int attach_handle_sched_process_exec(struct xdp_filter_bpf *skel){
     skel->links.handle_sched_process_exec = bpf_program__attach(skel->progs.handle_sched_process_exec);

@@ -1,5 +1,5 @@
-#ifndef __FS_H
-#define __FS_H
+#ifndef __SCHED_H
+#define __SCHED_H
 
 #include <stdio.h>
 #include <linux/types.h>
@@ -34,9 +34,9 @@ int handle_sched_process_exec(struct trace_event_raw_sched_process_exec *ctx){
 	char message[] = "PROCESS ACTIVATED";
 
 	//Just deactivated for now, but working
-	if(ring_buffer_send(&rb_comm, pid, INFO, 0, message, sizeof(message))<0){
+	/*if(ring_buffer_send(&rb_comm, pid, INFO, 0, message, sizeof(message))<0){
 		bpf_printk("ERROR printing in RB_COMM at fs module");
-	}
+	}*/
 
 	return 0;
 }

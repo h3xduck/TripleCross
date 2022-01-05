@@ -23,6 +23,12 @@ typedef struct module_config_t{
         char handle_sched_process_exec;
     }sched_module;
 
+    struct fs_module {
+        char all;
+        char kprobe__64_compat_sys_read;
+        char kprobe__64_sys_read;
+    }fs_module;
+
 } module_config_t;
 
 //Configuration struct. Used by the module manager to
@@ -37,6 +43,10 @@ typedef struct module_config_attr_t{
     struct sched_module_attr {
         void* __empty;
     }sched_module;
+
+    struct fs_module_attr {
+        void* __empty;
+    }fs_module;
 
 } module_config_attr_t;
 
