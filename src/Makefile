@@ -9,22 +9,15 @@ USER_INCLUDES_DIR := $(abspath ./user/include/)
 USER_INCLUDES_HDR := $(wildcard $(USER_INCLUDES_DIR)/**/*.h)
 USER_INCLUDES_SRC := $(wildcard $(USER_INCLUDES_DIR)/**/*.c)
 USER_INCLUDES_OBJ := $(USER_INCLUDES_SRC:.c=.o) 
-VMLINUX := ./vmlinux/newvmlinux.h
+VMLINUX := ./vmlinux/newnewvmlinux.h
 USER := user
 EBPF := ebpf
 COMMON_INCLUDES := -I$(abspath ./ebpf/include) -I$(abspath ./user/include)
 # Use our own libbpf API headers and Linux UAPI headers distributed with
 # libbpf to avoid dependency on system-wide headers, which could be missing or
 # outdated
-INCLUDES := -I$(OUTPUT) -I./libbpf/include/uapi #-I$(dir $(VMLINUX))
-KINCLUDES := -I$(OUTPUT)  \
-			-I./libbpf/include/uapi \
-			-I/lib/modules/5.11.0-41-generic/build/include \
-			-I/lib/modules/$$(uname -r)/build/include/uapi \
-			-I/lib/modules/$$(uname -r)/build/include/generated/uapi \
-			-I/lib/modules/$$(uname -r)/build/arch/x86/include \
-			-I/lib/modules/$$(uname -r)/build/arch/x86/include/uapi \
-			-I/lib/modules/$$(uname -r)/build/arch/x86/include/generated #-I$(dir $(VMLINUX))
+INCLUDES := -I$(OUTPUT) -I./libbpf/include/uapi -I$(dir $(VMLINUX))
+#INCLUDES := -I$(OUTPUT)  -I./libbpf/include/uapi -I/lib/modules/5.11.0-41-generic/build/include -I/lib/modules/$$(uname -r)/build/include/uapi -I/lib/modules/$$(uname -r)/build/include/generated/uapi -I/lib/modules/$$(uname -r)/build/arch/x86/include -I/lib/modules/$$(uname -r)/build/arch/x86/include/generated #-I$(dir $(VMLINUX))
 CFLAGS := -g -Wall
 ARCH := $(shell uname -m | sed 's/x86_64/x86/')
 
@@ -79,7 +72,7 @@ $(LIBBPF_OBJ): $(wildcard $(LIBBPF_SRC)/*.[ch] $(LIBBPF_SRC)/Makefile) | $(OUTPU
 # Build BPF code
 $(OUTPUT)/%.bpf.o: $(EBPF)/%.bpf.c $(LIBBPF_OBJ) $(wildcard $(EBPF)/%.h) | $(OUTPUT)
 	$(call msg,BPF,$@)
-	$(Q)$(CLANG) -g -O2 -fno-builtin -target bpf -emit-llvm -D__KERNEL__ -D__ASM_SYSREG_H -D__TARGET_ARCH_$(ARCH) $(KINCLUDES) $(COMMON_INCLUDES) $(CLANG_BPF_SYS_INCLUDES) -c $(filter %.c,$^) -o - | llc -march=bpf -filetype=obj -o $@
+	$(Q)$(CLANG) -g -O2 -fno-builtin -target bpf -D__KERNEL__ -D__TARGET_ARCH_$(ARCH) $(INCLUDES) $(COMMON_INCLUDES) $(CLANG_BPF_SYS_INCLUDES) -c $(filter %.c,$^) -o $@
 	$(Q)$(LLVM_STRIP) -g $@ # strip useless DWARF info
 
 # Generate BPF skeletons

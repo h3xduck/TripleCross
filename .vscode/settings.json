@@ -12,6 +12,11 @@
         "libbpf.h": "c",
         "bpf_tracing.h": "c",
         "ptrace.h": "c",
-        "stat.h": "c"
+        "stat.h": "c",
+        "udp.h": "c",
+        "tcp.h": "c",
+        "if_link.h": "c",
+        "netlink.h": "c",
+        "bpf_helper_defs.h": "c"
     }
 }

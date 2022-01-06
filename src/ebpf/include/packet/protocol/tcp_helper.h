@@ -1,16 +1,16 @@
 #ifndef __TCP_HELPER_H__
 #define __TCP_HELPER_H__
 
-#include <linux/tcp.h>
-#include <linux/ip.h>
-
+/*#include <linux/tcp.h>
+#include <linux/ip.h>*/
+#include "newnewvmlinux.h"
 
 static __always_inline int get_tcp_src_port(struct tcphdr *tcp){
-    return ntohs(tcp->source);
+    return bpf_ntohs(tcp->source);
 }
 
 static __always_inline int get_tcp_dest_port(struct tcphdr *tcp){
-    return ntohs(tcp->dest);
+    return bpf_ntohs(tcp->dest);
 }
 
 /**
@@ -27,7 +27,7 @@ static __always_inline unsigned short tcp_checksum(unsigned short *addr, int nby
         nbytes -= 2;
     }
     if(nbytes>0){
-        sum += htons((unsigned char)*addr);
+        sum += bpf_htons((unsigned char)*addr);
     }
             
     while (sum>>16){

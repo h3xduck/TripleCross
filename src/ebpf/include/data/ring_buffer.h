@@ -1,8 +1,10 @@
 #ifndef __RING_BUFFER_H
 #define __RING_BUFFER_H
 
-#include <linux/bpf.h>
-#include <bpf/bpf_helpers.h>
+/*#include <linux/bpf.h>
+#include <bpf/bpf_helpers.h>*/
+#include "newnewvmlinux.h"
+
 #include <bpf/bpf_tracing.h>
 #include <bpf/bpf_core_read.h>
 

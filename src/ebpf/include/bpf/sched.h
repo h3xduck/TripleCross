@@ -1,12 +1,14 @@
 #ifndef __SCHED_H
 #define __SCHED_H
 
-#include <stdio.h>
+#/*include <stdio.h>
 #include <linux/types.h>
 #include <unistd.h>
 #include <string.h>
 
-#include <linux/bpf.h>
+#include <linux/bpf.h>*/
+#include "newnewvmlinux.h"
+
 #include <bpf/bpf_helpers.h>
 #include <bpf/bpf_tracing.h>
 #include <bpf/bpf_core_read.h>

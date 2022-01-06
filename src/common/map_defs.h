@@ -19,7 +19,8 @@ struct rb_event {
 };
 
 //sched_process_exec tracepoint contents
-struct trace_entry {
+//now included in vmlinux
+/*struct trace_entry {
 	short unsigned int type;
 	unsigned char flags;
 	unsigned char preempt_count;
@@ -31,6 +32,6 @@ struct trace_event_raw_sched_process_exec {
 	int pid;
 	int old_pid;
 	char __data[0];
-};
+};*/
 
 #endif

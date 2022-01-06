@@ -1,13 +1,13 @@
 #ifndef __FS_H
 #define __FS_H
 
-//#include "vmlinux.h"
-#include <stdio.h>
+#include "newnewvmlinux.h"
+/*#include <stdio.h>
 #include <linux/types.h>
 #include <unistd.h>
 #include <string.h>
 #include <linux/ptrace.h>
-#include <linux/stat.h>
+#include <linux/stat.h>*/
 
 #include <bpf/bpf_helpers.h>
 #include <bpf/bpf_tracing.h>
