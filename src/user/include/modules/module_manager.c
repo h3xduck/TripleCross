@@ -56,7 +56,6 @@ int setup_all_modules(){
     if(config.fs_module.all == ON){
         ret = attach_fs_all(attr.skel);
     }else{
-        if(config.fs_module.kprobe__64_compat_sys_read == ON) ret = attach_kprobe__64_compat_sys_read(attr.skel);
         if(config.fs_module.kprobe__64_sys_read == ON) ret = attach_kprobe__64_sys_read(attr.skel);
     }
     if(ret!=0) return -1;
