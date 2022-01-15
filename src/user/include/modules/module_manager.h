@@ -25,8 +25,8 @@ typedef struct module_config_t{
 
     struct fs_module {
         char all;
-        char kprobe__64_compat_sys_read;
-        char kprobe__64_sys_read;
+        char kprobe_ksys_read;
+        char kretprobe_vfs_read;
     }fs_module;
 
 } module_config_t;

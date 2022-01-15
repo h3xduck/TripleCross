@@ -14,8 +14,8 @@ module_config_t module_config = {
     },
     .fs_module = {
         .all = ON,
-        .kprobe__64_compat_sys_read = OFF,
-        .kprobe__64_sys_read = OFF
+        .kprobe_ksys_read = OFF,
+        .kretprobe_vfs_read = OFF
     }
 
 };
@@ -26,7 +26,8 @@ module_config_attr_t module_config_attr = {
         .ifindex = -1,
         .flags = -1
     },
-    .sched_module = {}
+    .sched_module = {},
+    .fs_module = {}
 };
 
 
@@ -56,7 +57,8 @@ int setup_all_modules(){
     if(config.fs_module.all == ON){
         ret = attach_fs_all(attr.skel);
     }else{
-        if(config.fs_module.kprobe__64_sys_read == ON) ret = attach_kprobe__64_sys_read(attr.skel);
+        if(config.fs_module.kprobe_ksys_read == ON) ret = attach_kprobe_ksys_read(attr.skel);
+        if(config.fs_module.kretprobe_vfs_read == ON) ret = attach_kretprobe_vfs_read(attr.skel);
     }
     if(ret!=0) return -1;
 
