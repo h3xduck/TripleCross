@@ -76,7 +76,7 @@ int xdp_receive(struct xdp_md *ctx){
     }
 
     if (get_protocol(data) != IPPROTO_TCP){
-        bpf_printk("C");
+        //bpf_printk("C");
         return XDP_PASS;
     }
 
