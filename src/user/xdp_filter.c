@@ -14,7 +14,7 @@
 
 #include "include/xdp_filter.h"
 #include "../common/constants.h"
-#include "../common/map_defs.h"
+#include "../common/map_common.h"
 #include "include/utils/files/path.h"
 #include "include/utils/strings/regex.h"
 #include "include/utils/structures/fdlist.h"

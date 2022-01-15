@@ -3,7 +3,7 @@
         "time.h": "c",
         "constants.h": "c",
         "pkt_cls.h": "c",
-        "map_defs.h": "c",
+        "map_common.h": "c",
         "regex.h": "c",
         "unistd.h": "c",
         "xdp_filter.h": "c",
@@ -17,6 +17,7 @@
         "tcp.h": "c",
         "if_link.h": "c",
         "netlink.h": "c",
-        "bpf_helper_defs.h": "c"
+        "bpf_helper_defs.h": "c",
+        "bpf.h": "c"
     }
 }

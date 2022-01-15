@@ -3,12 +3,12 @@
 
 /*#include <linux/bpf.h>
 #include <bpf/bpf_helpers.h>*/
-#include "newnewvmlinux.h"
+#include "headervmlinux.h"
 
 #include <bpf/bpf_tracing.h>
 #include <bpf/bpf_core_read.h>
 
-#include "../../../common/map_defs.h"
+#include "../../../common/map_common.h"
 
 #define RING_BUFFER_MAX_ELEMS 256
 

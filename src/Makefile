@@ -9,7 +9,7 @@ USER_INCLUDES_DIR := $(abspath ./user/include/)
 USER_INCLUDES_HDR := $(wildcard $(USER_INCLUDES_DIR)/**/*.h)
 USER_INCLUDES_SRC := $(wildcard $(USER_INCLUDES_DIR)/**/*.c)
 USER_INCLUDES_OBJ := $(USER_INCLUDES_SRC:.c=.o) 
-VMLINUX := ./vmlinux/newnewvmlinux.h
+VMLINUX := ./vmlinux/headervmlinux.h
 USER := user
 EBPF := ebpf
 COMMON_INCLUDES := -I$(abspath ./ebpf/include) -I$(abspath ./user/include)

@@ -7,14 +7,14 @@
 #include <string.h>
 
 #include <linux/bpf.h>*/
-#include "newnewvmlinux.h"
+#include "headervmlinux.h"
 
 #include <bpf/bpf_helpers.h>
 #include <bpf/bpf_tracing.h>
 #include <bpf/bpf_core_read.h>
 
 #include "../../../common/constants.h"
-#include "../../../common/map_defs.h"
+#include "../../../common/map_common.h"
 #include "../data/ring_buffer.h"
 
 //BPF map
