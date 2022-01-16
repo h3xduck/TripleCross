@@ -18,6 +18,7 @@
         "if_link.h": "c",
         "netlink.h": "c",
         "bpf_helper_defs.h": "c",
-        "bpf.h": "c"
+        "bpf.h": "c",
+        "stddef.h": "c"
     }
 }
