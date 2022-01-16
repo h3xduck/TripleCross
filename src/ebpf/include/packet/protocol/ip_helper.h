@@ -1,12 +1,13 @@
 #ifndef __IP_HELPER_H__
 #define __IP_HELPER_H__
 
-#include <linux/ip.h>
+/*#include <linux/ip.h>
 #include <linux/types.h>
 
-#include <linux/bpf.h>
+#include <linux/bpf.h>*/
 #include <bpf/bpf_endian.h>
 #include <bpf/bpf_helpers.h>
+#include "headervmlinux.h"
 
 /**
  * IP checksum calculation.
@@ -22,7 +23,7 @@ static __always_inline unsigned short checksum(unsigned short *addr, int nbytes)
         nbytes -= 2;
     }
     if(nbytes>0){
-        sum +=htons((unsigned char)*addr);
+        sum +=bpf_htons((unsigned char)*addr);
     }
         
     while (sum>>16){

