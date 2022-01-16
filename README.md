@@ -22,3 +22,10 @@ echo -n "XDP_PoC_0" | nc 127.0.0.1 9000
 cd src/client
 sudo ./injector -S 127.0.0.1
 ```
+
+------------------
+## PoC 1 - Modifying arguments of read syscalls
+```bash
+echo "This won't be seen" > /tmp/txt.txt
+cat /tmp/txt.txt
+```
