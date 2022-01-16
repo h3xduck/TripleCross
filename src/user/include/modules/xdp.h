@@ -6,9 +6,9 @@
 #include <linux/if_link.h>
 #include "common.h"
 #include <sys/resource.h>
-#include "xdp_filter.skel.h"
+#include "kit.skel.h"
 
-int attach_xdp_receive(struct xdp_filter_bpf *skel, __u32 ifindex, __u32 flags){
+int attach_xdp_receive(struct kit_bpf *skel, __u32 ifindex, __u32 flags){
     //Attach BPF program to network interface
 	//New way of doing it: it allows for future addition of multiple 
 	//XDP programs attached to same interface if needed
@@ -54,12 +54,12 @@ int attach_xdp_receive(struct xdp_filter_bpf *skel, __u32 ifindex, __u32 flags){
     return 0;
 }
 
-int attach_xdp_all(struct xdp_filter_bpf *skel, __u32 ifindex, __u32 flags){
+int attach_xdp_all(struct kit_bpf *skel, __u32 ifindex, __u32 flags){
     return attach_xdp_receive(skel, ifindex, flags);
 }
 
 
-int detach_xdp_receive(struct xdp_filter_bpf *skel){
+int detach_xdp_receive(struct kit_bpf *skel){
     int err = detach_link_generic(skel->links.xdp_receive);
     if(err<0){
         fprintf(stderr, "Failed to detach XDP program\n");
@@ -68,7 +68,7 @@ int detach_xdp_receive(struct xdp_filter_bpf *skel){
     return 0;
 }
 
-int detach_xdp_all(struct xdp_filter_bpf *skel){
+int detach_xdp_all(struct kit_bpf *skel){
     return detach_xdp_receive(skel);
 }
 

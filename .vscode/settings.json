@@ -6,7 +6,7 @@
         "map_common.h": "c",
         "regex.h": "c",
         "unistd.h": "c",
-        "xdp_filter.h": "c",
+        "kit.h": "c",
         "module_manager.h": "c",
         "modules.h": "c",
         "libbpf.h": "c",

@@ -34,7 +34,7 @@ typedef struct module_config_t{
 //Configuration struct. Used by the module manager to
 //correctly attach the needed modules, providing necessary params
 typedef struct module_config_attr_t{
-    struct xdp_filter_bpf *skel;
+    struct kit_bpf *skel;
     struct xdp_module_attr {
         __u32 ifindex;
         __u32 flags;

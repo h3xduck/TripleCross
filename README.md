@@ -3,7 +3,7 @@
 ```bash
 cd src
 make
-sudo ./bin/xdp_filter -t <network interface>
+sudo ./bin/kit -t <network interface>
 ```
 Network interface used for PoC: lo
 

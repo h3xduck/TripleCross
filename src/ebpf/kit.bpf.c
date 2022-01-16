@@ -25,7 +25,6 @@
 #include <bpf/bpf_endian.h>
 
 //User-kernel dependencies
-#include "../user/include/xdp_filter.h"
 #include "../common/constants.h"
 
 //BPF exclusive includes

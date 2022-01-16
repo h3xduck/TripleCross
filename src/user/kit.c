@@ -10,9 +10,8 @@
 
 #include <bpf/bpf.h>
 
-#include "xdp_filter.skel.h"
+#include "kit.skel.h"
 
-#include "include/xdp_filter.h"
 #include "../common/constants.h"
 #include "../common/map_common.h"
 #include "include/utils/files/path.h"
@@ -33,7 +32,7 @@ static struct env {
 
 void print_help_dialog(const char* arg){
 	
-    printf("\nUsage: %s ./xdp_filter OPTION\n\n", arg);
+    printf("\nUsage: %s ./kit OPTION\n\n", arg);
     printf("Program OPTIONs\n");
     char* line = "-t[NETWORK INTERFACE]";
     char* desc = "Activate XDP filter";
@@ -116,7 +115,7 @@ static int handle_rb_event(void *ctx, void *data, size_t data_size){
 
 int main(int argc, char**argv){
     struct ring_buffer *rb = NULL;
-    struct xdp_filter_bpf *skel;
+    struct kit_bpf *skel;
     __u32 err;
 
 	//Ready to be used
@@ -176,14 +175,14 @@ int main(int argc, char**argv){
 	signal(SIGTERM, sig_handler);
 
     //Open and create BPF application in the kernel
-	skel = xdp_filter_bpf__open();
+	skel = kit_bpf__open();
 	if (!skel) {
 		fprintf(stderr, "Failed to open and load BPF skeleton\n");
 		return 1;
 	}
 
 	//Load & verify BPF program
-	err = xdp_filter_bpf__load(skel);
+	err = kit_bpf__load(skel);
 	if (err) {
 		fprintf(stderr, "Failed to load and verify BPF skeleton\n");
 		goto cleanup;
@@ -240,7 +239,7 @@ int main(int argc, char**argv){
 
 cleanup:
 	ring_buffer__free(rb);
-	//xdp_filter_bpf__destroy(skel);
+	//kit_bpf__destroy(skel);
 	if(err!=0) return -1;
 
     return 0;
