@@ -104,5 +104,5 @@ $(APPS): %: $(OUTPUT)/%.o $(LIBBPF_OBJ) $(USER_INCLUDES_OBJ) | $(OUTPUT)
 .DELETE_ON_ERROR:
 
 # keep intermediate (.skel.h, .bpf.o, etc) targets
-.SECONDARY:
+SECONDARY:
 

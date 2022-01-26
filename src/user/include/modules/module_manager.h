@@ -25,8 +25,8 @@ typedef struct module_config_t{
 
     struct fs_module {
         char all;
-        char kprobe_ksys_read;
-        char kretprobe_vfs_read;
+        char tp_sys_enter_read;
+        char tp_sys_exit_read;
     }fs_module;
 
 } module_config_t;

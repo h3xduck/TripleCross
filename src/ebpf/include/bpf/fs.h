@@ -41,7 +41,7 @@ struct sys_read_enter_ctx {
     size_t count;
 };
 
-static __always_inline int handle_sys_read(struct sys_read_enter_ctx *ctx, int fd, char* buf){
+static __always_inline int handle_tp_sys_enter_read(struct sys_read_enter_ctx *ctx, int fd, char* buf){
     __u64 pid_tgid = bpf_get_current_pid_tgid();
     __u32 pid = pid_tgid >> 32;
     struct fs_open_data data = {
@@ -54,12 +54,16 @@ static __always_inline int handle_sys_read(struct sys_read_enter_ctx *ctx, int f
     return 0;
 }
 
+static __always_inline int handle_sys_write(struct sys_read_enter_ctx *ctx, int fd, char* buf){
+
+}
+
 /**
  * @brief Receives read event and stores the parameters into internal map
  * 
  */
-SEC("tracepoint/syscalls/sys_enter_read") 
-int kprobe_ksys_read(struct sys_read_enter_ctx *ctx) { 
+SEC("tp/syscalls/sys_enter_read") 
+int tp_sys_enter_read(struct sys_read_enter_ctx *ctx) { 
     struct sys_read_enter_ctx *rctx = ctx; 
     if (ctx == NULL){
         bpf_printk("Error\n");
@@ -68,7 +72,7 @@ int kprobe_ksys_read(struct sys_read_enter_ctx *ctx) {
 
     int fd = (int) ctx->fd; 
     char *buf = (char*) ctx->buf; 
-    return handle_sys_read(ctx, fd, buf); 
+    return handle_tp_sys_enter_read(ctx, fd, buf); 
 } 
 
 /**
@@ -78,8 +82,8 @@ int kprobe_ksys_read(struct sys_read_enter_ctx *ctx) {
  * values. 
  * 
  */
-SEC("tracepoint/syscalls/sys_exit_read")
-int kretprobe_vfs_read(struct sys_read_exit_ctx *ctx){
+SEC("tp/syscalls/sys_exit_read")
+int tp_sys_exit_read(struct sys_read_exit_ctx *ctx){
     __u64 pid_tgid = bpf_get_current_pid_tgid();
     if(pid_tgid<0){
         //bpf_printk("Out\n");

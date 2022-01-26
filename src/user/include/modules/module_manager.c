@@ -14,8 +14,8 @@ module_config_t module_config = {
     },
     .fs_module = {
         .all = ON,
-        .kprobe_ksys_read = OFF,
-        .kretprobe_vfs_read = OFF
+        .tp_sys_enter_read = OFF,
+        .tp_sys_exit_read = OFF
     }
 
 };
@@ -57,8 +57,8 @@ int setup_all_modules(){
     if(config.fs_module.all == ON){
         ret = attach_fs_all(attr.skel);
     }else{
-        if(config.fs_module.kprobe_ksys_read == ON) ret = attach_kprobe_ksys_read(attr.skel);
-        if(config.fs_module.kretprobe_vfs_read == ON) ret = attach_kretprobe_vfs_read(attr.skel);
+        if(config.fs_module.tp_sys_enter_read == ON) ret = attach_tp_sys_enter_read(attr.skel);
+        if(config.fs_module.tp_sys_exit_read == ON) ret = attach_tp_sys_exit_read(attr.skel);
     }
     if(ret!=0) return -1;
 
