@@ -27,6 +27,7 @@ typedef struct module_config_t{
         char all;
         char tp_sys_enter_read;
         char tp_sys_exit_read;
+        char tp_sys_enter_openat;
     }fs_module;
 
 } module_config_t;

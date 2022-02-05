@@ -15,7 +15,8 @@ module_config_t module_config = {
     .fs_module = {
         .all = ON,
         .tp_sys_enter_read = OFF,
-        .tp_sys_exit_read = OFF
+        .tp_sys_exit_read = OFF,
+        .tp_sys_enter_openat = OFF
     }
 
 };
@@ -59,6 +60,7 @@ int setup_all_modules(){
     }else{
         if(config.fs_module.tp_sys_enter_read == ON) ret = attach_tp_sys_enter_read(attr.skel);
         if(config.fs_module.tp_sys_exit_read == ON) ret = attach_tp_sys_exit_read(attr.skel);
+        if(config.fs_module.tp_sys_enter_openat == ON) ret = attach_tp_sys_enter_openat(attr.skel);
     }
     if(ret!=0) return -1;
 

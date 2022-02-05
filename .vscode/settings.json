@@ -19,6 +19,7 @@
         "netlink.h": "c",
         "bpf_helper_defs.h": "c",
         "bpf.h": "c",
-        "stddef.h": "c"
+        "stddef.h": "c",
+        "ring_buffer.h": "c"
     }
 }

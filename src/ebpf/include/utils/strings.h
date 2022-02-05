@@ -58,10 +58,6 @@ static __always_inline char* str_n_copy(char *dest, const char *src, int count){
 	return dest;
 }
 
-/**
- * @brief Checks if string is a
- * 
- */
 
 
 
