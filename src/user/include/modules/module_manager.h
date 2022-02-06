@@ -30,6 +30,11 @@ typedef struct module_config_t{
         char tp_sys_enter_openat;
     }fs_module;
 
+    struct exec_module {
+        char all;
+        char tp_sys_enter_execve;
+    }exec_module;
+
 } module_config_t;
 
 //Configuration struct. Used by the module manager to
@@ -48,6 +53,10 @@ typedef struct module_config_attr_t{
     struct fs_module_attr {
         void* __empty;
     }fs_module;
+
+    struct exec_module_attr {
+        void* __empty;
+    }exec_module;
 
 } module_config_attr_t;
 
