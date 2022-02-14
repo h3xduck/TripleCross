@@ -25,7 +25,6 @@
 		goto cleanup\
 	}
 
-
 static struct env {
 	bool verbose;
 } env;
