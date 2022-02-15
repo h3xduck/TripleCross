@@ -1,10 +1,8 @@
 #ifndef __MAP_COMMON_H
 #define __MAP_COMMON_H
 
-#define RB_EVENT_MAX_MESSAGE_SIZE 512
-
-
 // Ring buffer for kernel->user communication
+#define RB_EVENT_MAX_MESSAGE_SIZE 512
 typedef enum {
     INFO,
     DEBUG,
@@ -18,6 +16,5 @@ struct rb_event {
     int code;
     event_type_t event_type;
 };
-
 
 #endif

