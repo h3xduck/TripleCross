@@ -162,7 +162,10 @@ void activate_command_control_shell(char* argv){
     while(1){
         char buf[BUFSIZ];                                                                                                                                                          
         printf(""KYLW"c>:"RESET"");                                                                                                                                                              
-        scanf("%s", buf);                                                                                                                                                                             
+        fgets(buf, BUFSIZ, stdin);
+        if ((strlen(buf)>0) && (buf[strlen(buf)-1] == '\n')){
+            buf[strlen(buf)-1] = '\0';   
+        }                                                                                                                                                                         
         
         char msg[BUFSIZ];
         strcpy(msg, CC_PROT_MSG);

