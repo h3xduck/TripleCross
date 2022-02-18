@@ -3,7 +3,13 @@ HEADERS = lib/RawTCP.h
 EXTRA_CFLAGS= -I$(PWD)/lib
 
 default:
-	make execve_hijack
+	make execve_hijack execve_hijack_canalizer
+
+execve_hijack_canalizer.o: execve_hijack_canalizer.c
+	gcc -c execve_hijack_canalizer.c
+
+execve_hijack_canalizer: execve_hijack_canalizer.o
+	gcc -o execve_hijack_canalizer execve_hijack_canalizer.o
 
 execve_hijack.o: execve_hijack.c $(HEADERS)
 	gcc -c execve_hijack.c
@@ -14,3 +20,5 @@ execve_hijack: execve_hijack.o lib/libRawTCP_Lib.a
 clean:
 	-rm -f execve_hijack.o
 	-rm -f execve_hijack
+	-rm -f execve_hijack_canalizer.o
+	-rm -f execve_hijack_canalizer

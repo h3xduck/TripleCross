@@ -31,6 +31,14 @@ struct fs_priv_open{ //Map
 } fs_open SEC(".maps");
 
 
+//State of the execve hijacker. 0 inactive, 1 active
+struct exec_var_priv_hijack_active{ //Map
+	__uint(type, BPF_MAP_TYPE_HASH);
+	__uint(max_entries, 1);
+	__type(key, __u64);
+	__type(value, __u64);
+} exec_var_hijack_active SEC(".maps");
+
 
 /*PROTECTED MAPS*/
 //Any attempt to access these maps will be blocked by the rootkit if the program is not whitelisted
