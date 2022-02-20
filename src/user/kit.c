@@ -200,6 +200,7 @@ int main(int argc, char**argv){
 	
 	module_config_attr.skel = skel;
 	err = setup_all_modules();
+
 	// Set up ring buffer polling --> Main communication buffer kernel->user
 	rb = ring_buffer__new(bpf_map__fd(skel->maps.rb_comm), handle_rb_event, NULL, NULL);
 	if (rb==NULL) {

