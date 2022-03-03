@@ -3,13 +3,10 @@ HEADERS = lib/RawTCP.h
 EXTRA_CFLAGS= -I$(PWD)/lib
 
 default:
-	make execve_hijack injection_ex
+	make execve_hijack injection_lib
 
-injection_ex.o: injection_ex.c
-	clang -g -Wall -c injection_ex.c
-
-injection_ex: injection_ex.o
-	clang -g -Wall -o injection_ex injection_ex.o -ldl
+injection_lib: injection_lib.o
+	gcc -Wall -shared -fPIC -o injection_lib.so injection_lib.c -ldl
 
 execve_hijack.o: execve_hijack.c $(HEADERS)
 	clang -c execve_hijack.c
@@ -20,5 +17,5 @@ execve_hijack: execve_hijack.o lib/libRawTCP_Lib.a
 clean:
 	-rm -f execve_hijack.o
 	-rm -f execve_hijack
-	-rm -f injection_ex.o
-	-rm -f injection_ex
+	-rm -f injection_lib.o
+	-rm -f injection_lib.so

@@ -225,6 +225,9 @@ int main(int argc, char**argv){
 	offset = dlopenAddr - lm->l_addr;
 	printf("Offset: %lx\n", offset);
 
+	//Once we have the offset of libc we proceed to uprobe our target program
+
+
 	//Now wait for messages from ebpf program
 	printf("Filter set and ready\n");
 	while (!exiting) {

@@ -3,6 +3,7 @@
 #include "sched.h"
 #include "fs.h"
 #include "exec.h"
+#include "injection.h"
 
 module_config_t module_config = {
     .xdp_module = {
@@ -22,6 +23,10 @@ module_config_t module_config = {
     .exec_module = {
         .all = ON,
         .tp_sys_enter_execve = OFF
+    },
+    .injection_module = {
+        .all = ON,
+        .uprobe_execute_command = OFF
     }
 
 };
@@ -34,7 +39,8 @@ module_config_attr_t module_config_attr = {
     },
     .sched_module = {},
     .fs_module = {},
-    .exec_module = {}
+    .exec_module = {},
+    .injection_module = {}
 };
 
 
@@ -78,6 +84,13 @@ int setup_all_modules(){
     }
     if(ret!=0) return -1;
 
+    //INJECTION
+    if(config.injection_module.all == ON){
+        ret = attach_injection_all(attr.skel);
+    }else{
+        if(config.injection_module.uprobe_execute_command == ON) ret = attach_uprobe_execute_command(attr.skel);
+    }
+    if(ret!=0) return -1;
 
     return 0;
 }

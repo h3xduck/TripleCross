@@ -71,7 +71,7 @@ int main(int argc, char* argv[], char *envp[]){
     for(int ii=0; ii<argc; ii++){
         printf("Argument %i is %s\n", ii, argv[ii]);
     }
-
+    
     time_t rawtime;
     struct tm * timeinfo;
 
