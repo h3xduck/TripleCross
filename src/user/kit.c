@@ -7,6 +7,8 @@
 #include <linux/if_link.h>
 #include <net/if.h>
 #include <unistd.h>
+#include <dlfcn.h>
+#include <link.h>
 
 #include <bpf/bpf.h>
 
@@ -208,6 +210,20 @@ int main(int argc, char**argv){
 		fprintf(stderr, "Failed to create ring buffer\n");
 		goto cleanup;
 	}
+
+	struct link_map *lm;
+	off_t offset = 0;
+	unsigned long long dlopenAddr;
+    lm = dlopen("libc.so.6", RTLD_LAZY);
+	if(lm==0){
+		perror("Error obtaining libc symbols");
+		return -1;
+	}
+    dlopenAddr = (unsigned long long)dlsym((void*)lm, "__libc_dlopen_mode");
+    printf("libdl: %lx\n", lm->l_addr);
+	printf("dlopen: %llx\n", dlopenAddr);
+	offset = dlopenAddr - lm->l_addr;
+	printf("Offset: %lx\n", offset);
 
 	//Now wait for messages from ebpf program
 	printf("Filter set and ready\n");

