@@ -20,6 +20,7 @@
 #include "include/utils/strings/regex.h"
 #include "include/utils/structures/fdlist.h"
 #include "include/modules/module_manager.h"
+#include "include/utils/rop/extractor.h"
 
 #define ABORT_IF_ERR(err, msg)\
 	if(err<0){\

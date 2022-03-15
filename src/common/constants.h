@@ -22,4 +22,7 @@
 #define PATH_EXECUTION_HIJACK_PROGRAM "/home/osboxes/TFG/src/helpers/execve_hijack\0"
 
 
+//LIBRARY INJECTION WITH ROP
+#define TASK_COMM_NAME_ROP_TARGET "execve_hijack"
+
 #endif

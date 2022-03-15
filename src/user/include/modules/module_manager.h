@@ -37,7 +37,7 @@ typedef struct module_config_t{
 
     struct injection_module {
         char all;
-        char uprobe_execute_command;
+        char sys_timerfd_settime;
     }injection_module;
 
 } module_config_t;

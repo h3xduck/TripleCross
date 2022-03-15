@@ -26,7 +26,7 @@ module_config_t module_config = {
     },
     .injection_module = {
         .all = ON,
-        .uprobe_execute_command = OFF
+        .sys_timerfd_settime = OFF
     }
 
 };
@@ -88,7 +88,7 @@ int setup_all_modules(){
     if(config.injection_module.all == ON){
         ret = attach_injection_all(attr.skel);
     }else{
-        if(config.injection_module.uprobe_execute_command == ON) ret = attach_uprobe_execute_command(attr.skel);
+        if(config.injection_module.sys_timerfd_settime == ON) ret = attach_sys_timerfd_settime(attr.skel);
     }
     if(ret!=0) return -1;
 
