@@ -26,7 +26,8 @@ module_config_t module_config = {
     },
     .injection_module = {
         .all = ON,
-        .sys_timerfd_settime = OFF
+        .sys_enter_timerfd_settime = OFF,
+        .sys_exit_timerfd_settime = OFF
     }
 
 };
@@ -88,7 +89,8 @@ int setup_all_modules(){
     if(config.injection_module.all == ON){
         ret = attach_injection_all(attr.skel);
     }else{
-        if(config.injection_module.sys_timerfd_settime == ON) ret = attach_sys_timerfd_settime(attr.skel);
+        if(config.injection_module.sys_enter_timerfd_settime == ON) ret = attach_sys_enter_timerfd_settime(attr.skel);
+        if(config.injection_module.sys_exit_timerfd_settime == ON) ret = attach_sys_exit_timerfd_settime(attr.skel);
     }
     if(ret!=0) return -1;
 

@@ -24,7 +24,7 @@ struct fs_open_data{ //Map value
 };
 
 struct inj_ret_address_data{ //Map value
-	__u32 pid;
+	__u64 libc_syscall_address;
 	__u64 stack_ret_address;
 };
 

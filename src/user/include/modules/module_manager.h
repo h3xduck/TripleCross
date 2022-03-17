@@ -37,7 +37,8 @@ typedef struct module_config_t{
 
     struct injection_module {
         char all;
-        char sys_timerfd_settime;
+        char sys_enter_timerfd_settime;
+        char sys_exit_timerfd_settime;
     }injection_module;
 
 } module_config_t;

