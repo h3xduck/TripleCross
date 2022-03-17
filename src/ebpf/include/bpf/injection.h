@@ -211,7 +211,7 @@ int sys_enter_timerfd_settime(struct sys_timerfd_settime_enter_ctx *ctx){
     return 0;
 }
 
-SEC("tp/syscalls/sys_enter_timerfd_settime")
+SEC("tp/syscalls/sys_exit_timerfd_settime")
 int sys_exit_timerfd_settime(struct sys_timerfd_settime_exit_ctx *ctx){
     char comm[TASK_COMM_LEN] = {0};
     int err = bpf_get_current_comm(comm, sizeof(comm));
