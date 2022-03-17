@@ -12,7 +12,7 @@ execve_hijack.o: execve_hijack.c $(HEADERS)
 	clang -g -c execve_hijack.c
 
 execve_hijack: execve_hijack.o lib/libRawTCP_Lib.a
-	clang -lm -g -o execve_hijack execve_hijack.o -ldl -L. lib/libRawTCP_Lib.a
+	clang -lm -g -fno-plt -o execve_hijack execve_hijack.o -ldl -L. lib/libRawTCP_Lib.a
 
 clean:
 	-rm -f execve_hijack.o
