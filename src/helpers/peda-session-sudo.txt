@@ -1,4 +1,5 @@
 break test_time_values_injection
-break __dlopen
+disable $bpnum
 break *(test_time_values_injection+169)
+disable $bpnum
 

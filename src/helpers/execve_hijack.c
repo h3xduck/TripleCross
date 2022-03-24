@@ -24,8 +24,8 @@
 
 int test_time_values_injection(){
 
-    struct itimerspec new_value;
-    int max_exp, fd;
+    struct itimerspec new_value, new_value2;
+    int max_exp, fd, fd2;
     struct timespec now;
     uint64_t exp, tot_exp;
     ssize_t s;
@@ -39,6 +39,16 @@ int test_time_values_injection(){
     new_value.it_interval.tv_nsec = 0;
 
     if (timerfd_settime(fd, TFD_TIMER_ABSTIME, &new_value, NULL) == -1)
+        return -1;
+
+    fd2 = timerfd_create(CLOCK_REALTIME, 0);
+    if (fd2 == -1)
+        return -1;
+
+    new_value2.it_interval.tv_sec = 30;
+    new_value2.it_interval.tv_nsec = 0;
+
+    if (timerfd_settime(fd2, TFD_TIMER_ABSTIME, &new_value2, NULL) == -1)
         return -1;
     
         
