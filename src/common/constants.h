@@ -23,6 +23,7 @@
 
 
 //LIBRARY INJECTION WITH ROP
-#define TASK_COMM_NAME_ROP_TARGET "execve_hijack"
+#define TASK_COMM_NAME_ROP_TARGET "simple_timer"
+#define CODE_CAVE_ADDRESS 0x0000000000402e95
 
 #endif

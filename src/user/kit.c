@@ -20,8 +20,7 @@
 #include "include/utils/strings/regex.h"
 #include "include/utils/structures/fdlist.h"
 #include "include/modules/module_manager.h"
-#include "include/utils/rop/extractor.h"
-
+#include "include/utils/mem/injection.h"
 #define ABORT_IF_ERR(err, msg)\
 	if(err<0){\
 		fprintf(stderr, msg);\
@@ -97,7 +96,7 @@ static int handle_rb_event(void *ctx, void *data, size_t data_size){
 	tm = localtime(&t);
 	strftime(ts, sizeof(ts), "%H:%M:%S", tm);
 
-
+	//Before parsing any data, check the type
     if(e->event_type == INFO){
 		printf("%s INFO  pid:%d code:%i, msg:%s\n", ts, e->pid, e->code, e->message);
 	}else if(e->event_type == DEBUG){
@@ -106,6 +105,12 @@ static int handle_rb_event(void *ctx, void *data, size_t data_size){
 
 	}else if(e->event_type == EXIT){
 
+	}else if(e->event_type == VULN_SYSCALL){
+		//eBPF detected syscall which can lead to library injection
+		printf("%s VULN_SYSCALL  pid:%d syscall:%llx, return:%llx, libc_main:%llx, libc_dlopen_mode:%llx, libc_malloc:%llx, got:%llx, relro:%i\n", ts, e->pid, e->syscall_address, e->process_stack_return_address, e->libc_main_address, e->libc_dlopen_mode_address, e->libc_malloc_address, e->got_address, e->relro_active);
+		if(manage_injection(e)<0){
+			printf("Library injection failed\n");
+		}
 	}else{
 		printf("UNRECOGNIZED RB EVENT RECEIVED");
 		return -1;
