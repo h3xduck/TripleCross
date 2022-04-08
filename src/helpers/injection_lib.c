@@ -5,6 +5,6 @@
 __attribute__((constructor))
 static void init()
 {
-    printf("It worked\n");
+    printf("Library successfully injected!\n");
     syslog(LOG_CRIT, "Library called\n");
 }
