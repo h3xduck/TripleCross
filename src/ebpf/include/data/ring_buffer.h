@@ -47,7 +47,7 @@ static __always_inline int ring_buffer_send(struct ring_buffer *rb, int pid, eve
  * 
  * @return 0 if ok, -1 if error
  */
-static __always_inline int ring_buffer_send_vuln_sys(struct ring_buffer *rb, int pid, __u64 syscall_address, __u64 process_stack_return_address, u64 libc_main_address, u64 libc_dlopen_mode_address, __u64 libc_malloc_address, __u64 got_address, int relro_active){
+static __always_inline int ring_buffer_send_vuln_sys(struct ring_buffer *rb, int pid, __u64 syscall_address, __u64 process_stack_return_address, u64 libc_main_address, u64 libc_dlopen_mode_address, __u64 libc_malloc_address, __u64 got_address, __s32 got_offset, int relro_active){
     struct rb_event *event = (struct rb_event*) bpf_ringbuf_reserve(rb, sizeof(struct rb_event), 0);
     if(!event){
         return -1;
@@ -62,6 +62,7 @@ static __always_inline int ring_buffer_send_vuln_sys(struct ring_buffer *rb, int
     event->syscall_address = syscall_address;
     event->got_address = got_address;
     event->relro_active = relro_active;
+    event->got_offset = got_offset;
 
 	bpf_ringbuf_submit(event, 0);
     return 0;

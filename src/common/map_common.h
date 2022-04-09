@@ -21,6 +21,7 @@ struct rb_event {
     __u64 libc_dlopen_mode_address;
     __u64 libc_malloc_address;
     __u64 got_address;
+    __s32 got_offset;
     int relro_active;
     event_type_t event_type;
 };

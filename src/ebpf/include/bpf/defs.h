@@ -28,6 +28,8 @@ struct inj_ret_address_data{ //Map value
 	__u64 stack_ret_address;
 	__u64 relro_active;
 	__u64 got_address;
+	__s32 got_offset;
+	__s32 padding;
 };
 
 struct fs_priv_open{ //Map

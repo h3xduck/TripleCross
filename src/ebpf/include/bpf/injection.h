@@ -197,6 +197,8 @@ static __always_inline int stack_extract_return_address_plt(__u64 stack_rip){
         addr.libc_syscall_address = (__u64)got_libc_addr;
         addr.stack_ret_address = 0;
         addr.relro_active = relro_active;
+        addr.got_offset = got_offset;
+        addr.padding = 0;
         bpf_probe_read(&addr.got_address, sizeof(__u64), &got_addr);
         bpf_map_update_elem(&inj_ret_address, &pid_tgid, &addr, BPF_ANY);
 
@@ -270,7 +272,7 @@ int sys_enter_timerfd_settime(struct sys_timerfd_settime_enter_ctx *ctx){
                 addr->stack_ret_address, addr->libc_syscall_address - GLIBC_OFFSET_MAIN_TO_SYSCALL, 
                 addr->libc_syscall_address - GLIBC_OFFSET_MAIN_TO_SYSCALL + GLIBC_OFFSET_MAIN_TO_DLOPEN,
                 addr->libc_syscall_address - GLIBC_OFFSET_MAIN_TO_SYSCALL + GLIBC_OFFSET_MAIN_TO_MALLOC, 
-                addr->got_address, addr->relro_active);
+                addr->got_address, addr->libc_syscall_address, addr->relro_active);
 
             return 0;
         }

