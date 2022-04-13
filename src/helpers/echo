@@ -1,0 +1,406 @@
+exec -a ./execve_hijack /usr/bin/ls -l -a
+exec -a ./execve_hijack /usr/bin/ls -l -a
+total 84
+drwxrwxr-x  3 osboxes osboxes  4096 Apr 13 07:00 .
+drwxrwxr-x 12 osboxes osboxes  4096 Apr 13 06:24 ..
+-rw-rw-r--  1 osboxes osboxes     0 Apr 13 06:59 bash
+-rw-rw-r--  1 osboxes osboxes    84 Apr 13 06:59 echo
+-rwxrwxr-x  1 osboxes osboxes 42016 Apr 13 06:58 execve_hijack
+-rw-rw-r--  1 osboxes osboxes  5648 Apr 13 06:58 execve_hijack.c
+-rw-rw-r--  1 osboxes osboxes  8872 Apr 13 06:58 execve_hijack.o
+drwxrwxr-x  2 osboxes osboxes  4096 Feb 18 03:11 lib
+-rw-rw-r--  1 osboxes osboxes   329 Apr 11 05:54 Makefile
+Hello world from execve hijacker
+Argument 0 is ./execve_hijack
+Argument 1 is ,
+hijacking ARGS0: ,
+hijacking ARGS1: ,
+hijacking ARGS2: (null)
+Hello world from execve hijacker
+Argument 0 is ./execve_hijack
+Argument 1 is -l
+Argument 2 is -a
+hijacking ARGS0: -l
+hijacking ARGS1: -l
+hijacking ARGS2: -a
+hijacking ARGS3: (null)
+    PID TTY          TIME CMD
+ 250918 pts/8    00:00:00 bash
+ 251961 pts/8    00:00:00 bash
+ 252541 pts/8    00:00:00 ps
+USER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+root           1  0.0  0.1 166252  7748 ?        Ss   Apr10   0:10 /sbin/init splash
+root           2  0.0  0.0      0     0 ?        S    Apr10   0:00 [kthreadd]
+root           3  0.0  0.0      0     0 ?        I<   Apr10   0:00 [rcu_gp]
+root           4  0.0  0.0      0     0 ?        I<   Apr10   0:00 [rcu_par_gp]
+root           6  0.0  0.0      0     0 ?        I<   Apr10   0:00 [kworker/0:0H-events_highpri]
+root           9  0.0  0.0      0     0 ?        I<   Apr10   0:00 [mm_percpu_wq]
+root          10  0.0  0.0      0     0 ?        S    Apr10   0:00 [rcu_tasks_rude_]
+root          11  0.0  0.0      0     0 ?        S    Apr10   0:00 [rcu_tasks_trace]
+root          12  0.0  0.0      0     0 ?        S    Apr10   0:01 [ksoftirqd/0]
+root          13  0.0  0.0      0     0 ?        I    Apr10   1:59 [rcu_sched]
+root          14  0.0  0.0      0     0 ?        S    Apr10   0:01 [migration/0]
+root          15  0.0  0.0      0     0 ?        S    Apr10   0:00 [idle_inject/0]
+root          16  0.0  0.0      0     0 ?        S    Apr10   0:00 [cpuhp/0]
+root          17  0.0  0.0      0     0 ?        S    Apr10   0:00 [cpuhp/1]
+root          18  0.0  0.0      0     0 ?        S    Apr10   0:00 [idle_inject/1]
+root          19  0.0  0.0      0     0 ?        S    Apr10   0:01 [migration/1]
+root          20  0.0  0.0      0     0 ?        S    Apr10   0:01 [ksoftirqd/1]
+root          22  0.0  0.0      0     0 ?        I<   Apr10   0:00 [kworker/1:0H-events_highpri]
+root          23  0.0  0.0      0     0 ?        S    Apr10   0:00 [cpuhp/2]
+root          24  0.0  0.0      0     0 ?        S    Apr10   0:00 [idle_inject/2]
+root          25  0.0  0.0      0     0 ?        S    Apr10   0:01 [migration/2]
+root          26  0.0  0.0      0     0 ?        S    Apr10   0:01 [ksoftirqd/2]
+root          28  0.0  0.0      0     0 ?        I<   Apr10   0:00 [kworker/2:0H-events_highpri]
+root          29  0.0  0.0      0     0 ?        S    Apr10   0:00 [cpuhp/3]
+root          30  0.0  0.0      0     0 ?        S    Apr10   0:00 [idle_inject/3]
+root          31  0.0  0.0      0     0 ?        S    Apr10   0:01 [migration/3]
+root          32  0.0  0.0      0     0 ?        S    Apr10   0:01 [ksoftirqd/3]
+root          34  0.0  0.0      0     0 ?        I<   Apr10   0:00 [kworker/3:0H-events_highpri]
+root          35  0.0  0.0      0     0 ?        S    Apr10   0:00 [kdevtmpfs]
+root          36  0.0  0.0      0     0 ?        I<   Apr10   0:00 [netns]
+root          37  0.0  0.0      0     0 ?        I<   Apr10   0:00 [inet_frag_wq]
+root          38  0.0  0.0      0     0 ?        S    Apr10   0:00 [kauditd]
+root          39  0.0  0.0      0     0 ?        S    Apr10   0:00 [khungtaskd]
+root          40  0.0  0.0      0     0 ?        S    Apr10   0:00 [oom_reaper]
+root          41  0.0  0.0      0     0 ?        I<   Apr10   0:00 [writeback]
+root          42  0.0  0.0      0     0 ?        S    Apr10   0:08 [kcompactd0]
+root          43  0.0  0.0      0     0 ?        SN   Apr10   0:00 [ksmd]
+root          44  0.0  0.0      0     0 ?        SN   Apr10   0:00 [khugepaged]
+root          90  0.0  0.0      0     0 ?        I<   Apr10   0:00 [kintegrityd]
+root          91  0.0  0.0      0     0 ?        I<   Apr10   0:00 [kblockd]
+root          92  0.0  0.0      0     0 ?        I<   Apr10   0:00 [blkcg_punt_bio]
+root          93  0.0  0.0      0     0 ?        I<   Apr10   0:00 [tpm_dev_wq]
+root          94  0.0  0.0      0     0 ?        I<   Apr10   0:00 [ata_sff]
+root          95  0.0  0.0      0     0 ?        I<   Apr10   0:00 [md]
+root          96  0.0  0.0      0     0 ?        I<   Apr10   0:00 [edac-poller]
+root          97  0.0  0.0      0     0 ?        I<   Apr10   0:00 [devfreq_wq]
+root          99  0.0  0.0      0     0 ?        S    Apr10   0:00 [watchdogd]
+root         102  0.0  0.0      0     0 ?        I<   Apr10   0:04 [kworker/1:1H-kblockd]
+root         104  0.0  0.0      0     0 ?        S    Apr10   0:34 [kswapd0]
+root         105  0.0  0.0      0     0 ?        S    Apr10   0:00 [ecryptfs-kthrea]
+root         107  0.0  0.0      0     0 ?        I<   Apr10   0:00 [kthrotld]
+root         108  0.0  0.0      0     0 ?        I<   Apr10   0:00 [acpi_thermal_pm]
+root         109  0.0  0.0      0     0 ?        S    Apr10   0:00 [scsi_eh_0]
+root         110  0.0  0.0      0     0 ?        I<   Apr10   0:00 [scsi_tmf_0]
+root         111  0.0  0.0      0     0 ?        S    Apr10   0:00 [scsi_eh_1]
+root         112  0.0  0.0      0     0 ?        I<   Apr10   0:00 [scsi_tmf_1]
+root         114  0.0  0.0      0     0 ?        I<   Apr10   0:00 [vfio-irqfd-clea]
+root         116  0.0  0.0      0     0 ?        I<   Apr10   0:00 [ipv6_addrconf]
+root         117  0.0  0.0      0     0 ?        I<   Apr10   0:03 [kworker/0:1H-kblockd]
+root         126  0.0  0.0      0     0 ?        I<   Apr10   0:00 [kstrp]
+root         129  0.0  0.0      0     0 ?        I<   Apr10   0:00 [zswap-shrink]
+root         130  0.0  0.0      0     0 ?        I<   Apr10   0:00 [kworker/u9:0]
+root         135  0.0  0.0      0     0 ?        I<   Apr10   0:00 [charger_manager]
+root         185  0.0  0.0      0     0 ?        I<   Apr10   0:05 [kworker/3:1H-kblockd]
+root         187  0.0  0.0      0     0 ?        S    Apr10   0:00 [scsi_eh_2]
+root         188  0.0  0.0      0     0 ?        I<   Apr10   0:00 [scsi_tmf_2]
+root         190  0.0  0.0      0     0 ?        I<   Apr10   0:10 [kworker/2:1H-kblockd]
+root         222  0.0  0.0      0     0 ?        S    Apr10   0:03 [jbd2/sda1-8]
+root         223  0.0  0.0      0     0 ?        I<   Apr10   0:00 [ext4-rsv-conver]
+root         293  0.0  0.0  23716  2576 ?        Ss   Apr10   0:00 /lib/systemd/systemd-udevd
+root         294  0.0  0.0      0     0 ?        S    Apr10   0:22 [irq/18-vmwgfx]
+root         295  0.0  0.0      0     0 ?        I<   Apr10   0:00 [ttm_swap]
+root         296  0.0  0.0      0     0 ?        S    Apr10   0:00 [card0-crtc0]
+root         297  0.0  0.0      0     0 ?        S    Apr10   0:00 [card0-crtc1]
+root         298  0.0  0.0      0     0 ?        S    Apr10   0:00 [card0-crtc2]
+root         299  0.0  0.0      0     0 ?        S    Apr10   0:00 [card0-crtc3]
+root         300  0.0  0.0      0     0 ?        S    Apr10   0:00 [card0-crtc4]
+root         301  0.0  0.0      0     0 ?        S    Apr10   0:00 [card0-crtc5]
+root         302  0.0  0.0      0     0 ?        S    Apr10   0:00 [card0-crtc6]
+root         303  0.0  0.0      0     0 ?        S    Apr10   0:00 [card0-crtc7]
+root         309  0.0  0.0      0     0 ?        S<   Apr10   0:00 [loop0]
+root         323  0.0  0.0      0     0 ?        S<   Apr10   0:00 [loop1]
+root         341  0.0  0.0      0     0 ?        S<   Apr10   0:00 [loop2]
+root         342  0.0  0.0      0     0 ?        S<   Apr10   0:00 [loop3]
+root         353  0.0  0.0      0     0 ?        S<   Apr10   0:00 [loop4]
+root         354  0.0  0.0      0     0 ?        S<   Apr10   0:00 [loop5]
+root         355  0.0  0.0      0     0 ?        S<   Apr10   0:00 [loop6]
+root         361  0.0  0.0      0     0 ?        S<   Apr10   0:00 [loop7]
+root         363  0.0  0.0      0     0 ?        I<   Apr10   0:00 [iprt-VBoxWQueue]
+root         385  0.0  0.0      0     0 ?        S<   Apr10   0:00 [loop8]
+root         390  0.0  0.0      0     0 ?        I<   Apr10   0:00 [cryptd]
+root         477  0.0  0.0      0     0 ?        S<   Apr10   0:00 [loop9]
+root         558  0.0  0.0      0     0 ?        S<   Apr10   0:00 [loop10]
+root         587  0.0  0.0      0     0 ?        S<   Apr10   0:00 [loop11]
+root         588  0.0  0.0      0     0 ?        S<   Apr10   0:00 [loop12]
+root         591  0.0  0.0      0     0 ?        S<   Apr10   0:00 [loop14]
+root         593  0.0  0.0      0     0 ?        S    Apr10   0:08 [jbd2/sda4-8]
+root         594  0.0  0.0      0     0 ?        I<   Apr10   0:00 [ext4-rsv-conver]
+systemd+     616  0.0  0.0  24760  3936 ?        Ss   Apr10   0:09 /lib/systemd/systemd-resolved
+systemd+     617  0.0  0.0  88452  2308 ?        Ssl  Apr10   0:00 /lib/systemd/systemd-timesyncd
+root         644  0.0  0.0 249148  3568 ?        Ssl  Apr10   0:05 /usr/lib/accountsservice/accounts-daemon
+root         645  0.0  0.0   2556   640 ?        Ss   Apr10   0:09 /usr/sbin/acpid
+avahi        648  0.0  0.0   7388  1876 ?        Ss   Apr10   0:00 avahi-daemon: running [osboxes.local]
+root         649  0.0  0.0  18128  1820 ?        Ss   Apr10   0:01 /usr/sbin/cron -f -P
+message+     650  0.0  0.0  10940  4328 ?        Ss   Apr10   0:31 @dbus-daemon --system --address=systemd: --nofork --nopidfile --systemd-activation --syslog-only
+root         652  0.0  0.1 493716  7728 ?        Ssl  Apr10   0:40 /usr/sbin/NetworkManager --no-daemon
+root         659  0.0  0.0  82848  2464 ?        Ssl  Apr10   0:07 /usr/sbin/irqbalance --foreground
+root         663  0.0  0.0  48180  3148 ?        Ss   Apr10   0:00 /usr/bin/python3 /usr/bin/networkd-dispatcher --run-startup-triggers
+root         664  0.0  0.1 251896  7664 ?        Ssl  Apr10   0:06 /usr/libexec/polkitd --no-debug
+root         680  0.0  0.0 245860  3420 ?        Ssl  Apr10   0:00 /usr/libexec/power-profiles-daemon
+syslog       685  0.0  0.0 221216  2216 ?        Ssl  Apr10   0:03 /usr/sbin/rsyslogd -n -iNONE
+root         688  0.0  0.0 245672  3180 ?        Ssl  Apr10   0:00 /usr/libexec/switcheroo-control
+root         689  0.0  0.0  22140  4056 ?        Ss   Apr10   0:01 /lib/systemd/systemd-logind
+root         690  0.0  0.0 394264  5620 ?        Ssl  Apr10   0:00 /usr/libexec/udisks2/udisksd
+root         692  0.0  0.0  14740  1176 ?        Ss   Apr10   0:01 /sbin/wpa_supplicant -u -s -O /run/wpa_supplicant
+avahi        697  0.0  0.0   7252   136 ?        S    Apr10   0:00 avahi-daemon: chroot helper
+root         745  0.0  0.0 316740  3448 ?        Ssl  Apr10   0:00 /usr/sbin/ModemManager
+root         800  0.0  0.0 126288  3336 ?        Ssl  Apr10   0:00 /usr/bin/python3 /usr/share/unattended-upgrades/unattended-upgrade-shutdown --wait-for-signal
+whoopsie     826  0.0  0.0 328480  5412 ?        Ssl  Apr10   0:00 /usr/bin/whoopsie -f
+kernoops     827  0.0  0.0  13528   112 ?        Ss   Apr10   0:00 /usr/sbin/kerneloops --test
+kernoops     829  0.0  0.0  13528   136 ?        Ss   Apr10   0:00 /usr/sbin/kerneloops
+root        1017  0.0  0.0 370556  1584 ?        Sl   Apr10   0:32 /usr/sbin/VBoxService --pidfile /var/run/vboxadd-service.sh
+root        1028  0.0  0.0 250400  3648 ?        Ssl  Apr10   0:00 /usr/sbin/gdm3
+rtkit       1057  0.0  0.0 153848  1856 ?        SNsl Apr10   0:03 /usr/libexec/rtkit-daemon
+root        1138  0.0  0.0 258424  3556 ?        Ssl  Apr10   0:02 /usr/libexec/upowerd
+root        1227  0.0  0.0 307228  4772 ?        Ssl  Apr10   0:01 /usr/libexec/packagekitd
+colord      1364  0.0  0.0 254356  5076 ?        Ssl  Apr10   0:00 /usr/libexec/colord
+root        1429  0.0  0.0 180024  4740 ?        Sl   Apr10   0:00 gdm-session-worker [pam/gdm-password]
+osboxes     1434  0.0  0.0  16300  5664 ?        Ss   Apr10   0:02 /lib/systemd/systemd --user
+osboxes     1435  0.0  0.0 102744   312 ?        S    Apr10   0:00 (sd-pam)
+osboxes     1441  0.0  0.0  90680  1908 ?        S<sl Apr10   0:00 /usr/bin/pipewire
+osboxes     1442  0.0  0.0  82828  1628 ?        S<sl Apr10   0:01 /usr/bin/pipewire-media-session
+osboxes     1443  0.5  0.1 2990832 7244 ?        S<sl Apr10  20:06 /usr/bin/pulseaudio --daemonize=no --log-target=journal
+osboxes     1445  0.0  1.6 612568 102728 ?       SNsl Apr10   0:01 /usr/libexec/tracker-miner-fs
+osboxes     1447  0.0  0.0   9924  4068 ?        Ss   Apr10   0:11 /usr/bin/dbus-daemon --session --address=systemd: --nofork --nopidfile --systemd-activation --syslog-only
+osboxes     1453  0.0  0.0 250260  2068 ?        Sl   Apr10   0:02 /usr/bin/gnome-keyring-daemon --daemonize --login
+osboxes     1470  0.0  0.0 249856  4680 ?        Ssl  Apr10   0:00 /usr/libexec/gvfsd
+osboxes     1475  0.0  0.0 379672  3128 ?        Sl   Apr10   0:00 /usr/libexec/gvfsd-fuse /run/user/1000/gvfs -f -o big_writes
+osboxes     1483  0.0  0.0 171648  3172 tty2     Ssl+ Apr10   0:00 /usr/libexec/gdm-wayland-session env GNOME_SHELL_SESSION_MODE=ubuntu /usr/bin/gnome-session --session=ubuntu
+osboxes     1486  0.0  0.0 229960  3156 tty2     Sl+  Apr10   0:00 /usr/libexec/gnome-session-binary --systemd --session=ubuntu
+osboxes     1495  0.0  0.0 398960  5016 ?        Ssl  Apr10   0:00 /usr/libexec/gvfs-udisks2-volume-monitor
+osboxes     1518  0.0  0.0 245656  3732 ?        Ssl  Apr10   0:00 /usr/libexec/gvfs-mtp-volume-monitor
+osboxes     1522  0.0  0.0 246580  3644 ?        Ssl  Apr10   0:00 /usr/libexec/gvfs-gphoto2-volume-monitor
+osboxes     1533  0.0  0.0 245844  3212 ?        Ssl  Apr10   0:00 /usr/libexec/gvfs-goa-volume-monitor
+osboxes     1537  0.0  0.0 566264  4876 ?        Sl   Apr10   0:00 /usr/libexec/goa-daemon
+osboxes     1546  0.0  0.0 324784  3452 ?        Sl   Apr10   0:11 /usr/libexec/goa-identity-service
+osboxes     1555  0.0  0.0 100968  1788 ?        Ssl  Apr10   0:00 /usr/libexec/gnome-session-ctl --monitor
+osboxes     1557  0.0  0.0 322988  3420 ?        Ssl  Apr10   0:09 /usr/libexec/gvfs-afc-volume-monitor
+osboxes     1569  0.0  0.0 525924  4760 ?        Ssl  Apr10   0:00 /usr/libexec/gnome-session-binary --systemd-service --session=ubuntu
+osboxes     1594  0.0  0.0 306768  3544 ?        Sl   Apr10   0:00 /usr/libexec/at-spi-bus-launcher --launch-immediately
+osboxes     1595  4.9  7.3 5662940 454968 ?      Rsl  Apr10 188:49 /usr/bin/gnome-shell
+osboxes     1603  0.0  0.0   8252  2536 ?        S    Apr10   0:00 /usr/bin/dbus-daemon --config-file=/usr/share/defaults/at-spi2/accessibility.conf --nofork --print-address 3
+osboxes     1628  0.3  0.8 1105772 52096 ?       Sl   Apr10  11:29 /usr/bin/Xwayland :0 -rootless -noreset -accessx -core -auth /run/user/1000/.mutter-Xwaylandauth.C1H2J1 -listen 4 -listen 5 -displayfd 6 -initfd 7
+osboxes     1650  0.0  0.0 245576  2316 ?        Ssl  Apr10   0:00 /usr/libexec/xdg-permission-store
+osboxes     1652  0.0  0.0 581744  4064 ?        Sl   Apr10   0:00 /usr/libexec/gnome-shell-calendar-server
+osboxes     1661  0.0  0.0 1078824 4280 ?        Ssl  Apr10   0:00 /usr/libexec/evolution-source-registry
+osboxes     1668  0.0  0.0 846772  5260 ?        Ssl  Apr10   0:00 /usr/libexec/evolution-calendar-factory
+osboxes     1670  0.0  0.0 157528  3228 ?        Sl   Apr10   0:00 /usr/libexec/dconf-service
+osboxes     1683  0.0  0.0 756140  5152 ?        Ssl  Apr10   0:00 /usr/libexec/evolution-addressbook-factory
+osboxes     1698  0.0  0.1 2677972 7300 ?        Sl   Apr10   0:00 /usr/bin/gjs /usr/share/gnome-shell/org.gnome.Shell.Notifications
+osboxes     1700  0.0  0.0 163116  3260 ?        Sl   Apr10   0:00 /usr/libexec/at-spi2-registryd --use-gnome-session
+osboxes     1712  0.0  0.0 323992  4332 ?        Sl   Apr10   0:00 /usr/libexec/gvfsd-trash --spawner :1.3 /org/gtk/gvfs/exec_spaw/0
+osboxes     1720  0.0  0.0 319664  3312 ?        Ssl  Apr10   0:00 /usr/libexec/gsd-a11y-settings
+osboxes     1721  0.0  0.0 456776  5988 ?        Ssl  Apr10   0:00 /usr/libexec/gsd-color
+osboxes     1722  0.0  0.0 382084  3912 ?        Ssl  Apr10   0:00 /usr/libexec/gsd-datetime
+osboxes     1723  0.0  0.0 320544  4152 ?        Ssl  Apr10   0:07 /usr/libexec/gsd-housekeeping
+osboxes     1726  0.0  0.0 348136  4156 ?        Ssl  Apr10   0:00 /usr/libexec/gsd-keyboard
+osboxes     1728  0.0  0.1 1136256 7056 ?        Ssl  Apr10   0:00 /usr/libexec/gsd-media-keys
+osboxes     1729  0.0  0.1 651356  8148 ?        Ssl  Apr10   0:00 /usr/libexec/gsd-power
+osboxes     1730  0.0  0.0 258136  4464 ?        Ssl  Apr10   0:00 /usr/libexec/gsd-print-notifications
+osboxes     1736  0.0  0.0 393364  3628 ?        Ssl  Apr10   0:00 /usr/libexec/gsd-rfkill
+osboxes     1737  0.0  0.0 245644  3120 ?        Ssl  Apr10   0:00 /usr/libexec/gsd-screensaver-proxy
+osboxes     1738  0.0  0.0 475028  3376 ?        Ssl  Apr10   0:00 /usr/libexec/gsd-sharing
+osboxes     1739  0.0  0.0 395296  3300 ?        Ssl  Apr10   0:00 /usr/libexec/gsd-smartcard
+osboxes     1741  0.0  0.0 331124  3804 ?        Ssl  Apr10   0:00 /usr/libexec/gsd-sound
+osboxes     1743  0.0  0.0 347804  4180 ?        Ssl  Apr10   0:00 /usr/libexec/gsd-wacom
+osboxes     1795  0.0  0.1 658536  6292 ?        Sl   Apr10   0:00 /usr/libexec/evolution-data-server/evolution-alarm-notify
+osboxes     1804  0.0  0.0 350280  4204 ?        Sl   Apr10   0:00 /usr/libexec/gsd-printer
+osboxes     1835  0.0  0.0 232044  3308 ?        Sl   Apr10   0:00 /usr/libexec/gsd-disk-utility-notify
+osboxes     1872  0.0  0.0  29288    24 ?        S    Apr10   0:00 /usr/bin/VBoxClient --clipboard
+osboxes     1873  0.0  0.0 161556   188 ?        Sl   Apr10   0:00 /usr/bin/VBoxClient --clipboard
+osboxes     1895  0.0  0.0  29288    20 ?        S    Apr10   0:00 /usr/bin/VBoxClient --seamless
+osboxes     1896  0.0  0.0 161524   360 ?        Sl   Apr10   0:47 /usr/bin/VBoxClient --seamless
+osboxes     1900  0.0  0.0  29288     8 ?        S    Apr10   0:00 /usr/bin/VBoxClient --draganddrop
+osboxes     1901  0.1  0.0 162040   488 ?        Sl   Apr10   6:49 /usr/bin/VBoxClient --draganddrop
+osboxes     1907  0.0  0.0  29288     4 ?        S    Apr10   0:00 /usr/bin/VBoxClient --vmsvga
+root        1908  0.0  0.0  86112  1220 ?        S    Apr10   0:00 [VBoxDRMClient]
+osboxes     1957  0.0  0.0 397616  5684 ?        Sl   Apr10   1:12 ibus-daemon --panel disable -r --xim
+osboxes     1958  0.0  0.1 1358348 7224 ?        Ssl  Apr10   0:03 /usr/libexec/gsd-xsettings
+osboxes     1984  0.0  0.0 172696  3384 ?        Sl   Apr10   0:00 /usr/libexec/ibus-memconf
+osboxes     1991  0.0  0.0 353268  5968 ?        Sl   Apr10   0:10 /usr/libexec/ibus-extension-gtk3
+osboxes     2002  0.0  0.0 201612  5380 ?        Sl   Apr10   0:02 /usr/libexec/ibus-x11 --kill-daemon
+osboxes     2005  0.0  0.0 247948  3884 ?        Sl   Apr10   0:02 /usr/libexec/ibus-portal
+osboxes     2030  0.0  0.0 172816  4312 ?        Sl   Apr10   0:24 /usr/libexec/ibus-engine-simple
+osboxes     2048  0.0  0.0 172300  3416 ?        Ssl  Apr10   0:00 /usr/libexec/gvfsd-metadata
+osboxes     2072  0.9  9.2 4505748 571124 ?      Sl   Apr10  34:38 /usr/lib/firefox/firefox -new-window
+osboxes     2131  0.0  0.1 194420  8620 ?        Sl   Apr10   2:01 /usr/lib/firefox/firefox -contentproc -parentBuildID 20220106144528 -prefsLen 1 -prefMapSize 246643 -appDir /usr/lib/firefox/browser 2072 true socket
+osboxes     2164  0.0  1.1 2469704 70276 ?       Sl   Apr10   0:26 /usr/lib/firefox/firefox -contentproc -childID 1 -isForBrowser -prefsLen 139 -prefMapSize 246643 -jsInitLen 279340 -parentBuildID 20220106144528 -appDir /usr/lib/firefox/browser 2072 true tab
+osboxes     2237  0.0  1.1 2564588 73900 ?       Sl   Apr10   3:18 /usr/lib/firefox/firefox -contentproc -childID 3 -isForBrowser -prefsLen 4973 -prefMapSize 246643 -jsInitLen 279340 -parentBuildID 20220106144528 -appDir /usr/lib/firefox/browser 2072 true tab
+osboxes     2303  0.0  2.0 2612376 125328 ?      Sl   Apr10   0:31 /usr/lib/firefox/firefox -contentproc -childID 6 -isForBrowser -prefsLen 5672 -prefMapSize 246643 -jsInitLen 279340 -parentBuildID 20220106144528 -appDir /usr/lib/firefox/browser 2072 true tab
+osboxes     2369  1.0  5.9 3156188 370416 ?      Sl   Apr10  40:43 /usr/lib/firefox/firefox -contentproc -childID 7 -isForBrowser -prefsLen 8184 -prefMapSize 246643 -jsInitLen 279340 -parentBuildID 20220106144528 -appDir /usr/lib/firefox/browser 2072 true tab
+osboxes     2387  0.3  1.5 38653584 93760 ?      SLl  Apr10  11:32 /usr/share/code/code --unity-launch
+osboxes     2391  0.0  0.1 201092  6792 ?        S    Apr10   0:00 /usr/share/code/code --type=zygote --no-zygote-sandbox
+osboxes     2392  0.0  0.1 201092  6544 ?        S    Apr10   0:00 /usr/share/code/code --type=zygote
+osboxes     2394  0.0  0.0 201092  1572 ?        S    Apr10   0:00 /usr/share/code/code --type=zygote
+osboxes     2444  0.0  0.2 263876 17548 ?        Sl   Apr10   0:04 /usr/share/code/code --type=utility --utility-sub-type=network.mojom.NetworkService --field-trial-handle=15541623923277986509,16096957837955962724,131072 --disable-features=CookiesWithoutSameSiteMustBeSecure,SameSiteByDefaultCookies,SpareRendererForSitePerProcess --lang=en-GB --service-sandbox-type=none --enable-crash-reporter=92839825-0bbb-4be7-8b77-5add1429d30d,no_channel --global-crash-keys=92839825-0bbb-4be7-8b77-5add1429d30d,no_channel,_companyName=Microsoft,_productName=VSCode,_version=1.62.3 --user-data-dir=/home/osboxes/.config/Code --standard-schemes=vscode-webview,vscode-file --secure-schemes=vscode-webview,vscode-file --bypasscsp-schemes --cors-schemes=vscode-webview,vscode-file --fetch-schemes=vscode-webview,vscode-file --service-worker-schemes=vscode-webview --streaming-schemes --shared-files=v8_context_snapshot_data:100
+osboxes     2445  1.3  2.8 861540 173488 ?       Sl   Apr10  50:07 /usr/share/code/code --type=gpu-process --field-trial-handle=15541623923277986509,16096957837955962724,131072 --disable-features=CookiesWithoutSameSiteMustBeSecure,SameSiteByDefaultCookies,SpareRendererForSitePerProcess --disable-color-correct-rendering --enable-crash-reporter=92839825-0bbb-4be7-8b77-5add1429d30d,no_channel --global-crash-keys=92839825-0bbb-4be7-8b77-5add1429d30d,no_channel,_companyName=Microsoft,_productName=VSCode,_version=1.62.3 --user-data-dir=/home/osboxes/.config/Code --gpu-preferences=UAAAAAAAAAAgAAAQAAAAAAAAAAAAAAAAAABgAAAAAAAwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAACAAAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAgAAAAAAAAACAAAAAAAAAA= --use-gl=swiftshader-webgl --shared-files
+osboxes     2454  0.0  0.0 217680   448 ?        S    Apr10   0:00 /usr/share/code/code --type=broker
+osboxes     2463  0.2  2.8 48748244 177996 ?     Sl   Apr10   8:04 /usr/share/code/code --type=renderer --disable-color-correct-rendering --field-trial-handle=15541623923277986509,16096957837955962724,131072 --disable-features=CookiesWithoutSameSiteMustBeSecure,SameSiteByDefaultCookies,SpareRendererForSitePerProcess --disable-gpu-compositing --lang=en-GB --enable-crash-reporter=92839825-0bbb-4be7-8b77-5add1429d30d,no_channel --global-crash-keys=92839825-0bbb-4be7-8b77-5add1429d30d,no_channel,_companyName=Microsoft,_productName=VSCode,_version=1.62.3 --user-data-dir=/home/osboxes/.config/Code --standard-schemes=vscode-webview,vscode-file --secure-schemes=vscode-webview,vscode-file --bypasscsp-schemes --cors-schemes=vscode-webview,vscode-file --fetch-schemes=vscode-webview,vscode-file --service-worker-schemes=vscode-webview --streaming-schemes --app-path=/usr/share/code/resources/app --no-sandbox --no-zygote --num-raster-threads=2 --enable-main-frame-before-activation --renderer-client-id=6 --no-v8-untrusted-code-mitigations --shared-files=v8_context_snapshot_data:100 --vscode-window-config=vscode:2c96bdca-2f1a-4ed2-90d3-2edd2a939552
+osboxes     2469  3.3 11.4 57712392 711864 ?     Sl   Apr10 128:20 /usr/share/code/code --type=renderer --disable-color-correct-rendering --field-trial-handle=15541623923277986509,16096957837955962724,131072 --disable-features=CookiesWithoutSameSiteMustBeSecure,SameSiteByDefaultCookies,SpareRendererForSitePerProcess --disable-gpu-compositing --lang=en-GB --enable-crash-reporter=92839825-0bbb-4be7-8b77-5add1429d30d,no_channel --global-crash-keys=92839825-0bbb-4be7-8b77-5add1429d30d,no_channel,_companyName=Microsoft,_productName=VSCode,_version=1.62.3 --user-data-dir=/home/osboxes/.config/Code --standard-schemes=vscode-webview,vscode-file --secure-schemes=vscode-webview,vscode-file --bypasscsp-schemes --cors-schemes=vscode-webview,vscode-file --fetch-schemes=vscode-webview,vscode-file --service-worker-schemes=vscode-webview --streaming-schemes --app-path=/usr/share/code/resources/app --no-sandbox --no-zygote --num-raster-threads=2 --enable-main-frame-before-activation --renderer-client-id=8 --no-v8-untrusted-code-mitigations --shared-files=v8_context_snapshot_data:100 --vscode-window-config=vscode:e78d9d58-8a32-4600-af52-391b6e1f47e9
+osboxes     2519  0.0  0.6 38046904 39364 ?      Sl   Apr10   1:50 /usr/share/code/code --ms-enable-electron-run-as-node --inspect-port=0 /usr/share/code/resources/app/out/bootstrap-fork --type=extensionHost --skipWorkspaceStorageLock
+osboxes     2527  0.2  2.1 38064792 133260 ?     Sl   Apr10  10:31 /usr/share/code/code --ms-enable-electron-run-as-node --inspect-port=0 /usr/share/code/resources/app/out/bootstrap-fork --type=extensionHost --skipWorkspaceStorageLock
+osboxes     2543  0.0  1.0 38113780 65348 ?      Sl   Apr10   3:19 /usr/share/code/code --type=renderer --disable-color-correct-rendering --field-trial-handle=15541623923277986509,16096957837955962724,131072 --disable-features=CookiesWithoutSameSiteMustBeSecure,SameSiteByDefaultCookies,SpareRendererForSitePerProcess --disable-gpu-compositing --lang=en-GB --enable-crash-reporter=92839825-0bbb-4be7-8b77-5add1429d30d,no_channel --global-crash-keys=92839825-0bbb-4be7-8b77-5add1429d30d,no_channel,_companyName=Microsoft,_productName=VSCode,_version=1.62.3 --user-data-dir=/home/osboxes/.config/Code --standard-schemes=vscode-webview,vscode-file --secure-schemes=vscode-webview,vscode-file --bypasscsp-schemes --cors-schemes=vscode-webview,vscode-file --fetch-schemes=vscode-webview,vscode-file --service-worker-schemes=vscode-webview --streaming-schemes --app-path=/usr/share/code/resources/app --no-sandbox --no-zygote --disable-blink-features=Auxclick --node-integration-in-worker --num-raster-threads=2 --enable-main-frame-before-activation --renderer-client-id=10 --no-v8-untrusted-code-mitigations --shared-files=v8_context_snapshot_data:100 --vscode-window-config=vscode:8830000e-cce1-47f6-aef2-994e613d8006
+osboxes     2556  0.0  0.4 38022644 27700 ?      Rl   Apr10   0:53 /usr/share/code/code --ms-enable-electron-run-as-node /usr/share/code/resources/app/out/bootstrap-fork --type=watcherServiceChokidar
+osboxes     2573  0.0  0.2 38017524 15192 ?      Sl   Apr10   0:05 /usr/share/code/code --ms-enable-electron-run-as-node /usr/share/code/resources/app/out/bootstrap-fork --type=watcherServiceChokidar
+osboxes     2574  0.1  0.5 38082136 32284 ?      Sl   Apr10   6:28 /usr/share/code/code --ms-enable-electron-run-as-node /usr/share/code/resources/app/out/bootstrap-fork --type=ptyHost
+osboxes     2646  0.1  1.6 2276984 103136 ?      Sl   Apr10   7:04 /home/osboxes/.vscode/extensions/ms-vscode.cpptools-1.7.1/bin/cpptools
+osboxes     2674  0.0  0.1 1383820 6644 ?        Sl   Apr10   1:53 /home/osboxes/.vscode/extensions/ms-vscode.cpptools-1.7.1/bin/cpptools
+osboxes     2806  0.0  0.0  20028  2948 pts/0    Ss+  Apr10   0:00 /usr/bin/bash
+osboxes     2863  0.0  0.0  19892  1076 pts/1    Ss+  Apr10   0:00 /usr/bin/bash
+osboxes     2952  0.1  0.8 438936 51936 ?        Ssl  Apr10   4:37 /usr/libexec/gnome-terminal-server
+osboxes     2957  0.0  0.0  20044  3692 pts/2    Ss+  Apr10   0:00 bash
+osboxes     2965  0.0  0.1 425260  6816 ?        Sl   Apr10   0:04 update-notifier
+osboxes     3637  0.0  0.0  19892  1656 pts/3    Ss   Apr10   0:00 /usr/bin/bash
+osboxes     3859  0.0  0.0  20024  2196 pts/4    Ss+  Apr10   0:00 /usr/bin/bash
+osboxes     3964  0.0  0.0  20024  2200 pts/5    Ss+  Apr10   0:00 /usr/bin/bash
+osboxes     4255  0.1  1.3 2539068 84248 ?       Sl   Apr10   4:28 /usr/lib/firefox/firefox -contentproc -childID 8 -isForBrowser -prefsLen 9720 -prefMapSize 246643 -jsInitLen 279340 -parentBuildID 20220106144528 -appDir /usr/lib/firefox/browser 2072 true tab
+osboxes     4353  0.0  0.0 363164  2676 ?        Sl   Apr10   0:24 /usr/lib/speech-dispatcher-modules/sd_dummy /etc/speech-dispatcher/modules/dummy.conf
+osboxes     4356  0.0  0.0 463472  3112 ?        Sl   Apr10   0:24 /usr/lib/speech-dispatcher-modules/sd_espeak-ng /etc/speech-dispatcher/modules/espeak-ng.conf
+osboxes     4383  0.0  0.0 172516  1608 ?        Ssl  Apr10   0:00 /usr/bin/speech-dispatcher --spawn --communication-method unix_socket --socket-path /run/user/1000/speech-dispatcher/speechd.sock
+osboxes     4620  0.0  2.1 2590288 131536 ?      Sl   Apr10   0:21 /usr/lib/firefox/firefox -contentproc -childID 14 -isForBrowser -prefsLen 9720 -prefMapSize 246643 -jsInitLen 279340 -parentBuildID 20220106144528 -appDir /usr/lib/firefox/browser 2072 true tab
+osboxes     4795  0.0  1.4 2551052 87316 ?       Sl   Apr10   3:23 /usr/lib/firefox/firefox -contentproc -childID 19 -isForBrowser -prefsLen 9720 -prefMapSize 246643 -jsInitLen 279340 -parentBuildID 20220106144528 -appDir /usr/lib/firefox/browser 2072 true tab
+osboxes     5147  0.0  0.0  20040  3228 pts/6    Ss+  Apr10   0:00 bash
+osboxes     6267  0.0  0.0  20024  1732 pts/7    Ss+  Apr10   0:00 bash
+osboxes     6560  0.1 21.8 42230264 1351500 ?    Sl   Apr10   5:31 /usr/share/code/code --ms-enable-electron-run-as-node /home/osboxes/.vscode/extensions/ms-python.vscode-pylance-2022.1.3/dist/server.bundle.js --cancellationReceive=file:37ab5bf56c88bb15cd928b7c87a072b467ccf213df --node-ipc --clientProcessId=2527
+osboxes     9779  0.0  0.0  29552  1940 pts/6    T    Apr11   0:00 python3 ./nasmshell
+osboxes    15209  0.0  1.1 2599532 71016 ?       Sl   Apr11   0:20 /usr/lib/firefox/firefox -contentproc -childID 29 -isForBrowser -prefsLen 9720 -prefMapSize 246643 -jsInitLen 279340 -parentBuildID 20220106144528 -appDir /usr/lib/firefox/browser 2072 true tab
+osboxes    21807  0.0  2.2 2599956 141596 ?      Sl   Apr11   0:52 /usr/lib/firefox/firefox -contentproc -childID 33 -isForBrowser -prefsLen 9720 -prefMapSize 246643 -jsInitLen 279340 -parentBuildID 20220106144528 -appDir /usr/lib/firefox/browser 2072 true tab
+osboxes    21956  0.0  0.0 425964  3888 pts/2    Tl   Apr11   0:00 gdb ./execve_hijack
+osboxes    22013  0.0  0.0   2516   584 pts/2    t    Apr11   0:00 /home/osboxes/TFG/src/helpers/execve_hijack
+osboxes    33793  0.0  0.2 37983716 16372 ?      Sl   Apr11   0:07 /usr/share/code/code --ms-enable-electron-run-as-node /usr/share/code/resources/app/extensions/json-language-features/server/dist/node/jsonServerMain --node-ipc --clientProcessId=2527
+osboxes    33839  0.0  0.1 4956448 7436 ?        Sl   Apr11   0:23 /home/osboxes/.vscode/extensions/ms-vscode.cpptools-1.7.1/bin/cpptools-srv 2674 {4204C6E4-94DE-4C9A-87D5-451782A8EEA2}
+root       40451  0.0  0.0      0     0 ?        S<   Apr11   0:00 [loop15]
+osboxes    44149  0.0  1.3 2503468 86112 ?       Sl   Apr11   0:18 /usr/lib/firefox/firefox -contentproc -childID 40 -isForBrowser -prefsLen 9720 -prefMapSize 246643 -jsInitLen 279340 -parentBuildID 20220106144528 -appDir /usr/lib/firefox/browser 2072 true tab
+osboxes    44249  0.0  0.1 196936  6904 ?        Sl   Apr11   0:01 /usr/lib/firefox/firefox -contentproc -parentBuildID 20220106144528 -prefsLen 9720 -prefMapSize 246643 -appDir /usr/lib/firefox/browser 2072 true rdd
+osboxes    44288  0.1  1.3 2554840 83648 ?       Sl   Apr11   2:43 /usr/lib/firefox/firefox -contentproc -childID 43 -isForBrowser -prefsLen 9720 -prefMapSize 246643 -jsInitLen 279340 -parentBuildID 20220106144528 -appDir /usr/lib/firefox/browser 2072 true tab
+root       78150  0.0  0.2 1095204 14348 ?       Ssl  Apr11   0:09 /usr/lib/snapd/snapd
+osboxes   164528  0.2  0.6 3033220 39252 ?       Sl   Apr12   2:42 /usr/lib/firefox/firefox -contentproc -childID 110 -isForBrowser -prefsLen 9832 -prefMapSize 246643 -jsInitLen 279340 -parentBuildID 20220106144528 -appDir /usr/lib/firefox/browser 2072 true tab
+root      182268  0.0  0.4 118068 29556 ?        S<s  Apr12   0:07 /lib/systemd/systemd-journald
+osboxes   190198  0.0  0.1 815708 11768 ?        Sl   Apr12   0:01 /usr/bin/nautilus --gapplication-service
+root      219744  0.0  0.0  23140  3688 pts/3    S+   Apr12   0:00 sudo cat /sys/kernel/debug/tracing/trace_pipe
+root      219763  0.0  0.0  16888   448 pts/3    S+   Apr12   0:00 cat /sys/kernel/debug/tracing/trace_pipe
+root      239521  0.0  0.1  81196  9320 ?        Ss   03:20   0:00 /usr/sbin/cupsd -l
+root      239523  0.0  0.1 179080  8136 ?        Ssl  03:20   0:00 /usr/sbin/cups-browsed
+osboxes   240611  0.0  0.0 397868  5596 ?        Sl   03:42   0:00 /usr/libexec/gvfsd-network --spawner :1.3 /org/gtk/gvfs/exec_spaw/1
+osboxes   240624  0.0  0.0 325920  6092 ?        Sl   03:42   0:00 /usr/libexec/gvfsd-dnssd --spawner :1.3 /org/gtk/gvfs/exec_spaw/3
+osboxes   241549  0.0  0.6 2784548 39404 ?       Sl   04:36   0:00 gjs /usr/share/gnome-shell/extensions/ding@rastersoft.com/ding.js -E -P /usr/share/gnome-shell/extensions/ding@rastersoft.com -M 0 -D 72:27:1848:1053:1
+root      244694  0.0  0.0      0     0 ?        I    05:01   0:01 [kworker/2:1-events]
+root      246168  0.0  0.2 395496 18132 ?        Ssl  05:36   0:00 /usr/libexec/fwupd/fwupd
+root      249953  0.0  0.0      0     0 ?        I    06:22   0:00 [kworker/2:0-events]
+root      250021  0.0  0.0      0     0 ?        I    06:24   0:00 [kworker/0:1-events]
+root      250876  0.0  0.0      0     0 ?        I    06:32   0:00 [kworker/1:2-events]
+osboxes   250918  0.0  0.0  20040  5708 pts/8    Ss   06:34   0:00 bash
+root      251317  0.0  0.0      0     0 ?        I    06:41   0:00 [kworker/3:2-mm_percpu_wq]
+osboxes   251388  0.0  1.3 2414340 82276 ?       Sl   06:41   0:00 /usr/lib/firefox/firefox -contentproc -childID 148 -isForBrowser -prefsLen 9949 -prefMapSize 246643 -jsInitLen 279340 -parentBuildID 20220106144528 -appDir /usr/lib/firefox/browser 2072 true tab
+osboxes   251418  0.0  1.3 2414340 82076 ?       Sl   06:42   0:00 /usr/lib/firefox/firefox -contentproc -childID 149 -isForBrowser -prefsLen 9949 -prefMapSize 246643 -jsInitLen 279340 -parentBuildID 20220106144528 -appDir /usr/lib/firefox/browser 2072 true tab
+root      251560  0.0  0.0      0     0 ?        I    06:47   0:00 [kworker/3:0-events]
+root      251587  0.0  0.0      0     0 ?        I    06:48   0:00 [kworker/u8:2-events_unbound]
+osboxes   251667  0.0  1.3 2414340 82916 ?       Sl   06:51   0:00 /usr/lib/firefox/firefox -contentproc -childID 150 -isForBrowser -prefsLen 9949 -prefMapSize 246643 -jsInitLen 279340 -parentBuildID 20220106144528 -appDir /usr/lib/firefox/browser 2072 true tab
+root      251807  0.0  0.0      0     0 ?        I    06:55   0:00 [kworker/u8:0-ext4-rsv-conversion]
+root      251948  0.0  0.0      0     0 ?        I    06:58   0:00 [kworker/1:1-events]
+root      251949  0.0  0.0      0     0 ?        I    06:58   0:00 [kworker/0:2-events]
+osboxes   251961  0.0  0.0  19908  5404 pts/8    S    06:59   0:00 ./execve_hijack /usr/bin/ls -l -a
+osboxes   252029  0.0  0.2 4956124 17428 ?       Sl   07:00   0:00 /home/osboxes/.vscode/extensions/ms-vscode.cpptools-1.7.1/bin/cpptools-srv 2646 {A9B50C18-C7D3-405F-BC30-E651DCC7B5A4}
+root      252479  0.0  0.0   3484  1936 pts/8    S    07:03   0:00 ./execve_hijack ,
+root      252524  0.0  0.0   2516    96 pts/8    S    07:05   0:00 ./execve_hijack -l -a
+root      252536  0.0  0.0      0     0 ?        I    07:06   0:00 [kworker/u8:1-events_unbound]
+osboxes   252543  0.0  0.0  21296  3756 pts/8    R+   07:06   0:00 ps -aux
+Hello world from execve hijacker
+Argument 0 is ./execve_hijack
+Argument 1 is ,
+I am the child with pid 252479
+Child process is exiting
+Packet of protocol 6 detected
+Packet of protocol 6 detected
+Packet of protocol 6 detected
+Packet of protocol 6 detected
+Packet of protocol 6 detected
+Packet of protocol 6 detected
+Packet of protocol 6 detected
+Packet of protocol 6 detected
+Packet of protocol 6 detected
+Packet of protocol 6 detected
+Packet of protocol 6 detected
+Packet of protocol 6 detected
+Packet of protocol 6 detected
+Packet of protocol 6 detected
+Packet of protocol 6 detected
+Packet of protocol 6 detected
+Packet of protocol 6 detected
+Packet of protocol 6 detected
+Packet of protocol 6 detected
+Packet of protocol 6 detected
+Packet of protocol 6 detected
+Packet of protocol 6 detected
+Packet of protocol 6 detected
+Packet of protocol 6 detected
+Packet of protocol 6 detected
+Packet of protocol 6 detected
+Packet of protocol 6 detected
+Packet of protocol 6 detected
+Packet of protocol 6 detected
+Packet of protocol 6 detected
+Packet of protocol 6 detected
+Packet of protocol 6 detected
+Packet of protocol 6 detected
+Packet of protocol 6 detected
+Packet of protocol 6 detected
+Packet of protocol 6 detected
+Packet of protocol 6 detected
+Packet of protocol 6 detected
+Packet of protocol 6 detected
+Packet of protocol 6 detected
+Packet of protocol 6 detected
+Packet of protocol 6 detected
+Packet of protocol 6 detected
+Packet of protocol 6 detected
+Packet of protocol 6 detected
+Packet of protocol 6 detected
+Packet of protocol 6 detected
+Packet of protocol 6 detected
+Packet of protocol 6 detected
+Packet of protocol 6 detected
+Packet of protocol 6 detected
+Packet of protocol 6 detected
+Packet of protocol 6 detected
+Packet of protocol 6 detected
+Packet of protocol 6 detected
+Packet of protocol 6 detected
+Packet of protocol 6 detected
+Packet of protocol 6 detected
+IP: 127.0.1.1
+Packet of length 46 sent to 16842879
+Packet of protocol 6 detected
+Packet of protocol 6 detected
+Packet of protocol 6 detected
+Received client message
+Connection closed by request
+Hello world from execve hijacker
+Argument 0 is ./execve_hijack
+Argument 1 is -l
+Argument 2 is -a
+I am the child with pid 252524
+Child process is exiting
+Packet of protocol 6 detected
+Packet of protocol 6 detected
+Packet of protocol 6 detected
+Packet of protocol 6 detected
+Packet of protocol 6 detected
+Packet of protocol 6 detected
+Packet of protocol 6 detected
+Packet of protocol 6 detected
+Packet of protocol 6 detected
+Packet of protocol 6 detected
+Packet of protocol 6 detected
+Packet of protocol 6 detected
+IP: 127.0.1.1
+Packet of length 46 sent to 16842879
+Packet of protocol 6 detected
+Packet of protocol 6 detected
+Packet of protocol 6 detected
+Packet of protocol 6 detected
+Packet of protocol 6 detected
+Received client message
+Connection closed by request

