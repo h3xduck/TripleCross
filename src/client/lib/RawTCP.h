@@ -31,5 +31,6 @@ int rawsocket_send(packet_t packet);
 
 packet_t rawsocket_sniff();
 
+packet_t rawsocket_sniff_pattern(char* payload_pattern);
 
 #endif

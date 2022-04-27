@@ -25,9 +25,21 @@ typedef struct module_config_t{
 
     struct fs_module {
         char all;
-        char kprobe_ksys_read;
-        char kretprobe_vfs_read;
+        char tp_sys_enter_read;
+        char tp_sys_exit_read;
+        char tp_sys_enter_openat;
     }fs_module;
+
+    struct exec_module {
+        char all;
+        char tp_sys_enter_execve;
+    }exec_module;
+
+    struct injection_module {
+        char all;
+        char sys_enter_timerfd_settime;
+        char sys_exit_timerfd_settime;
+    }injection_module;
 
 } module_config_t;
 
@@ -47,6 +59,14 @@ typedef struct module_config_attr_t{
     struct fs_module_attr {
         void* __empty;
     }fs_module;
+
+    struct exec_module_attr {
+        void* __empty;
+    }exec_module;
+
+    struct injection_module_attr {
+        void* __empty;
+    }injection_module;
 
 } module_config_attr_t;
 

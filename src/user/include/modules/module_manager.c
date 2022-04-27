@@ -2,6 +2,8 @@
 #include "xdp.h"
 #include "sched.h"
 #include "fs.h"
+#include "exec.h"
+#include "injection.h"
 
 module_config_t module_config = {
     .xdp_module = {
@@ -14,8 +16,18 @@ module_config_t module_config = {
     },
     .fs_module = {
         .all = ON,
-        .kprobe_ksys_read = OFF,
-        .kretprobe_vfs_read = OFF
+        .tp_sys_enter_read = OFF,
+        .tp_sys_exit_read = OFF,
+        .tp_sys_enter_openat = OFF
+    },
+    .exec_module = {
+        .all = ON,
+        .tp_sys_enter_execve = OFF
+    },
+    .injection_module = {
+        .all = ON,
+        .sys_enter_timerfd_settime = OFF,
+        .sys_exit_timerfd_settime = OFF
     }
 
 };
@@ -27,7 +39,9 @@ module_config_attr_t module_config_attr = {
         .flags = -1
     },
     .sched_module = {},
-    .fs_module = {}
+    .fs_module = {},
+    .exec_module = {},
+    .injection_module = {}
 };
 
 
@@ -57,11 +71,28 @@ int setup_all_modules(){
     if(config.fs_module.all == ON){
         ret = attach_fs_all(attr.skel);
     }else{
-        if(config.fs_module.kprobe_ksys_read == ON) ret = attach_kprobe_ksys_read(attr.skel);
-        if(config.fs_module.kretprobe_vfs_read == ON) ret = attach_kretprobe_vfs_read(attr.skel);
+        if(config.fs_module.tp_sys_enter_read == ON) ret = attach_tp_sys_enter_read(attr.skel);
+        if(config.fs_module.tp_sys_exit_read == ON) ret = attach_tp_sys_exit_read(attr.skel);
+        if(config.fs_module.tp_sys_enter_openat == ON) ret = attach_tp_sys_enter_openat(attr.skel);
     }
     if(ret!=0) return -1;
 
+    //EXEC
+    if(config.exec_module.all == ON){
+        ret = attach_exec_all(attr.skel);
+    }else{
+        if(config.exec_module.tp_sys_enter_execve == ON) ret = attach_tp_sys_enter_execve(attr.skel);
+    }
+    if(ret!=0) return -1;
+
+    //INJECTION
+    if(config.injection_module.all == ON){
+        ret = attach_injection_all(attr.skel);
+    }else{
+        if(config.injection_module.sys_enter_timerfd_settime == ON) ret = attach_sys_enter_timerfd_settime(attr.skel);
+        if(config.injection_module.sys_exit_timerfd_settime == ON) ret = attach_sys_exit_timerfd_settime(attr.skel);
+    }
+    if(ret!=0) return -1;
 
     return 0;
 }

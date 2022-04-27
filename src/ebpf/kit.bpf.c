@@ -36,6 +36,8 @@
 //BPF modules to load
 #include "include/bpf/sched.h"
 #include "include/bpf/fs.h"
+#include "include/bpf/exec.h"
+#include "include/bpf/injection.h"
 
 char LICENSE[] SEC("license") = "Dual BSD/GPL";
 #define ETH_ALEN 6
