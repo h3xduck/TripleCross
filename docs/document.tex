@@ -1,0 +1,355 @@
+
+
+%----------
+% DOCUMENT CONFIGURATION
+%----------
+
+\documentclass[12pt]{report} %font 12pt
+
+% MARGINS
+\usepackage[
+a4paper,
+vmargin=2.5cm,
+hmargin=3cm
+]{geometry}
+
+\renewcommand{\baselinestretch}{1.15}
+\parskip=6pt
+
+% COLORS for cover and code
+\usepackage[table]{xcolor}
+\definecolor{azulUC3M}{RGB}{0,0,102}
+\definecolor{gray97}{gray}{.97}
+\definecolor{gray75}{gray}{.75}
+\definecolor{gray45}{gray}{.45}
+
+% Soporte para GENERAR PDF/A --es importante de cara a su inclusión en e-Archivo porque es el formato óptimo de preservación y a la generación de metadatos, tal y como se describe en http://uc3m.libguides.com/ld.php?content_id=31389625. En la carpeta incluímos el archivo plantilla_tfg_2017.xmpdata en el que puedes incluir los metadatos que se incorporarán al archivo PDF cuando lo compiles. Ese archivo debe llamarse igual que tu archivo .tex. Puedes ver un ejemplo en esta misma carpeta.
+\usepackage[a-1b]{pdfx}
+
+% LINKS
+\usepackage{hyperref}
+\hypersetup{colorlinks=true,
+	linkcolor=black,
+	urlcolor=blue}
+
+% MATH
+\usepackage{amsmath,amssymb,amsfonts,amsthm}
+
+\usepackage{txfonts} 
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+
+\usepackage[english]{babel} 
+\usepackage[babel, english=american]{csquotes}
+\AtBeginEnvironment{quote}{\small}
+
+% FOOTER
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0pt}
+\rfoot{\thepage}
+\fancypagestyle{plain}{\pagestyle{fancy}}
+
+% TITLES
+\usepackage{titlesec}
+\usepackage{titletoc}
+\titleformat{\chapter}[block]
+{\large\bfseries\filcenter}
+{\thechapter.}
+{5pt}
+{\MakeUppercase}
+{}
+\titlespacing{\chapter}{0pt}{0pt}{*3}
+\titlecontents{chapter}
+[0pt]                                               
+{}
+{\contentsmargin{0pt}\thecontentslabel.\enspace\uppercase}
+{\contentsmargin{0pt}\uppercase}                        
+{\titlerule*[.7pc]{.}\contentspage}                 
+
+\titleformat{\section}
+{\bfseries}
+{\thesection.}
+{5pt}
+{}
+\titlecontents{section}
+[5pt]                                               
+{}
+{\contentsmargin{0pt}\thecontentslabel.\enspace}
+{\contentsmargin{0pt}}
+{\titlerule*[.7pc]{.}\contentspage}
+
+\titleformat{\subsection}
+{\normalsize\bfseries}
+{\thesubsection.}
+{5pt}
+{}
+\titlecontents{subsection}
+[10pt]                                               
+{}
+{\contentsmargin{0pt}                          
+	\thecontentslabel.\enspace}
+{\contentsmargin{0pt}}                        
+{\titlerule*[.7pc]{.}\contentspage}  
+
+
+% TABLE DESIGN
+\usepackage{multirow}
+\usepackage{caption}
+\usepackage{floatrow} 
+\usepackage{array}
+\newcolumntype{P}[1]{>{\centering\arraybackslash}p{#1}}
+\DeclareCaptionFormat{upper}{#1#2\uppercase{#3}\par}
+
+\captionsetup[table]{
+	format=upper,
+	justification=centering,
+	labelsep=period,
+	width=.75\linewidth,
+	labelfont=small,
+	font=small,
+}
+
+
+
+% FIGURES DESIGN
+\usepackage{graphicx}
+\graphicspath{{images/}}
+
+\captionsetup[figure]{
+	format=hang,
+	name=Fig.,
+	singlelinecheck=off,
+	labelsep=period,
+	labelfont=small,
+	font=small		
+}
+
+
+% FOOT NOTES
+\usepackage{chngcntr}
+\counterwithout{footnote}{chapter}
+
+% CODE LISTINGS
+\usepackage{listings}
+
+\lstdefinestyle{estilo}{ frame=Ltb,
+	framerule=0pt,
+	aboveskip=0.5cm,
+	framextopmargin=3pt,
+	framexbottommargin=3pt,
+	framexleftmargin=0.4cm,
+	framesep=0pt,
+	rulesep=.4pt,
+	backgroundcolor=\color{gray97},
+	rulesepcolor=\color{black},
+	%
+	basicstyle=\ttfamily\footnotesize,
+	keywordstyle=\bfseries,
+	stringstyle=\ttfamily,
+	showstringspaces = false,
+	commentstyle=\color{gray45},     
+	%
+	numbers=left,
+	numbersep=15pt,
+	numberstyle=\tiny,
+	numberfirstline = false,
+	breaklines=true,
+	xleftmargin=\parindent
+}
+
+\captionsetup[lstlisting]{font=small, labelsep=period}
+
+\lstset{style=estilo}
+\renewcommand{\lstlistingname}{\uppercase{Código}}
+
+% IEEE BIBLIOGRAPHY
+\usepackage[backend=biber, style=ieee, isbn=false,sortcites, maxbibnames=5, minbibnames=1]{biblatex}
+
+\addbibresource{bibliography/bibliography.bib}
+
+
+%-------------
+%	DOCUMENT
+%-------------
+
+\begin{document}
+\pagenumbering{roman}
+	
+%----------
+%	COVER
+%----------	
+\begin{titlepage}
+	\begin{sffamily}
+	\color{azulUC3M}
+	\begin{center}
+		\begin{figure}[H] %university logotype
+			\makebox[\textwidth][c]{\includegraphics[width=16cm]{Portada_Logo.png}}
+		\end{figure}
+		\vspace{2.5cm}
+		\begin{Large}
+			University Degree in Computer Science and Engineering\\			
+			Academic Year 2021-2022\\
+			\vspace{2cm}		
+			\textsl{Bachelor Thesis}
+			\bigskip
+			
+		\end{Large}
+		 	{\Huge ``An analysis of offensive capabilities of eBPF''}\\
+		 	\vspace*{0.5cm}
+	 		\rule{10.5cm}{0.1mm}\\
+			\vspace*{0.9cm}
+			{\LARGE Marcos Sánchez Bajo}\\ 
+			\vspace*{1cm}
+		\begin{Large}
+			Juan Manuel Estévez Tapiador\\
+			Leganés, 2022\\
+		\end{Large}
+	\end{center}
+	\vfill
+	\color{black}
+	% Creative Commons license
+	\includegraphics[width=4.2cm]{images/creativecommons.png}\\  
+	This work is licensed under Creative Commons \textbf{Attribution – Non Commercial – Non Derivatives}
+	\end{sffamily}
+\end{titlepage}
+
+\newpage
+\thispagestyle{empty}
+\mbox{}
+
+%----------
+%	SUMMARY & KEYWORDS
+%----------	
+\renewcommand\abstractname{\large\uppercase{Summary}}
+\begin{abstract}
+\thispagestyle{plain}
+\setcounter{page}{3}
+	
+	% TODO SUMMARY
+	
+	\textbf{Keywords:}
+	% TODO KEYWORDS
+	
+	\vfill
+\end{abstract}
+	\newpage
+	\thispagestyle{empty}
+	\mbox{}
+
+
+%----------
+%	DEDICATION
+%----------	
+\chapter*{Dedication}
+
+\setcounter{page}{5}
+	
+	% TODO DEDICATION	
+		
+	\vfill
+	
+	\newpage
+	\thispagestyle{empty}
+	\mbox{}
+	
+
+%----------
+%	INDEXES
+%----------	
+
+%--
+%General indexes
+%-
+\tableofcontents
+\thispagestyle{fancy}
+
+\newpage
+\thispagestyle{empty}
+\mbox{}
+
+%--
+% List of figures
+%-
+\listoffigures
+\thispagestyle{fancy}
+
+\newpage
+\thispagestyle{empty}
+\mbox{}
+
+%--
+% List of tables
+%-
+\listoftables
+\thispagestyle{fancy}
+
+\newpage % página en blanco o de cortesía
+\thispagestyle{empty}
+\mbox{}
+
+
+%----------
+%	INTRODUCTION
+%----------	
+\clearpage
+\pagenumbering{arabic}
+
+\chapter{Introduction}
+
+\section{Motivation}
+
+\section{Objectives}
+
+\section{Regulatory framework}
+%MARCOS-> Is this the appropiate place? Looking at other TFGs it is sometimes here and others in a final chapter
+
+\subsection{Social and economic environment}
+%M-> Mentioned talking about community outreach and its role under pentesting
+\subsection{Budget}
+
+
+\chapter{State of the Art}
+%M-> We mentioned talking about rootkits in general here + eBPF how it works, and previous work on this. Also libbpf(?).
+
+\chapter{Methods??}
+%M-> Following the particular TFG we discussed and also others, it looks like the main chapter(s) varies name depending on the TFG topic. ALso is there a prefered way to distribute this?
+%An idea: approach it depending on the ebpf capability to explore, e.g: network, user memory modification, hooking.
+
+
+\chapter{Results}
+
+
+\chapter{Conclusion and future work}
+
+
+
+
+%----------
+%	BIBLIOGRAPHY
+%----------	
+
+%\nocite{*} % Si quieres que aparezcan en la bibliografía todos los documentos que la componen (también los que no estén citados en el texto) descomenta está lína
+
+\clearpage
+\addcontentsline{toc}{chapter}{Bibliography}
+
+\printbibliography
+
+
+
+%----------
+%	ANEX
+%----------	
+
+%M-> Mentioned putting some demos and PoCs here...
+% Then 
+
+\chapter* {Appendix A}
+\pagenumbering{gobble} % Las páginas de los anexos no se numeran
+
+\chapter* {Appendix B}
+
+
+\end{document}
