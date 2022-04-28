@@ -16,7 +16,7 @@ COMMON_INCLUDES := -I$(abspath ./ebpf/include) -I$(abspath ./user/include)
 # Use our own libbpf API headers and Linux UAPI headers distributed with
 # libbpf to avoid dependency on system-wide headers, which could be missing or
 # outdated
-INCLUDES := -I$(OUTPUT) -I./libbpf/include/uapi -I$(dir $(VMLINUX))
+INCLUDES := -I$(OUTPUT) -I./libbpf/include/uapi -I$(dir $(VMLINUX)) -I./libbpf/include/uapi/linux
 #INCLUDES := -I$(OUTPUT)  -I./libbpf/include/uapi -I/lib/modules/5.11.0-41-generic/build/include -I/lib/modules/$$(uname -r)/build/include/uapi -I/lib/modules/$$(uname -r)/build/include/generated/uapi -I/lib/modules/$$(uname -r)/build/arch/x86/include -I/lib/modules/$$(uname -r)/build/arch/x86/include/generated #-I$(dir $(VMLINUX))
 CFLAGS := -g -Wall
 ARCH := $(shell uname -m | sed 's/x86_64/x86/')
@@ -47,7 +47,7 @@ else
 endif
 
 .PHONY: all
-all: $(APPS)
+all: $(APPS) tckit
 
 .PHONY: clean
 clean:
@@ -92,17 +92,22 @@ $(USER_INCLUDES_OBJ): $(wildcard $(USER_INCLUDES_SRC)/**/*.h) | $(OUTPUT)
 #User code
 $(OUTPUT)/%.o: $(USER)/%.c $(wildcard $(USER)/*.h)| $(OUTPUT)
 	$(call msg,CC,$@)
-	$(Q)$(CC) $(CFLAGS) $(INCLUDES) $(COMMON_INCLUDES) -c $(filter $(USER)/%.c,$^) -o $@
+	$(Q)$(CC) $(CFLAGS) $(INCLUDES) $(COMMON_INCLUDES) -c $(filter $(USER)/%.c,$^) -o $@ -ldl
 
 # Build application binary
 $(APPS): %: $(OUTPUT)/%.o $(LIBBPF_OBJ) $(USER_INCLUDES_OBJ) | $(OUTPUT)
 	$(call msg,BINARY,$@)
-	$(Q)$(CC) $(CFLAGS) $(INCLUDES) $^ -lelf -lbpf -lz -o bin/$@
+	$(Q)$(CC) $(CFLAGS) $(INCLUDES) $^ -lelf -lbpf -lz -o bin/$@ -ldl
 	$(Q)rm $(USER_INCLUDES_OBJ)
+
+tckit: $(abspath $(EBPF)/include/bpf)/tc.c
+	clang -O2 -emit-llvm -c $(abspath $(EBPF)/include/bpf)/tc.c -o - | \
+	llc -march=bpf -mcpu=probe -filetype=obj -o tc.o
+
 
 # delete failed targets
 .DELETE_ON_ERROR:
 
 # keep intermediate (.skel.h, .bpf.o, etc) targets
-.SECONDARY:
+SECONDARY:
 

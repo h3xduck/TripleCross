@@ -45,7 +45,8 @@ static long get_base_addr() {
 
 	while (fscanf(f, "%zx-%*x %s %zx %*[^\n]\n", &start, buf, &offset) == 3) {
 		if (strcmp(buf, "r-xp") == 0) {
-			fclose(f);
+			fclose(f); // 401380 //text offset-> 1290 //text VA->401290
+						//4199296 //4752 //4199056
 			return start - offset;
 		}
 	}
