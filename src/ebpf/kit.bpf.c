@@ -55,8 +55,8 @@ SEC("xdp_prog")
 int xdp_receive(struct xdp_md *ctx){
     //bpf_printk("BPF triggered\n");
     
-    void *data_end = (void *)(__u32)ctx->data_end;
-    void *data = (void *)(__u32)ctx->data;
+    void *data_end = (void *)(long)ctx->data_end;
+    void *data = (void *)(long)ctx->data;
 
     unsigned int payload_size;
     struct ethhdr *eth = data;
