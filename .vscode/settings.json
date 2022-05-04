@@ -22,6 +22,7 @@
         "stddef.h": "c",
         "ring_buffer.h": "c",
         "bpf_helpers.h": "c",
-        "tcp_helper.h": "c"
+        "tcp_helper.h": "c",
+        "headervmlinux.h": "c"
     }
 }

