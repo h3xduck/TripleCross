@@ -87,17 +87,17 @@ $(patsubst %,$(OUTPUT)/%.o, $(APPS)): %.o: %.skel.h
 #User includes and modules
 $(USER_INCLUDES_OBJ): $(wildcard $(USER_INCLUDES_SRC)/**/*.h) | $(OUTPUT)
 	$(call msg,CC,$@)
-	$(Q)$(CC) $(CFLAGS) $(INCLUDES) $(COMMON_INCLUDES) -c $(USER_INCLUDES_SRC) -o $@
+	$(Q)$(CC) $(CFLAGS) $(INCLUDES) $(COMMON_INCLUDES) -Wno-deprecated-declarations -c $(USER_INCLUDES_SRC) -o $@
 
 #User code
 $(OUTPUT)/%.o: $(USER)/%.c $(wildcard $(USER)/*.h)| $(OUTPUT)
 	$(call msg,CC,$@)
-	$(Q)$(CC) $(CFLAGS) $(INCLUDES) $(COMMON_INCLUDES) -c $(filter $(USER)/%.c,$^) -o $@
+	$(Q)$(CC) $(CFLAGS) $(INCLUDES) $(COMMON_INCLUDES) -c $(filter $(USER)/%.c,$^) -Wno-deprecated-declarations -o $@
 
 # Build application binary
 $(APPS): %: $(OUTPUT)/%.o $(LIBBPF_OBJ) $(USER_INCLUDES_OBJ) | $(OUTPUT)
 	$(call msg,BINARY,$@)
-	$(Q)$(CC) $(CFLAGS) $(INCLUDES) $^ -lelf -lbpf -lz -o bin/$@
+	$(Q)$(CC) $(CFLAGS) $(INCLUDES) $^ -lelf -lbpf -lz  -lssl -lcrypto -Wno-deprecated-declarations -o bin/$@
 	$(Q)rm $(USER_INCLUDES_OBJ)
 
 tckit: $(abspath $(EBPF)/include/bpf)/tc.c
