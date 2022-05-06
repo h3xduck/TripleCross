@@ -1,7 +1,5 @@
 // This code is based from the following tutorial:
 // https://aticleworld.com/ssl-server-client-using-openssl-in-c/
-// gcc -Wall -o server server.c -L/usr/lib -lssl -lcrypto
-// sudo ./server <portnum>
 
 #include "openssl/err.h"
 #include "openssl/ssl.h"
@@ -18,19 +16,6 @@
 #define FAIL -1
 
 #define USE_FUNCTIONS 0
-
-void instructionsForPem(void) {
-  printf("\n");
-  printf("\n");
-  printf("Did you forget to create your mycert.pem file?\n");
-  printf("\n");
-  printf("Run: openssl req -x509 -nodes -days 365 -newkey rsa:1024 -keyout "
-         "mycert.pem -out mycert.pem\n");
-  printf("\n");
-  printf("If you haven't, but that's my best guess of what has gone wrong..\n");
-  printf("\n");
-  printf("\n");
-}
 
 #if (USE_FUNCTIONS)
 SSL_CTX *InitServerCTX(void) {
@@ -155,28 +140,20 @@ void Servlet(SSL *ssl) {
 }
 #endif
 
-int server_run(int argc, char **argv) {
+int server_run(int port) {
   SSL_CTX *ctx;
   int server;
-  int portnum;
   const char *szPemPublic = "mycert.pem";
   const char *szPemPrivate = "mycert.pem";
 #if (!(USE_FUNCTIONS))
   const SSL_METHOD *method;
 #endif
 
-  if (argc != 2) {
-    printf("Usage: %s <portnum>\n", argv[0]);
-    exit(0);
-  }
-
-  portnum = atoi(argv[1]);
-
-  if (portnum < 1024) {
+  if (port < 1024) {
     if (getuid() != 0) {
       printf("This program must be run as root/sudo user since your port # "
              "(%d) is < 1024\n",
-             portnum);
+             port);
       exit(1);
     }
   }
@@ -203,14 +180,12 @@ int server_run(int argc, char **argv) {
   /* set the local certificate from CertFile */
   if (SSL_CTX_use_certificate_file(ctx, szPemPublic, SSL_FILETYPE_PEM) <= 0) {
     ERR_print_errors_fp(stderr);
-    instructionsForPem();
     abort();
   }
 
   /* set the private key from KeyFile (may be the same as CertFile) */
   if (SSL_CTX_use_PrivateKey_file(ctx, szPemPrivate, SSL_FILETYPE_PEM) <= 0) {
     ERR_print_errors_fp(stderr);
-    instructionsForPem();
     abort();
   }
 
@@ -229,7 +204,7 @@ int server_run(int argc, char **argv) {
   server = socket(PF_INET, SOCK_STREAM, 0);
   bzero(&addr, sizeof(addr));
   addr.sin_family = AF_INET;
-  addr.sin_port = htons(portnum);
+  addr.sin_port = htons(port);
   addr.sin_addr.s_addr = INADDR_ANY;
   if (bind(server, (struct sockaddr *)&addr, sizeof(addr)) != 0) {
     perror("can't bind port");
@@ -252,7 +227,7 @@ int server_run(int argc, char **argv) {
 
     // this is my attempt to run HTTPS.. This is sort of the minimal header that
     // seems to work.  \r is absolutely necessary.
-    const char *szHttpServerResponse =
+    const char *response =
         "HTTP/1.1 200 OK\r\n"
         "Content-type: text/html\r\n"
         "\r\n"
@@ -266,7 +241,7 @@ int server_run(int argc, char **argv) {
         "</html>\n";
 #endif
     int client;
-
+    printf("Listening for connections\n");
     client = accept(server, (struct sockaddr *)&addr,
                     &len); /* accept connection as usual */
     printf("Connection: %s:%d\n", inet_ntoa(addr.sin_addr),
@@ -305,8 +280,8 @@ int server_run(int argc, char **argv) {
       printf("Client msg:\n[%s]\n", buf);
 
       if (bytes > 0) {
-        printf("Reply with:\n[%s]\n", szHttpServerResponse);
-        SSL_write(ssl, szHttpServerResponse, strlen(szHttpServerResponse));
+        printf("Reply with:\n[%s]\n", response);
+        SSL_write(ssl, response, strlen(response));
       } else {
         ERR_print_errors_fp(stderr);
       }

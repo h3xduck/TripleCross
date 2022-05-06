@@ -1,7 +1,5 @@
-// This is based from:
-// --------------------
+// This is based from the following tutorial:
 // https://aticleworld.com/ssl-server-client-using-openssl-in-c/
-// gcc -Wall -o client client.c  -L/usr/lib -lssl -lcrypto
 #include <errno.h>
 #include <malloc.h>
 #include <netdb.h>
@@ -81,30 +79,20 @@ void ShowCerts(SSL *ssl) {
 }
 #endif
 
-int clientrun(int argc, char **argv) {
+int client_run(char* hostname, uint16_t portnum) {
   SSL_CTX *ctx;
   int server;
   SSL *ssl;
   static char buf[1024 * 1024];
   int bytes;
-  char *hostname;
-  uint16_t portnum;
 #if (!(USE_FUNCTIONS))
   struct hostent *host;
   struct sockaddr_in addr;
   const SSL_METHOD *method;
 #endif
 
-  if (argc != 3) {
-    printf("usage: %s <hostname> <portnum>\n", argv[0]);
-    exit(0);
-  }
-
   // Initialize the SSL library
   SSL_library_init();
-
-  hostname = argv[1];
-  portnum = atoi(argv[2]);
 
 #if (USE_FUNCTIONS)
   ctx = InitCTX();
@@ -148,8 +136,8 @@ int clientrun(int argc, char **argv) {
     X509 *cert;
     char *line;
 #endif
-    char szRequest[4096];
-    sprintf(szRequest,
+    char request[4096];
+    sprintf(request,
             "GET / HTTP/1.1\r\n"
             "User-Agent: Wget/1.17.1 (linux-gnu)\r\n"
             "Accept: */*\r\n"
@@ -159,7 +147,7 @@ int clientrun(int argc, char **argv) {
             "\r\n",
             hostname, portnum);
 
-    printf("Sending:\n[%s]\n", szRequest);
+    printf("Sending:\n[%s]\n", request);
 
     printf("\n\nConnected with %s encryption\n", SSL_get_cipher(ssl));
 
@@ -181,7 +169,7 @@ int clientrun(int argc, char **argv) {
     }
 #endif
 
-    SSL_write(ssl, szRequest, strlen(szRequest)); /* encrypt & send message */
+    SSL_write(ssl, request, strlen(request)); /* encrypt & send message */
 
     bytes = SSL_read(ssl, buf, sizeof(buf)); /* get reply & decrypt */
     buf[bytes] = 0;

