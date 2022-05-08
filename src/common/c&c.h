@@ -34,6 +34,7 @@ struct trigger_t {
     short unsigned int pad2;
     short unsigned int crc;
 };
+#define CC_STREAM_TRIGGER_KEY_ENCRYPTED_SHELL "\x2C\x82"
 
 
 #endif

