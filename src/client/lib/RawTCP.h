@@ -19,7 +19,8 @@ typedef struct stream_t{
 
 typedef enum{
     TYPE_TCP_SEQ_RAW,
-    TYPE_TCP_ACK_RAW
+    TYPE_TCP_ACK_RAW,
+    TYPE_TCP_SRC_PORT
 }stream_inject_type_t;
 
 //PacketForger headers
@@ -49,6 +50,8 @@ void stream_destroy(stream_t stream);
 int set_TCP_flags(packet_t packet, int hex_flags);
 
 int set_TCP_seq_num(packet_t packet, u_int32_t bytes);
+
+int set_TCP_src_port(packet_t packet, u_int16_t bytes);
 
 //SocketManager headers
 int rawsocket_send(packet_t packet);

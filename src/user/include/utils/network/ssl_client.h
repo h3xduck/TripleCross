@@ -14,7 +14,7 @@
 #define LOCAL_ABORT()                                                          \
   do {                                                                         \
     printf("Abort at %s:%d\n", __FILE__, __LINE__);                            \
-    abort();                                                                   \
+	return -1;                                                               \
   } while (0)
 
 /**
