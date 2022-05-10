@@ -100,8 +100,8 @@ $(APPS): %: $(OUTPUT)/%.o $(LIBBPF_OBJ) $(USER_INCLUDES_OBJ) | $(OUTPUT)
 	$(Q)$(CC) $(CFLAGS) $(INCLUDES) $^ -lelf -lbpf -lz  -lssl -lcrypto -Wno-deprecated-declarations -o bin/$@
 	$(Q)rm $(USER_INCLUDES_OBJ)
 
-tckit: $(abspath $(EBPF)/include/bpf)/tc.c
-	clang -O2 -emit-llvm -c $(abspath $(EBPF)/include/bpf)/tc.c -o - | \
+tckit: $(abspath $(EBPF)/include/bpf)/tc.c $(LIBBPF_OBJ)
+	clang -O2 -emit-llvm -g -c $(abspath $(EBPF)/include/bpf)/tc.c -o - | \
 	llc -march=bpf -mcpu=probe -filetype=obj -o tc.o
 
 

