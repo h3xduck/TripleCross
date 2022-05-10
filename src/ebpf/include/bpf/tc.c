@@ -70,13 +70,23 @@ int classifier(struct __sk_buff *skb){
 
 	bpf_printk("PAYLOAD size: %u\n", payload_size);
 	
-	
-	
 
 
 
 	return TC_ACT_OK;
 	
 }
+
+/**
+ * COMMANDS
+ * sudo tc qdisc add dev lo clsact
+ * sudo tc filter add dev lo egress bpf direct-action obj tc.o sec classifier/egress
+ * sudo tc filter show dev lo
+ * sudo tc filter show dev lo egress
+ * 
+ * tc qdisc del dev lo clsact
+ */
+
+
 
 char _license[4] SEC("license") = "GPL";

@@ -27,7 +27,7 @@
  * @return int 
  */
 int live_command_shell_mode(char* buf, SSL *ssl){
-	int is_global_command = manage_global_command(buf, ssl);
+	int is_global_command = manage_global_command(buf, ssl, NULL, NULL);
 	if(is_global_command == 1){
 		//Already finished then, go to next command input
 		return 0;

