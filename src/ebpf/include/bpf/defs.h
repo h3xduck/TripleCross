@@ -47,11 +47,7 @@ struct backdoor_packet_log_data_16{
 };
 
 //Map value, contains data of phantom shell, if active
-struct backdoor_phantom_shell_data{
-	int active;
-	__u32 d_ip;
-	__u16 d_port;
-};
+//In struct_common.h, it is used from userspace and kernel many times, so moved there
 
 
 struct fs_priv_open{ //Map

