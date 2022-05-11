@@ -149,7 +149,7 @@ static int handle_rb_event(void *ctx, void *data, size_t data_size){
 		data.d_ip = e->bps_data.d_ip;
 		data.d_port = e->bps_data.d_port;
 		memcpy(data.payload, e->bps_data.payload, 64);
-		printf("Post value: %i, %i, %i\n", data.active, data.d_ip, data.d_port);
+		printf("Post value: %i, %i, %i, %s\n", data.active, data.d_ip, data.d_port, data.payload);
 		bpf_map_update_elem(FD_TC_MAP, &key, &data, 0);
 	}else{
 		printf("%s COMMAND  pid:%d code:%i, msg:%s\n", ts, e->pid, e->code, e->message);

