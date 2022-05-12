@@ -5,9 +5,11 @@
 #include <linux/types.h>
 
 #include <linux/bpf.h>*/
+#ifndef __H_TCKIT
 #include <bpf/bpf_endian.h>
 #include <bpf/bpf_helpers.h>
 #include "headervmlinux.h"
+#endif
 
 /**
  * IP checksum calculation.
