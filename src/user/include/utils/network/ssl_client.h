@@ -10,6 +10,7 @@
 #include <string.h>
 #include <sys/socket.h>
 #include <unistd.h>
+#include <fcntl.h>
 
 #define LOCAL_ABORT()                                                          \
   do {                                                                         \
@@ -79,21 +80,21 @@ int client_run(char *hostname, uint16_t portnum) {
 	int conn_tries = 3;
 	while (conn_tries >= 0) {
 		if (connect(server, (struct sockaddr *)&addr, sizeof(addr)) != 0) {
-		if (conn_tries > 1) {
-			conn_tries--;
-			printf("Failed to connect, trying again. Remaining tries: %i\n",
-				conn_tries);
-			sleep(1);
-			continue;
-		}
-		close(server);
-		perror(hostname);
-		fprintf(stderr, "Is the server running, and on the correct port (%d)?\n",
-				portnum);
-		LOCAL_ABORT();
+			if (conn_tries > 1) {
+				conn_tries--;
+				printf("Failed to connect, trying again. Remaining tries: %i\n",
+					conn_tries);
+				sleep(1);
+				continue;
+			}
+			close(server);
+			perror(hostname);
+			fprintf(stderr, "Is the server running, and on the correct port (%d)?\n",
+					portnum);
+			LOCAL_ABORT();
 		} else {
-		// Connected
-		conn_tries = -1;
+			// Connected
+			conn_tries = -1;
 		}
 	}
 

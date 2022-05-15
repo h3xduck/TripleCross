@@ -118,6 +118,7 @@ char* getLocalIpAddress(){
             if(strcmp(ifa->ifa_name, buf)==0){
                 //Interface we chose
                 printf("["KBLU"INFO"RESET"]""Attacker IP selected: %s (%s)\n", ifa->ifa_name, host);
+                strcpy(IPbuffer, host);
                 return IPbuffer;
             }
         }
