@@ -43,8 +43,7 @@ static __always_inline struct expand_return expand_tcp_packet_payload(struct xdp
     __builtin_memcpy(&ip_copy, ip, sizeof(struct iphdr));
     __builtin_memcpy(&tcp_copy, tcp, sizeof(struct tcphdr));
 
-    if (bpf_xdp_adjust_tail(ctx, (int)(sizeof(char)*more_bytes)) != 0)
-    {
+    if (bpf_xdp_adjust_tail(ctx, (int)(sizeof(char)*more_bytes)) != 0){
         //Failed to expand
         bpf_printk("Failed to expand a tcp packet reserved bytes by %i\n", more_bytes);
         ret.code = -1;//The rest is undefined

