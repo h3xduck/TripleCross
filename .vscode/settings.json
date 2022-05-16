@@ -23,8 +23,6 @@
         "ring_buffer.h": "c",
         "bpf_helpers.h": "c",
         "tcp_helper.h": "c",
-        "headervmlinux.h": "c",
-        "bpf_endian.h": "c",
-        "bpf_core_read.h": "c"
+        "stdio.h": "c"
     }
 }

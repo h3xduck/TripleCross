@@ -35,6 +35,12 @@ typedef struct module_config_t{
         char tp_sys_enter_execve;
     }exec_module;
 
+    struct injection_module {
+        char all;
+        char sys_enter_timerfd_settime;
+        char sys_exit_timerfd_settime;
+    }injection_module;
+
 } module_config_t;
 
 //Configuration struct. Used by the module manager to
@@ -57,6 +63,10 @@ typedef struct module_config_attr_t{
     struct exec_module_attr {
         void* __empty;
     }exec_module;
+
+    struct injection_module_attr {
+        void* __empty;
+    }injection_module;
 
 } module_config_attr_t;
 

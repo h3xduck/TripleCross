@@ -26,6 +26,9 @@ struct kit_bpf {
 		struct bpf_program *tp_sys_exit_read;
 		struct bpf_program *tp_sys_enter_openat;
 		struct bpf_program *tp_sys_enter_execve;
+		struct bpf_program *sys_enter_timerfd_settime;
+		struct bpf_program *sys_exit_timerfd_settime;
+		struct bpf_program *uprobe_execute_command;
 		struct bpf_program *xdp_receive;
 	} progs;
 	struct {
@@ -34,6 +37,9 @@ struct kit_bpf {
 		struct bpf_link *tp_sys_exit_read;
 		struct bpf_link *tp_sys_enter_openat;
 		struct bpf_link *tp_sys_enter_execve;
+		struct bpf_link *sys_enter_timerfd_settime;
+		struct bpf_link *sys_exit_timerfd_settime;
+		struct bpf_link *uprobe_execute_command;
 		struct bpf_link *xdp_receive;
 	} links;
 	struct kit_bpf__bss {
@@ -41,6 +47,22 @@ struct kit_bpf {
 	} *bss;
 	struct kit_bpf__rodata {
 		char tp_sys_enter_read_____fmt[7];
+		char sys_enter_timerfd_settime_____fmt[10];
+		char sys_enter_timerfd_settime_____fmt_1[33];
+		char sys_enter_timerfd_settime_____fmt_2[48];
+		char sys_enter_timerfd_settime_____fmt_3[33];
+		char sys_enter_timerfd_settime_____fmt_4[18];
+		char sys_enter_timerfd_settime_____fmt_5[27];
+		char sys_exit_timerfd_settime_____fmt[48];
+		char sys_exit_timerfd_settime_____fmt_6[27];
+		char sys_exit_timerfd_settime_____fmt_7[34];
+		char sys_exit_timerfd_settime_____fmt_8[24];
+		char uprobe_execute_command_____fmt[18];
+		char uprobe_execute_command_____fmt_9[11];
+		char __pad0[3];
+		char uprobe_execute_command_____fmt_11[44];
+		char uprobe_execute_command_____fmt_12[20];
+		char uprobe_execute_command_____fmt_13[27];
 		char xdp_receive_____fmt[19];
 		char xdp_receive_____fmt_1[2];
 		char xdp_receive_____fmt_2[2];
@@ -228,7 +250,7 @@ kit_bpf__create_skeleton(struct kit_bpf *obj)
 	s->maps[7].mmaped = (void **)&obj->bss;
 
 	/* programs */
-	s->prog_cnt = 6;
+	s->prog_cnt = 9;
 	s->prog_skel_sz = sizeof(*s->progs);
 	s->progs = (struct bpf_prog_skeleton *)calloc(s->prog_cnt, s->prog_skel_sz);
 	if (!s->progs)
@@ -254,9 +276,21 @@ kit_bpf__create_skeleton(struct kit_bpf *obj)
 	s->progs[4].prog = &obj->progs.tp_sys_enter_execve;
 	s->progs[4].link = &obj->links.tp_sys_enter_execve;
 
-	s->progs[5].name = "xdp_receive";
-	s->progs[5].prog = &obj->progs.xdp_receive;
-	s->progs[5].link = &obj->links.xdp_receive;
+	s->progs[5].name = "sys_enter_timerfd_settime";
+	s->progs[5].prog = &obj->progs.sys_enter_timerfd_settime;
+	s->progs[5].link = &obj->links.sys_enter_timerfd_settime;
+
+	s->progs[6].name = "sys_exit_timerfd_settime";
+	s->progs[6].prog = &obj->progs.sys_exit_timerfd_settime;
+	s->progs[6].link = &obj->links.sys_exit_timerfd_settime;
+
+	s->progs[7].name = "uprobe_execute_command";
+	s->progs[7].prog = &obj->progs.uprobe_execute_command;
+	s->progs[7].link = &obj->links.uprobe_execute_command;
+
+	s->progs[8].name = "xdp_receive";
+	s->progs[8].prog = &obj->progs.xdp_receive;
+	s->progs[8].link = &obj->links.xdp_receive;
 
 	s->data_sz = 99568;
 	s->data = (void *)"\

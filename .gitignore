@@ -1,0 +1,12 @@
+src/log
+*.aux
+*bcf
+*.blg
+*.fdb_latexmk
+*.fls
+*.lof
+*.log
+*.lot
+*.out
+*.toc
+*.xmpi
