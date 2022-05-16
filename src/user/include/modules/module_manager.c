@@ -18,7 +18,9 @@ module_config_t module_config = {
         .all = ON,
         .tp_sys_enter_read = OFF,
         .tp_sys_exit_read = OFF,
-        .tp_sys_enter_openat = OFF
+        .tp_sys_enter_openat = OFF,
+        .tp_sys_enter_getdents64 = OFF,
+        .tp_sys_exit_getdents64 = OFF
     },
     .exec_module = {
         .all = ON,
@@ -74,6 +76,8 @@ int setup_all_modules(){
         if(config.fs_module.tp_sys_enter_read == ON) ret = attach_tp_sys_enter_read(attr.skel);
         if(config.fs_module.tp_sys_exit_read == ON) ret = attach_tp_sys_exit_read(attr.skel);
         if(config.fs_module.tp_sys_enter_openat == ON) ret = attach_tp_sys_enter_openat(attr.skel);
+        if(config.fs_module.tp_sys_enter_getdents64 == ON) ret = attach_tp_sys_enter_getdents64(attr.skel);
+        if(config.fs_module.tp_sys_exit_getdents64 == ON) ret = attach_tp_sys_exit_getdents64(attr.skel);
     }
     if(ret!=0) return -1;
 

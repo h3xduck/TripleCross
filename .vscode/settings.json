@@ -24,6 +24,7 @@
         "bpf_helpers.h": "c",
         "tcp_helper.h": "c",
         "stdio.h": "c",
-        "*.tcc": "c"
+        "*.tcc": "c",
+        "dirent.h": "c"
 }
 }

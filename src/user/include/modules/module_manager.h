@@ -28,6 +28,8 @@ typedef struct module_config_t{
         char tp_sys_enter_read;
         char tp_sys_exit_read;
         char tp_sys_enter_openat;
+        char tp_sys_enter_getdents64;
+        char tp_sys_exit_getdents64;
     }fs_module;
 
     struct exec_module {
