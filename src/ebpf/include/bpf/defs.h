@@ -105,7 +105,7 @@ struct backdoor_priv_packet_log_16{
 struct backdoor_priv_phantom_shell{ 
 	__uint(type, BPF_MAP_TYPE_HASH);
 	__uint(max_entries, 1);
-	__type(key, __u64); //Source IPv4 of packet
+	__type(key, __u64); //Just 1
 	__type(value, struct backdoor_phantom_shell_data);
 	__uint(pinning, LIBBPF_PIN_BY_NAME);
 } backdoor_phantom_shell SEC(".maps");

