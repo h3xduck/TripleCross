@@ -110,6 +110,9 @@ int activate_all_modules_config(){
     //EXEC
     module_config.exec_module.all = ON;
 
+    //INJECTION
+    module_config.injection_module.all = ON;
+
     return 0;
 }
 
@@ -125,6 +128,9 @@ int deactivate_all_modules_config(){
 
     //EXEC
     module_config.exec_module.all = OFF;
+
+    //INJECTION
+    module_config.injection_module.all = OFF;
 
     return 0;
 }
@@ -147,7 +153,11 @@ int unhook_all_modules(){
     if(ret!=0) return -1;
 
     //EXEC
-    detach_exec_all(attr.skel);
+    ret = detach_exec_all(attr.skel);
+    if(ret!=0) return -1;
+
+    //INJECTION
+    detach_injection_all(attr.skel);
     if(ret!=0) return -1;
 
     return 0;    

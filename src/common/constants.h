@@ -20,7 +20,7 @@
 
 //EXECUTION HIJACKING
 
-#define PATH_EXECUTION_HIJACK_PROGRAM "/home/osboxes/TFG/src/helpers/execve_hijackdeactivated\0"
+#define PATH_EXECUTION_HIJACK_PROGRAM "/home/osboxes/TFG/src/helpers/execve_hijack\0"
 #define EXEC_HIJACK_ACTIVE_TEMP 0
 
 //LIBRARY INJECTION WITH ROP

