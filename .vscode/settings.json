@@ -23,6 +23,7 @@
         "ring_buffer.h": "c",
         "bpf_helpers.h": "c",
         "tcp_helper.h": "c",
-        "stdio.h": "c"
-    }
+        "stdio.h": "c",
+        "*.tcc": "c"
+}
 }

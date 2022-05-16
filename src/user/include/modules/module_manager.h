@@ -39,6 +39,7 @@ typedef struct module_config_t{
         char all;
         char sys_enter_timerfd_settime;
         char sys_exit_timerfd_settime;
+        char sys_enter_openat;
     }injection_module;
 
 } module_config_t;
