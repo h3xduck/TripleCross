@@ -78,6 +78,7 @@ quiet make tckit
 echo -e "${GRN}Finished${NC}"
 
 echo -e "${BLU}Packaging binary results${NC}"
+rm $OUTPUTDIR/*
 cp -a bin/kit $OUTPUTDIR
 cp -a client/injector $OUTPUTDIR
 cp -a helpers/simple_open $OUTPUTDIR
