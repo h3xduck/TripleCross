@@ -254,6 +254,18 @@ hmargin=3cm
 	\thispagestyle{empty}
 	\mbox{}
 	
+\chapter*{Abstract}
+
+\setcounter{page}{5}
+	
+	% TODO ABSTRACT	
+		
+	\vfill
+	
+	\newpage
+	\thispagestyle{empty}
+	\mbox{}
+	
 
 %----------
 %	INDEXES
@@ -297,8 +309,39 @@ hmargin=3cm
 \pagenumbering{arabic}
 
 \chapter{Introduction}
-
 \section{Motivation}
+%M-> Slightly long, but it summarizes and presents the ideas in order:
+% Main idea: Malware keeps evolving -> 
+% -> Relevance of innovating and researching on the new techniques ->
+% -> Relevance of stealth software in targeted attacks-> 
+% -> Introduce eBPF as the logical step of innovation in the field ->
+% -> There is a need to research on this topic now.
+
+As the efforts of the computer security community grow to protect increasingly critical devices and networks from malware infections, so do the techniques used by malicious actors become more sophisticated. Following the incorporation of ever more capable firewalls and Intrusion Detection Systems (IDS), cybercriminals have in turn sought novel attack vectors and exploits in common software, taking advantage of an inevitably larger attack surface that keeps growing due to the continued incorporation of new programs and functionalities into modern computer systems.
+
+In contrast with ransomware incidents, which remained the most significant and common cyber threat faced by organizations on 2021\cite{ransomware_pwc}, another powerful class of malware called rootkits is found considerably more infrequently, yet it is usually associated to high-profile targeted attacks that lead to greatly impactful consequences. 
+
+A rootkit is a piece of computer software characterized for its advanced stealth capabilities. Once it is installed on a system it remains invisible to the host, usually hiding its related processes and files from the user, while at the same time performing the malicious operations for which it was designed. Most common operations include storing keystrokes, sniffing network traffic, exfiltrating sensible data from the user or the system, or actively modifying the data at the infected device. The other characteristic functionality is that rootkits seek to achieve persistence on the infected hosts, with the purpose of being launched again after a system reboot, without further user interaction.
+The techniques used for achieving both of these functionalities depend on the type of rootkit developed, a classification usually made depending on the level of privileges on which the rootkit operates in the system.
+
+\begin{itemize}
+\item \textbf{User-mode} rootkits run at the same level of privilege as common user applications. They usually work by hijacking legitimate processes on which they may inject code by preloading shared libraries, thus modifying the calls issued to user APIs, on which malicious code is placed by the rootkit. Although easier to build, these rootkits are exposed to detection by common anti-malware programs.
+\item \textbf{Kernel-mode} rootkits run at the same level of privilege as the operating system, thus enjoying unrestricted access to the whole computer. These rootkits usually come as kernel modules or device drivers and, once loaded, they reside in the kernel. This implies that special attention must be taken to avoid programming errors since they could potentially corrupt user or kernel memory, resulting in a fatal kernel panic and a subsequent system reboot, which goes against the original purpose of maintaining stealth.
+
+Common techniques used for the development of their malicious activities include hooking system calls made to the kernel by user applications (on which malicious code is then injected), or modifying data structures in the kernel to change the data of user programs at runtime. Therefore, trusted programs on an infected machine can no longer be trusted to operate securely.
+
+These rootkits are usually the most attractive (and difficult to build) option for a malicious actor, but the installation of a kernel rootkit requires of a complete previous compromise of the system, meaning that administrator or root privileges must have been already achieved by the attacker, commonly by the execution of an exploit or a local installation of a privileged user.
+\end{itemize}
+
+Historically, kernel-mode rootkits have been tightly associated with espionage activities on governments and research institutes by Advanced Persistent Threat (APT) groups\cite{rootkit_ptsecurity}, state-sponsored or criminal organizations specialized on long-term operations to gather intelligence and gain unauthorized persistent access to computer systems. Although rootkits' functionality is tailored for each specific attack, a common set of techniques and procedures can be identified being used by these organizations. However, during the last years, a new technology called eBPF has been found to be the target of the latest innovation on the development of rootkits. 
+
+%eBPF is
+
+
+%On February 2022, the Chinese security team Pangu Lab reported about a NSA backdoor that uses eBPF
+
+
+ 
 
 \section{Objectives}
 

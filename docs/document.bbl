@@ -16,5 +16,44 @@
   {}
 \endgroup
 
+
+\refsection{0}
+  \datalist[entry]{none/global//global/global}
+    \entry{ransomware_pwc}{report}{}
+      \list{institution}{1}{%
+        {PricewaterhouseCoopers}%
+      }
+      \field{sortinit}{1}
+      \field{sortinithash}{50c6687d7fc80f50136d75228e3c59ba}
+      \field{labeltitlesource}{title}
+      \field{title}{Cyber Threats 2021: A year in Retrospect}
+      \verb{urlraw}
+      \verb https://www.pwc.com/gx/en/issues/cybersecurity/cyber-threat-intelligence/cyber-year-in-retrospect/yir-cyber-threats-report-download.pdf
+      \endverb
+      \verb{url}
+      \verb https://www.pwc.com/gx/en/issues/cybersecurity/cyber-threat-intelligence/cyber-year-in-retrospect/yir-cyber-threats-report-download.pdf
+      \endverb
+    \endentry
+    \entry{rootkit_ptsecurity}{report}{}
+      \list{institution}{1}{%
+        {Positive Technologies}%
+      }
+      \field{sortinit}{2}
+      \field{sortinithash}{ed39bb39cf854d5250e95b1c1f94f4ed}
+      \field{labeltitlesource}{title}
+      \field{day}{3}
+      \field{month}{11}
+      \field{title}{Rootkits: evolution and detection methods}
+      \field{year}{2021}
+      \field{dateera}{ce}
+      \verb{urlraw}
+      \verb https://www.ptsecurity.com/ww-en/analytics/rootkits-evolution-and-detection-methods/
+      \endverb
+      \verb{url}
+      \verb https://www.ptsecurity.com/ww-en/analytics/rootkits-evolution-and-detection-methods/
+      \endverb
+    \endentry
+  \enddatalist
+\endrefsection
 \endinput
 
