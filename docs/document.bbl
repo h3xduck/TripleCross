@@ -104,6 +104,34 @@
       \verb https://www.pwc.com/gx/en/issues/cybersecurity/cyber-threat-intelligence/cyber-year-in-retrospect/yir-cyber-threats-report-download.pdf
       \endverb
     \endentry
+    \entry{ebpf_windows}{online}{}
+      \field{sortinit}{6}
+      \field{sortinithash}{7851c86048328b027313775d8fbd2131}
+      \field{labeltitlesource}{title}
+      \field{day}{7}
+      \field{month}{12}
+      \field{title}{eBPF incorporation in the Linux Kernel 3.18}
+      \field{year}{2014}
+      \field{dateera}{ce}
+      \verb{urlraw}
+      \verb https://kernelnewbies.org/Linux_3.18
+      \endverb
+      \verb{url}
+      \verb https://kernelnewbies.org/Linux_3.18
+      \endverb
+    \endentry
+    \entry{ebpf_android}{online}{}
+      \field{sortinit}{7}
+      \field{sortinithash}{f615fb9c6fba11c6f962fb3fd599810e}
+      \field{labeltitlesource}{title}
+      \field{title}{eBPF for Windows}
+      \verb{urlraw}
+      \verb https://source.android.com/devices/architecture/kernel/bpf
+      \endverb
+      \verb{url}
+      \verb https://source.android.com/devices/architecture/kernel/bpf
+      \endverb
+    \endentry
     \entry{evil_ebpf}{proceedings}{}
       \name{author}{1}{}{%
         {{hash=5142e68c748eb70cb619b21160eb7f72}{%
@@ -124,8 +152,8 @@
       \strng{authorbibnamehash}{5142e68c748eb70cb619b21160eb7f72}
       \strng{authornamehash}{5142e68c748eb70cb619b21160eb7f72}
       \strng{authorfullhash}{5142e68c748eb70cb619b21160eb7f72}
-      \field{sortinit}{6}
-      \field{sortinithash}{7851c86048328b027313775d8fbd2131}
+      \field{sortinit}{8}
+      \field{sortinithash}{1b24cab5087933ef0826a7cd3b99e994}
       \field{labelnamesource}{author}
       \field{eventtitle}{Evil eBPF Practical Abuses of an In-Kernel Bytecode Runtime}
       \verb{urlraw}
@@ -133,6 +161,34 @@
       \endverb
       \verb{url}
       \verb https://raw.githubusercontent.com/nccgroup/ebpf/master/talks/Evil_eBPF-DC27-v2.pdf
+      \endverb
+    \endentry
+    \entry{bad_ebpf}{online}{}
+      \name{author}{1}{}{%
+        {{hash=53d4d4da0d1a82f58d57d86ba9635f2c}{%
+           family={Hogan},
+           familyi={H\bibinitperiod},
+           given={Pat},
+           giveni={P\bibinitperiod}}}%
+      }
+      \list{organization}{1}{%
+        {DEFCON 27}%
+      }
+      \strng{namehash}{53d4d4da0d1a82f58d57d86ba9635f2c}
+      \strng{fullhash}{53d4d4da0d1a82f58d57d86ba9635f2c}
+      \strng{bibnamehash}{53d4d4da0d1a82f58d57d86ba9635f2c}
+      \strng{authorbibnamehash}{53d4d4da0d1a82f58d57d86ba9635f2c}
+      \strng{authornamehash}{53d4d4da0d1a82f58d57d86ba9635f2c}
+      \strng{authorfullhash}{53d4d4da0d1a82f58d57d86ba9635f2c}
+      \field{sortinit}{9}
+      \field{sortinithash}{54047ffb55bdefa0694bbd554c1b11a0}
+      \field{labelnamesource}{author}
+      \field{eventtitle}{Bad BPF - Warping reality using eBPF}
+      \verb{urlraw}
+      \verb https://www.youtube.com/watch?v=g6SKWT7sROQ
+      \endverb
+      \verb{url}
+      \verb https://www.youtube.com/watch?v=g6SKWT7sROQ
       \endverb
     \endentry
     \entry{ebpf_friends}{proceedings}{}
@@ -155,8 +211,8 @@
       \strng{authorbibnamehash}{2994fc802c0b46f7289cf001e2c26cfe}
       \strng{authornamehash}{2994fc802c0b46f7289cf001e2c26cfe}
       \strng{authorfullhash}{2994fc802c0b46f7289cf001e2c26cfe}
-      \field{sortinit}{7}
-      \field{sortinithash}{f615fb9c6fba11c6f962fb3fd599810e}
+      \field{sortinit}{1}
+      \field{sortinithash}{50c6687d7fc80f50136d75228e3c59ba}
       \field{labelnamesource}{author}
       \field{eventtitle}{Cyber Threats 2021: A year in Retrospect}
       \verb{urlraw}
@@ -164,34 +220,6 @@
       \endverb
       \verb{url}
       \verb https://media.defcon.org/DEF%20CON%2029/DEF%20CON%2029%20presentations/Guillaume%20Fournier%20Sylvain%20Afchain%20Sylvain%20Baubeau%20-%20eBPF%2C%20I%20thought%20we%20were%20friends.pdf
-      \endverb
-    \endentry
-    \entry{ebpf_windows}{online}{}
-      \field{sortinit}{8}
-      \field{sortinithash}{1b24cab5087933ef0826a7cd3b99e994}
-      \field{labeltitlesource}{title}
-      \field{day}{7}
-      \field{month}{12}
-      \field{title}{eBPF incorporation in the Linux Kernel 3.18}
-      \field{year}{2014}
-      \field{dateera}{ce}
-      \verb{urlraw}
-      \verb https://kernelnewbies.org/Linux_3.18
-      \endverb
-      \verb{url}
-      \verb https://kernelnewbies.org/Linux_3.18
-      \endverb
-    \endentry
-    \entry{ebpf_android}{online}{}
-      \field{sortinit}{9}
-      \field{sortinithash}{54047ffb55bdefa0694bbd554c1b11a0}
-      \field{labeltitlesource}{title}
-      \field{title}{eBPF for Windows}
-      \verb{urlraw}
-      \verb https://source.android.com/devices/architecture/kernel/bpf
-      \endverb
-      \verb{url}
-      \verb https://source.android.com/devices/architecture/kernel/bpf
       \endverb
     \endentry
   \enddatalist

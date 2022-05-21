@@ -5,7 +5,7 @@
 \defcounter {refsection}{0}\relax 
 \contentsline {section}{\numberline {1.1}Motivation}{1}{section.1.1}%
 \defcounter {refsection}{0}\relax 
-\contentsline {section}{\numberline {1.2}Objectives}{3}{section.1.2}%
+\contentsline {section}{\numberline {1.2}Project objectives}{3}{section.1.2}%
 \defcounter {refsection}{0}\relax 
 \contentsline {section}{\numberline {1.3}Regulatory framework}{3}{section.1.3}%
 \defcounter {refsection}{0}\relax 

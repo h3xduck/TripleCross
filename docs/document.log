@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.21 (TeX Live 2020/Debian) (preloaded format=pdflatex 2022.4.27)  20 MAY 2022 22:57
+This is pdfTeX, Version 3.14159265-2.6-1.40.21 (TeX Live 2020/Debian) (preloaded format=pdflatex 2022.4.27)  21 MAY 2022 16:55
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1190,43 +1190,43 @@ Chapter 5.
 
 ]
 LaTeX Font Info:    Trying to load font information for T1+txtt on input line 3
-83.
+89.
  (/usr/share/texlive/texmf-dist/tex/latex/txfonts/t1txtt.fd
 File: t1txtt.fd 2000/12/15 v3.1
 )
 LaTeX Font Info:    Trying to load font information for OT1+txr on input line 3
-83.
+89.
 
 (/usr/share/texlive/texmf-dist/tex/latex/txfonts/ot1txr.fd
 File: ot1txr.fd 2000/12/15 v3.1
 )
 LaTeX Font Info:    Trying to load font information for U+txsya on input line 3
-83.
+89.
 
 (/usr/share/texlive/texmf-dist/tex/latex/txfonts/utxsya.fd
 File: utxsya.fd 2000/12/15 v3.1
 )
 LaTeX Font Info:    Trying to load font information for U+txsyb on input line 3
-83.
+89.
 
 (/usr/share/texlive/texmf-dist/tex/latex/txfonts/utxsyb.fd
 File: utxsyb.fd 2000/12/15 v3.1
 )
 LaTeX Font Info:    Trying to load font information for U+txmia on input line 3
-83.
+89.
 
 (/usr/share/texlive/texmf-dist/tex/latex/txfonts/utxmia.fd
 File: utxmia.fd 2000/12/15 v3.1
 )
 LaTeX Font Info:    Trying to load font information for U+txsyc on input line 3
-83.
+89.
 
 (/usr/share/texlive/texmf-dist/tex/latex/txfonts/utxsyc.fd
 File: utxsyc.fd 2000/12/15 v3.1
 )
-Overfull \hbox (2.7712pt too wide) in paragraph at lines 384--384
-[]\T1/txr/m/n/12 ^^P  Cy-ber threats 2021: A year in ret-ro-spect,^^Q Price-wa-
-ter-house-C-oop-ers. [On-line]. Avail-
+Overfull \hbox (5.34976pt too wide) in paragraph at lines 390--390
+\T1/txtt/m/n/12 threat -[] intelligence / cyber -[] year -[] in -[] retrospect 
+/ yir -[] cyber -[] threats -[]
  []
 
 [8
@@ -1247,21 +1247,21 @@ pdfTeX warning (ext4): destination with the same identifier (name{page.}) has b
 een already used, duplicate ignored
 <to be read again> 
                    \relax 
-l.400 \end{document}
+l.406 \end{document}
                      [2
 
 ] (./document.aux)
 Package rerunfilecheck Info: File `document.out' has not changed.
-(rerunfilecheck)             Checksum: 22937790BEE0F30769157DC04627A687;645.
+(rerunfilecheck)             Checksum: 029B6DE53007DA8B33AC812D93231EF1;656.
 Package logreq Info: Writing requests to 'document.run.xml'.
 \openout1 = `document.run.xml'.
 
  ) 
 Here is how much of TeX's memory you used:
- 27168 strings out of 481209
- 430663 string characters out of 5914747
- 1165085 words of memory out of 5000000
- 43654 multiletter control sequences out of 15000+600000
+ 27171 strings out of 481209
+ 430760 string characters out of 5914747
+ 1166131 words of memory out of 5000000
+ 43656 multiletter control sequences out of 15000+600000
  444100 words of font info for 89 fonts, out of 8000000 for 9000
  36 hyphenation exceptions out of 8191
  88i,11n,90p,1029b,2369s stack positions out of 5000i,500n,10000p,200000b,80000s
@@ -1273,9 +1273,9 @@ tic/uhvb8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/helvetic/uhvr8a.p
 fb></usr/share/texlive/texmf-dist/fonts/type1/urw/helvetic/uhvr8a.pfb></usr/sha
 re/texlive/texmf-dist/fonts/type1/urw/times/utmb8a.pfb></usr/share/texlive/texm
 f-dist/fonts/type1/urw/times/utmr8a.pfb>
-Output written on document.pdf (24 pages, 157809 bytes).
+Output written on document.pdf (24 pages, 161550 bytes).
 PDF statistics:
- 274 PDF objects out of 1000 (max. 8388607)
- 48 named destinations out of 1000 (max. 500000)
+ 280 PDF objects out of 1000 (max. 8388607)
+ 49 named destinations out of 1000 (max. 500000)
  111 words of extra memory for PDF output out of 10000 (max. 10000000)
 

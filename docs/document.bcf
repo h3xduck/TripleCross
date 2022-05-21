@@ -2353,10 +2353,11 @@
     <bcf:citekey order="3">ebpf_linux318</bcf:citekey>
     <bcf:citekey order="4">bvp47_report</bcf:citekey>
     <bcf:citekey order="5">bpfdoor_pwc</bcf:citekey>
-    <bcf:citekey order="6">evil_ebpf</bcf:citekey>
-    <bcf:citekey order="7">ebpf_friends</bcf:citekey>
-    <bcf:citekey order="8">ebpf_windows</bcf:citekey>
-    <bcf:citekey order="9">ebpf_android</bcf:citekey>
+    <bcf:citekey order="6">ebpf_windows</bcf:citekey>
+    <bcf:citekey order="7">ebpf_android</bcf:citekey>
+    <bcf:citekey order="8">evil_ebpf</bcf:citekey>
+    <bcf:citekey order="9">bad_ebpf</bcf:citekey>
+    <bcf:citekey order="10">ebpf_friends</bcf:citekey>
   </bcf:section>
   <!-- SORTING TEMPLATES -->
   <bcf:sortingtemplate name="none">
