@@ -53,6 +53,147 @@
       \verb https://www.ptsecurity.com/ww-en/analytics/rootkits-evolution-and-detection-methods/
       \endverb
     \endentry
+    \entry{ebpf_linux318}{online}{}
+      \field{sortinit}{3}
+      \field{sortinithash}{a37a8ef248a93c322189792c34fc68c9}
+      \field{day}{7}
+      \field{indextitle}{eBPF incorporation in the Linux Kernel 3.18}
+      \field{month}{12}
+      \field{year}{2014}
+      \field{dateera}{ce}
+      \verb{urlraw}
+      \verb https://kernelnewbies.org/Linux_3.18
+      \endverb
+      \verb{url}
+      \verb https://kernelnewbies.org/Linux_3.18
+      \endverb
+    \endentry
+    \entry{bvp47_report}{report}{}
+      \list{institution}{1}{%
+        {Pangu Lab}%
+      }
+      \field{sortinit}{4}
+      \field{sortinithash}{e071e0bcb44634fab398d68ad04e69f4}
+      \field{labeltitlesource}{title}
+      \field{day}{23}
+      \field{month}{2}
+      \field{title}{Bvp47 Top-tier Backdoor of US NSA Equation Group}
+      \field{year}{2022}
+      \field{dateera}{ce}
+      \verb{urlraw}
+      \verb https://www.pangulab.cn/files/The_Bvp47_a_top-tier_backdoor_of_us_nsa_equation_group.en.pdf
+      \endverb
+      \verb{url}
+      \verb https://www.pangulab.cn/files/The_Bvp47_a_top-tier_backdoor_of_us_nsa_equation_group.en.pdf
+      \endverb
+    \endentry
+    \entry{bpfdoor_pwc}{report}{}
+      \list{institution}{1}{%
+        {PricewaterhouseCoopers}%
+      }
+      \field{sortinit}{5}
+      \field{sortinithash}{5dd416adbafacc8226114bc0202d5fdd}
+      \field{labeltitlesource}{title}
+      \field{title}{Cyber Threats 2021: A year in Retrospect}
+      \field{pages}{37}
+      \range{pages}{1}
+      \verb{urlraw}
+      \verb https://www.pwc.com/gx/en/issues/cybersecurity/cyber-threat-intelligence/cyber-year-in-retrospect/yir-cyber-threats-report-download.pdf
+      \endverb
+      \verb{url}
+      \verb https://www.pwc.com/gx/en/issues/cybersecurity/cyber-threat-intelligence/cyber-year-in-retrospect/yir-cyber-threats-report-download.pdf
+      \endverb
+    \endentry
+    \entry{evil_ebpf}{proceedings}{}
+      \name{author}{1}{}{%
+        {{hash=5142e68c748eb70cb619b21160eb7f72}{%
+           family={Dileo},
+           familyi={D\bibinitperiod},
+           given={Jeff},
+           giveni={J\bibinitperiod}}}%
+      }
+      \list{institution}{1}{%
+        {NCC Group}%
+      }
+      \list{organization}{1}{%
+        {DEFCON 27}%
+      }
+      \strng{namehash}{5142e68c748eb70cb619b21160eb7f72}
+      \strng{fullhash}{5142e68c748eb70cb619b21160eb7f72}
+      \strng{bibnamehash}{5142e68c748eb70cb619b21160eb7f72}
+      \strng{authorbibnamehash}{5142e68c748eb70cb619b21160eb7f72}
+      \strng{authornamehash}{5142e68c748eb70cb619b21160eb7f72}
+      \strng{authorfullhash}{5142e68c748eb70cb619b21160eb7f72}
+      \field{sortinit}{6}
+      \field{sortinithash}{7851c86048328b027313775d8fbd2131}
+      \field{labelnamesource}{author}
+      \field{eventtitle}{Evil eBPF Practical Abuses of an In-Kernel Bytecode Runtime}
+      \verb{urlraw}
+      \verb https://raw.githubusercontent.com/nccgroup/ebpf/master/talks/Evil_eBPF-DC27-v2.pdf
+      \endverb
+      \verb{url}
+      \verb https://raw.githubusercontent.com/nccgroup/ebpf/master/talks/Evil_eBPF-DC27-v2.pdf
+      \endverb
+    \endentry
+    \entry{ebpf_friends}{proceedings}{}
+      \name{author}{1}{}{%
+        {{hash=2994fc802c0b46f7289cf001e2c26cfe}{%
+           family={Guillaume\bibnamedelima Fournier},
+           familyi={G\bibinitperiod\bibinitdelim F\bibinitperiod},
+           given={Sylvain\bibnamedelima Afchainthe},
+           giveni={S\bibinitperiod\bibinitdelim A\bibinitperiod}}}%
+      }
+      \list{institution}{1}{%
+        {Datadog}%
+      }
+      \list{organization}{1}{%
+        {DEFCON 29}%
+      }
+      \strng{namehash}{2994fc802c0b46f7289cf001e2c26cfe}
+      \strng{fullhash}{2994fc802c0b46f7289cf001e2c26cfe}
+      \strng{bibnamehash}{2994fc802c0b46f7289cf001e2c26cfe}
+      \strng{authorbibnamehash}{2994fc802c0b46f7289cf001e2c26cfe}
+      \strng{authornamehash}{2994fc802c0b46f7289cf001e2c26cfe}
+      \strng{authorfullhash}{2994fc802c0b46f7289cf001e2c26cfe}
+      \field{sortinit}{7}
+      \field{sortinithash}{f615fb9c6fba11c6f962fb3fd599810e}
+      \field{labelnamesource}{author}
+      \field{eventtitle}{Cyber Threats 2021: A year in Retrospect}
+      \verb{urlraw}
+      \verb https://media.defcon.org/DEF%20CON%2029/DEF%20CON%2029%20presentations/Guillaume%20Fournier%20Sylvain%20Afchain%20Sylvain%20Baubeau%20-%20eBPF%2C%20I%20thought%20we%20were%20friends.pdf
+      \endverb
+      \verb{url}
+      \verb https://media.defcon.org/DEF%20CON%2029/DEF%20CON%2029%20presentations/Guillaume%20Fournier%20Sylvain%20Afchain%20Sylvain%20Baubeau%20-%20eBPF%2C%20I%20thought%20we%20were%20friends.pdf
+      \endverb
+    \endentry
+    \entry{ebpf_windows}{online}{}
+      \field{sortinit}{8}
+      \field{sortinithash}{1b24cab5087933ef0826a7cd3b99e994}
+      \field{labeltitlesource}{title}
+      \field{day}{7}
+      \field{month}{12}
+      \field{title}{eBPF incorporation in the Linux Kernel 3.18}
+      \field{year}{2014}
+      \field{dateera}{ce}
+      \verb{urlraw}
+      \verb https://kernelnewbies.org/Linux_3.18
+      \endverb
+      \verb{url}
+      \verb https://kernelnewbies.org/Linux_3.18
+      \endverb
+    \endentry
+    \entry{ebpf_android}{online}{}
+      \field{sortinit}{9}
+      \field{sortinithash}{54047ffb55bdefa0694bbd554c1b11a0}
+      \field{labeltitlesource}{title}
+      \field{title}{eBPF for Windows}
+      \verb{urlraw}
+      \verb https://source.android.com/devices/architecture/kernel/bpf
+      \endverb
+      \verb{url}
+      \verb https://source.android.com/devices/architecture/kernel/bpf
+      \endverb
+    \endentry
   \enddatalist
 \endrefsection
 \endinput
