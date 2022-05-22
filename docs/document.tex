@@ -405,14 +405,20 @@ This chapter is dedicated to an study of the eBPF technology. Firstly, we will a
 \section{Introduction to eBPF}
 Nowadays eBPF is not officially considered to be an acronym anymore, but it remains largely known as "extended Berkeley Packet Filters", given its roots in the Berkeley Packet Filter (BPF) technology, now known as classic BPF.
 
-BPF was introduced in 1992 in the paper "The BSD Packet Filter: A New Architecture for User-level Packet Capture"\cite{bpf_bsd_origin}, as a new filtering technology for network packets in the BSD platform.
+BPF was introduced in 1992 in the paper "The BSD Packet Filter: A New Architecture for User-level Packet Capture"\cite{bpf_bsd_origin}, as a new filtering technology for network packets in the BSD platform. It was first integrated in the Linux kernel on version 2.1.75\cite{ebpf_history_opensource}.
 
 
 \begin{figure}[h]
 	\centering
 	\includegraphics[width=12cm, keepaspectratio=true]{classic_bpf.jpg}
 	\caption{Sketch of the functionality of classic BPF}
+	\label{fig:classif_bpf}
 \end{figure}
+
+Figure \ref{fig:classif_bpf} shows how BPF was integrated in the existing network packet processing by the kernel. After receiving a packet, it would first be analysed by BPF filters, which are directly programmed by the BPF developer. The filter decides whether the packet is to be accepted by analysing the packet properties, such as its length or the type and values of its headers. If a packet is accepted, the filter proceeds to decide how many bytes of the original buffer are passed to the application. Otherwise, the packet is redirected to the original network stack, where it is managed as usual.
+
+
+
 
 
 

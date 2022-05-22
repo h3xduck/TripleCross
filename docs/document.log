@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.21 (TeX Live 2020/Debian) (preloaded format=pdflatex 2022.4.27)  22 MAY 2022 08:18
+This is pdfTeX, Version 3.14159265-2.6-1.40.21 (TeX Live 2020/Debian) (preloaded format=pdflatex 2022.4.27)  22 MAY 2022 09:54
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1210,37 +1210,37 @@ Overfull \hbox (0.50073pt too wide) in paragraph at lines 355--356
 
 [3] [4]
 Chapter 2.
-<images//classic_bpf.jpg, id=195, 588.1975pt x 432.61626pt>
+<images//classic_bpf.jpg, id=196, 588.1975pt x 432.61626pt>
 File: images//classic_bpf.jpg Graphic file (type jpg)
 <use images//classic_bpf.jpg>
 Package pdftex.def Info: images//classic_bpf.jpg  used on input line 413.
 (pdftex.def)             Requested size: 341.43306pt x 251.12224pt.
 [5
 
- <./images//classic_bpf.jpg>]
+ <./images//classic_bpf.jpg>] [6]
 Chapter 3.
-[6
-
-]
-Chapter 4.
 [7
 
 ]
-Chapter 5.
+Chapter 4.
 [8
 
 ]
+Chapter 5.
+[9
+
+]
 LaTeX Font Info:    Trying to load font information for T1+txtt on input line 4
-42.
+48.
  (/usr/share/texlive/texmf-dist/tex/latex/txfonts/t1txtt.fd
 File: t1txtt.fd 2000/12/15 v3.1
 )
-Overfull \hbox (5.34976pt too wide) in paragraph at lines 443--443
+Overfull \hbox (5.34976pt too wide) in paragraph at lines 449--449
 \T1/txtt/m/n/12 threat -[] intelligence / cyber -[] year -[] in -[] retrospect 
 / yir -[] cyber -[] threats -[]
  []
 
-[9
+[10
 
 
 ] [1
@@ -1258,7 +1258,7 @@ pdfTeX warning (ext4): destination with the same identifier (name{page.}) has b
 een already used, duplicate ignored
 <to be read again> 
                    \relax 
-l.459 \end{document}
+l.465 \end{document}
                      [2
 
 ] (./document.aux)
@@ -1269,10 +1269,10 @@ Package logreq Info: Writing requests to 'document.run.xml'.
 
  ) 
 Here is how much of TeX's memory you used:
- 27194 strings out of 481209
- 431200 string characters out of 5914747
- 1167217 words of memory out of 5000000
- 43670 multiletter control sequences out of 15000+600000
+ 27199 strings out of 481209
+ 431366 string characters out of 5914747
+ 1168340 words of memory out of 5000000
+ 43673 multiletter control sequences out of 15000+600000
  447071 words of font info for 92 fonts, out of 8000000 for 9000
  36 hyphenation exceptions out of 8191
  88i,11n,90p,1029b,2369s stack positions out of 5000i,500n,10000p,200000b,80000s
@@ -1284,9 +1284,9 @@ tic/uhvb8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/helvetic/uhvr8a.p
 fb></usr/share/texlive/texmf-dist/fonts/type1/urw/helvetic/uhvr8a.pfb></usr/sha
 re/texlive/texmf-dist/fonts/type1/urw/times/utmb8a.pfb></usr/share/texlive/texm
 f-dist/fonts/type1/urw/times/utmr8a.pfb>
-Output written on document.pdf (25 pages, 199165 bytes).
+Output written on document.pdf (26 pages, 201266 bytes).
 PDF statistics:
- 304 PDF objects out of 1000 (max. 8388607)
- 54 named destinations out of 1000 (max. 500000)
+ 313 PDF objects out of 1000 (max. 8388607)
+ 56 named destinations out of 1000 (max. 500000)
  132 words of extra memory for PDF output out of 10000 (max. 10000000)
 
