@@ -13,7 +13,9 @@
 \defcounter {refsection}{0}\relax 
 \contentsline {subsection}{\numberline {1.3.2}Budget}{4}{subsection.1.3.2}%
 \defcounter {refsection}{0}\relax 
-\contentsline {chapter}{\numberline {2}State of the Art}{5}{chapter.2}%
+\contentsline {subsection}{\numberline {1.3.3}Structure of the document}{4}{subsection.1.3.3}%
+\defcounter {refsection}{0}\relax 
+\contentsline {chapter}{\numberline {2}State of the art}{5}{chapter.2}%
 \defcounter {refsection}{0}\relax 
 \contentsline {chapter}{\numberline {3}Methods??}{6}{chapter.3}%
 \defcounter {refsection}{0}\relax 

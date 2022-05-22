@@ -382,13 +382,31 @@ The knowledge gathered by the previous three pillars will be then used as a basi
 \subsection{Budget}
 %TODO - Leaving this for the end
 
+\section{Structure of the document}
+%TODO - Best to be done at the end
 
-\chapter{State of the Art}
-%M-> We mentioned talking about rootkits in general here + eBPF how it works, and previous work on this. Also libbpf(?).
+
+%%%%%%%%%%%%%%%
+%TODO IMPORTANT- Clearly structure eveything, for instance I am not sure about the "Methods" section. Maybe a "State of the Art"+"Analysis of offensive capabilities"+"Implementation of a rootkit" is more suitable?
+%I'm following that for now, we can join it together afterwards if it was not a good idea.
+%
+% In the end, we need to talk about 3 main points before the conclusion at least:
+% 1- Background on eBPF, what it is, how it works. How we will develop applications on it(libbpf).
+% 2- Offensive capabilities of ebpf
+% 3- Our rootkit in ebpf with the previous section as the basis. The idea is to show diagrams with the components and describe the functionality. However, the library injection part is long and requires quite a background by itself. Should we introduce the background on a different section??
+%%%%%%%%%%%%%%
+
+\chapter{State of the art}
+% I WILL NOT INCLUDE A ROOTKIT BACKGROUND, considering that a deep study of that is not fully relevant for us. I explained what it is, its two main types (should we include bootkits, maybe?) and its relation with eBPF in the introduction, since it is needed to introduce the overall context. Should we do otherwise?
+
+
+
+
+
+
 
 \chapter{Methods??}
-%M-> Following the particular TFG we discussed and also others, it looks like the main chapter(s) varies name depending on the TFG topic. ALso is there a prefered way to distribute this?
-%An idea: approach it depending on the ebpf capability to explore, e.g: network, user memory modification, hooking.
+%M-> Following the particular TFG we discussed and also others, it looks like the main chapter(s) varies name depending on the TFG topic. Also is there a prefered way to distribute this?
 
 
 \chapter{Results}
@@ -417,7 +435,7 @@ The knowledge gathered by the previous three pillars will be then used as a basi
 %----------	
 
 %M-> Mentioned putting some demos and PoCs here...
-% Then 
+%
 
 \chapter* {Appendix A}
 \pagenumbering{gobble} % Las páginas de los anexos no se numeran
