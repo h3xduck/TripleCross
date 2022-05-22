@@ -123,7 +123,9 @@ hmargin=3cm
 	singlelinecheck=off,
 	labelsep=period,
 	labelfont=small,
-	font=small		
+	font=small,
+	%THE FOLLOWING WAS ADDED BY ME, is this ok? I think it was missed on the template
+	justification=centering		
 }
 
 
@@ -359,7 +361,7 @@ Taking the previous research into account, and on the basis of common functional
 \item Analysing eBPF's possibilities when hooking system calls and kernel functions.
 \end{itemize}
 
-The knowledge gathered by the previous three pillars will be then used as a basis for building our rootkit. We will present different attack vectors and techniques than the ones presented in previous research, although inevitably we will also tackle common points, which will be clearly indicated and on which we will try to perform further research. In essence, our eBPF-based rootkit aims at:
+The knowledge gathered by the previous three pillars will be then used as a basis for building our rootkit. We will present attack vectors and techniques different than the ones presented in previous research, although inevitably we will also tackle common points, which will be clearly indicated and on which we will try to perform further research. In essence, our eBPF-based rootkit aims at:
 \begin{itemize}
 \item Hijacking the execution of user programs while they are running, injecting libraries and executing malicious code, without impacting their normal execution.
 \item Featuring a command-and-control module powered by a network backdoor, which can be operated from a remote client. This backdoor should be controlled with stealth in mind, featuring similar mechanisms to those present in rootkits found in the wild.
@@ -398,8 +400,19 @@ The knowledge gathered by the previous three pillars will be then used as a basi
 
 \chapter{State of the art}
 % I WILL NOT INCLUDE A ROOTKIT BACKGROUND, considering that a deep study of that is not fully relevant for us. I explained what it is, its two main types (should we include bootkits, maybe?) and its relation with eBPF in the introduction, since it is needed to introduce the overall context. Should we do otherwise?
+This chapter is dedicated to an study of the eBPF technology. Firstly, we will analyse its origins, understanding what it is and how it works, and discuss the reasons why it is a necessary component of the Linux kernel today. Afterwards, we will cover the main features of eBPF in detail. Finally, an study of the existing alternatives for developing eBPF applications will be also included.
+
+\section{Introduction to eBPF}
+Nowadays eBPF is not officially considered to be an acronym anymore, but it remains largely known as "extended Berkeley Packet Filters", given its roots in the Berkeley Packet Filter (BPF) technology, now known as classic BPF.
+
+BPF was introduced in 1992 in the paper "The BSD Packet Filter: A New Architecture for User-level Packet Capture"\cite{bpf_bsd_origin}, as a new filtering technology for network packets in the BSD platform.
 
 
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=12cm, keepaspectratio=true]{classic_bpf.jpg}
+	\caption{Sketch of the functionality of classic BPF}
+\end{figure}
 
 
 

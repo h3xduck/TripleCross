@@ -222,6 +222,39 @@
       \verb https://media.defcon.org/DEF%20CON%2029/DEF%20CON%2029%20presentations/Guillaume%20Fournier%20Sylvain%20Afchain%20Sylvain%20Baubeau%20-%20eBPF%2C%20I%20thought%20we%20were%20friends.pdf
       \endverb
     \endentry
+    \entry{bpf_bsd_origin}{article}{}
+      \name{author}{1}{}{%
+        {{hash=b74c2671072cf5a1a1400dc035240dfd}{%
+           family={Steven\bibnamedelima McCanne},
+           familyi={S\bibinitperiod\bibinitdelim M\bibinitperiod},
+           given={Van\bibnamedelima Jacobson},
+           giveni={V\bibinitperiod\bibinitdelim J\bibinitperiod}}}%
+      }
+      \list{institution}{1}{%
+        {Lawrence Berkeley Laboratory}%
+      }
+      \strng{namehash}{b74c2671072cf5a1a1400dc035240dfd}
+      \strng{fullhash}{b74c2671072cf5a1a1400dc035240dfd}
+      \strng{bibnamehash}{b74c2671072cf5a1a1400dc035240dfd}
+      \strng{authorbibnamehash}{b74c2671072cf5a1a1400dc035240dfd}
+      \strng{authornamehash}{b74c2671072cf5a1a1400dc035240dfd}
+      \strng{authorfullhash}{b74c2671072cf5a1a1400dc035240dfd}
+      \field{sortinit}{1}
+      \field{sortinithash}{50c6687d7fc80f50136d75228e3c59ba}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{day}{19}
+      \field{month}{12}
+      \field{title}{The BSD Packet Filter: A New Architecture for User-level Packet Capture}
+      \field{year}{1992}
+      \field{dateera}{ce}
+      \verb{urlraw}
+      \verb https://www.tcpdump.org/papers/bpf-usenix93.pdf
+      \endverb
+      \verb{url}
+      \verb https://www.tcpdump.org/papers/bpf-usenix93.pdf
+      \endverb
+    \endentry
   \enddatalist
 \endrefsection
 \endinput
