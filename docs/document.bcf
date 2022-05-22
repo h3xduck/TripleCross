@@ -2358,7 +2358,11 @@
     <bcf:citekey order="8">evil_ebpf</bcf:citekey>
     <bcf:citekey order="9">bad_ebpf</bcf:citekey>
     <bcf:citekey order="10">ebpf_friends</bcf:citekey>
-    <bcf:citekey order="11">bpf_bsd_origin</bcf:citekey>
+    <bcf:citekey order="11">ebpf_io</bcf:citekey>
+    <bcf:citekey order="12">bpf_bsd_origin</bcf:citekey>
+    <bcf:citekey order="13">ebpf_history_opensource</bcf:citekey>
+    <bcf:citekey order="14">bpf_bsd_origin_bpf_page1</bcf:citekey>
+    <bcf:citekey order="15">index_register</bcf:citekey>
   </bcf:section>
   <!-- SORTING TEMPLATES -->
   <bcf:sortingtemplate name="none">

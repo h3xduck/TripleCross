@@ -198,7 +198,7 @@ hmargin=3cm
 			\bigskip
 			
 		\end{Large}
-		 	{\Huge ``An analysis of offensive capabilities of eBPF''}\\
+		 	{\Huge ``An analysis of offensive capabilities of eBPF and implementation of a rootkit''}\\
 		 	\vspace*{0.5cm}
 	 		\rule{10.5cm}{0.1mm}\\
 			\vspace*{0.9cm}
@@ -403,7 +403,9 @@ The knowledge gathered by the previous three pillars will be then used as a basi
 This chapter is dedicated to an study of the eBPF technology. Firstly, we will analyse its origins, understanding what it is and how it works, and discuss the reasons why it is a necessary component of the Linux kernel today. Afterwards, we will cover the main features of eBPF in detail. Finally, an study of the existing alternatives for developing eBPF applications will be also included.
 
 \section{Introduction to eBPF}
-Nowadays eBPF is not officially considered to be an acronym anymore, but it remains largely known as "extended Berkeley Packet Filters", given its roots in the Berkeley Packet Filter (BPF) technology, now known as classic BPF.
+% Is it ok to have sections / chapters without individual intros?
+\subsection{eBPF history}
+Nowadays eBPF is not officially considered to be an acronym anymore\cite{ebpf_io}, but it remains largely known as "extended Berkeley Packet Filters", given its roots in the Berkeley Packet Filter (BPF) technology, now known as classic BPF.
 
 BPF was introduced in 1992 in the paper "The BSD Packet Filter: A New Architecture for User-level Packet Capture"\cite{bpf_bsd_origin}, as a new filtering technology for network packets in the BSD platform. It was first integrated in the Linux kernel on version 2.1.75\cite{ebpf_history_opensource}.
 
@@ -415,7 +417,32 @@ BPF was introduced in 1992 in the paper "The BSD Packet Filter: A New Architectu
 	\label{fig:classif_bpf}
 \end{figure}
 
-Figure \ref{fig:classif_bpf} shows how BPF was integrated in the existing network packet processing by the kernel. After receiving a packet, it would first be analysed by BPF filters, which are directly programmed by the BPF developer. The filter decides whether the packet is to be accepted by analysing the packet properties, such as its length or the type and values of its headers. If a packet is accepted, the filter proceeds to decide how many bytes of the original buffer are passed to the application. Otherwise, the packet is redirected to the original network stack, where it is managed as usual.
+Figure \ref{fig:classif_bpf} shows how BPF was integrated in the existing network packet processing by the kernel. After receiving a packet, it would first be analysed by BPF filters, programs directly developed by the user. The filter decides whether the packet is to be accepted by analysing the packet properties, such as its length or the type and values of its headers. If a packet is accepted, the filter proceeds to decide how many bytes of the original buffer are passed to the application at the user space. Otherwise, the packet is redirected to the original network stack, where it is managed as usual.
+
+In a technical level, BPF comprises both the BPF filter programs developed by the user and the BPF module included in the kernel which allows for loading and running the BPF filters. This BPF module in the kernel works as a virtual machine\cite{bpf_bsd_origin_bpf_page1}. Therefore, it is usually referred as the BPF Virtual Machine (BPF VM). The BPF VM comprises the following components:
+\begin{itemize}
+\item \textbf{An accumulator register}, used to store intermediate values of operations.
+\item \textbf{An index register}, used to modify operand addresses, it is usually incorporated to optimize vector operations\cite{index_register}.
+\item \textbf{An scratch memory store}, a temporary storage.
+\item \textbf{A program counter}, used to point to the next machine instruction to execute in a filter program.
+\end{itemize}
+
+The components of the BPF VM are used to support running BPF filter programs. A BPF filter is implemented as a boolean function:
+\begin{itemize}
+\item If it returns \textit{true}, the kernel copies the packet to the application.
+\item If it returns \textit{false}, the packet is not accepted by the filter (and thus the network stack will be the next to operate it).
+\end{itemize}
+
+
+
+
+
+
+%How to include a source in the following paragraph? Its from an already cited source
+%%%By filtering packets before they are handled by the kernel instead of using an user-level application, BPF offered a performance improvement between 10 and 150 times the used technologies at the time\cite{bpf_bsd_origin_bpf_page1}. Since then, multiple popular tools began to use BPF, such as the network tracing tool tcpdump.
+
+
+
 
 
 
