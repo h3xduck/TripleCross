@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.21 (TeX Live 2020/Debian) (preloaded format=pdflatex 2022.4.27)  23 MAY 2022 06:08
+This is pdfTeX, Version 3.14159265-2.6-1.40.21 (TeX Live 2020/Debian) (preloaded format=pdflatex 2022.4.27)  23 MAY 2022 07:07
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1089,7 +1089,7 @@ File: t1txss.fd 2000/12/15 v3.1
 )
 LaTeX Font Info:    Font shape `T1/txss/m/n' will be
 (Font)              scaled to size 11.39996pt on input line 186.
-<images//Portada_Logo.png, id=61, 456.2865pt x 45.99pt>
+<images//Portada_Logo.png, id=73, 456.2865pt x 45.99pt>
 File: images//Portada_Logo.png Graphic file (type png)
 <use images//Portada_Logo.png>
 Package pdftex.def Info: images//Portada_Logo.png  used on input line 190.
@@ -1102,7 +1102,7 @@ LaTeX Font Info:    Font shape `T1/txss/m/n' will be
 (Font)              scaled to size 23.63593pt on input line 201.
 LaTeX Font Info:    Font shape `T1/txss/m/n' will be
 (Font)              scaled to size 19.70294pt on input line 205.
-<images/creativecommons.png, id=63, 338.76563pt x 118.19156pt>
+<images/creativecommons.png, id=75, 338.76563pt x 118.19156pt>
 File: images/creativecommons.png Graphic file (type png)
 <use images/creativecommons.png>
 Package pdftex.def Info: images/creativecommons.png  used on input line 215.
@@ -1210,7 +1210,7 @@ Overfull \hbox (0.50073pt too wide) in paragraph at lines 355--356
 
 [3] [4]
 Chapter 2.
-<images//classic_bpf.jpg, id=219, 588.1975pt x 432.61626pt>
+<images//classic_bpf.jpg, id=245, 588.1975pt x 432.61626pt>
 File: images//classic_bpf.jpg Graphic file (type jpg)
 <use images//classic_bpf.jpg>
 Package pdftex.def Info: images//classic_bpf.jpg  used on input line 416.
@@ -1218,50 +1218,63 @@ Package pdftex.def Info: images//classic_bpf.jpg  used on input line 416.
 [5
 
  <./images//classic_bpf.jpg>]
-<images//cbpf_prog.jpg, id=231, 403.5075pt x 451.6875pt>
+<images//cbpf_prog.jpg, id=257, 403.5075pt x 451.6875pt>
 File: images//cbpf_prog.jpg Graphic file (type jpg)
 <use images//cbpf_prog.jpg>
-Package pdftex.def Info: images//cbpf_prog.jpg  used on input line 439.
+Package pdftex.def Info: images//cbpf_prog.jpg  used on input line 443.
 (pdftex.def)             Requested size: 227.62204pt x 254.80415pt.
  [6] [7 <./images/cBPF_prog.jpg>]
-<images//bpf_instructions.png, id=249, 380.92313pt x 475.27562pt>
+<images//bpf_instructions.png, id=274, 380.92313pt x 475.27562pt>
 File: images//bpf_instructions.png Graphic file (type png)
 <use images//bpf_instructions.png>
-Package pdftex.def Info: images//bpf_instructions.png  used on input line 478.
+Package pdftex.def Info: images//bpf_instructions.png  used on input line 483.
 (pdftex.def)             Requested size: 227.62204pt x 283.99998pt.
  [8 <./images//bpf_instructions.png>]
-<images//bpf_address_mode.png, id=258, 417.05812pt x 313.67188pt>
+<images//bpf_address_mode.png, id=283, 417.05812pt x 313.67188pt>
 File: images//bpf_address_mode.png Graphic file (type png)
 <use images//bpf_address_mode.png>
-Package pdftex.def Info: images//bpf_address_mode.png  used on input line 494.
+Package pdftex.def Info: images//bpf_address_mode.png  used on input line 499.
 (pdftex.def)             Requested size: 227.62204pt x 171.19905pt.
+LaTeX Font Info:    Font shape `T1/txr/b/it' in size <12> not available
+(Font)              Font shape `T1/txr/bx/it' tried instead on input line 507.
+<images//tcpdump_example.png, id=289, 534.99875pt x 454.69875pt>
+File: images//tcpdump_example.png Graphic file (type png)
+<use images//tcpdump_example.png>
+Package pdftex.def Info: images//tcpdump_example.png  used on input line 514.
+(pdftex.def)             Requested size: 284.52756pt x 241.82869pt.
  [9 <./images//bpf_address_mode.png>]
+<images//cBPF_prog_ex_sol.png, id=299, 320.19624pt x 321.2pt>
+File: images//cBPF_prog_ex_sol.png Graphic file (type png)
+<use images//cBPF_prog_ex_sol.png>
+Package pdftex.def Info: images//cBPF_prog_ex_sol.png  used on input line 525.
+(pdftex.def)             Requested size: 227.62204pt x 228.33786pt.
+ [10 <./images//tcpdump_example.png> <./images//cBPF_prog_ex_sol.png>]
 Chapter 3.
-[10
-
-]
-Chapter 4.
 [11
 
 ]
-Chapter 5.
+Chapter 4.
 [12
 
 ]
+Chapter 5.
+[13
+
+]
 LaTeX Font Info:    Trying to load font information for T1+txtt on input line 5
-41.
+64.
  (/usr/share/texlive/texmf-dist/tex/latex/txfonts/t1txtt.fd
 File: t1txtt.fd 2000/12/15 v3.1
 )
-Overfull \hbox (5.34976pt too wide) in paragraph at lines 542--542
+Overfull \hbox (5.34976pt too wide) in paragraph at lines 565--565
 \T1/txtt/m/n/12 threat -[] intelligence / cyber -[] year -[] in -[] retrospect 
 / yir -[] cyber -[] threats -[]
  []
 
-[13
+[14
 
 
-] [14] [1
+] [15] [1
 
 ]
 
@@ -1272,22 +1285,28 @@ pdfTeX warning (ext4): destination with the same identifier (name{page.}) has b
 een already used, duplicate ignored
 <to be read again> 
                    \relax 
-l.558 \end{document}
+l.581 \end{document}
                      [2
 
 ] (./document.aux)
-Package rerunfilecheck Info: File `document.out' has not changed.
-(rerunfilecheck)             Checksum: 79836A949AAA92D8359931E3F0756F41;902.
+
+Package rerunfilecheck Warning: File `document.out' has changed.
+(rerunfilecheck)                Rerun to get outlines right
+(rerunfilecheck)                or use package `bookmark'.
+
+Package rerunfilecheck Info: Checksums for `document.out':
+(rerunfilecheck)             Before: A6577BD8B13F5EB107CFC8B7036FD0A0;1199
+(rerunfilecheck)             After:  527B694ACE0F160609707BF4E9568D31;1305.
 Package logreq Info: Writing requests to 'document.run.xml'.
 \openout1 = `document.run.xml'.
 
  ) 
 Here is how much of TeX's memory you used:
- 27260 strings out of 481209
- 433123 string characters out of 5914747
- 1169390 words of memory out of 5000000
- 43712 multiletter control sequences out of 15000+600000
- 450160 words of font info for 95 fonts, out of 8000000 for 9000
+ 27292 strings out of 481209
+ 433755 string characters out of 5914747
+ 1169713 words of memory out of 5000000
+ 43730 multiletter control sequences out of 15000+600000
+ 456264 words of font info for 101 fonts, out of 8000000 for 9000
  36 hyphenation exceptions out of 8191
  88i,11n,90p,1029b,3095s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/share/texlive/texmf-dist/fonts/enc/dvips/base/8r.enc}</usr/share/texliv
@@ -1297,11 +1316,12 @@ t/fonts/type1/public/txfonts/rtxr.pfb></usr/share/texlive/texmf-dist/fonts/type
 tic/uhvb8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/helvetic/uhvr8a.p
 fb></usr/share/texlive/texmf-dist/fonts/type1/urw/helvetic/uhvr8a.pfb></usr/sha
 re/texlive/texmf-dist/fonts/type1/urw/times/utmb8a.pfb></usr/share/texlive/texm
-f-dist/fonts/type1/urw/times/utmr8a.pfb></usr/share/texlive/texmf-dist/fonts/ty
-pe1/urw/times/utmri8a.pfb>
-Output written on document.pdf (30 pages, 412900 bytes).
+f-dist/fonts/type1/urw/times/utmbi8a.pfb></usr/share/texlive/texmf-dist/fonts/t
+ype1/urw/times/utmr8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/times/
+utmri8a.pfb>
+Output written on document.pdf (31 pages, 470997 bytes).
 PDF statistics:
- 395 PDF objects out of 1000 (max. 8388607)
- 72 named destinations out of 1000 (max. 500000)
- 155 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 442 PDF objects out of 1000 (max. 8388607)
+ 79 named destinations out of 1000 (max. 500000)
+ 189 words of extra memory for PDF output out of 10000 (max. 10000000)
 

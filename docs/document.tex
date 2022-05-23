@@ -402,10 +402,10 @@ The knowledge gathered by the previous three pillars will be then used as a basi
 % I WILL NOT INCLUDE A ROOTKIT BACKGROUND, considering that a deep study of that is not fully relevant for us. I explained what it is, its two main types (should we include bootkits, maybe?) and its relation with eBPF in the introduction, since it is needed to introduce the overall context. Should we do otherwise?
 This chapter is dedicated to an study of the eBPF technology. Firstly, we will analyse its origins, understanding what it is and how it works, and discuss the reasons why it is a necessary component of the Linux kernel today. Afterwards, we will cover the main features of eBPF in detail. Finally, an study of the existing alternatives for developing eBPF applications will be also included.
 
-\section{Introduction to eBPF}
+\section{eBPF history - Classic BPF}
 % Is it ok to have sections / chapters without individual intros?
 
-\subsection{eBPF history - Classic BPF}
+\subsection{Introduction to the BPF system}
 Nowadays eBPF is not officially considered to be an acronym anymore\cite{ebpf_io}, but it remains largely known as "extended Berkeley Packet Filters", given its roots in the Berkeley Packet Filter (BPF) technology, now known as classic BPF.
 
 BPF was introduced in 1992 by Steven McCanne and Van Jacobson in the paper "The BSD Packet Filter: A New Architecture for User-level Packet Capture"\cite{bpf_bsd_origin}, as a new filtering technology for network packets in the BSD platform. It was first integrated in the Linux kernel on version 2.1.75\cite{ebpf_history_opensource}.
@@ -420,6 +420,8 @@ BPF was introduced in 1992 by Steven McCanne and Van Jacobson in the paper "The 
 
 Figure \ref{fig:classif_bpf} shows how BPF was integrated in the existing network packet processing by the kernel. After receiving a packet, it would first be analysed by BPF filters, programs directly developed by the user. The filter decides whether the packet is to be accepted by analysing the packet properties, such as its length or the type and values of its headers. If a packet is accepted, the filter proceeds to decide how many bytes of the original buffer are passed to the application at the user space. Otherwise, the packet is redirected to the original network stack, where it is managed as usual.
 
+
+\subsection{The BPF virtual machine}
 In a technical level, BPF comprises both the BPF filter programs developed by the user and the BPF module included in the kernel which allows for loading and running the BPF filters. This BPF module in the kernel works as a virtual machine\cite{bpf_bsd_origin_bpf_page1}. Therefore, it is usually referred as the BPF Virtual Machine (BPF VM). The BPF VM comprises the following components:
 \begin{itemize}
 \item \textbf{An accumulator register}, used to store intermediate values of operations.
@@ -428,6 +430,8 @@ In a technical level, BPF comprises both the BPF filter programs developed by th
 \item \textbf{A program counter}, used to point to the next machine instruction to execute in a filter program.
 \end{itemize}
 
+
+\subsection{Analysis of a BPF filter program}
 The components of the BPF VM are used to support running BPF filter programs. A BPF filter is implemented as a boolean function:
 \begin{itemize}
 \item If it returns \textit{true}, the kernel copies the packet to the application.
@@ -450,6 +454,7 @@ Figure \ref{fig:cbpf_prog} shows an example of a BPF filter upon receiving a pac
 \end{itemize}
 
 
+\subsection{BPF bytecode instruction format}
 In order to implement the CFG to be run at the BPF VM, BPF filter programs are made up of BPF bytecode, which is defined by a new BPF instruction set. Therefore, a BPF filter program is an array of BPF bytecode instructions\cite{bpf_organicprogrammer_analysis}.
 
 
@@ -499,13 +504,31 @@ Figure \ref{fig:bpf_instructions} shows how BPF instructions are defined accordi
 The column \textit{addr modes} in figure \ref{fig:bpf_instructions} describes how the parameters of a BPF instruction are referenced depending on the opcode. The address modes are detailed in figure \ref{fig:bpf_address_mode}. As it can be observed, paremeters may consist of immediate values, offsets to memory positions or on the packet, the index register or combinations of the previous.
 
 
+\subsection{An example of BPF filter - \textit{tcpdump}}
+At the time, by filtering packets before they are handled by the kernel instead of using an user-level application, BPF offered a performance improvement between 10 and 150 times the state-of-the art technologies of the moment\cite{bpf_bsd_origin_bpf_page1}. Since then, multiple popular tools began to use BPF, such as the network tracing tool \textit{tcpdump}.
+
+\textit{tcpdump} is a command-line tool that enables to capture and analyse the network traffic going through the system. It works by setting filters on a network interface, so that it shows the packets that are accepted by the filter. Still today, \textit{tcpdump} uses BPF for the filter implementation. We will now show an example of BPF code used by \textit{tcpdump} to implement a simple filter:
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=10cm]{tcpdump_example.png}
+	\caption{BPF bytecode tcpdump needs to set a filter to display packets directed to port 80.}
+	\label{fig:bpf_tcpdump_example}
+\end{figure}
+
+Figure \ref{fig:bpf_tcpdump_example} shows how tcpdump sets a filter to display traffic directed to all interfaces (\textit{-i any}) directed to port 80. Flag \textit{-d} instructs tcpdump to display BPF bytecode.
+
+In the example, we can clearly label the nodes of the CFG. Figure \ref{fig:tcpdump_ex_sol} is the shortest graph path that a true comparison will need to follow to be accepted by the filter. Note how instruction 010 is checking the value 80, the one our filter is looking for.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=8cm]{cBPF_prog_ex_sol.png}
+	\caption{Shortest path in the CFG described in the example of figure \ref{fig:bpf_tcpdump_example} that a packet needs to follow to be accepted by the BPF filter set with \textit{tcpdump}.}
+	\label{fig:tcpdump_ex_sol}
+\end{figure}
 
 
 
-
-
-%How to include a source in the following paragraph? Its from an already cited source
-%%%By filtering packets before they are handled by the kernel instead of using an user-level application, BPF offered a performance improvement between 10 and 150 times the used technologies at the time\cite{bpf_bsd_origin_bpf_page1}. Since then, multiple popular tools began to use BPF, such as the network tracing tool tcpdump.
 
 
 

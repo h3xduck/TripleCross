@@ -13,6 +13,10 @@
 \defcounter {refsection}{0}\relax 
 \contentsline {figure}{\numberline {2.4}{\ignorespaces Table explaining the column address modes in Figure\ref {fig:bpf_instructions}, as shown by McCanne and Jacobson\cite {bpf_bsd_origin_bpf_page8}\relax }}{9}{figure.caption.11}%
 \defcounter {refsection}{0}\relax 
+\contentsline {figure}{\numberline {2.5}{\ignorespaces BPF bytecode tcpdump needs to set a filter to display packets directed to port 80.\relax }}{10}{figure.caption.12}%
+\defcounter {refsection}{0}\relax 
+\contentsline {figure}{\numberline {2.6}{\ignorespaces Shortest path in the CFG described in the example of figure \ref {fig:bpf_tcpdump_example} that a packet needs to follow to be accepted by the BPF filter set with \textit {tcpdump}.\relax }}{10}{figure.caption.13}%
+\defcounter {refsection}{0}\relax 
 \addvspace {10\p@ }
 \defcounter {refsection}{0}\relax 
 \addvspace {10\p@ }

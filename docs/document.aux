@@ -61,8 +61,8 @@
 \@writefile{toc}{\defcounter {refsection}{0}\relax }\@writefile{toc}{\contentsline {chapter}{\numberline {2}State of the art}{5}{chapter.2}\protected@file@percent }
 \@writefile{lof}{\defcounter {refsection}{0}\relax }\@writefile{lof}{\addvspace {10\p@ }}
 \@writefile{lot}{\defcounter {refsection}{0}\relax }\@writefile{lot}{\addvspace {10\p@ }}
-\@writefile{toc}{\defcounter {refsection}{0}\relax }\@writefile{toc}{\contentsline {section}{\numberline {2.1}Introduction to eBPF}{5}{section.2.1}\protected@file@percent }
-\@writefile{toc}{\defcounter {refsection}{0}\relax }\@writefile{toc}{\contentsline {subsection}{\numberline {2.1.1}eBPF history - Classic BPF}{5}{subsection.2.1.1}\protected@file@percent }
+\@writefile{toc}{\defcounter {refsection}{0}\relax }\@writefile{toc}{\contentsline {section}{\numberline {2.1}eBPF history - Classic BPF}{5}{section.2.1}\protected@file@percent }
+\@writefile{toc}{\defcounter {refsection}{0}\relax }\@writefile{toc}{\contentsline {subsection}{\numberline {2.1.1}Introduction to the BPF system}{5}{subsection.2.1.1}\protected@file@percent }
 \@writefile{lof}{\defcounter {refsection}{0}\relax }\@writefile{lof}{\contentsline {figure}{\numberline {2.1}{\ignorespaces Sketch of the functionality of classic BPF\relax }}{5}{figure.caption.7}\protected@file@percent }
 \providecommand*\caption@xref[2]{\@setref\relax\@undefined{#1}}
 \newlabel{fig:classif_bpf}{{2.1}{5}{Sketch of the functionality of classic BPF\relax }{figure.caption.7}{}}
@@ -70,12 +70,15 @@
 \abx@aux@segm{0}{0}{bpf_bsd_origin_bpf_page1}
 \abx@aux@cite{index_register}
 \abx@aux@segm{0}{0}{index_register}
+\@writefile{toc}{\defcounter {refsection}{0}\relax }\@writefile{toc}{\contentsline {subsection}{\numberline {2.1.2}The BPF virtual machine}{6}{subsection.2.1.2}\protected@file@percent }
+\@writefile{toc}{\defcounter {refsection}{0}\relax }\@writefile{toc}{\contentsline {subsection}{\numberline {2.1.3}Analysis of a BPF filter program}{6}{subsection.2.1.3}\protected@file@percent }
 \abx@aux@cite{bpf_bsd_origin_bpf_page5}
 \abx@aux@segm{0}{0}{bpf_bsd_origin_bpf_page5}
 \abx@aux@cite{bpf_organicprogrammer_analysis}
 \abx@aux@segm{0}{0}{bpf_organicprogrammer_analysis}
 \@writefile{lof}{\defcounter {refsection}{0}\relax }\@writefile{lof}{\contentsline {figure}{\numberline {2.2}{\ignorespaces Execution of a BPF filter.\relax }}{7}{figure.caption.8}\protected@file@percent }
 \newlabel{fig:cbpf_prog}{{2.2}{7}{Execution of a BPF filter.\relax }{figure.caption.8}{}}
+\@writefile{toc}{\defcounter {refsection}{0}\relax }\@writefile{toc}{\contentsline {subsection}{\numberline {2.1.4}BPF bytecode instruction format}{7}{subsection.2.1.4}\protected@file@percent }
 \@writefile{lot}{\defcounter {refsection}{0}\relax }\@writefile{lot}{\contentsline {table}{\numberline {2.1}{\ignorespaces Table showing BPF instruction format. It is a fixed-length 64 bit instruction, the number of bits used by each field are indicated.\relax }}{7}{table.caption.9}\protected@file@percent }
 \newlabel{table:bpf_inst_format}{{2.1}{7}{Table showing BPF instruction format. It is a fixed-length 64 bit instruction, the number of bits used by each field are indicated.\relax }{table.caption.9}{}}
 \abx@aux@cite{bpf_bsd_origin_bpf_page7}
@@ -86,18 +89,25 @@
 \newlabel{fig:bpf_instructions}{{2.3}{8}{Table of supported classic BPF instructions, as shown by McCanne and Jacobson\cite {bpf_bsd_origin_bpf_page7}\relax }{figure.caption.10}{}}
 \abx@aux@cite{bpf_bsd_origin_bpf_page8}
 \abx@aux@segm{0}{0}{bpf_bsd_origin_bpf_page8}
+\abx@aux@cite{bpf_bsd_origin_bpf_page1}
+\abx@aux@segm{0}{0}{bpf_bsd_origin_bpf_page1}
 \@writefile{lof}{\defcounter {refsection}{0}\relax }\@writefile{lof}{\contentsline {figure}{\numberline {2.4}{\ignorespaces Table explaining the column address modes in Figure\ref  {fig:bpf_instructions}, as shown by McCanne and Jacobson\cite {bpf_bsd_origin_bpf_page8}\relax }}{9}{figure.caption.11}\protected@file@percent }
 \newlabel{fig:bpf_address_mode}{{2.4}{9}{Table explaining the column address modes in Figure\ref {fig:bpf_instructions}, as shown by McCanne and Jacobson\cite {bpf_bsd_origin_bpf_page8}\relax }{figure.caption.11}{}}
-\@writefile{toc}{\defcounter {refsection}{0}\relax }\@writefile{toc}{\contentsline {chapter}{\numberline {3}Methods??}{10}{chapter.3}\protected@file@percent }
+\@writefile{toc}{\defcounter {refsection}{0}\relax }\@writefile{toc}{\contentsline {subsection}{\numberline {2.1.5}An example of BPF filter - \textit  {tcpdump}}{9}{subsection.2.1.5}\protected@file@percent }
+\@writefile{lof}{\defcounter {refsection}{0}\relax }\@writefile{lof}{\contentsline {figure}{\numberline {2.5}{\ignorespaces BPF bytecode tcpdump needs to set a filter to display packets directed to port 80.\relax }}{10}{figure.caption.12}\protected@file@percent }
+\newlabel{fig:bpf_tcpdump_example}{{2.5}{10}{BPF bytecode tcpdump needs to set a filter to display packets directed to port 80.\relax }{figure.caption.12}{}}
+\@writefile{lof}{\defcounter {refsection}{0}\relax }\@writefile{lof}{\contentsline {figure}{\numberline {2.6}{\ignorespaces Shortest path in the CFG described in the example of figure \ref  {fig:bpf_tcpdump_example} that a packet needs to follow to be accepted by the BPF filter set with \textit  {tcpdump}.\relax }}{10}{figure.caption.13}\protected@file@percent }
+\newlabel{fig:tcpdump_ex_sol}{{2.6}{10}{Shortest path in the CFG described in the example of figure \ref {fig:bpf_tcpdump_example} that a packet needs to follow to be accepted by the BPF filter set with \textit {tcpdump}.\relax }{figure.caption.13}{}}
+\@writefile{toc}{\defcounter {refsection}{0}\relax }\@writefile{toc}{\contentsline {chapter}{\numberline {3}Methods??}{11}{chapter.3}\protected@file@percent }
 \@writefile{lof}{\defcounter {refsection}{0}\relax }\@writefile{lof}{\addvspace {10\p@ }}
 \@writefile{lot}{\defcounter {refsection}{0}\relax }\@writefile{lot}{\addvspace {10\p@ }}
-\@writefile{toc}{\defcounter {refsection}{0}\relax }\@writefile{toc}{\contentsline {chapter}{\numberline {4}Results}{11}{chapter.4}\protected@file@percent }
+\@writefile{toc}{\defcounter {refsection}{0}\relax }\@writefile{toc}{\contentsline {chapter}{\numberline {4}Results}{12}{chapter.4}\protected@file@percent }
 \@writefile{lof}{\defcounter {refsection}{0}\relax }\@writefile{lof}{\addvspace {10\p@ }}
 \@writefile{lot}{\defcounter {refsection}{0}\relax }\@writefile{lot}{\addvspace {10\p@ }}
-\@writefile{toc}{\defcounter {refsection}{0}\relax }\@writefile{toc}{\contentsline {chapter}{\numberline {5}Conclusion and future work}{12}{chapter.5}\protected@file@percent }
+\@writefile{toc}{\defcounter {refsection}{0}\relax }\@writefile{toc}{\contentsline {chapter}{\numberline {5}Conclusion and future work}{13}{chapter.5}\protected@file@percent }
 \@writefile{lof}{\defcounter {refsection}{0}\relax }\@writefile{lof}{\addvspace {10\p@ }}
 \@writefile{lot}{\defcounter {refsection}{0}\relax }\@writefile{lot}{\addvspace {10\p@ }}
-\@writefile{toc}{\defcounter {refsection}{0}\relax }\@writefile{toc}{\contentsline {chapter}{Bibliography}{13}{chapter.5}\protected@file@percent }
+\@writefile{toc}{\defcounter {refsection}{0}\relax }\@writefile{toc}{\contentsline {chapter}{Bibliography}{14}{chapter.5}\protected@file@percent }
 \abx@aux@read@bbl@mdfivesum{87C7875B9C878945D5F672C63ACB5E95}
 \abx@aux@refcontextdefaultsdone
 \abx@aux@defaultrefcontext{0}{ransomware_pwc}{none/global//global/global}
@@ -120,4 +130,4 @@
 \abx@aux@defaultrefcontext{0}{bpf_bsd_origin_bpf_page7}{none/global//global/global}
 \abx@aux@defaultrefcontext{0}{bpf_bsd_origin_bpf_page8}{none/global//global/global}
 \ttl@finishall
-\gdef \@abspage@last{30}
+\gdef \@abspage@last{31}
