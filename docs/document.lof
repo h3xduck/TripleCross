@@ -7,6 +7,12 @@
 \defcounter {refsection}{0}\relax 
 \contentsline {figure}{\numberline {2.1}{\ignorespaces Sketch of the functionality of classic BPF\relax }}{5}{figure.caption.7}%
 \defcounter {refsection}{0}\relax 
+\contentsline {figure}{\numberline {2.2}{\ignorespaces Execution of a BPF filter.\relax }}{7}{figure.caption.8}%
+\defcounter {refsection}{0}\relax 
+\contentsline {figure}{\numberline {2.3}{\ignorespaces Table of supported classic BPF instructions, as shown by McCanne and Jacobson\cite {bpf_bsd_origin_bpf_page7}\relax }}{8}{figure.caption.10}%
+\defcounter {refsection}{0}\relax 
+\contentsline {figure}{\numberline {2.4}{\ignorespaces Table explaining the column address modes in Figure\ref {fig:bpf_instructions}, as shown by McCanne and Jacobson\cite {bpf_bsd_origin_bpf_page8}\relax }}{9}{figure.caption.11}%
+\defcounter {refsection}{0}\relax 
 \addvspace {10\p@ }
 \defcounter {refsection}{0}\relax 
 \addvspace {10\p@ }

@@ -103,7 +103,7 @@ hmargin=3cm
 \DeclareCaptionFormat{upper}{#1#2\uppercase{#3}\par}
 
 \captionsetup[table]{
-	format=upper,
+	%format=upper,  UPPER??? Set by the template, but it looks really weird, I got this off
 	justification=centering,
 	labelsep=period,
 	width=.75\linewidth,
@@ -404,13 +404,14 @@ This chapter is dedicated to an study of the eBPF technology. Firstly, we will a
 
 \section{Introduction to eBPF}
 % Is it ok to have sections / chapters without individual intros?
-\subsection{eBPF history}
+
+\subsection{eBPF history - Classic BPF}
 Nowadays eBPF is not officially considered to be an acronym anymore\cite{ebpf_io}, but it remains largely known as "extended Berkeley Packet Filters", given its roots in the Berkeley Packet Filter (BPF) technology, now known as classic BPF.
 
-BPF was introduced in 1992 in the paper "The BSD Packet Filter: A New Architecture for User-level Packet Capture"\cite{bpf_bsd_origin}, as a new filtering technology for network packets in the BSD platform. It was first integrated in the Linux kernel on version 2.1.75\cite{ebpf_history_opensource}.
+BPF was introduced in 1992 by Steven McCanne and Van Jacobson in the paper "The BSD Packet Filter: A New Architecture for User-level Packet Capture"\cite{bpf_bsd_origin}, as a new filtering technology for network packets in the BSD platform. It was first integrated in the Linux kernel on version 2.1.75\cite{ebpf_history_opensource}.
 
 
-\begin{figure}[h]
+\begin{figure}[H]
 	\centering
 	\includegraphics[width=12cm, keepaspectratio=true]{classic_bpf.jpg}
 	\caption{Sketch of the functionality of classic BPF}
@@ -432,6 +433,71 @@ The components of the BPF VM are used to support running BPF filter programs. A 
 \item If it returns \textit{true}, the kernel copies the packet to the application.
 \item If it returns \textit{false}, the packet is not accepted by the filter (and thus the network stack will be the next to operate it).
 \end{itemize}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=8cm]{cbpf_prog.jpg}
+	\caption{Execution of a BPF filter.}
+	\label{fig:cbpf_prog}
+\end{figure}
+
+Figure \ref{fig:cbpf_prog} shows an example of a BPF filter upon receiving a packet. In the figure, green lines indicate that the condition is true and red lines that it is evaluated as false. Therefore, the execution works as a control flow graph (CFG) which ends on a boolean value\cite{bpf_bsd_origin_bpf_page5}. The figure presents an example BPF program which accepts the following frames:
+\begin{itemize}
+\item Frames with an IP packet as a payload directed from IP address X.
+\item Frames with an IP packet as a payload directed towards IP address Y.
+\item Frames belonging to the ARP protocol and from IP address Y.
+\item Frames not from the ARP protocol directed from IP address Y to IP address X.
+\end{itemize}
+
+
+In order to implement the CFG to be run at the BPF VM, BPF filter programs are made up of BPF bytecode, which is defined by a new BPF instruction set. Therefore, a BPF filter program is an array of BPF bytecode instructions\cite{bpf_organicprogrammer_analysis}.
+
+
+\begin{table}[H]
+\begin{tabular}{|c|c|c|c|c|}
+\hline
+& OPCODE & JT & JF & K\\
+\hline
+BITS & 16 & 8 & 8 & 32\\
+\hline
+\end{tabular}
+\caption{Table showing BPF instruction format. It is a fixed-length 64 bit instruction, the number of bits used by each field are indicated.}
+\label{table:bpf_inst_format}
+\end{table}
+
+Table \ref{table:bpf_inst_format} shows the format of a BPF bytecode instruction. As it can be observed, it is a compound of:
+\begin{itemize}
+\item An \textbf{opcode}, similar to assembly opcode, it indicates the operation to be executed.
+\item Field \textbf{jt} indicates the offset to the next instruction to jump in case a condition is evaluated as \textit{true}.
+\item Field \textbf{jf} indicates the offset to the next instruction to jump in case a condition is evaluated as \textit{false}.
+\item Field \textbf{k} is miscellaneous and its contents vary depending on the instruction opcode.
+\end{itemize}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=8cm]{bpf_instructions.png}
+	\caption{Table of supported classic BPF instructions, as shown by McCanne and Jacobson\cite{bpf_bsd_origin_bpf_page7}}
+	\label{fig:bpf_instructions}
+\end{figure}
+
+Figure \ref{fig:bpf_instructions} shows how BPF instructions are defined according to the BPF instruction set. As we mentioned, similarly to assembly, instructions include an opcode which indicates the operation to execute, and the multiple arguments defining the arguments of the operation. The table shows, in order by rows, the following instruction types\cite{bpf_bsd_origin_bpf_page8}:
+\begin{itemize}
+\item Rows 1-4 are \textbf{load instructions}, copying the addressed value into the index or accumulator register.
+\item Rows 4-6 are \textbf{store instructions}, copying the accumulator or index register into the scratch memory store.
+\item Rows 7-11 are \textbf{jump instructions}, changing the program counter register. These are usually present on each node of the CFG, and evaluate whether the condition to be evaluated is true or not.
+\item Rows 12-19 and 21-22 are \textbf{arithmetic and miscellaneous instructions}, performing operations usually needed during the program execution.
+\item Row 20 is a \textbf{return instruction}, it is positioned in the final end of the CFG, and indicate whether the filter accepts the packet (returning true) or otherwise rejects it (return false).
+\end{itemize}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=8cm]{bpf_address_mode.png}
+	\caption{Table explaining the column address modes in Figure\ref{fig:bpf_instructions}, as shown by McCanne and Jacobson\cite{bpf_bsd_origin_bpf_page8}}
+	\label{fig:bpf_address_mode}
+\end{figure}
+
+The column \textit{addr modes} in figure \ref{fig:bpf_instructions} describes how the parameters of a BPF instruction are referenced depending on the opcode. The address modes are detailed in figure \ref{fig:bpf_address_mode}. As it can be observed, paremeters may consist of immediate values, offsets to memory positions or on the packet, the index register or combinations of the previous.
+
 
 
 
