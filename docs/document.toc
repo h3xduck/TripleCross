@@ -29,11 +29,15 @@
 \defcounter {refsection}{0}\relax 
 \contentsline {subsection}{\numberline {2.1.5}An example of BPF filter - \textit {tcpdump}}{9}{subsection.2.1.5}%
 \defcounter {refsection}{0}\relax 
-\contentsline {chapter}{\numberline {3}Methods??}{11}{chapter.3}%
+\contentsline {section}{\numberline {2.2}Analysis of modern eBPF}{11}{section.2.2}%
 \defcounter {refsection}{0}\relax 
-\contentsline {chapter}{\numberline {4}Results}{12}{chapter.4}%
+\contentsline {subsection}{\numberline {2.2.1}New eBPF infrastructure}{11}{subsection.2.2.1}%
 \defcounter {refsection}{0}\relax 
-\contentsline {chapter}{\numberline {5}Conclusion and future work}{13}{chapter.5}%
+\contentsline {chapter}{\numberline {3}Methods??}{12}{chapter.3}%
 \defcounter {refsection}{0}\relax 
-\contentsline {chapter}{Bibliography}{14}{chapter.5}%
+\contentsline {chapter}{\numberline {4}Results}{13}{chapter.4}%
+\defcounter {refsection}{0}\relax 
+\contentsline {chapter}{\numberline {5}Conclusion and future work}{14}{chapter.5}%
+\defcounter {refsection}{0}\relax 
+\contentsline {chapter}{Bibliography}{15}{chapter.5}%
 \contentsfinish 

@@ -12,7 +12,9 @@
 \BOOKMARK [2][-]{subsection.2.1.3}{Analysis\040of\040a\040BPF\040filter\040program}{section.2.1}% 12
 \BOOKMARK [2][-]{subsection.2.1.4}{BPF\040bytecode\040instruction\040format}{section.2.1}% 13
 \BOOKMARK [2][-]{subsection.2.1.5}{An\040example\040of\040BPF\040filter\040-\040tcpdump}{section.2.1}% 14
-\BOOKMARK [0][-]{chapter.3}{Methods??}{}% 15
-\BOOKMARK [0][-]{chapter.4}{Results}{}% 16
-\BOOKMARK [0][-]{chapter.5}{Conclusion\040and\040future\040work}{}% 17
-\BOOKMARK [0][-]{chapter.5}{Bibliography}{}% 18
+\BOOKMARK [1][-]{section.2.2}{Analysis\040of\040modern\040eBPF}{chapter.2}% 15
+\BOOKMARK [2][-]{subsection.2.2.1}{New\040eBPF\040infrastructure}{section.2.2}% 16
+\BOOKMARK [0][-]{chapter.3}{Methods??}{}% 17
+\BOOKMARK [0][-]{chapter.4}{Results}{}% 18
+\BOOKMARK [0][-]{chapter.5}{Conclusion\040and\040future\040work}{}% 19
+\BOOKMARK [0][-]{chapter.5}{Bibliography}{}% 20

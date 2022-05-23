@@ -23,8 +23,8 @@
       \list{institution}{1}{%
         {PricewaterhouseCoopers}%
       }
-      \field{sortinit}{2}
-      \field{sortinithash}{ed39bb39cf854d5250e95b1c1f94f4ed}
+      \field{sortinit}{3}
+      \field{sortinithash}{a37a8ef248a93c322189792c34fc68c9}
       \field{labeltitlesource}{title}
       \field{title}{Cyber Threats 2021: A year in Retrospect}
       \verb{urlraw}
@@ -38,8 +38,8 @@
       \list{institution}{1}{%
         {Positive Technologies}%
       }
-      \field{sortinit}{3}
-      \field{sortinithash}{a37a8ef248a93c322189792c34fc68c9}
+      \field{sortinit}{4}
+      \field{sortinithash}{e071e0bcb44634fab398d68ad04e69f4}
       \field{labeltitlesource}{title}
       \field{day}{3}
       \field{month}{11}
@@ -54,8 +54,8 @@
       \endverb
     \endentry
     \entry{ebpf_linux318}{online}{}
-      \field{sortinit}{4}
-      \field{sortinithash}{e071e0bcb44634fab398d68ad04e69f4}
+      \field{sortinit}{5}
+      \field{sortinithash}{5dd416adbafacc8226114bc0202d5fdd}
       \field{day}{7}
       \field{indextitle}{eBPF incorporation in the Linux Kernel 3.18}
       \field{month}{12}
@@ -72,8 +72,8 @@
       \list{institution}{1}{%
         {Pangu Lab}%
       }
-      \field{sortinit}{5}
-      \field{sortinithash}{5dd416adbafacc8226114bc0202d5fdd}
+      \field{sortinit}{6}
+      \field{sortinithash}{7851c86048328b027313775d8fbd2131}
       \field{labeltitlesource}{title}
       \field{day}{23}
       \field{month}{2}
@@ -91,8 +91,8 @@
       \list{institution}{1}{%
         {PricewaterhouseCoopers}%
       }
-      \field{sortinit}{6}
-      \field{sortinithash}{7851c86048328b027313775d8fbd2131}
+      \field{sortinit}{7}
+      \field{sortinithash}{f615fb9c6fba11c6f962fb3fd599810e}
       \field{labeltitlesource}{title}
       \field{title}{Cyber Threats 2021: A year in Retrospect}
       \field{pages}{37}
@@ -105,8 +105,8 @@
       \endverb
     \endentry
     \entry{ebpf_windows}{online}{}
-      \field{sortinit}{7}
-      \field{sortinithash}{f615fb9c6fba11c6f962fb3fd599810e}
+      \field{sortinit}{8}
+      \field{sortinithash}{1b24cab5087933ef0826a7cd3b99e994}
       \field{labeltitlesource}{title}
       \field{day}{7}
       \field{month}{12}
@@ -121,8 +121,8 @@
       \endverb
     \endentry
     \entry{ebpf_android}{online}{}
-      \field{sortinit}{8}
-      \field{sortinithash}{1b24cab5087933ef0826a7cd3b99e994}
+      \field{sortinit}{9}
+      \field{sortinithash}{54047ffb55bdefa0694bbd554c1b11a0}
       \field{labeltitlesource}{title}
       \field{title}{eBPF for Windows}
       \verb{urlraw}
@@ -152,8 +152,8 @@
       \strng{authorbibnamehash}{5142e68c748eb70cb619b21160eb7f72}
       \strng{authornamehash}{5142e68c748eb70cb619b21160eb7f72}
       \strng{authorfullhash}{5142e68c748eb70cb619b21160eb7f72}
-      \field{sortinit}{9}
-      \field{sortinithash}{54047ffb55bdefa0694bbd554c1b11a0}
+      \field{sortinit}{1}
+      \field{sortinithash}{50c6687d7fc80f50136d75228e3c59ba}
       \field{labelnamesource}{author}
       \field{eventtitle}{Evil eBPF Practical Abuses of an In-Kernel Bytecode Runtime}
       \verb{urlraw}
@@ -402,8 +402,8 @@
       \strng{authornamehash}{b74c2671072cf5a1a1400dc035240dfd}
       \strng{authorfullhash}{b74c2671072cf5a1a1400dc035240dfd}
       \field{extraname}{4}
-      \field{sortinit}{1}
-      \field{sortinithash}{50c6687d7fc80f50136d75228e3c59ba}
+      \field{sortinit}{2}
+      \field{sortinithash}{ed39bb39cf854d5250e95b1c1f94f4ed}
       \field{labelnamesource}{author}
       \field{labeltitlesource}{title}
       \field{day}{19}
@@ -454,6 +454,18 @@
       \endverb
       \verb{url}
       \verb https://www.tcpdump.org/papers/bpf-usenix93.pdf
+      \endverb
+    \endentry
+    \entry{tcpdump_page}{manual}{}
+      \field{sortinit}{2}
+      \field{sortinithash}{ed39bb39cf854d5250e95b1c1f94f4ed}
+      \field{labeltitlesource}{title}
+      \field{title}{Tcpdump & Libpcap}
+      \verb{urlraw}
+      \verb https://www.tcpdump.org
+      \endverb
+      \verb{url}
+      \verb https://www.tcpdump.org
       \endverb
     \endentry
   \enddatalist

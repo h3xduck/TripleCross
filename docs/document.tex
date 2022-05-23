@@ -371,6 +371,13 @@ The knowledge gathered by the previous three pillars will be then used as a basi
 \
 \end{itemize}
 
+The rootkit will work in a fresh-install of a Linux system with the following characteristics:
+\begin{itemize}
+%Maybe a table for this?
+\item Distribution: Ubuntu 21.04.
+\item Kernel version: 5.11.0-49.
+\end{itemize} 
+
 \section{Regulatory framework}
 %MARCOS-> Is this the appropiate place? Looking at other TFGs it is sometimes here and others in a final chapter
 
@@ -505,7 +512,7 @@ The column \textit{addr modes} in figure \ref{fig:bpf_instructions} describes ho
 
 
 \subsection{An example of BPF filter - \textit{tcpdump}}
-At the time, by filtering packets before they are handled by the kernel instead of using an user-level application, BPF offered a performance improvement between 10 and 150 times the state-of-the art technologies of the moment\cite{bpf_bsd_origin_bpf_page1}. Since then, multiple popular tools began to use BPF, such as the network tracing tool \textit{tcpdump}.
+At the time, by filtering packets before they are handled by the kernel instead of using an user-level application, BPF offered a performance improvement between 10 and 150 times the state-of-the art technologies of the moment\cite{bpf_bsd_origin_bpf_page1}. Since then, multiple popular tools began to use BPF, such as the network tracing tool \textit{tcpdump}\cite{tcpdump_page}.
 
 \textit{tcpdump} is a command-line tool that enables to capture and analyse the network traffic going through the system. It works by setting filters on a network interface, so that it shows the packets that are accepted by the filter. Still today, \textit{tcpdump} uses BPF for the filter implementation. We will now show an example of BPF code used by \textit{tcpdump} to implement a simple filter:
 
@@ -518,16 +525,18 @@ At the time, by filtering packets before they are handled by the kernel instead 
 
 Figure \ref{fig:bpf_tcpdump_example} shows how tcpdump sets a filter to display traffic directed to all interfaces (\textit{-i any}) directed to port 80. Flag \textit{-d} instructs tcpdump to display BPF bytecode.
 
-In the example, we can clearly label the nodes of the CFG. Figure \ref{fig:tcpdump_ex_sol} is the shortest graph path that a true comparison will need to follow to be accepted by the filter. Note how instruction 010 is checking the value 80, the one our filter is looking for.
+In the example, using the \textit{jf} and \textit{jt} fields, we can label the nodes of the CFG described by the BPF filter. Figure \ref{fig:tcpdump_ex_sol} is the shortest graph path that a true comparison will need to follow to be accepted by the filter. Note how instruction 010 is checking the value 80, the one our filter is looking for in the port.
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=8cm]{cBPF_prog_ex_sol.png}
+	\includegraphics[width=6cm]{cBPF_prog_ex_sol.png}
 	\caption{Shortest path in the CFG described in the example of figure \ref{fig:bpf_tcpdump_example} that a packet needs to follow to be accepted by the BPF filter set with \textit{tcpdump}.}
 	\label{fig:tcpdump_ex_sol}
 \end{figure}
 
-
+\section{Analysis of modern eBPF}
+\subsection{New eBPF infrastructure}
+Since the addition of classic BPF in the Linux kernel, multiple improvements were added. On 
 
 
 
