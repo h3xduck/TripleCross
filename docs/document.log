@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.21 (TeX Live 2020/Debian) (preloaded format=pdflatex 2022.4.27)  23 MAY 2022 08:11
+This is pdfTeX, Version 3.14159265-2.6-1.40.21 (TeX Live 2020/Debian) (preloaded format=pdflatex 2022.4.27)  24 MAY 2022 20:52
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1210,7 +1210,7 @@ Overfull \hbox (0.50073pt too wide) in paragraph at lines 355--356
 
 [3] [4]
 Chapter 2.
-<images//classic_bpf.jpg, id=263, 588.1975pt x 432.61626pt>
+<images//classic_bpf.jpg, id=278, 588.1975pt x 432.61626pt>
 File: images//classic_bpf.jpg Graphic file (type jpg)
 <use images//classic_bpf.jpg>
 Package pdftex.def Info: images//classic_bpf.jpg  used on input line 423.
@@ -1218,76 +1218,80 @@ Package pdftex.def Info: images//classic_bpf.jpg  used on input line 423.
 [5
 
  <./images//classic_bpf.jpg>]
-<images//cbpf_prog.jpg, id=275, 403.5075pt x 451.6875pt>
+<images//cbpf_prog.jpg, id=290, 403.5075pt x 451.6875pt>
 File: images//cbpf_prog.jpg Graphic file (type jpg)
 <use images//cbpf_prog.jpg>
 Package pdftex.def Info: images//cbpf_prog.jpg  used on input line 450.
 (pdftex.def)             Requested size: 227.62204pt x 254.80415pt.
  [6] [7 <./images/cBPF_prog.jpg>]
-<images//bpf_instructions.png, id=292, 380.92313pt x 475.27562pt>
+<images//bpf_instructions.png, id=307, 380.92313pt x 475.27562pt>
 File: images//bpf_instructions.png Graphic file (type png)
 <use images//bpf_instructions.png>
 Package pdftex.def Info: images//bpf_instructions.png  used on input line 490.
 (pdftex.def)             Requested size: 227.62204pt x 283.99998pt.
  [8 <./images//bpf_instructions.png>]
-<images//bpf_address_mode.png, id=301, 417.05812pt x 313.67188pt>
+<images//bpf_address_mode.png, id=316, 417.05812pt x 313.67188pt>
 File: images//bpf_address_mode.png Graphic file (type png)
 <use images//bpf_address_mode.png>
 Package pdftex.def Info: images//bpf_address_mode.png  used on input line 506.
 (pdftex.def)             Requested size: 227.62204pt x 171.19905pt.
 LaTeX Font Info:    Font shape `T1/txr/b/it' in size <12> not available
 (Font)              Font shape `T1/txr/bx/it' tried instead on input line 514.
-<images//tcpdump_example.png, id=308, 534.99875pt x 454.69875pt>
+<images//tcpdump_example.png, id=323, 534.99875pt x 454.69875pt>
 File: images//tcpdump_example.png Graphic file (type png)
 <use images//tcpdump_example.png>
 Package pdftex.def Info: images//tcpdump_example.png  used on input line 521.
 (pdftex.def)             Requested size: 284.52756pt x 241.82869pt.
  [9 <./images//bpf_address_mode.png>]
-<images//cBPF_prog_ex_sol.png, id=318, 242.9075pt x 321.2pt>
+<images//cBPF_prog_ex_sol.png, id=333, 242.9075pt x 321.2pt>
 File: images//cBPF_prog_ex_sol.png Graphic file (type png)
 <use images//cBPF_prog_ex_sol.png>
 Package pdftex.def Info: images//cBPF_prog_ex_sol.png  used on input line 532.
 (pdftex.def)             Requested size: 170.71652pt x 225.74026pt.
- [10 <./images//tcpdump_example.png> <./images//cBPF_prog_ex_sol.png>] [11]
-Chapter 3.
-[12
+ [10 <./images//tcpdump_example.png> <./images//cBPF_prog_ex_sol.png>]
+Overfull \hbox (3.10062pt too wide) in paragraph at lines 586--603
+ [][] 
+ []
 
-]
-Chapter 4.
+[11] [12]
+Chapter 3.
 [13
 
 ]
-Chapter 5.
+Chapter 4.
 [14
 
 ]
-LaTeX Font Info:    Trying to load font information for T1+txtt on input line 5
-73.
+Chapter 5.
+[15
+
+]
+LaTeX Font Info:    Trying to load font information for T1+txtt on input line 6
+45.
  (/usr/share/texlive/texmf-dist/tex/latex/txfonts/t1txtt.fd
 File: t1txtt.fd 2000/12/15 v3.1
 )
-Overfull \hbox (5.34976pt too wide) in paragraph at lines 574--574
+Overfull \hbox (5.34976pt too wide) in paragraph at lines 646--646
 \T1/txtt/m/n/12 threat -[] intelligence / cyber -[] year -[] in -[] retrospect 
 / yir -[] cyber -[] threats -[]
  []
 
-[15
+[16
 
 
 ]
-! Misplaced alignment tab character &.
-<inserted text> Tcpdump &
-                          libpcap
-l.574 
-      
-I can't figure out why you would want to use a tab mark
-here. If you just want an ampersand, the remedy is
-simple: Just type `I\&' now. But if some right brace
-up above has ended a previous alignment prematurely,
-you're probably due for more error messages, and you
-might try typing `S' now just to see what is salvageable.
+Overfull \hbox (6.22696pt too wide) in paragraph at lines 646--646
+[]\T1/txr/m/it/12 Bpf fea-tures by linux ker-nel ver-sion\T1/txr/m/n/12 , io-vi
+-sor. [On-line]. Avail-able: [][]$\T1/txtt/m/n/12 https : / / github .
+ []
 
-[16] [1
+
+Overfull \hbox (21.24973pt too wide) in paragraph at lines 646--646
+\T1/txtt/m/n/12 vger . kernel . org / netconf2015Starovoitov -[] bpf _ collabsu
+mmit _ 2015feb20 .
+ []
+
+[17] [1
 
 ]
 
@@ -1298,37 +1302,47 @@ pdfTeX warning (ext4): destination with the same identifier (name{page.}) has b
 een already used, duplicate ignored
 <to be read again> 
                    \relax 
-l.590 \end{document}
+l.662 \end{document}
                      [2
 
 ] (./document.aux)
-Package rerunfilecheck Info: File `document.out' has not changed.
-(rerunfilecheck)             Checksum: E11F11882B461E0C78448E51C0034A6A;1467.
+
+LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
+
+
+Package rerunfilecheck Warning: File `document.out' has changed.
+(rerunfilecheck)                Rerun to get outlines right
+(rerunfilecheck)                or use package `bookmark'.
+
+Package rerunfilecheck Info: Checksums for `document.out':
+(rerunfilecheck)             Before: 260AE7FF5C653A434FB11872FD491CEC;1464
+(rerunfilecheck)             After:  78EEF05F3FA16DD01514ABFEEF3266FA;1536.
 Package logreq Info: Writing requests to 'document.run.xml'.
 \openout1 = `document.run.xml'.
 
  ) 
 Here is how much of TeX's memory you used:
- 27301 strings out of 481209
- 433947 string characters out of 5914747
- 1169742 words of memory out of 5000000
- 43735 multiletter control sequences out of 15000+600000
- 456264 words of font info for 101 fonts, out of 8000000 for 9000
+ 27329 strings out of 481209
+ 434770 string characters out of 5914747
+ 1172582 words of memory out of 5000000
+ 43751 multiletter control sequences out of 15000+600000
+ 456974 words of font info for 103 fonts, out of 8000000 for 9000
  36 hyphenation exceptions out of 8191
  88i,11n,90p,1029b,3093s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/share/texlive/texmf-dist/fonts/enc/dvips/base/8r.enc}</usr/share/texliv
-e/texmf-dist/fonts/type1/public/txfonts/rtcxr.pfb></usr/share/texlive/texmf-dis
-t/fonts/type1/public/txfonts/rtxr.pfb></usr/share/texlive/texmf-dist/fonts/type
-1/public/txfonts/t1xtt.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/helve
-tic/uhvb8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/helvetic/uhvr8a.p
-fb></usr/share/texlive/texmf-dist/fonts/type1/urw/helvetic/uhvr8a.pfb></usr/sha
-re/texlive/texmf-dist/fonts/type1/urw/times/utmb8a.pfb></usr/share/texlive/texm
-f-dist/fonts/type1/urw/times/utmbi8a.pfb></usr/share/texlive/texmf-dist/fonts/t
-ype1/urw/times/utmr8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/times/
-utmri8a.pfb>
-Output written on document.pdf (32 pages, 473613 bytes).
+e/texmf-dist/fonts/type1/public/txfonts/rtcxi.pfb></usr/share/texlive/texmf-dis
+t/fonts/type1/public/txfonts/rtcxr.pfb></usr/share/texlive/texmf-dist/fonts/typ
+e1/public/txfonts/rtxi.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/tx
+fonts/rtxr.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/txfonts/t1xtt.
+pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/helvetic/uhvb8a.pfb></usr/sh
+are/texlive/texmf-dist/fonts/type1/urw/helvetic/uhvr8a.pfb></usr/share/texlive/
+texmf-dist/fonts/type1/urw/helvetic/uhvr8a.pfb></usr/share/texlive/texmf-dist/f
+onts/type1/urw/times/utmb8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/
+times/utmbi8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/times/utmr8a.p
+fb></usr/share/texlive/texmf-dist/fonts/type1/urw/times/utmri8a.pfb>
+Output written on document.pdf (33 pages, 495134 bytes).
 PDF statistics:
- 466 PDF objects out of 1000 (max. 8388607)
- 83 named destinations out of 1000 (max. 500000)
+ 523 PDF objects out of 1000 (max. 8388607)
+ 93 named destinations out of 1000 (max. 500000)
  213 words of extra memory for PDF output out of 10000 (max. 10000000)
 

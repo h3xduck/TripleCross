@@ -7,6 +7,12 @@
 \defcounter {refsection}{0}\relax 
 \contentsline {table}{\numberline {2.1}{\ignorespaces Table showing BPF instruction format. It is a fixed-length 64 bit instruction, the number of bits used by each field are indicated.\relax }}{7}{table.caption.9}%
 \defcounter {refsection}{0}\relax 
+\contentsline {table}{\numberline {2.2}{\ignorespaces Table showing relevant eBPF updates. Note that only those relevant for our research objectives are shown. This is a selection of the official complete table at \cite {ebpf_funcs_by_ver}.\relax }}{11}{table.caption.14}%
+\defcounter {refsection}{0}\relax 
+\contentsline {table}{\numberline {2.3}{\ignorespaces Table showing eBPF instruction format. It is a fixed-length 64 bit instruction, the number of bits used by each field are indicated.\relax }}{11}{table.caption.15}%
+\defcounter {refsection}{0}\relax 
+\contentsline {table}{\numberline {2.4}{\ignorespaces Table showing eBPF registers and their purpose in the BPF VM.\cite {ebpf_inst_set}\cite {ebpf_starovo_slides}.\relax }}{12}{table.caption.16}%
+\defcounter {refsection}{0}\relax 
 \addvspace {10\p@ }
 \defcounter {refsection}{0}\relax 
 \addvspace {10\p@ }

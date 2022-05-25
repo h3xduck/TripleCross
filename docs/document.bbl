@@ -23,8 +23,8 @@
       \list{institution}{1}{%
         {PricewaterhouseCoopers}%
       }
-      \field{sortinit}{3}
-      \field{sortinithash}{a37a8ef248a93c322189792c34fc68c9}
+      \field{sortinit}{6}
+      \field{sortinithash}{7851c86048328b027313775d8fbd2131}
       \field{labeltitlesource}{title}
       \field{title}{Cyber Threats 2021: A year in Retrospect}
       \verb{urlraw}
@@ -38,8 +38,8 @@
       \list{institution}{1}{%
         {Positive Technologies}%
       }
-      \field{sortinit}{4}
-      \field{sortinithash}{e071e0bcb44634fab398d68ad04e69f4}
+      \field{sortinit}{7}
+      \field{sortinithash}{f615fb9c6fba11c6f962fb3fd599810e}
       \field{labeltitlesource}{title}
       \field{day}{3}
       \field{month}{11}
@@ -54,8 +54,8 @@
       \endverb
     \endentry
     \entry{ebpf_linux318}{online}{}
-      \field{sortinit}{5}
-      \field{sortinithash}{5dd416adbafacc8226114bc0202d5fdd}
+      \field{sortinit}{8}
+      \field{sortinithash}{1b24cab5087933ef0826a7cd3b99e994}
       \field{day}{7}
       \field{indextitle}{eBPF incorporation in the Linux Kernel 3.18}
       \field{month}{12}
@@ -72,8 +72,8 @@
       \list{institution}{1}{%
         {Pangu Lab}%
       }
-      \field{sortinit}{6}
-      \field{sortinithash}{7851c86048328b027313775d8fbd2131}
+      \field{sortinit}{9}
+      \field{sortinithash}{54047ffb55bdefa0694bbd554c1b11a0}
       \field{labeltitlesource}{title}
       \field{day}{23}
       \field{month}{2}
@@ -91,8 +91,8 @@
       \list{institution}{1}{%
         {PricewaterhouseCoopers}%
       }
-      \field{sortinit}{7}
-      \field{sortinithash}{f615fb9c6fba11c6f962fb3fd599810e}
+      \field{sortinit}{1}
+      \field{sortinithash}{50c6687d7fc80f50136d75228e3c59ba}
       \field{labeltitlesource}{title}
       \field{title}{Cyber Threats 2021: A year in Retrospect}
       \field{pages}{37}
@@ -105,8 +105,8 @@
       \endverb
     \endentry
     \entry{ebpf_windows}{online}{}
-      \field{sortinit}{8}
-      \field{sortinithash}{1b24cab5087933ef0826a7cd3b99e994}
+      \field{sortinit}{1}
+      \field{sortinithash}{50c6687d7fc80f50136d75228e3c59ba}
       \field{labeltitlesource}{title}
       \field{day}{7}
       \field{month}{12}
@@ -121,8 +121,8 @@
       \endverb
     \endentry
     \entry{ebpf_android}{online}{}
-      \field{sortinit}{9}
-      \field{sortinithash}{54047ffb55bdefa0694bbd554c1b11a0}
+      \field{sortinit}{1}
+      \field{sortinithash}{50c6687d7fc80f50136d75228e3c59ba}
       \field{labeltitlesource}{title}
       \field{title}{eBPF for Windows}
       \verb{urlraw}
@@ -321,8 +321,8 @@
       \endverb
     \endentry
     \entry{index_register}{manual}{}
-      \field{sortinit}{1}
-      \field{sortinithash}{50c6687d7fc80f50136d75228e3c59ba}
+      \field{sortinit}{2}
+      \field{sortinithash}{ed39bb39cf854d5250e95b1c1f94f4ed}
       \field{labeltitlesource}{title}
       \field{title}{Index register}
       \verb{urlraw}
@@ -350,8 +350,8 @@
       \strng{authornamehash}{b74c2671072cf5a1a1400dc035240dfd}
       \strng{authorfullhash}{b74c2671072cf5a1a1400dc035240dfd}
       \field{extraname}{3}
-      \field{sortinit}{1}
-      \field{sortinithash}{50c6687d7fc80f50136d75228e3c59ba}
+      \field{sortinit}{2}
+      \field{sortinithash}{ed39bb39cf854d5250e95b1c1f94f4ed}
       \field{labelnamesource}{author}
       \field{labeltitlesource}{title}
       \field{day}{19}
@@ -369,8 +369,8 @@
       \endverb
     \endentry
     \entry{bpf_organicprogrammer_analysis}{online}{}
-      \field{sortinit}{1}
-      \field{sortinithash}{50c6687d7fc80f50136d75228e3c59ba}
+      \field{sortinit}{2}
+      \field{sortinithash}{ed39bb39cf854d5250e95b1c1f94f4ed}
       \field{labeltitlesource}{title}
       \field{day}{28}
       \field{month}{3}
@@ -460,12 +460,115 @@
       \field{sortinit}{2}
       \field{sortinithash}{ed39bb39cf854d5250e95b1c1f94f4ed}
       \field{labeltitlesource}{title}
-      \field{title}{Tcpdump & Libpcap}
+      \field{title}{Tcpdump and Libpcap}
       \verb{urlraw}
       \verb https://www.tcpdump.org
       \endverb
       \verb{url}
       \verb https://www.tcpdump.org
+      \endverb
+    \endentry
+    \entry{ebpf_funcs_by_ver}{manual}{}
+      \list{organization}{1}{%
+        {iovisor}%
+      }
+      \field{sortinit}{2}
+      \field{sortinithash}{ed39bb39cf854d5250e95b1c1f94f4ed}
+      \field{labeltitlesource}{title}
+      \field{title}{BPF features by Linux Kernel Version}
+      \verb{urlraw}
+      \verb https://github.com/iovisor/bcc/blob/master/docs/kernel-versions.md
+      \endverb
+      \verb{url}
+      \verb https://github.com/iovisor/bcc/blob/master/docs/kernel-versions.md
+      \endverb
+    \endentry
+    \entry{brendan_gregg_bpf_book}{book}{}
+      \name{author}{1}{}{%
+        {{hash=b45aef384111d7e9dd71b74ba427b5f1}{%
+           family={Gregg},
+           familyi={G\bibinitperiod},
+           given={Brendan},
+           giveni={B\bibinitperiod}}}%
+      }
+      \strng{namehash}{b45aef384111d7e9dd71b74ba427b5f1}
+      \strng{fullhash}{b45aef384111d7e9dd71b74ba427b5f1}
+      \strng{bibnamehash}{b45aef384111d7e9dd71b74ba427b5f1}
+      \strng{authorbibnamehash}{b45aef384111d7e9dd71b74ba427b5f1}
+      \strng{authornamehash}{b45aef384111d7e9dd71b74ba427b5f1}
+      \strng{authorfullhash}{b45aef384111d7e9dd71b74ba427b5f1}
+      \field{sortinit}{3}
+      \field{sortinithash}{a37a8ef248a93c322189792c34fc68c9}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{BPF performance tools}
+      \verb{urlraw}
+      \verb https://www.oreilly.com/library/view/bpf-performance-tools/9780136588870/
+      \endverb
+      \verb{url}
+      \verb https://www.oreilly.com/library/view/bpf-performance-tools/9780136588870/
+      \endverb
+    \endentry
+    \entry{ebpf_inst_set}{manual}{}
+      \field{sortinit}{3}
+      \field{sortinithash}{a37a8ef248a93c322189792c34fc68c9}
+      \field{labeltitlesource}{title}
+      \field{title}{eBPF instruction set}
+      \verb{urlraw}
+      \verb https://www.kernel.org/doc/html/latest/bpf/instruction-set.html
+      \endverb
+      \verb{url}
+      \verb https://www.kernel.org/doc/html/latest/bpf/instruction-set.html
+      \endverb
+    \endentry
+    \entry{8664_inst_set_specs}{manual}{}
+      \name{author}{1}{}{%
+        {{hash=ff97a9fdede09eaf6e1c8ec9f6a61dd5}{%
+           family={Intel},
+           familyi={I\bibinitperiod}}}%
+      }
+      \strng{namehash}{ff97a9fdede09eaf6e1c8ec9f6a61dd5}
+      \strng{fullhash}{ff97a9fdede09eaf6e1c8ec9f6a61dd5}
+      \strng{bibnamehash}{ff97a9fdede09eaf6e1c8ec9f6a61dd5}
+      \strng{authorbibnamehash}{ff97a9fdede09eaf6e1c8ec9f6a61dd5}
+      \strng{authornamehash}{ff97a9fdede09eaf6e1c8ec9f6a61dd5}
+      \strng{authorfullhash}{ff97a9fdede09eaf6e1c8ec9f6a61dd5}
+      \field{sortinit}{3}
+      \field{sortinithash}{a37a8ef248a93c322189792c34fc68c9}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Intel® 64 and IA-32 Architectures Software Developer’s Manual Combined Volumes: 1, 2A, 2B, 2C, 2D, 3A, 3B, 3C, 3D, and 4}
+      \field{urlday}{13}
+      \field{urlmonth}{5}
+      \field{urlyear}{2022}
+      \field{volume}{2A}
+      \field{urldateera}{ce}
+      \field{pages}{507}
+      \range{pages}{1}
+      \verb{urlraw}
+      \verb https://www.intel.com/content/www/us/en/developer/articles/technical/intel-sdm.html
+      \endverb
+      \verb{url}
+      \verb https://www.intel.com/content/www/us/en/developer/articles/technical/intel-sdm.html
+      \endverb
+    \endentry
+    \entry{ebpf_starovo_slides}{proceedings}{}
+      \list{institution}{1}{%
+        {PLUMgrid}%
+      }
+      \field{sortinit}{3}
+      \field{sortinithash}{a37a8ef248a93c322189792c34fc68c9}
+      \field{labeltitlesource}{title}
+      \field{day}{20}
+      \field{month}{2}
+      \field{title}{BPF – in-kernel virtual machine}
+      \field{year}{2015}
+      \field{dateera}{ce}
+      \verb{urlraw}
+      \verb http://vger.kernel.org/netconf2015Starovoitov-bpf_collabsummit_2015feb20.pdf
+      \endverb
+      \verb{url}
+      \verb http://vger.kernel.org/netconf2015Starovoitov-bpf_collabsummit_2015feb20.pdf
       \endverb
     \endentry
   \enddatalist

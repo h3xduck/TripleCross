@@ -535,8 +535,77 @@ In the example, using the \textit{jf} and \textit{jt} fields, we can label the n
 \end{figure}
 
 \section{Analysis of modern eBPF}
-\subsection{New eBPF infrastructure}
-Since the addition of classic BPF in the Linux kernel, multiple improvements were added. On 
+\subsection{Architecture of eBPF}
+The addition of classic BPF in the Linux kernel set the foundations of eBPF, but nowadays it has already extended its presence to many other components other than traffic filtering. Table \ref{table:ebpf_history} shows the main updates that were incorporated and shaped modern eBPF of today.
+
+\begin{table}[H]
+\begin{tabular}{|c|c|c|}
+\hline
+Description & Kernel version & Year\\
+\hline
+\hline
+\textit{BPF}: First addition in the kernel & 2.1.75 & 1997\\
+\textit{BPF+}: New JIT assembler & 3.0 & 2011\\
+\textit{eBPF}: Added eBPF support & 3.15 & 2014\\
+\textit New bpf() syscall & 3.18 & 2014\\
+\textit eBPF for sockets & 3.19 & 2015\\
+\textit Introduction of eBPF maps & 3.19 & 2015\\
+\textit eBPF attached to kprobes & 4.1 & 2015\\
+\textit Introduction of Traffic Control & 4.5 & 2016\\
+\textit eBPF attached to tracepoints & 4.7 & 2016\\
+\textit Introduction of XDP & 4.8 & 2016\\
+
+
+\hline
+\end{tabular}
+\caption{Table showing relevant eBPF updates. Note that only those relevant for our research objectives are shown. This is a selection of the official complete table at \cite{ebpf_funcs_by_ver}.}
+\label{table:ebpf_history}
+\end{table}
+
+As it can be observed in the table above, the main breakthrough happened in the 3.15 version, where Alexei Starovoitov, along with Daniel Borkmann, decided to expand the capabilities of BPF by remodelling the BPF instruction set and overall architecture\cite{brendan_gregg_bpf_book}.
+
+\begin{table}[H]
+\begin{tabular}{|c|c|c|c|c|c|}
+\hline
+& IMM & OFF & SRC & DST & OPCODE \\
+\hline
+BITS & 32 & 16 & 4 & 4 & 8\\
+\hline
+\end{tabular}
+\caption{Table showing eBPF instruction format. It is a fixed-length 64 bit instruction, the number of bits used by each field are indicated.}
+\label{table:ebpf_inst_format}
+\end{table}
+
+
+Table \ref{table:ebpf_inst_format} shows the new instruction format for eBPF programs\cite{ebpf_inst_set}. The new fields are similar to x86\_64 assembly, incorporating the typically found immediate and offset fields, and source and destination registers\cite{8664_inst_set_specs}.
+%Should I talk about assembly or this more in detail?
+
+With respect to the BPF VM registers, they get extended from 32 to 64 bits of length, and the number of registers is incremented to 10, instead of the original accumulator and index registers. These registers are also adapted to be similar to those in assembly, as it is shown in table \ref{table:ebpf_regs}.
+
+\begin{table}[H]
+\begin{tabular}{|c|c|m{21em}|}
+\hline
+eBPF register & x86\_64 register & Purpose\\
+\hline
+r0 & rax & Return value from functions and exit value of eBPF programs\\
+r1 & rdi & Function call argument 1\\
+r2 & rsi & Function call argument 2\\
+r3 & rdx & Function call argument 3\\
+r4 & rcx & Function call argument 4\\
+r5 & r8 & Function call argument 5\\
+r6 & rbx & Callee saved register, value preserved between calls\\
+r7 & r13 & Callee saved register, value preserved between calls\\
+r8 & r14 & Callee saved register, value preserved between calls\\
+r9 & r15 & Callee saved register, value preserved between calls\\
+r10 & rbp & Frame pointer for stack, read only\\
+\hline
+\end{tabular}
+\caption{Table showing eBPF registers and their purpose in the BPF VM.\cite{ebpf_inst_set}\cite{ebpf_starovo_slides}.}
+\label{table:ebpf_regs}
+\end{table}
+
+\subsection{JIT compilation}
+The p
 
 
 
@@ -547,6 +616,9 @@ Since the addition of classic BPF in the Linux kernel, multiple improvements wer
 
 
 
+
+
+%TODO Talk about the difference between having always on BPF and always on kernel modules
 
 
 \chapter{Methods??}
