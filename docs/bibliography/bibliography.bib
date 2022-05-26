@@ -129,6 +129,11 @@
 	url={https://ebpf.io/what-is-ebpf/}
 },
 
+@manual{ebpf_io_arch,
+	title={eBPF Documentation: Loader and verification architecture},
+	url={https://ebpf.io/what-is-ebpf/#loader--verification-architecture}
+},
+
 @manual{index_register,
 	title={Index register},
 	url={https://gunkies.org/wiki/Index_register}
@@ -160,7 +165,7 @@
 @manual{ebpf_inst_set,
 	title={eBPF instruction set},
 	url={https://www.kernel.org/doc/html/latest/bpf/instruction-set.html}
-}
+},
 
 @manual{8664_inst_set_specs,
 	title={Intel® 64 and IA-32 Architectures Software Developer’s Manual Combined Volumes: 1, 2A, 2B, 2C, 2D, 3A, 3B, 3C, 3D, and 4},
@@ -169,14 +174,59 @@
 	pages={507},
 	urldate={2022-05-13},
 	url={https://www.intel.com/content/www/us/en/developer/articles/technical/intel-sdm.html}
-}
+},
 
 @proceedings{ebpf_starovo_slides,
 	title={BPF – in-kernel virtual machine},	
 	url={http://vger.kernel.org/netconf2015Starovoitov-bpf_collabsummit_2015feb20.pdf},
 	date={2015-02-20},
 	institution={PLUMgrid}
+},
+
+@proceedings{ebpf_starovo_slides_page23,
+	title={BPF – in-kernel virtual machine},	
+	url={http://vger.kernel.org/netconf2015Starovoitov-bpf_collabsummit_2015feb20.pdf},
+	date={2015-02-20},
+	institution={PLUMgrid},
+	pages={23}
+},
+
+@manual{ebpf_JIT,
+	title={A JIT for packet filters},
+	url={https://lwn.net/Articles/437981/},
+	date={2011-04-12},
+	author={Jonathan Corbet}
+},
+
+@proceedings{ebpf_JIT_demystify_page13,
+	title={Demystify eBPF JIT Compiler},
+	url={https://www.netronome.com/media/documents/demystify-ebpf-jit-compiler.pdf},
+	institution={Netronome},
+	author={Jiong Wang},
+	date={2018-09-11},
+	pages={13}
+},
+
+@proceedings{ebpf_JIT_demystify_page14,
+	title={Demystify eBPF JIT Compiler},
+	url={https://www.netronome.com/media/documents/demystify-ebpf-jit-compiler.pdf},
+	institution={Netronome},
+	author={Jiong Wang},
+	date={2018-09-11},
+	pages={14}
+},
+
+@book{brendan_gregg_bpf_book_bpf_vm,
+	title={BPF performance tools},
+	author={Brendan Gregg},
+	url={https://learning.oreilly.com/library/view/bpf-performance-tools/9780136588870/ch02.xhtml#:-:text=With%20JIT%20compiled%20code%2C%20i,%20other%20native%20kernel%20code}
+},
+
+@manual{jit_enable_setting,
+	title={bpf\_jit\_enable},
+	url={https://sysctl-explorer.net/net/core/bpf_jit_enable/}
 }
+
 
 
 

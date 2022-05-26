@@ -497,6 +497,7 @@
       \strng{authorbibnamehash}{b45aef384111d7e9dd71b74ba427b5f1}
       \strng{authornamehash}{b45aef384111d7e9dd71b74ba427b5f1}
       \strng{authorfullhash}{b45aef384111d7e9dd71b74ba427b5f1}
+      \field{extraname}{1}
       \field{sortinit}{3}
       \field{sortinithash}{a37a8ef248a93c322189792c34fc68c9}
       \field{labelnamesource}{author}
@@ -507,6 +508,18 @@
       \endverb
       \verb{url}
       \verb https://www.oreilly.com/library/view/bpf-performance-tools/9780136588870/
+      \endverb
+    \endentry
+    \entry{ebpf_io_arch}{manual}{}
+      \field{sortinit}{3}
+      \field{sortinithash}{a37a8ef248a93c322189792c34fc68c9}
+      \field{labeltitlesource}{title}
+      \field{title}{eBPF Documentation: Loader and verification architecture}
+      \verb{urlraw}
+      \verb https://ebpf.io/what-is-ebpf/#loader--verification-architecture
+      \endverb
+      \verb{url}
+      \verb https://ebpf.io/what-is-ebpf/#loader--verification-architecture
       \endverb
     \endentry
     \entry{ebpf_inst_set}{manual}{}
@@ -569,6 +582,168 @@
       \endverb
       \verb{url}
       \verb http://vger.kernel.org/netconf2015Starovoitov-bpf_collabsummit_2015feb20.pdf
+      \endverb
+    \endentry
+    \entry{ebpf_JIT}{manual}{}
+      \name{author}{1}{}{%
+        {{hash=729670cd9d39b9b575390147a29d51d7}{%
+           family={Corbet},
+           familyi={C\bibinitperiod},
+           given={Jonathan},
+           giveni={J\bibinitperiod}}}%
+      }
+      \strng{namehash}{729670cd9d39b9b575390147a29d51d7}
+      \strng{fullhash}{729670cd9d39b9b575390147a29d51d7}
+      \strng{bibnamehash}{729670cd9d39b9b575390147a29d51d7}
+      \strng{authorbibnamehash}{729670cd9d39b9b575390147a29d51d7}
+      \strng{authornamehash}{729670cd9d39b9b575390147a29d51d7}
+      \strng{authorfullhash}{729670cd9d39b9b575390147a29d51d7}
+      \field{sortinit}{4}
+      \field{sortinithash}{e071e0bcb44634fab398d68ad04e69f4}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{day}{12}
+      \field{month}{4}
+      \field{title}{A JIT for packet filters}
+      \field{year}{2011}
+      \field{dateera}{ce}
+      \verb{urlraw}
+      \verb https://lwn.net/Articles/437981/
+      \endverb
+      \verb{url}
+      \verb https://lwn.net/Articles/437981/
+      \endverb
+    \endentry
+    \entry{ebpf_JIT_demystify_page13}{proceedings}{}
+      \name{author}{1}{}{%
+        {{hash=0fcaa32b080db12cbc8b11b27d05ad61}{%
+           family={Wang},
+           familyi={W\bibinitperiod},
+           given={Jiong},
+           giveni={J\bibinitperiod}}}%
+      }
+      \list{institution}{1}{%
+        {Netronome}%
+      }
+      \strng{namehash}{0fcaa32b080db12cbc8b11b27d05ad61}
+      \strng{fullhash}{0fcaa32b080db12cbc8b11b27d05ad61}
+      \strng{bibnamehash}{0fcaa32b080db12cbc8b11b27d05ad61}
+      \strng{authorbibnamehash}{0fcaa32b080db12cbc8b11b27d05ad61}
+      \strng{authornamehash}{0fcaa32b080db12cbc8b11b27d05ad61}
+      \strng{authorfullhash}{0fcaa32b080db12cbc8b11b27d05ad61}
+      \field{extraname}{1}
+      \field{sortinit}{4}
+      \field{sortinithash}{e071e0bcb44634fab398d68ad04e69f4}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{day}{11}
+      \field{month}{9}
+      \field{title}{Demystify eBPF JIT Compiler}
+      \field{year}{2018}
+      \field{dateera}{ce}
+      \field{pages}{13}
+      \range{pages}{1}
+      \verb{urlraw}
+      \verb https://www.netronome.com/media/documents/demystify-ebpf-jit-compiler.pdf
+      \endverb
+      \verb{url}
+      \verb https://www.netronome.com/media/documents/demystify-ebpf-jit-compiler.pdf
+      \endverb
+    \endentry
+    \entry{ebpf_JIT_demystify_page14}{proceedings}{}
+      \name{author}{1}{}{%
+        {{hash=0fcaa32b080db12cbc8b11b27d05ad61}{%
+           family={Wang},
+           familyi={W\bibinitperiod},
+           given={Jiong},
+           giveni={J\bibinitperiod}}}%
+      }
+      \list{institution}{1}{%
+        {Netronome}%
+      }
+      \strng{namehash}{0fcaa32b080db12cbc8b11b27d05ad61}
+      \strng{fullhash}{0fcaa32b080db12cbc8b11b27d05ad61}
+      \strng{bibnamehash}{0fcaa32b080db12cbc8b11b27d05ad61}
+      \strng{authorbibnamehash}{0fcaa32b080db12cbc8b11b27d05ad61}
+      \strng{authornamehash}{0fcaa32b080db12cbc8b11b27d05ad61}
+      \strng{authorfullhash}{0fcaa32b080db12cbc8b11b27d05ad61}
+      \field{extraname}{2}
+      \field{sortinit}{4}
+      \field{sortinithash}{e071e0bcb44634fab398d68ad04e69f4}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{day}{11}
+      \field{month}{9}
+      \field{title}{Demystify eBPF JIT Compiler}
+      \field{year}{2018}
+      \field{dateera}{ce}
+      \field{pages}{14}
+      \range{pages}{1}
+      \verb{urlraw}
+      \verb https://www.netronome.com/media/documents/demystify-ebpf-jit-compiler.pdf
+      \endverb
+      \verb{url}
+      \verb https://www.netronome.com/media/documents/demystify-ebpf-jit-compiler.pdf
+      \endverb
+    \endentry
+    \entry{jit_enable_setting}{manual}{}
+      \field{sortinit}{4}
+      \field{sortinithash}{e071e0bcb44634fab398d68ad04e69f4}
+      \field{labeltitlesource}{title}
+      \field{title}{bpf\_jit\_enable}
+      \verb{urlraw}
+      \verb https://sysctl-explorer.net/net/core/bpf_jit_enable/
+      \endverb
+      \verb{url}
+      \verb https://sysctl-explorer.net/net/core/bpf_jit_enable/
+      \endverb
+    \endentry
+    \entry{ebpf_starovo_slides_page23}{proceedings}{}
+      \list{institution}{1}{%
+        {PLUMgrid}%
+      }
+      \field{sortinit}{4}
+      \field{sortinithash}{e071e0bcb44634fab398d68ad04e69f4}
+      \field{labeltitlesource}{title}
+      \field{day}{20}
+      \field{month}{2}
+      \field{title}{BPF – in-kernel virtual machine}
+      \field{year}{2015}
+      \field{dateera}{ce}
+      \field{pages}{23}
+      \range{pages}{1}
+      \verb{urlraw}
+      \verb http://vger.kernel.org/netconf2015Starovoitov-bpf_collabsummit_2015feb20.pdf
+      \endverb
+      \verb{url}
+      \verb http://vger.kernel.org/netconf2015Starovoitov-bpf_collabsummit_2015feb20.pdf
+      \endverb
+    \endentry
+    \entry{brendan_gregg_bpf_book_bpf_vm}{book}{}
+      \name{author}{1}{}{%
+        {{hash=b45aef384111d7e9dd71b74ba427b5f1}{%
+           family={Gregg},
+           familyi={G\bibinitperiod},
+           given={Brendan},
+           giveni={B\bibinitperiod}}}%
+      }
+      \strng{namehash}{b45aef384111d7e9dd71b74ba427b5f1}
+      \strng{fullhash}{b45aef384111d7e9dd71b74ba427b5f1}
+      \strng{bibnamehash}{b45aef384111d7e9dd71b74ba427b5f1}
+      \strng{authorbibnamehash}{b45aef384111d7e9dd71b74ba427b5f1}
+      \strng{authornamehash}{b45aef384111d7e9dd71b74ba427b5f1}
+      \strng{authorfullhash}{b45aef384111d7e9dd71b74ba427b5f1}
+      \field{extraname}{2}
+      \field{sortinit}{4}
+      \field{sortinithash}{e071e0bcb44634fab398d68ad04e69f4}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{BPF performance tools}
+      \verb{urlraw}
+      \verb https://learning.oreilly.com/library/view/bpf-performance-tools/9780136588870/ch02.xhtml#:-:text=With%20JIT%20compiled%20code%2C%20i,%20other%20native%20kernel%20code
+      \endverb
+      \verb{url}
+      \verb https://learning.oreilly.com/library/view/bpf-performance-tools/9780136588870/ch02.xhtml#:-:text=With%20JIT%20compiled%20code%2C%20i,%20other%20native%20kernel%20code
       \endverb
     \endentry
   \enddatalist

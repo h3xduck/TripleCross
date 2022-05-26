@@ -409,8 +409,11 @@ The rootkit will work in a fresh-install of a Linux system with the following ch
 % I WILL NOT INCLUDE A ROOTKIT BACKGROUND, considering that a deep study of that is not fully relevant for us. I explained what it is, its two main types (should we include bootkits, maybe?) and its relation with eBPF in the introduction, since it is needed to introduce the overall context. Should we do otherwise?
 This chapter is dedicated to an study of the eBPF technology. Firstly, we will analyse its origins, understanding what it is and how it works, and discuss the reasons why it is a necessary component of the Linux kernel today. Afterwards, we will cover the main features of eBPF in detail. Finally, an study of the existing alternatives for developing eBPF applications will be also included.
 
+Although during our discussion of the offensive capabilities of eBPF in section\ref{section:analysis_offensive_capabilities} we use a library that will provide us with a layer of abstraction over the underlying operations, this background is needed to understand how eBPF is embedded in the kernel and which capabilities and limits we can expect to achieve with it.
+
 \section{eBPF history - Classic BPF}
 % Is it ok to have sections / chapters without individual intros?
+In this section we will detail the origins of eBPF in the Linux kernel. By offering us background into the earlier versions of the system, the goal is to acquire insight on the design decisions included in modern versions of eBPF.
 
 \subsection{Introduction to the BPF system}
 Nowadays eBPF is not officially considered to be an acronym anymore\cite{ebpf_io}, but it remains largely known as "extended Berkeley Packet Filters", given its roots in the Berkeley Packet Filter (BPF) technology, now known as classic BPF.
@@ -425,11 +428,11 @@ BPF was introduced in 1992 by Steven McCanne and Van Jacobson in the paper "The 
 	\label{fig:classif_bpf}
 \end{figure}
 
-Figure \ref{fig:classif_bpf} shows how BPF was integrated in the existing network packet processing by the kernel. After receiving a packet, it would first be analysed by BPF filters, programs directly developed by the user. The filter decides whether the packet is to be accepted by analysing the packet properties, such as its length or the type and values of its headers. If a packet is accepted, the filter proceeds to decide how many bytes of the original buffer are passed to the application at the user space. Otherwise, the packet is redirected to the original network stack, where it is managed as usual.
+Figure \ref{fig:classif_bpf} shows how BPF was integrated in the existing network packet processing by the kernel. After receiving a packet via the Network Interface Controller (NIC) driver, it would first be analysed by BPF filters, which are programs directly developed by the user. This filter decides whether the packet is to be accepted by analysing the packet properties, such as its length or the type and values of its headers. If a packet is accepted, the filter proceeds to decide how many bytes of the original buffer are passed to the application at the user space. Otherwise, the packet is redirected to the original network stack, where it is managed as usual.
 
 
-\subsection{The BPF virtual machine}
-In a technical level, BPF comprises both the BPF filter programs developed by the user and the BPF module included in the kernel which allows for loading and running the BPF filters. This BPF module in the kernel works as a virtual machine\cite{bpf_bsd_origin_bpf_page1}. Therefore, it is usually referred as the BPF Virtual Machine (BPF VM). The BPF VM comprises the following components:
+\subsection{The BPF virtual machine} \label{section:bpf_vm}
+In a technical level, BPF comprises both the BPF filter programs developed by the user and the BPF module included in the kernel which allows for loading and running the BPF filters. This BPF module in the kernel works as a virtual machine\cite{bpf_bsd_origin_bpf_page1}, meaning that it parses and interprets the filter program by providing simulated components needed for its execution, turning into a software-based CPU. Because of this reason, it is usually referred as the BPF Virtual Machine (BPF VM). The BPF VM comprises the following components:
 \begin{itemize}
 \item \textbf{An accumulator register}, used to store intermediate values of operations.
 \item \textbf{An index register}, used to modify operand addresses, it is usually incorporated to optimize vector operations\cite{index_register}.
@@ -439,7 +442,7 @@ In a technical level, BPF comprises both the BPF filter programs developed by th
 
 
 \subsection{Analysis of a BPF filter program}
-The components of the BPF VM are used to support running BPF filter programs. A BPF filter is implemented as a boolean function:
+As we mentioned in section \ref{section:bpf_vm}, the components of the BPF VM are used to support running BPF filter programs. A BPF filter is implemented as a boolean function:
 \begin{itemize}
 \item If it returns \textit{true}, the kernel copies the packet to the application.
 \item If it returns \textit{false}, the packet is not accepted by the filter (and thus the network stack will be the next to operate it).
@@ -525,7 +528,7 @@ At the time, by filtering packets before they are handled by the kernel instead 
 
 Figure \ref{fig:bpf_tcpdump_example} shows how tcpdump sets a filter to display traffic directed to all interfaces (\textit{-i any}) directed to port 80. Flag \textit{-d} instructs tcpdump to display BPF bytecode.
 
-In the example, using the \textit{jf} and \textit{jt} fields, we can label the nodes of the CFG described by the BPF filter. Figure \ref{fig:tcpdump_ex_sol} is the shortest graph path that a true comparison will need to follow to be accepted by the filter. Note how instruction 010 is checking the value 80, the one our filter is looking for in the port.
+In the example, using the \textit{jf} and \textit{jt} fields, we can label the nodes of the CFG described by the BPF filter. Figure \ref{fig:tcpdump_ex_sol} describes the shortest graph path that a true comparison will need to follow to be accepted by the filter. Note how instruction 010 is checking the value 80, the one our filter is looking for in the port.
 
 \begin{figure}[H]
 	\centering
@@ -535,8 +538,9 @@ In the example, using the \textit{jf} and \textit{jt} fields, we can label the n
 \end{figure}
 
 \section{Analysis of modern eBPF}
-\subsection{Architecture of eBPF}
-The addition of classic BPF in the Linux kernel set the foundations of eBPF, but nowadays it has already extended its presence to many other components other than traffic filtering. Table \ref{table:ebpf_history} shows the main updates that were incorporated and shaped modern eBPF of today.
+This section discusses the current state of modern eBPF in the Linux kernel. By building on the previous architecture described in classic BPF, we will be able to provide a comprehensive picture of the underlying infrastructure in which eBPF relies today.
+
+The addition of classic BPF in the Linux kernel set the foundations of eBPF, but nowadays it has already extended its presence to many other components other than traffic filtering. Similarly to how BPF filters were included in the networking module of the Linux kernel, we will now study the necessary changes made in the kernel to support these new program types. Table \ref{table:ebpf_history} shows the main updates that were incorporated and shaped modern eBPF of today.
 
 \begin{table}[H]
 \begin{tabular}{|c|c|c|}
@@ -548,7 +552,6 @@ Description & Kernel version & Year\\
 \textit{BPF+}: New JIT assembler & 3.0 & 2011\\
 \textit{eBPF}: Added eBPF support & 3.15 & 2014\\
 \textit New bpf() syscall & 3.18 & 2014\\
-\textit eBPF for sockets & 3.19 & 2015\\
 \textit Introduction of eBPF maps & 3.19 & 2015\\
 \textit eBPF attached to kprobes & 4.1 & 2015\\
 \textit Introduction of Traffic Control & 4.5 & 2016\\
@@ -564,6 +567,18 @@ Description & Kernel version & Year\\
 
 As it can be observed in the table above, the main breakthrough happened in the 3.15 version, where Alexei Starovoitov, along with Daniel Borkmann, decided to expand the capabilities of BPF by remodelling the BPF instruction set and overall architecture\cite{brendan_gregg_bpf_book}.
 
+Figure \ref{fig:ebpf_architecture} offers an overview of the current eBPF architecture. During the subsequent subsections, we will proceed to explain its components in detail.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=15cm]{ebpf_arch.jpg}
+	\caption{Figure showing overall eBPF architecture in the Linux kernel and the process of loading an eBPF program. Based on\cite{brendan_gregg_bpf_book} and \cite{ebpf_io_arch}.}
+	\label{fig:ebpf_architecture}
+\end{figure}
+
+\subsection{eBPF instruction set} \label{subsection:ebpf_inst_set}
+The eBPF update included a complete remodel of the instruction set architecture (ISA) of the BPF VM. Therefore, eBPF programs will need to follow the new architecture in order to be interpreted as valid and executed.
+
 \begin{table}[H]
 \begin{tabular}{|c|c|c|c|c|c|}
 \hline
@@ -577,7 +592,7 @@ BITS & 32 & 16 & 4 & 4 & 8\\
 \end{table}
 
 
-Table \ref{table:ebpf_inst_format} shows the new instruction format for eBPF programs\cite{ebpf_inst_set}. The new fields are similar to x86\_64 assembly, incorporating the typically found immediate and offset fields, and source and destination registers\cite{8664_inst_set_specs}.
+Table \ref{table:ebpf_inst_format} shows the new instruction format for eBPF programs\cite{ebpf_inst_set}. The new fields are similar to x86\_64 assembly, incorporating the typically found immediate and offset fields, and source and destination registers\cite{8664_inst_set_specs}. Similarly, the instruction set is extended to be similar to the one typically found on x86\_64 systems, the complete list can be consulted in the official documentation\cite{ebpf_inst_set}.
 %Should I talk about assembly or this more in detail?
 
 With respect to the BPF VM registers, they get extended from 32 to 64 bits of length, and the number of registers is incremented to 10, instead of the original accumulator and index registers. These registers are also adapted to be similar to those in assembly, as it is shown in table \ref{table:ebpf_regs}.
@@ -605,7 +620,23 @@ r10 & rbp & Frame pointer for stack, read only\\
 \end{table}
 
 \subsection{JIT compilation}
-The p
+We mentioned in subsection \ref{subsection:ebpf_inst_set} that eBPF registers and instructions describe an almost one-to-one correspondence to those in x86 assembly. This is in fact not a coincidence, but rather it is with the purpose of improving a functionality that was included in Linux kernel 3.0, called Just-in-Time (JIT) compilation\cite{ebpf_JIT}\cite{ebpf_JIT_demystify_page13}.
+
+JIT compiling is an extra step that optimizes the execution speed of eBPF programs. It consists of translating BPF bytecode into machine-specific instructions, so that they run as fast as native code in the kernel. Machine instructions are generated during runtime, written directly into executable memory and executed there\cite{ebpf_JIT_demystify_page14}.
+
+Therefore, when using JIT compiling (a setting defined by the variable \textit{bpf\_jit\_enable}\cite{jit_enable_setting}, BPF registers are translated into machine-specific registers following their one-to-one mapping and bytecode instructions are translated into machine-specific instructions\cite{ebpf_starovo_slides_page23}. There no longer exists an interpretation step by the BPF VM, since we can execute the code directly\cite{brendan_gregg_bpf_book_bpf_vm}.
+
+The programs developed during this project will always have JIT compiling active.
+
+
+\subsection{eBPF architecture}
+Provided the instruction set architecture (ISA) described in section
+
+
+
+
+
+
 
 
 
