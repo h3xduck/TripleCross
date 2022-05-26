@@ -23,8 +23,8 @@
       \list{institution}{1}{%
         {PricewaterhouseCoopers}%
       }
-      \field{sortinit}{8}
-      \field{sortinithash}{1b24cab5087933ef0826a7cd3b99e994}
+      \field{sortinit}{1}
+      \field{sortinithash}{50c6687d7fc80f50136d75228e3c59ba}
       \field{labeltitlesource}{title}
       \field{title}{Cyber Threats 2021: A year in Retrospect}
       \verb{urlraw}
@@ -38,8 +38,8 @@
       \list{institution}{1}{%
         {Positive Technologies}%
       }
-      \field{sortinit}{9}
-      \field{sortinithash}{54047ffb55bdefa0694bbd554c1b11a0}
+      \field{sortinit}{1}
+      \field{sortinithash}{50c6687d7fc80f50136d75228e3c59ba}
       \field{labeltitlesource}{title}
       \field{day}{3}
       \field{month}{11}
@@ -211,8 +211,8 @@
       \strng{authorbibnamehash}{2994fc802c0b46f7289cf001e2c26cfe}
       \strng{authornamehash}{2994fc802c0b46f7289cf001e2c26cfe}
       \strng{authorfullhash}{2994fc802c0b46f7289cf001e2c26cfe}
-      \field{sortinit}{1}
-      \field{sortinithash}{50c6687d7fc80f50136d75228e3c59ba}
+      \field{sortinit}{2}
+      \field{sortinithash}{ed39bb39cf854d5250e95b1c1f94f4ed}
       \field{labelnamesource}{author}
       \field{eventtitle}{Cyber Threats 2021: A year in Retrospect}
       \verb{urlraw}
@@ -223,8 +223,8 @@
       \endverb
     \endentry
     \entry{ebpf_io}{manual}{}
-      \field{sortinit}{1}
-      \field{sortinithash}{50c6687d7fc80f50136d75228e3c59ba}
+      \field{sortinit}{2}
+      \field{sortinithash}{ed39bb39cf854d5250e95b1c1f94f4ed}
       \field{labeltitlesource}{title}
       \field{title}{eBPF Documentation}
       \verb{urlraw}
@@ -252,8 +252,8 @@
       \strng{authornamehash}{b74c2671072cf5a1a1400dc035240dfd}
       \strng{authorfullhash}{b74c2671072cf5a1a1400dc035240dfd}
       \field{extraname}{1}
-      \field{sortinit}{1}
-      \field{sortinithash}{50c6687d7fc80f50136d75228e3c59ba}
+      \field{sortinit}{2}
+      \field{sortinithash}{ed39bb39cf854d5250e95b1c1f94f4ed}
       \field{labelnamesource}{author}
       \field{labeltitlesource}{title}
       \field{day}{19}
@@ -457,8 +457,8 @@
       \endverb
     \endentry
     \entry{tcpdump_page}{manual}{}
-      \field{sortinit}{2}
-      \field{sortinithash}{ed39bb39cf854d5250e95b1c1f94f4ed}
+      \field{sortinit}{3}
+      \field{sortinithash}{a37a8ef248a93c322189792c34fc68c9}
       \field{labeltitlesource}{title}
       \field{title}{Tcpdump and Libpcap}
       \verb{urlraw}
@@ -569,8 +569,8 @@
       \list{institution}{1}{%
         {PLUMgrid}%
       }
-      \field{sortinit}{3}
-      \field{sortinithash}{a37a8ef248a93c322189792c34fc68c9}
+      \field{sortinit}{4}
+      \field{sortinithash}{e071e0bcb44634fab398d68ad04e69f4}
       \field{labeltitlesource}{title}
       \field{day}{20}
       \field{month}{2}
@@ -734,8 +734,8 @@
       \strng{authornamehash}{b45aef384111d7e9dd71b74ba427b5f1}
       \strng{authorfullhash}{b45aef384111d7e9dd71b74ba427b5f1}
       \field{extraname}{2}
-      \field{sortinit}{4}
-      \field{sortinithash}{e071e0bcb44634fab398d68ad04e69f4}
+      \field{sortinit}{5}
+      \field{sortinithash}{5dd416adbafacc8226114bc0202d5fdd}
       \field{labelnamesource}{author}
       \field{labeltitlesource}{title}
       \field{title}{BPF performance tools}
@@ -747,8 +747,8 @@
       \endverb
     \endentry
     \entry{ebpf_verifier_kerneldocs}{manual}{}
-      \field{sortinit}{4}
-      \field{sortinithash}{e071e0bcb44634fab398d68ad04e69f4}
+      \field{sortinit}{5}
+      \field{sortinithash}{5dd416adbafacc8226114bc0202d5fdd}
       \field{labeltitlesource}{title}
       \field{title}{eBPF verifier}
       \verb{urlraw}
@@ -776,8 +776,8 @@
       \strng{authornamehash}{0fcaa32b080db12cbc8b11b27d05ad61}
       \strng{authorfullhash}{0fcaa32b080db12cbc8b11b27d05ad61}
       \field{extraname}{3}
-      \field{sortinit}{4}
-      \field{sortinithash}{e071e0bcb44634fab398d68ad04e69f4}
+      \field{sortinit}{5}
+      \field{sortinithash}{5dd416adbafacc8226114bc0202d5fdd}
       \field{labelnamesource}{author}
       \field{labeltitlesource}{title}
       \field{day}{11}
@@ -820,6 +820,30 @@
       \verb https://lwn.net/Articles/794934/
       \endverb
       \warn{\item Entry 'ebpf_bounded_loops' (bibliography/bibliography.bib): Invalid format '2019-06-31' of date field 'date' - ignoring}
+    \endentry
+    \entry{ebpf_maps_kernel}{manual}{}
+      \field{sortinit}{5}
+      \field{sortinithash}{5dd416adbafacc8226114bc0202d5fdd}
+      \field{labeltitlesource}{title}
+      \field{title}{eBPF maps}
+      \verb{urlraw}
+      \verb https://www.kernel.org/doc/html/latest/bpf/maps.html
+      \endverb
+      \verb{url}
+      \verb https://www.kernel.org/doc/html/latest/bpf/maps.html
+      \endverb
+    \endentry
+    \entry{bpf_syscall}{manual}{}
+      \field{sortinit}{5}
+      \field{sortinithash}{5dd416adbafacc8226114bc0202d5fdd}
+      \field{labeltitlesource}{title}
+      \field{title}{bpf(2)- Linux manual page}
+      \verb{urlraw}
+      \verb https://man7.org/linux/man-pages/man2/bpf.2.html
+      \endverb
+      \verb{url}
+      \verb https://man7.org/linux/man-pages/man2/bpf.2.html
+      \endverb
     \endentry
   \enddatalist
 \endrefsection

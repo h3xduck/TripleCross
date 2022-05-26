@@ -71,7 +71,7 @@
 \providecommand*\caption@xref[2]{\@setref\relax\@undefined{#1}}
 \newlabel{fig:classif_bpf}{{2.1}{6}{Sketch of the functionality of classic BPF\relax }{figure.caption.7}{}}
 \@writefile{toc}{\defcounter {refsection}{0}\relax }\@writefile{toc}{\contentsline {subsection}{\numberline {2.1.2}The BPF virtual machine}{6}{subsection.2.1.2}\protected@file@percent }
-\newlabel{section:bpf_vm}{{2.1.2}{6}{The BPF virtual machine}{subsection.2.1.2}{}}
+\newlabel{subsection:bpf_vm}{{2.1.2}{6}{The BPF virtual machine}{subsection.2.1.2}{}}
 \abx@aux@cite{bpf_bsd_origin_bpf_page5}
 \abx@aux@segm{0}{0}{bpf_bsd_origin_bpf_page5}
 \abx@aux@cite{bpf_organicprogrammer_analysis}
@@ -97,7 +97,7 @@
 \abx@aux@segm{0}{0}{tcpdump_page}
 \@writefile{lof}{\defcounter {refsection}{0}\relax }\@writefile{lof}{\contentsline {figure}{\numberline {2.4}{\ignorespaces Table explaining the column address modes in Figure\ref  {fig:bpf_instructions}, as shown by McCanne and Jacobson\cite {bpf_bsd_origin_bpf_page8}\relax }}{9}{figure.caption.11}\protected@file@percent }
 \newlabel{fig:bpf_address_mode}{{2.4}{9}{Table explaining the column address modes in Figure\ref {fig:bpf_instructions}, as shown by McCanne and Jacobson\cite {bpf_bsd_origin_bpf_page8}\relax }{figure.caption.11}{}}
-\@writefile{toc}{\defcounter {refsection}{0}\relax }\@writefile{toc}{\contentsline {subsection}{\numberline {2.1.5}An example of BPF filter - \textit  {tcpdump}}{10}{subsection.2.1.5}\protected@file@percent }
+\@writefile{toc}{\defcounter {refsection}{0}\relax }\@writefile{toc}{\contentsline {subsection}{\numberline {2.1.5}An example of BPF filter with tcpdump}{10}{subsection.2.1.5}\protected@file@percent }
 \@writefile{lof}{\defcounter {refsection}{0}\relax }\@writefile{lof}{\contentsline {figure}{\numberline {2.5}{\ignorespaces BPF bytecode tcpdump needs to set a filter to display packets directed to port 80.\relax }}{10}{figure.caption.12}\protected@file@percent }
 \newlabel{fig:bpf_tcpdump_example}{{2.5}{10}{BPF bytecode tcpdump needs to set a filter to display packets directed to port 80.\relax }{figure.caption.12}{}}
 \abx@aux@cite{ebpf_funcs_by_ver}
@@ -157,17 +157,55 @@
 \abx@aux@cite{ebpf_bounded_loops}
 \abx@aux@segm{0}{0}{ebpf_bounded_loops}
 \@writefile{toc}{\defcounter {refsection}{0}\relax }\@writefile{toc}{\contentsline {subsection}{\numberline {2.2.3}The eBPF verifier}{14}{subsection.2.2.3}\protected@file@percent }
-\@writefile{toc}{\defcounter {refsection}{0}\relax }\@writefile{toc}{\contentsline {chapter}{\numberline {3}Methods??}{16}{chapter.3}\protected@file@percent }
+\abx@aux@cite{ebpf_maps_kernel}
+\abx@aux@segm{0}{0}{ebpf_maps_kernel}
+\abx@aux@cite{bpf_syscall}
+\abx@aux@segm{0}{0}{bpf_syscall}
+\abx@aux@cite{bpf_syscall}
+\abx@aux@segm{0}{0}{bpf_syscall}
+\abx@aux@cite{bpf_syscall}
+\abx@aux@segm{0}{0}{bpf_syscall}
+\@writefile{toc}{\defcounter {refsection}{0}\relax }\@writefile{toc}{\contentsline {subsection}{\numberline {2.2.4}eBPF maps}{15}{subsection.2.2.4}\protected@file@percent }
+\@writefile{lot}{\defcounter {refsection}{0}\relax }\@writefile{lot}{\contentsline {table}{\numberline {2.5}{\ignorespaces Table showing common fields for creating an eBPF map.\relax }}{15}{table.caption.18}\protected@file@percent }
+\newlabel{table:ebpf_map_struct}{{2.5}{15}{Table showing common fields for creating an eBPF map.\relax }{table.caption.18}{}}
+\@writefile{lot}{\defcounter {refsection}{0}\relax }\@writefile{lot}{\contentsline {table}{\numberline {2.6}{\ignorespaces Table showing types of eBPF maps. Only those used in our rootkit are displayed, the full list can be consulted in the man page \cite {bpf_syscall}\relax }}{15}{table.caption.19}\protected@file@percent }
+\newlabel{table:ebpf_map_types}{{2.6}{15}{Table showing types of eBPF maps. Only those used in our rootkit are displayed, the full list can be consulted in the man page \cite {bpf_syscall}\relax }{table.caption.19}{}}
+\abx@aux@cite{bpf_syscall}
+\abx@aux@segm{0}{0}{bpf_syscall}
+\abx@aux@cite{bpf_syscall}
+\abx@aux@segm{0}{0}{bpf_syscall}
+\abx@aux@cite{bpf_syscall}
+\abx@aux@segm{0}{0}{bpf_syscall}
+\abx@aux@cite{bpf_syscall}
+\abx@aux@segm{0}{0}{bpf_syscall}
+\@writefile{toc}{\defcounter {refsection}{0}\relax }\@writefile{toc}{\contentsline {subsection}{\numberline {2.2.5}The eBPF ring buffer}{16}{subsection.2.2.5}\protected@file@percent }
+\newlabel{subsection:bpf_ring_buf}{{2.2.5}{16}{The eBPF ring buffer}{subsection.2.2.5}{}}
+\@writefile{toc}{\defcounter {refsection}{0}\relax }\@writefile{toc}{\contentsline {subsection}{\numberline {2.2.6}The bpf() syscall}{16}{subsection.2.2.6}\protected@file@percent }
+\@writefile{lot}{\defcounter {refsection}{0}\relax }\@writefile{lot}{\contentsline {table}{\numberline {2.7}{\ignorespaces Table showing types of syscall actions. Only those relevant to our research are shown the full list and attribute details can be consulted in the man page \cite {bpf_syscall}\relax }}{16}{table.caption.20}\protected@file@percent }
+\newlabel{table:ebpf_syscall}{{2.7}{16}{Table showing types of syscall actions. Only those relevant to our research are shown the full list and attribute details can be consulted in the man page \cite {bpf_syscall}\relax }{table.caption.20}{}}
+\abx@aux@cite{ebpf_helpers}
+\abx@aux@segm{0}{0}{ebpf_helpers}
+\abx@aux@cite{ebpf_helpers}
+\abx@aux@segm{0}{0}{ebpf_helpers}
+\abx@aux@cite{ebpf_helpers}
+\abx@aux@segm{0}{0}{ebpf_helpers}
+\@writefile{lot}{\defcounter {refsection}{0}\relax }\@writefile{lot}{\contentsline {table}{\numberline {2.8}{\ignorespaces Table showing types of eBPF programs. Only those relevant to our research are shown. The full list and attribute details can be consulted in the man page \cite {bpf_syscall}.\relax }}{17}{table.caption.21}\protected@file@percent }
+\newlabel{table:ebpf_prog_types}{{2.8}{17}{Table showing types of eBPF programs. Only those relevant to our research are shown. The full list and attribute details can be consulted in the man page \cite {bpf_syscall}.\relax }{table.caption.21}{}}
+\@writefile{toc}{\defcounter {refsection}{0}\relax }\@writefile{toc}{\contentsline {subsection}{\numberline {2.2.7}eBPF helpers}{17}{subsection.2.2.7}\protected@file@percent }
+\@writefile{lot}{\defcounter {refsection}{0}\relax }\@writefile{lot}{\contentsline {table}{\numberline {2.9}{\ignorespaces Table showing common eBPF helpers. Only those relevant to our research are shown. Those helpers exclusive to an specific program type are not listed. The full list and attribute details can be consulted in the man page \cite {ebpf_helpers}.\relax }}{18}{table.caption.22}\protected@file@percent }
+\newlabel{table:ebpf_helpers}{{2.9}{18}{Table showing common eBPF helpers. Only those relevant to our research are shown. Those helpers exclusive to an specific program type are not listed. The full list and attribute details can be consulted in the man page \cite {ebpf_helpers}.\relax }{table.caption.22}{}}
+\@writefile{toc}{\defcounter {refsection}{0}\relax }\@writefile{toc}{\contentsline {chapter}{\numberline {3}Methods??}{19}{chapter.3}\protected@file@percent }
 \@writefile{lof}{\defcounter {refsection}{0}\relax }\@writefile{lof}{\addvspace {10\p@ }}
 \@writefile{lot}{\defcounter {refsection}{0}\relax }\@writefile{lot}{\addvspace {10\p@ }}
-\@writefile{toc}{\defcounter {refsection}{0}\relax }\@writefile{toc}{\contentsline {chapter}{\numberline {4}Results}{17}{chapter.4}\protected@file@percent }
+\@writefile{toc}{\defcounter {refsection}{0}\relax }\@writefile{toc}{\contentsline {chapter}{\numberline {4}Results}{20}{chapter.4}\protected@file@percent }
 \@writefile{lof}{\defcounter {refsection}{0}\relax }\@writefile{lof}{\addvspace {10\p@ }}
 \@writefile{lot}{\defcounter {refsection}{0}\relax }\@writefile{lot}{\addvspace {10\p@ }}
-\@writefile{toc}{\defcounter {refsection}{0}\relax }\@writefile{toc}{\contentsline {chapter}{\numberline {5}Conclusion and future work}{18}{chapter.5}\protected@file@percent }
+\@writefile{toc}{\defcounter {refsection}{0}\relax }\@writefile{toc}{\contentsline {chapter}{\numberline {5}Conclusion and future work}{21}{chapter.5}\protected@file@percent }
 \@writefile{lof}{\defcounter {refsection}{0}\relax }\@writefile{lof}{\addvspace {10\p@ }}
 \@writefile{lot}{\defcounter {refsection}{0}\relax }\@writefile{lot}{\addvspace {10\p@ }}
-\@writefile{toc}{\defcounter {refsection}{0}\relax }\@writefile{toc}{\contentsline {chapter}{Bibliography}{19}{chapter.5}\protected@file@percent }
-\abx@aux@read@bbl@mdfivesum{B46A2B2BB490570F1A9251B9CDF39B97}
+\@writefile{toc}{\defcounter {refsection}{0}\relax }\@writefile{toc}{\contentsline {chapter}{Bibliography}{22}{chapter.5}\protected@file@percent }
+\abx@aux@read@bbl@mdfivesum{B0FAA8A56537935B1DC703B06B60D6C1}
+\abx@aux@read@bblrerun
 \abx@aux@refcontextdefaultsdone
 \abx@aux@defaultrefcontext{0}{ransomware_pwc}{none/global//global/global}
 \abx@aux@defaultrefcontext{0}{rootkit_ptsecurity}{none/global//global/global}
@@ -204,5 +242,7 @@
 \abx@aux@defaultrefcontext{0}{ebpf_verifier_kerneldocs}{none/global//global/global}
 \abx@aux@defaultrefcontext{0}{ebpf_JIT_demystify_page17-22}{none/global//global/global}
 \abx@aux@defaultrefcontext{0}{ebpf_bounded_loops}{none/global//global/global}
+\abx@aux@defaultrefcontext{0}{ebpf_maps_kernel}{none/global//global/global}
+\abx@aux@defaultrefcontext{0}{bpf_syscall}{none/global//global/global}
 \ttl@finishall
-\gdef \@abspage@last{37}
+\gdef \@abspage@last{40}

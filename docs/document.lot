@@ -13,6 +13,16 @@
 \defcounter {refsection}{0}\relax 
 \contentsline {table}{\numberline {2.4}{\ignorespaces Table showing eBPF registers and their purpose in the BPF VM.\cite {ebpf_inst_set}\cite {ebpf_starovo_slides}.\relax }}{13}{table.caption.17}%
 \defcounter {refsection}{0}\relax 
+\contentsline {table}{\numberline {2.5}{\ignorespaces Table showing common fields for creating an eBPF map.\relax }}{15}{table.caption.18}%
+\defcounter {refsection}{0}\relax 
+\contentsline {table}{\numberline {2.6}{\ignorespaces Table showing types of eBPF maps. Only those used in our rootkit are displayed, the full list can be consulted in the man page \cite {bpf_syscall}\relax }}{15}{table.caption.19}%
+\defcounter {refsection}{0}\relax 
+\contentsline {table}{\numberline {2.7}{\ignorespaces Table showing types of syscall actions. Only those relevant to our research are shown the full list and attribute details can be consulted in the man page \cite {bpf_syscall}\relax }}{16}{table.caption.20}%
+\defcounter {refsection}{0}\relax 
+\contentsline {table}{\numberline {2.8}{\ignorespaces Table showing types of eBPF programs. Only those relevant to our research are shown. The full list and attribute details can be consulted in the man page \cite {bpf_syscall}.\relax }}{17}{table.caption.21}%
+\defcounter {refsection}{0}\relax 
+\contentsline {table}{\numberline {2.9}{\ignorespaces Table showing common eBPF helpers. Only those relevant to our research are shown. Those helpers exclusive to an specific program type are not listed. The full list and attribute details can be consulted in the man page \cite {ebpf_helpers}.\relax }}{18}{table.caption.22}%
+\defcounter {refsection}{0}\relax 
 \addvspace {10\p@ }
 \defcounter {refsection}{0}\relax 
 \addvspace {10\p@ }

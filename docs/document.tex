@@ -431,7 +431,7 @@ BPF was introduced in 1992 by Steven McCanne and Van Jacobson in the paper "The 
 Figure \ref{fig:classif_bpf} shows how BPF was integrated in the existing network packet processing by the kernel. After receiving a packet via the Network Interface Controller (NIC) driver, it would first be analysed by BPF filters, which are programs directly developed by the user. This filter decides whether the packet is to be accepted by analysing the packet properties, such as its length or the type and values of its headers. If a packet is accepted, the filter proceeds to decide how many bytes of the original buffer are passed to the application at the user space. Otherwise, the packet is redirected to the original network stack, where it is managed as usual.
 
 
-\subsection{The BPF virtual machine} \label{section:bpf_vm}
+\subsection{The BPF virtual machine} \label{subsection:bpf_vm}
 In a technical level, BPF comprises both the BPF filter programs developed by the user and the BPF module included in the kernel which allows for loading and running the BPF filters. This BPF module in the kernel works as a virtual machine\cite{bpf_bsd_origin_bpf_page1}, meaning that it parses and interprets the filter program by providing simulated components needed for its execution, turning into a software-based CPU. Because of this reason, it is usually referred as the BPF Virtual Machine (BPF VM). The BPF VM comprises the following components:
 \begin{itemize}
 \item \textbf{An accumulator register}, used to store intermediate values of operations.
@@ -442,7 +442,7 @@ In a technical level, BPF comprises both the BPF filter programs developed by th
 
 
 \subsection{Analysis of a BPF filter program} \label{subsection:analysis_bpf_filter_prog}
-As we mentioned in section \ref{section:bpf_vm}, the components of the BPF VM are used to support running BPF filter programs. A BPF filter is implemented as a boolean function:
+As we mentioned in section \ref{subsection:bpf_vm}, the components of the BPF VM are used to support running BPF filter programs. A BPF filter is implemented as a boolean function:
 \begin{itemize}
 \item If it returns \textit{true}, the kernel copies the packet to the application.
 \item If it returns \textit{false}, the packet is not accepted by the filter (and thus the network stack will be the next to operate it).
@@ -514,7 +514,7 @@ Figure \ref{fig:bpf_instructions} shows how BPF instructions are defined accordi
 The column \textit{addr modes} in figure \ref{fig:bpf_instructions} describes how the parameters of a BPF instruction are referenced depending on the opcode. The address modes are detailed in figure \ref{fig:bpf_address_mode}. As it can be observed, paremeters may consist of immediate values, offsets to memory positions or on the packet, the index register or combinations of the previous.
 
 
-\subsection{An example of BPF filter - \textit{tcpdump}}
+\subsection{An example of BPF filter with tcpdump}
 At the time, by filtering packets before they are handled by the kernel instead of using an user-level application, BPF offered a performance improvement between 10 and 150 times the state-of-the art technologies of the moment\cite{bpf_bsd_origin_bpf_page1}. Since then, multiple popular tools began to use BPF, such as the network tracing tool \textit{tcpdump}\cite{tcpdump_page}.
 
 \textit{tcpdump} is a command-line tool that enables to capture and analyse the network traffic going through the system. It works by setting filters on a network interface, so that it shows the packets that are accepted by the filter. Still today, \textit{tcpdump} uses BPF for the filter implementation. We will now show an example of BPF code used by \textit{tcpdump} to implement a simple filter:
@@ -652,9 +652,139 @@ These checks are performed by two main algorithms:
 \end{itemize}
 
 \subsection{eBPF maps}
+An eBPF map is a generic storage for eBPF programs used to share data between user and kernel space, to maintain persistent data between eBPF calls and to share information between multiple eBPF programs\cite{ebpf_maps_kernel}.
 
+A map consists of a key + value tuple. Both fields can have an arbitrary data type, the map only needs to know the length of the key and the value field at its creation\cite{bpf_syscall}. Programs can lookup or delete elements in the map by specifying its key, and insert new ones by supplying the element value and they key to store it with.
 
- 
+Therefore, creating a map requires a struct with the following fields:
+
+\begin{table}[H]
+\begin{tabular}{|c|c|}
+\hline
+FIELD & VALUE\\
+\hline
+type & Type of eBPF map. Described in table \ref{table:ebpf_map_types}\\
+key\_size & Size of the data structure to use as a key\\
+value\_size & Size of the data structure to use as value field\\
+max\_entries & Maximum number of elements in the map\\
+\hline
+\end{tabular}
+\caption{Table showing common fields for creating an eBPF map.}
+\label{table:ebpf_map_struct}
+\end{table}
+
+\begin{table}[H]
+\begin{tabular}{|c|>{\centering\arraybackslash}p{10cm}|}
+\hline
+TYPE & DESCRIPTION\\
+\hline
+BPF\_MAP\_TYPE\_HASH & A hast table-like storage, elements are stored in tuples.\\
+BPF\_MAP\_TYPE\_ARRAY & Elements are stored in an array.\\
+BPF\_MAP\_TYPE\_RINGBUF & Map providing alerts from kernel to user space, covered in subsection \ref{subsection:bpf_ring_buf}\\
+\hline
+\end{tabular}
+\caption{Table showing types of eBPF maps. Only those used in our rootkit are displayed, the full list can be consulted in the man page \cite{bpf_syscall}}
+\label{table:ebpf_map_types}
+\end{table}
+
+Table \ref{table:ebpf_maps} describes the main types of eBPF maps that are available for use. During the development of our rootkit, we will mainly focus on hash maps (BPF\_MAP\_TYPE\_HASH), provided that they are simple to use and we do not require of any special storage for our research purposes.
+
+\subsection{The eBPF ring buffer} \label{subsection:bpf_ring_buf}
+eBPF ring buffers are a special kind of eBPF maps, providing a one-way directional communication system, going from an eBPF program in the kernel to an user space program that subscribes to its events.
+
+%TODO DIAGRAM OF A TYPICAL RING BUFFER
+
+\subsection{The bpf() syscall}
+The bpf() syscall is used to issue commands from user space to kernel space in eBPF programs. This syscall is multiplexor, meaning that it can perform a great range of actions, changing its behaviour depending on the parameters.
+
+The main operations that can be issued are described in table \ref{table:bpf_syscall}:
+
+\begin{table}[H]
+\begin{tabular}{|c|>{\centering\arraybackslash}p{5cm}|>{\centering\arraybackslash}p{5cm}|}
+\hline
+COMMAND & ATTRIBUTE & DESCRIPTION\\
+\hline
+\hline
+BPF\_MAP\_CREATE & Struct with map info as defined in table \ref{table:ebpf_map_struct} & Create a new map\\
+\hline
+BPF\_MAP\_LOOKUP\_ELEM & Struct with key to search in the map & Get the element on the map with an specific key\\
+\hline
+BPF\_MAP\_UPDATE\_ELEM & Struct with key and new value & Update the element of an specific key with a new value\\
+\hline
+BPF\_MAP\_DELETE\_ELEM & Struct with key to search in the map & Delete the element on the map with an specific key\\
+\hline
+BPF\_PROG\_LOAD & Struct describing the type of eBPF program to load & Load an eBPF program in the kernel\\
+\hline
+\end{tabular}
+\caption{Table showing types of syscall actions. Only those relevant to our research are shown the full list and attribute details can be consulted in the man page \cite{bpf_syscall}}
+\label{table:ebpf_syscall}
+\end{table}
+
+With respect to the program type indicated with BPF\_PROG\_LOAD, this parameter indicates the type of eBPF program, setting the context in the kernel in which it will run, and to which modules it will have access to. The types of programs relevant for our research are described in table \ref{table:ebpf_prog_types}.
+
+\begin{table}[H]
+\begin{tabular}{|c|>{\centering\arraybackslash}p{5cm}|}
+\hline
+PROGRAM TYPE & DESCRIPTION\\
+\hline
+\hline
+BPF\_PROG\_TYPE\_KPROBE & Program to instrument code to an attached kprobe\\
+\hline
+BPF\_PROG\_TYPE\_UPROBE & Program to instrument code to an attached uprobe\\
+\hline
+BPF\_PROG\_TYPE\_TRACEPOINT & Program to instrument code to a syscall tracepoint\\
+\hline
+BPF\_PROG\_TYPE\_XDP & Program to filter, redirect and monitor network events from the Xpress Data Path\\
+\hline
+BPF\_PROG\_TYPE\_SCHED\_CLS & Program to filter, redirect and monitor events using the Traffic Control classifier\\
+\hline
+\end{tabular}
+\caption{Table showing types of eBPF programs. Only those relevant to our research are shown. The full list and attribute details can be consulted in the man page \cite{bpf_syscall}.}
+\label{table:ebpf_prog_types}
+\end{table}
+
+In section \ref{section:TODO}, we will proceed to analyse in detail the different program types and what capabilities` they offer.
+
+\subsection{eBPF helpers}
+Our last component to cover of the eBPF architecture are the eBPF helpers. Since eBPF programs have limited accessibility to kernel functions (which kernel modules commonly have free access to), the eBPF system offers a set of limited functions called helpers\cite{ebpf_helpers}, which are used by eBPF programs to perform certain actions and interact with the context on which they are run. The list of helpers a program can call varies between eBPF program types, since different programs run in different contexts.
+
+It is important to highlight that, just like commands issued via the bpf() syscall can only be issued from the user space, eBPF helpers correspond to the kernel-side of eBPF program exclusively. Note that we will also find a symmetric correspondence to those functions of the bpf() syscall related to map operations (since these are accessible both from user and kernel space).
+
+Table \ref{table:ebpf_helpers} lists the most relevant general-purpose eBPF helpers we will use during the development of our project. We will later detail those helpers exclusive to an specific eBPF program type in the sections on which they are studied.
+
+\begin{table}[H]
+\begin{tabular}{|c|>{\centering\arraybackslash}p{10cm}|}
+\hline
+eBPF helper & DESCRIPTION\\
+\hline
+\hline
+bpf\_map\_lookup\_elem() & Query an element with a certain key in a map\\
+\hline
+bpf\_map\_delete\_elem() & Delete an element with a certain key in a map\\
+\hline
+bpf\_map\_update\_elem() & Update the value of the element with a certain key in a map\\
+\hline
+bpf\_probe\_read\_user() & Attempt to safely read data at an specific user address into a buffer\\
+\hline
+bpf\_probe\_read\_kernel() & Attempt to safely read data at an specific kernel address into a buffer\\
+\hline
+bpf\_trace\_printk() & Similarly to printk() in kernel modules, writes buffer in \/sys\/kernel\/debug\/tracing\/trace\_pipe\\
+\hline
+bpf\_get\_current\_pid\_tgid() & Get the process process id (PID) and thread group id (TGID)\\
+\hline
+bpf\_get\_current\_comm() & Get the name of the executable\\
+\hline
+bpf\_probe\_write\_user() & Attempt to write data at a user memory address\\
+\hline
+bpf\_override\_return() & Override return value of a probed function\\
+\hline
+bpf\_ringbuf\_submit() & Submit data to an specific eBPF ring buffer, and notify to subscribers\\
+\hline
+\end{tabular}
+\caption{Table showing common eBPF helpers. Only those relevant to our research are shown. Those helpers exclusive to an specific program type are not listed. The full list and attribute details can be consulted in the man page \cite{ebpf_helpers}.}
+\label{table:ebpf_helpers}
+\end{table}
+
 
 
 
