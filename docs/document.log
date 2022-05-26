@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.21 (TeX Live 2020/Debian) (preloaded format=pdflatex 2022.4.27)  25 MAY 2022 21:59
+This is pdfTeX, Version 3.14159265-2.6-1.40.21 (TeX Live 2020/Debian) (preloaded format=pdflatex 2022.4.27)  26 MAY 2022 08:37
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1079,7 +1079,14 @@ Package: blx-case-expl3 2020/12/31 v3.16 expl3 case changing code for biblatex
 
 Package biblatex Info: Trying to load bibliographic data...
 Package biblatex Info: ... file 'document.bbl' found.
- (./document.bbl)
+ (./document.bbl
+
+Package biblatex Warning: Biber reported the following issues
+(biblatex)                with 'ebpf_bounded_loops':
+(biblatex)                - Entry 'ebpf_bounded_loops' (bibliography/bibliograp
+hy.bib): Invalid format '2019-06-31' of date field 'date' - ignoring.
+
+)
 Package biblatex Info: Reference section=0 on input line 179.
 Package biblatex Info: Reference segment=0 on input line 179.
 LaTeX Font Info:    Trying to load font information for T1+txss on input line 1
@@ -1111,8 +1118,7 @@ LaTeX Font Info:    Font shape `T1/txss/b/n' in size <12> not available
 (Font)              Font shape `T1/txss/bx/n' tried instead on input line 216.
 LaTeX Font Info:    Font shape `T1/txss/bx/n' will be
 (Font)              scaled to size 11.39996pt on input line 216.
-
-[1
+ [1
 
  <./images//Portada_Logo.png> <./images/creativecommons.png>]pdfTeX warning (ex
 t4): destination with the same identifier (name{page.i}) has been already used,
@@ -1269,57 +1275,57 @@ Overfull \hbox (17.02478pt too wide) in paragraph at lines 627--628
  the vari-able \T1/txr/m/it/12 bpf_jit_enable\T1/txr/m/n/12 [[][]30[][]],
  []
 
-[14]
+[14] [15]
 Chapter 3.
-[15
-
-]
-Chapter 4.
 [16
 
 ]
-Chapter 5.
+Chapter 4.
 [17
 
 ]
+Chapter 5.
+[18
+
+]
 LaTeX Font Info:    Trying to load font information for T1+txtt on input line 6
-76.
+97.
  (/usr/share/texlive/texmf-dist/tex/latex/txfonts/t1txtt.fd
 File: t1txtt.fd 2000/12/15 v3.1
 )
-Overfull \hbox (5.34976pt too wide) in paragraph at lines 677--677
+Overfull \hbox (5.34976pt too wide) in paragraph at lines 698--698
 \T1/txtt/m/n/12 threat -[] intelligence / cyber -[] year -[] in -[] retrospect 
 / yir -[] cyber -[] threats -[]
  []
 
-[18
+[19
 
 
 ]
-Overfull \hbox (6.22696pt too wide) in paragraph at lines 677--677
+Overfull \hbox (6.22696pt too wide) in paragraph at lines 698--698
 []\T1/txr/m/it/12 Bpf fea-tures by linux ker-nel ver-sion\T1/txr/m/n/12 , io-vi
 -sor. [On-line]. Avail-able: [][]$\T1/txtt/m/n/12 https : / / github .
  []
 
 
-Overfull \hbox (7.34976pt too wide) in paragraph at lines 677--677
+Overfull \hbox (7.34976pt too wide) in paragraph at lines 698--698
 [][]$\T1/txtt/m/n/12 https : / / ebpf . io / what -[] is -[] ebpf / #loader -[]
 -[] verification -[] architecture$[][]\T1/txr/m/n/12 . 
  []
 
 
-Overfull \hbox (21.24973pt too wide) in paragraph at lines 677--677
+Overfull \hbox (21.24973pt too wide) in paragraph at lines 698--698
 \T1/txtt/m/n/12 vger . kernel . org / netconf2015Starovoitov -[] bpf _ collabsu
 mmit _ 2015feb20 .
  []
 
-[19]
-Overfull \hbox (9.14975pt too wide) in paragraph at lines 677--677
+[20]
+Overfull \hbox (9.14975pt too wide) in paragraph at lines 698--698
 \T1/txtt/m/n/12 ch02 . xhtml# :-[]: text = With % 20JIT % 20compiled % 20code %
  2C % 20i ,[] %20other %
  []
 
-[20] [1
+[21] [1
 
 ]
 
@@ -1330,7 +1336,7 @@ pdfTeX warning (ext4): destination with the same identifier (name{page.}) has b
 een already used, duplicate ignored
 <to be read again> 
                    \relax 
-l.693 \end{document}
+l.714 \end{document}
                      [2
 
 ] (./document.aux)
@@ -1338,19 +1344,19 @@ l.693 \end{document}
 LaTeX Warning: There were undefined references.
 
 Package rerunfilecheck Info: File `document.out' has not changed.
-(rerunfilecheck)             Checksum: 66497A77734FDFAA905ECBF53B99BCD1;1610.
+(rerunfilecheck)             Checksum: 1F4132EC47FF9B036E3940F1818CC401;1613.
 Package logreq Info: Writing requests to 'document.run.xml'.
 \openout1 = `document.run.xml'.
 
  ) 
 Here is how much of TeX's memory you used:
- 27367 strings out of 481209
- 436043 string characters out of 5914747
- 1175417 words of memory out of 5000000
- 43776 multiletter control sequences out of 15000+600000
+ 27378 strings out of 481209
+ 436516 string characters out of 5914747
+ 1175713 words of memory out of 5000000
+ 43783 multiletter control sequences out of 15000+600000
  456974 words of font info for 103 fonts, out of 8000000 for 9000
  36 hyphenation exceptions out of 8191
- 88i,11n,90p,1029b,3093s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 88i,11n,90p,1029b,3095s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/share/texlive/texmf-dist/fonts/enc/dvips/base/8r.enc}</usr/share/texliv
 e/texmf-dist/fonts/type1/public/txfonts/rtcxi.pfb></usr/share/texlive/texmf-dis
 t/fonts/type1/public/txfonts/rtcxr.pfb></usr/share/texlive/texmf-dist/fonts/typ
@@ -1362,9 +1368,9 @@ texmf-dist/fonts/type1/urw/helvetic/uhvr8a.pfb></usr/share/texlive/texmf-dist/f
 onts/type1/urw/times/utmb8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/
 times/utmbi8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/times/utmr8a.p
 fb></usr/share/texlive/texmf-dist/fonts/type1/urw/times/utmri8a.pfb>
-Output written on document.pdf (36 pages, 573346 bytes).
+Output written on document.pdf (37 pages, 578756 bytes).
 PDF statistics:
- 591 PDF objects out of 1000 (max. 8388607)
- 105 named destinations out of 1000 (max. 500000)
+ 613 PDF objects out of 1000 (max. 8388607)
+ 109 named destinations out of 1000 (max. 500000)
  234 words of extra memory for PDF output out of 10000 (max. 10000000)
 

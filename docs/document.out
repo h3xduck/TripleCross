@@ -15,7 +15,7 @@
 \BOOKMARK [1][-]{section.2.2}{Analysis\040of\040modern\040eBPF}{chapter.2}% 15
 \BOOKMARK [2][-]{subsection.2.2.1}{eBPF\040instruction\040set}{section.2.2}% 16
 \BOOKMARK [2][-]{subsection.2.2.2}{JIT\040compilation}{section.2.2}% 17
-\BOOKMARK [2][-]{subsection.2.2.3}{eBPF\040architecture}{section.2.2}% 18
+\BOOKMARK [2][-]{subsection.2.2.3}{The\040eBPF\040verifier}{section.2.2}% 18
 \BOOKMARK [0][-]{chapter.3}{Methods??}{}% 19
 \BOOKMARK [0][-]{chapter.4}{Results}{}% 20
 \BOOKMARK [0][-]{chapter.5}{Conclusion\040and\040future\040work}{}% 21

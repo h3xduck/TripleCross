@@ -35,13 +35,13 @@
 \defcounter {refsection}{0}\relax 
 \contentsline {subsection}{\numberline {2.2.2}JIT compilation}{13}{subsection.2.2.2}%
 \defcounter {refsection}{0}\relax 
-\contentsline {subsection}{\numberline {2.2.3}eBPF architecture}{14}{subsection.2.2.3}%
+\contentsline {subsection}{\numberline {2.2.3}The eBPF verifier}{14}{subsection.2.2.3}%
 \defcounter {refsection}{0}\relax 
-\contentsline {chapter}{\numberline {3}Methods??}{15}{chapter.3}%
+\contentsline {chapter}{\numberline {3}Methods??}{16}{chapter.3}%
 \defcounter {refsection}{0}\relax 
-\contentsline {chapter}{\numberline {4}Results}{16}{chapter.4}%
+\contentsline {chapter}{\numberline {4}Results}{17}{chapter.4}%
 \defcounter {refsection}{0}\relax 
-\contentsline {chapter}{\numberline {5}Conclusion and future work}{17}{chapter.5}%
+\contentsline {chapter}{\numberline {5}Conclusion and future work}{18}{chapter.5}%
 \defcounter {refsection}{0}\relax 
-\contentsline {chapter}{Bibliography}{18}{chapter.5}%
+\contentsline {chapter}{Bibliography}{19}{chapter.5}%
 \contentsfinish 

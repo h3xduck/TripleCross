@@ -2388,6 +2388,9 @@
     <bcf:citekey order="45">jit_enable_setting</bcf:citekey>
     <bcf:citekey order="46">ebpf_starovo_slides_page23</bcf:citekey>
     <bcf:citekey order="47">brendan_gregg_bpf_book_bpf_vm</bcf:citekey>
+    <bcf:citekey order="48">ebpf_verifier_kerneldocs</bcf:citekey>
+    <bcf:citekey order="49">ebpf_JIT_demystify_page17-22</bcf:citekey>
+    <bcf:citekey order="50">ebpf_bounded_loops</bcf:citekey>
   </bcf:section>
   <!-- SORTING TEMPLATES -->
   <bcf:sortingtemplate name="none">

@@ -409,7 +409,7 @@ The rootkit will work in a fresh-install of a Linux system with the following ch
 % I WILL NOT INCLUDE A ROOTKIT BACKGROUND, considering that a deep study of that is not fully relevant for us. I explained what it is, its two main types (should we include bootkits, maybe?) and its relation with eBPF in the introduction, since it is needed to introduce the overall context. Should we do otherwise?
 This chapter is dedicated to an study of the eBPF technology. Firstly, we will analyse its origins, understanding what it is and how it works, and discuss the reasons why it is a necessary component of the Linux kernel today. Afterwards, we will cover the main features of eBPF in detail. Finally, an study of the existing alternatives for developing eBPF applications will be also included.
 
-Although during our discussion of the offensive capabilities of eBPF in section\ref{section:analysis_offensive_capabilities} we use a library that will provide us with a layer of abstraction over the underlying operations, this background is needed to understand how eBPF is embedded in the kernel and which capabilities and limits we can expect to achieve with it.
+Although during our discussion of the offensive capabilities of eBPF in section\ref{section:analysis_offensive_capabilities} we will use a library that will provide us with a layer of abstraction over the underlying operations, this background is needed to understand how eBPF is embedded in the kernel and which capabilities and limits we can expect to achieve with it.
 
 \section{eBPF history - Classic BPF}
 % Is it ok to have sections / chapters without individual intros?
@@ -441,7 +441,7 @@ In a technical level, BPF comprises both the BPF filter programs developed by th
 \end{itemize}
 
 
-\subsection{Analysis of a BPF filter program}
+\subsection{Analysis of a BPF filter program} \label{subsection:analysis_bpf_filter_prog}
 As we mentioned in section \ref{section:bpf_vm}, the components of the BPF VM are used to support running BPF filter programs. A BPF filter is implemented as a boolean function:
 \begin{itemize}
 \item If it returns \textit{true}, the kernel copies the packet to the application.
@@ -629,8 +629,32 @@ Therefore, when using JIT compiling (a setting defined by the variable \textit{b
 The programs developed during this project will always have JIT compiling active.
 
 
-\subsection{eBPF architecture}
-Provided the instruction set architecture (ISA) described in section
+\subsection{The eBPF verifier}
+We introduced in figure \ref{fig:ebpf_architecture} the presence of the so-called eBPF verifier. Provided that we will be loading programs in the kernel from user space, these programs need to be checked for safety before being valid to be executed.
+
+The verifier performs a series of tests which every eBPF program must pass in order to be accepted. Otherwise, user programs could leak privileged data, result in kernel memory corruption, or hang the kernel in an infinite loop, between others. Therefore, the verifier limits multiple aspects of eBPF programs so that they are restricted to the intended functionality, whilst at the same time offering a reasonable amount of freedom to the developer.
+
+The following are the most relevant checks that the verifier performs in eBPF programs\cite{ebpf_verifier_kerneldocs}\cite{ebpf_JIT_demystify_page17-22}:
+\begin{itemize}
+\item Tests for ensuring overall control flow safety:
+	\subitem No loops allowed (bounded loops accepted since kernel version 5.3\cite{ebpf_bounded_loops}.
+	\subitem Function call and jumps safety to known, reachable functions.
+\item Tests for individual instructions:
+	 \subitem Divisions by zero and invalid shift operations.
+	 \subitem Invalid stack access and invalid out-of-bound access to data structures.
+	 \subitem Reads from uninitialized registers and corruption of pointers.
+\end{itemize}
+
+These checks are performed by two main algorithms:
+\begin{itemize}
+\item Build a graph representing the eBPF instructions (similar to the one shown in section \ref{subsection:analysis_bpf_filter_prog}. Check that it is in fact a direct acyclic graph (DAG), meaning that the verifier prevents loops and unreachable instructions.
+\item Simulate execution flow by starting on the first instruction and following each possible path, observing at each instruction the state of every register and of the stack.
+\end{itemize}
+
+\subsection{eBPF maps}
+
+
+ 
 
 
 
