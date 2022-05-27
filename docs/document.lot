@@ -23,6 +23,14 @@
 \defcounter {refsection}{0}\relax 
 \contentsline {table}{\numberline {2.9}{\ignorespaces Table showing common eBPF helpers. Only those relevant to our research are shown. Those helpers exclusive to an specific program type are not listed. The full list and attribute details can be consulted in the man page \cite {ebpf_helpers}.\relax }}{18}{table.caption.22}%
 \defcounter {refsection}{0}\relax 
+\contentsline {table}{\numberline {2.10}{\ignorespaces Table showing XDP relevant return values.\relax }}{19}{table.caption.24}%
+\defcounter {refsection}{0}\relax 
+\contentsline {table}{\numberline {2.11}{\ignorespaces Table showing relevant XDP-exclusive eBPF helpers.\relax }}{20}{table.caption.25}%
+\defcounter {refsection}{0}\relax 
+\contentsline {table}{\numberline {2.12}{\ignorespaces Table showing TC relevant return values. Full list can be consulted at \cite {tc_ret_list_complete}.\relax }}{21}{table.caption.26}%
+\defcounter {refsection}{0}\relax 
+\contentsline {table}{\numberline {2.13}{\ignorespaces Table showing relevant TC-exclusive eBPF helpers.\relax }}{21}{table.caption.27}%
+\defcounter {refsection}{0}\relax 
 \addvspace {10\p@ }
 \defcounter {refsection}{0}\relax 
 \addvspace {10\p@ }

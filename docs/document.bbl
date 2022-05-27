@@ -180,8 +180,8 @@
       \strng{authorbibnamehash}{53d4d4da0d1a82f58d57d86ba9635f2c}
       \strng{authornamehash}{53d4d4da0d1a82f58d57d86ba9635f2c}
       \strng{authorfullhash}{53d4d4da0d1a82f58d57d86ba9635f2c}
-      \field{sortinit}{1}
-      \field{sortinithash}{50c6687d7fc80f50136d75228e3c59ba}
+      \field{sortinit}{2}
+      \field{sortinithash}{ed39bb39cf854d5250e95b1c1f94f4ed}
       \field{labelnamesource}{author}
       \field{eventtitle}{Bad BPF - Warping reality using eBPF}
       \verb{urlraw}
@@ -438,8 +438,8 @@
       \strng{authornamehash}{b74c2671072cf5a1a1400dc035240dfd}
       \strng{authorfullhash}{b74c2671072cf5a1a1400dc035240dfd}
       \field{extraname}{5}
-      \field{sortinit}{2}
-      \field{sortinithash}{ed39bb39cf854d5250e95b1c1f94f4ed}
+      \field{sortinit}{3}
+      \field{sortinithash}{a37a8ef248a93c322189792c34fc68c9}
       \field{labelnamesource}{author}
       \field{labeltitlesource}{title}
       \field{day}{19}
@@ -546,8 +546,8 @@
       \strng{authorbibnamehash}{ff97a9fdede09eaf6e1c8ec9f6a61dd5}
       \strng{authornamehash}{ff97a9fdede09eaf6e1c8ec9f6a61dd5}
       \strng{authorfullhash}{ff97a9fdede09eaf6e1c8ec9f6a61dd5}
-      \field{sortinit}{3}
-      \field{sortinithash}{a37a8ef248a93c322189792c34fc68c9}
+      \field{sortinit}{4}
+      \field{sortinithash}{e071e0bcb44634fab398d68ad04e69f4}
       \field{labelnamesource}{author}
       \field{labeltitlesource}{title}
       \field{title}{Intel® 64 and IA-32 Architectures Software Developer’s Manual Combined Volumes: 1, 2A, 2B, 2C, 2D, 3A, 3B, 3C, 3D, and 4}
@@ -702,8 +702,8 @@
       \list{institution}{1}{%
         {PLUMgrid}%
       }
-      \field{sortinit}{4}
-      \field{sortinithash}{e071e0bcb44634fab398d68ad04e69f4}
+      \field{sortinit}{5}
+      \field{sortinithash}{5dd416adbafacc8226114bc0202d5fdd}
       \field{labeltitlesource}{title}
       \field{day}{20}
       \field{month}{2}
@@ -843,6 +843,161 @@
       \endverb
       \verb{url}
       \verb https://man7.org/linux/man-pages/man2/bpf.2.html
+      \endverb
+    \endentry
+    \entry{ebpf_helpers}{manual}{}
+      \field{sortinit}{6}
+      \field{sortinithash}{7851c86048328b027313775d8fbd2131}
+      \field{labeltitlesource}{title}
+      \field{title}{bpf-helpers(7)- Linux manual page}
+      \verb{urlraw}
+      \verb https://man7.org/linux/man-pages/man7/bpf-helpers.7.html
+      \endverb
+      \verb{url}
+      \verb https://man7.org/linux/man-pages/man7/bpf-helpers.7.html
+      \endverb
+    \endentry
+    \entry{xdp_gentle_intro}{online}{}
+      \name{author}{1}{}{%
+        {{hash=78dcb92591468323e355b4f87108649d}{%
+           family={Lavie},
+           familyi={L\bibinitperiod},
+           given={Daniel},
+           giveni={D\bibinitperiod}}}%
+      }
+      \strng{namehash}{78dcb92591468323e355b4f87108649d}
+      \strng{fullhash}{78dcb92591468323e355b4f87108649d}
+      \strng{bibnamehash}{78dcb92591468323e355b4f87108649d}
+      \strng{authorbibnamehash}{78dcb92591468323e355b4f87108649d}
+      \strng{authornamehash}{78dcb92591468323e355b4f87108649d}
+      \strng{authorfullhash}{78dcb92591468323e355b4f87108649d}
+      \field{sortinit}{6}
+      \field{sortinithash}{7851c86048328b027313775d8fbd2131}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{day}{3}
+      \field{month}{2}
+      \field{title}{A Gentle Introduction to XDP}
+      \field{year}{2022}
+      \field{dateera}{ce}
+      \verb{urlraw}
+      \verb https://www.seekret.io/blog/a-gentle-introduction-to-xdp/
+      \endverb
+      \verb{url}
+      \verb https://www.seekret.io/blog/a-gentle-introduction-to-xdp/
+      \endverb
+    \endentry
+    \entry{xdp_manual}{manual}{}
+      \field{sortinit}{6}
+      \field{sortinithash}{7851c86048328b027313775d8fbd2131}
+      \field{labeltitlesource}{title}
+      \field{title}{XDP actions}
+      \verb{urlraw}
+      \verb https://prototype-kernel.readthedocs.io/en/latest/networking/XDP/implementation/xdp_actions.html
+      \endverb
+      \verb{url}
+      \verb https://prototype-kernel.readthedocs.io/en/latest/networking/XDP/implementation/xdp_actions.html
+      \endverb
+    \endentry
+    \entry{tc_differences}{online}{}
+      \name{author}{1}{}{%
+        {{hash=5442e761747b6fce78f695385639556e}{%
+           family={Hangbin},
+           familyi={H\bibinitperiod}}}%
+      }
+      \strng{namehash}{5442e761747b6fce78f695385639556e}
+      \strng{fullhash}{5442e761747b6fce78f695385639556e}
+      \strng{bibnamehash}{5442e761747b6fce78f695385639556e}
+      \strng{authorbibnamehash}{5442e761747b6fce78f695385639556e}
+      \strng{authornamehash}{5442e761747b6fce78f695385639556e}
+      \strng{authorfullhash}{5442e761747b6fce78f695385639556e}
+      \field{sortinit}{6}
+      \field{sortinithash}{7851c86048328b027313775d8fbd2131}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{day}{13}
+      \field{month}{3}
+      \field{title}{tc/BPF and XDP/BPF}
+      \field{year}{2019}
+      \field{dateera}{ce}
+      \verb{urlraw}
+      \verb https://liuhangbin.netlify.app/post/ebpf-and-xdp/
+      \endverb
+      \verb{url}
+      \verb https://liuhangbin.netlify.app/post/ebpf-and-xdp/
+      \endverb
+    \endentry
+    \entry{tc_docs_complete}{online}{}
+      \name{author}{1}{}{%
+        {{hash=6f963077bb5e5f5e471047d2f4a2e4e7}{%
+           family={Brown},
+           familyi={B\bibinitperiod},
+           given={Martin\bibnamedelima A.},
+           giveni={M\bibinitperiod\bibinitdelim A\bibinitperiod}}}%
+      }
+      \strng{namehash}{6f963077bb5e5f5e471047d2f4a2e4e7}
+      \strng{fullhash}{6f963077bb5e5f5e471047d2f4a2e4e7}
+      \strng{bibnamehash}{6f963077bb5e5f5e471047d2f4a2e4e7}
+      \strng{authorbibnamehash}{6f963077bb5e5f5e471047d2f4a2e4e7}
+      \strng{authornamehash}{6f963077bb5e5f5e471047d2f4a2e4e7}
+      \strng{authorfullhash}{6f963077bb5e5f5e471047d2f4a2e4e7}
+      \field{sortinit}{6}
+      \field{sortinithash}{7851c86048328b027313775d8fbd2131}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{day}{1}
+      \field{month}{10}
+      \field{title}{Traffic Control HOWTO}
+      \field{year}{2006}
+      \field{dateera}{ce}
+      \verb{urlraw}
+      \verb http://linux-ip.net/articles/Traffic-Control-HOWTO/
+      \endverb
+      \verb{url}
+      \verb http://linux-ip.net/articles/Traffic-Control-HOWTO/
+      \endverb
+    \endentry
+    \entry{tc_direct_action}{online}{}
+      \name{author}{1}{}{%
+        {{hash=d3c24514dc6326a55dee93eaf9976d63}{%
+           family={Monnet},
+           familyi={M\bibinitperiod},
+           given={Quentin},
+           giveni={Q\bibinitperiod}}}%
+      }
+      \strng{namehash}{d3c24514dc6326a55dee93eaf9976d63}
+      \strng{fullhash}{d3c24514dc6326a55dee93eaf9976d63}
+      \strng{bibnamehash}{d3c24514dc6326a55dee93eaf9976d63}
+      \strng{authorbibnamehash}{d3c24514dc6326a55dee93eaf9976d63}
+      \strng{authornamehash}{d3c24514dc6326a55dee93eaf9976d63}
+      \strng{authorfullhash}{d3c24514dc6326a55dee93eaf9976d63}
+      \field{sortinit}{7}
+      \field{sortinithash}{f615fb9c6fba11c6f962fb3fd599810e}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{day}{11}
+      \field{month}{4}
+      \field{title}{Understanding tc “direct action” mode for BPF}
+      \field{year}{2020}
+      \field{dateera}{ce}
+      \verb{urlraw}
+      \verb https://qmonnet.github.io/whirl-offload/2020/04/11/tc-bpf-direct-action/
+      \endverb
+      \verb{url}
+      \verb https://qmonnet.github.io/whirl-offload/2020/04/11/tc-bpf-direct-action/
+      \endverb
+    \endentry
+    \entry{tc_ret_list_complete}{online}{}
+      \field{sortinit}{7}
+      \field{sortinithash}{f615fb9c6fba11c6f962fb3fd599810e}
+      \field{labeltitlesource}{title}
+      \field{indextitle}{index : kernel/git/torvalds/linux.git}
+      \field{title}{Linux kernel source tree}
+      \verb{urlraw}
+      \verb https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/include/uapi/linux/pkt_cls.h
+      \endverb
+      \verb{url}
+      \verb https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/include/uapi/linux/pkt_cls.h
       \endverb
     \endentry
   \enddatalist

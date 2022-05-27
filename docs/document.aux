@@ -181,6 +181,7 @@
 \@writefile{toc}{\defcounter {refsection}{0}\relax }\@writefile{toc}{\contentsline {subsection}{\numberline {2.2.5}The eBPF ring buffer}{16}{subsection.2.2.5}\protected@file@percent }
 \newlabel{subsection:bpf_ring_buf}{{2.2.5}{16}{The eBPF ring buffer}{subsection.2.2.5}{}}
 \@writefile{toc}{\defcounter {refsection}{0}\relax }\@writefile{toc}{\contentsline {subsection}{\numberline {2.2.6}The bpf() syscall}{16}{subsection.2.2.6}\protected@file@percent }
+\newlabel{subsection:bpf_syscall}{{2.2.6}{16}{The bpf() syscall}{subsection.2.2.6}{}}
 \@writefile{lot}{\defcounter {refsection}{0}\relax }\@writefile{lot}{\contentsline {table}{\numberline {2.7}{\ignorespaces Table showing types of syscall actions. Only those relevant to our research are shown the full list and attribute details can be consulted in the man page \cite {bpf_syscall}\relax }}{16}{table.caption.20}\protected@file@percent }
 \newlabel{table:ebpf_syscall}{{2.7}{16}{Table showing types of syscall actions. Only those relevant to our research are shown the full list and attribute details can be consulted in the man page \cite {bpf_syscall}\relax }{table.caption.20}{}}
 \abx@aux@cite{ebpf_helpers}
@@ -192,20 +193,47 @@
 \@writefile{lot}{\defcounter {refsection}{0}\relax }\@writefile{lot}{\contentsline {table}{\numberline {2.8}{\ignorespaces Table showing types of eBPF programs. Only those relevant to our research are shown. The full list and attribute details can be consulted in the man page \cite {bpf_syscall}.\relax }}{17}{table.caption.21}\protected@file@percent }
 \newlabel{table:ebpf_prog_types}{{2.8}{17}{Table showing types of eBPF programs. Only those relevant to our research are shown. The full list and attribute details can be consulted in the man page \cite {bpf_syscall}.\relax }{table.caption.21}{}}
 \@writefile{toc}{\defcounter {refsection}{0}\relax }\@writefile{toc}{\contentsline {subsection}{\numberline {2.2.7}eBPF helpers}{17}{subsection.2.2.7}\protected@file@percent }
+\abx@aux@cite{xdp_gentle_intro}
+\abx@aux@segm{0}{0}{xdp_gentle_intro}
 \@writefile{lot}{\defcounter {refsection}{0}\relax }\@writefile{lot}{\contentsline {table}{\numberline {2.9}{\ignorespaces Table showing common eBPF helpers. Only those relevant to our research are shown. Those helpers exclusive to an specific program type are not listed. The full list and attribute details can be consulted in the man page \cite {ebpf_helpers}.\relax }}{18}{table.caption.22}\protected@file@percent }
 \newlabel{table:ebpf_helpers}{{2.9}{18}{Table showing common eBPF helpers. Only those relevant to our research are shown. Those helpers exclusive to an specific program type are not listed. The full list and attribute details can be consulted in the man page \cite {ebpf_helpers}.\relax }{table.caption.22}{}}
-\@writefile{toc}{\defcounter {refsection}{0}\relax }\@writefile{toc}{\contentsline {chapter}{\numberline {3}Methods??}{19}{chapter.3}\protected@file@percent }
+\@writefile{toc}{\defcounter {refsection}{0}\relax }\@writefile{toc}{\contentsline {section}{\numberline {2.3}eBPF program types}{18}{section.2.3}\protected@file@percent }
+\@writefile{toc}{\defcounter {refsection}{0}\relax }\@writefile{toc}{\contentsline {subsection}{\numberline {2.3.1}XDP}{18}{subsection.2.3.1}\protected@file@percent }
+\abx@aux@cite{xdp_manual}
+\abx@aux@segm{0}{0}{xdp_manual}
+\@writefile{lof}{\defcounter {refsection}{0}\relax }\@writefile{lof}{\contentsline {figure}{\numberline {2.8}{\ignorespaces Figure showing how the eBPF XDP and TC modules are integrated in the network processing in the Linux kernel.\relax }}{19}{figure.caption.23}\protected@file@percent }
+\newlabel{fig:xdp_diag}{{2.8}{19}{Figure showing how the eBPF XDP and TC modules are integrated in the network processing in the Linux kernel.\relax }{figure.caption.23}{}}
+\@writefile{lot}{\defcounter {refsection}{0}\relax }\@writefile{lot}{\contentsline {table}{\numberline {2.10}{\ignorespaces Table showing XDP relevant return values.\relax }}{19}{table.caption.24}\protected@file@percent }
+\newlabel{table:xdp_actions_av}{{2.10}{19}{Table showing XDP relevant return values.\relax }{table.caption.24}{}}
+\abx@aux@cite{tc_differences}
+\abx@aux@segm{0}{0}{tc_differences}
+\abx@aux@cite{tc_docs_complete}
+\abx@aux@segm{0}{0}{tc_docs_complete}
+\abx@aux@cite{tc_direct_action}
+\abx@aux@segm{0}{0}{tc_direct_action}
+\abx@aux@cite{tc_ret_list_complete}
+\abx@aux@segm{0}{0}{tc_ret_list_complete}
+\abx@aux@cite{tc_ret_list_complete}
+\abx@aux@segm{0}{0}{tc_ret_list_complete}
+\@writefile{lot}{\defcounter {refsection}{0}\relax }\@writefile{lot}{\contentsline {table}{\numberline {2.11}{\ignorespaces Table showing relevant XDP-exclusive eBPF helpers.\relax }}{20}{table.caption.25}\protected@file@percent }
+\newlabel{table:xdp_helpers}{{2.11}{20}{Table showing relevant XDP-exclusive eBPF helpers.\relax }{table.caption.25}{}}
+\@writefile{toc}{\defcounter {refsection}{0}\relax }\@writefile{toc}{\contentsline {subsection}{\numberline {2.3.2}Traffic Control}{20}{subsection.2.3.2}\protected@file@percent }
+\@writefile{lot}{\defcounter {refsection}{0}\relax }\@writefile{lot}{\contentsline {table}{\numberline {2.12}{\ignorespaces Table showing TC relevant return values. Full list can be consulted at \cite {tc_ret_list_complete}.\relax }}{21}{table.caption.26}\protected@file@percent }
+\newlabel{table:tc_actions}{{2.12}{21}{Table showing TC relevant return values. Full list can be consulted at \cite {tc_ret_list_complete}.\relax }{table.caption.26}{}}
+\@writefile{lot}{\defcounter {refsection}{0}\relax }\@writefile{lot}{\contentsline {table}{\numberline {2.13}{\ignorespaces Table showing relevant TC-exclusive eBPF helpers.\relax }}{21}{table.caption.27}\protected@file@percent }
+\newlabel{table:tc_helpers}{{2.13}{21}{Table showing relevant TC-exclusive eBPF helpers.\relax }{table.caption.27}{}}
+\@writefile{toc}{\defcounter {refsection}{0}\relax }\@writefile{toc}{\contentsline {section}{\numberline {2.4}Developing eBPF programs}{21}{section.2.4}\protected@file@percent }
+\@writefile{toc}{\defcounter {refsection}{0}\relax }\@writefile{toc}{\contentsline {chapter}{\numberline {3}Methods??}{22}{chapter.3}\protected@file@percent }
 \@writefile{lof}{\defcounter {refsection}{0}\relax }\@writefile{lof}{\addvspace {10\p@ }}
 \@writefile{lot}{\defcounter {refsection}{0}\relax }\@writefile{lot}{\addvspace {10\p@ }}
-\@writefile{toc}{\defcounter {refsection}{0}\relax }\@writefile{toc}{\contentsline {chapter}{\numberline {4}Results}{20}{chapter.4}\protected@file@percent }
+\@writefile{toc}{\defcounter {refsection}{0}\relax }\@writefile{toc}{\contentsline {chapter}{\numberline {4}Results}{23}{chapter.4}\protected@file@percent }
 \@writefile{lof}{\defcounter {refsection}{0}\relax }\@writefile{lof}{\addvspace {10\p@ }}
 \@writefile{lot}{\defcounter {refsection}{0}\relax }\@writefile{lot}{\addvspace {10\p@ }}
-\@writefile{toc}{\defcounter {refsection}{0}\relax }\@writefile{toc}{\contentsline {chapter}{\numberline {5}Conclusion and future work}{21}{chapter.5}\protected@file@percent }
+\@writefile{toc}{\defcounter {refsection}{0}\relax }\@writefile{toc}{\contentsline {chapter}{\numberline {5}Conclusion and future work}{24}{chapter.5}\protected@file@percent }
 \@writefile{lof}{\defcounter {refsection}{0}\relax }\@writefile{lof}{\addvspace {10\p@ }}
 \@writefile{lot}{\defcounter {refsection}{0}\relax }\@writefile{lot}{\addvspace {10\p@ }}
-\@writefile{toc}{\defcounter {refsection}{0}\relax }\@writefile{toc}{\contentsline {chapter}{Bibliography}{22}{chapter.5}\protected@file@percent }
-\abx@aux@read@bbl@mdfivesum{B0FAA8A56537935B1DC703B06B60D6C1}
-\abx@aux@read@bblrerun
+\@writefile{toc}{\defcounter {refsection}{0}\relax }\@writefile{toc}{\contentsline {chapter}{Bibliography}{25}{chapter.5}\protected@file@percent }
+\abx@aux@read@bbl@mdfivesum{D22502BFD1AA9A775C1BCD405EB9F4D6}
 \abx@aux@refcontextdefaultsdone
 \abx@aux@defaultrefcontext{0}{ransomware_pwc}{none/global//global/global}
 \abx@aux@defaultrefcontext{0}{rootkit_ptsecurity}{none/global//global/global}
@@ -244,5 +272,12 @@
 \abx@aux@defaultrefcontext{0}{ebpf_bounded_loops}{none/global//global/global}
 \abx@aux@defaultrefcontext{0}{ebpf_maps_kernel}{none/global//global/global}
 \abx@aux@defaultrefcontext{0}{bpf_syscall}{none/global//global/global}
+\abx@aux@defaultrefcontext{0}{ebpf_helpers}{none/global//global/global}
+\abx@aux@defaultrefcontext{0}{xdp_gentle_intro}{none/global//global/global}
+\abx@aux@defaultrefcontext{0}{xdp_manual}{none/global//global/global}
+\abx@aux@defaultrefcontext{0}{tc_differences}{none/global//global/global}
+\abx@aux@defaultrefcontext{0}{tc_docs_complete}{none/global//global/global}
+\abx@aux@defaultrefcontext{0}{tc_direct_action}{none/global//global/global}
+\abx@aux@defaultrefcontext{0}{tc_ret_list_complete}{none/global//global/global}
 \ttl@finishall
-\gdef \@abspage@last{40}
+\gdef \@abspage@last{45}

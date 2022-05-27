@@ -694,7 +694,7 @@ eBPF ring buffers are a special kind of eBPF maps, providing a one-way direction
 
 %TODO DIAGRAM OF A TYPICAL RING BUFFER
 
-\subsection{The bpf() syscall}
+\subsection{The bpf() syscall} \label{subsection:bpf_syscall}
 The bpf() syscall is used to issue commands from user space to kernel space in eBPF programs. This syscall is multiplexor, meaning that it can perform a great range of actions, changing its behaviour depending on the parameters.
 
 The main operations that can be issued are described in table \ref{table:bpf_syscall}:
@@ -784,6 +784,131 @@ bpf\_ringbuf\_submit() & Submit data to an specific eBPF ring buffer, and notify
 \caption{Table showing common eBPF helpers. Only those relevant to our research are shown. Those helpers exclusive to an specific program type are not listed. The full list and attribute details can be consulted in the man page \cite{ebpf_helpers}.}
 \label{table:ebpf_helpers}
 \end{table}
+
+
+% Is this the best title?
+\section{eBPF program types}
+In the previous subsection \ref{subsection:bpf_syscall} we introduced the new types of eBPF programs that are supported and that we will be developing for our offensive analysis. In this section, we will analyse in greater detail how eBPF is integrated in the Linux kernel in order to support these new functionalities.
+
+\subsection{XDP}
+eXpress Data Path (XDP) programs are a novel type of eBPF program that allows for the lowest-latency traffic filtering and monitoring in the whole Linux kernel. In order to load an XDP program, a bpf() syscall with the command BPF\_PROG\_LOAD and the program type BPF\_PROG\_TYPE\_XDP must be issued. 
+
+These programs are directly attached to the Network Interface Controller (NIC) driver, and thus they can process the packet before any other module\cite{xdp_gentle_intro}.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=15cm]{xdp_diag.jpg}
+	% Either this caption, or change the text afterwards. I still need to know whether to put the long explanation here or on the paragraph, it gets repetitive.
+	\caption{Figure showing how the eBPF XDP and TC modules are integrated in the network processing in the Linux kernel.}
+	\label{fig:xdp_diag}
+\end{figure}
+
+Figure \ref{fig:xdp_diag} shows how XDP is integrated in the network processing of the Linux kernel. After receiving a raw packet (in the figure, \textit{xdp\_md}, which consists on the raw bytes plus some very basic metadata about the packet) from the incoming traffic, XDP program can perform the following actions\cite{xdp_manual}:
+\begin{itemize}
+\item Analyse the data between the packet buffer bounds.
+\item Modify the packet contents, and modify the packet length.
+\item Decide between one of the actions displayed in table \ref{table:xdp_actions_av}.
+\end{itemize}
+
+\begin{table}[H]
+\begin{tabular}{|c|>{\centering\arraybackslash}p{10cm}|}
+\hline
+ACTION & DESCRIPTION\\
+\hline
+\hline
+XDP\_PASS & Let packet proceed with operated modifications on it.\\
+\hline
+XDP\_TX & Return the packet at the same NIC it was received from. Packet modifications are kept.\\
+\hline
+XDP\_DROP & Drops the packet completely, kernel networking will not be notified.\\
+\hline
+\end{tabular}
+\caption{Table showing XDP relevant return values.}
+\label{table:xdp_actions_av}
+\end{table}
+
+Some of the XDP-exclusive eBPF helpers we will be discussing in later sections are shown in table \ref{table:xdp_helpers}.
+\begin{table}[H]
+\begin{tabular}{|c|>{\centering\arraybackslash}p{10cm}|}
+\hline
+eBPF helper & DESCRIPTION\\
+\hline
+\hline
+bpf\_xdp\_adjust\_head() & Enlarges or reduces the extension of a packet, by moving the address of its first byte.\\
+\hline
+bpf\_xdp\_adjust\_tail() & Enlarges or reduces the extension of a packet, by moving the address of its last byte.\\
+\hline
+\end{tabular}
+\caption{Table showing relevant XDP-exclusive eBPF helpers.}
+\label{table:xdp_helpers}
+\end{table}
+
+
+\subsection{Traffic Control}
+Traffic Control (TC) programs are also indicated for networking instrumentation. Similarly to XDP, their module is positioned before entering the overall network processing of the kernel. However, as it can be observed in figure \ref{fig:xdp_diag}, they differ in some aspects:
+\begin{itemize}
+\item TC programs receive a network buffer with metadata (in the figure, \textit{sk\_buff}) about the packet in it. This renders TC programs less ideal than XDP for performing large packet modifications (like new headers), but at the same time the additional metadata fields make it easier to locate and modify specific packet fields\cite{tc_differences}.
+\item TC programs can be attached to the \textit{ingress} or \textit{egress} points, meaning that an eBPF program can operate not only over incoming traffic, but also over the outgoing packets.
+\end{itemize}
+
+With respect to how TC programs operate, the Traffic Control system in Linux is greatly complex and would require a complete section by itself. In fact, it was already a complete system before the appearance of eBPF. Full documentation can be found at \cite{tc_docs_complete}. For this document, we will explain the overall process needed to load a TC program\cite{tc_direct_action}:
+\begin{enumerate}
+\item The TC program defines a so-called queuing discipline (qdisc), a packet scheduler that issues packets in a FIFO order as soon as they are received. This qdisc will be attached to an specific network interface (e.g.: wlan0).
+\item Our TC eBPF program is attached to the qdisc. It will work as a filter, being run for every of the packets dispatched by the qdisc.
+\end{enumerate}
+
+Similarly to XDP, the TC eBPF programs can decide an action to be executed on a packet by specifying a return value. These actions are almost analogous to the ones in XDP, as it can be observed in table \ref{table:tc_actions}.
+
+\begin{table}[H]
+\begin{tabular}{|c|>{\centering\arraybackslash}p{10cm}|}
+\hline
+ACTION & DESCRIPTION\\
+\hline
+\hline
+TC\_ACT\_OK & Let packet proceed with operated modifications on it.\\
+\hline
+TC\_ACT\_RECLASSIFY & Return the packet to the back of the qdisc scheduling queue.\\
+\hline
+TC\_ACT\_SHOT & Drops the packet completely, kernel networking will not be notified.\\
+\hline
+\end{tabular}
+\caption{Table showing TC relevant return values. Full list can be consulted at \cite{tc_ret_list_complete}.}
+\label{table:tc_actions}
+\end{table}
+
+Finally, as in XDP, there exist a list of useful BPF helpers that will be relevant for the creation of our rootkit. They are shown in table \ref{table:tc_helpers}.
+\begin{table}[H]
+\begin{tabular}{|c|>{\centering\arraybackslash}p{10cm}|}
+\hline
+eBPF helper & DESCRIPTION\\
+\hline
+\hline
+bpf\_l3\_csum\_replace() & Recomputes the network layer 3 (e.g.: IP) checksum of the packet.\\
+\hline
+bpf\_l4\_csum\_replace() & Recomputes the network layer 4 (e.g: TCP) checksum of the packet.\\
+\hline
+bpf\_skb\_store\_bytes() & Write a data buffer into the packet.\\
+\hline
+bpf\_skb\_pull\_data() & Reads a sequence of packet bytes into a buffer.\\
+\hline
+bpf\_skb\_change\_head() & (Only) enlarges the extension of a packet, by moving the address of its first byte.\\
+\hline
+bpf\_skb\_change\_tail() & Enlarges or reduces the extension of a packet, by moving the address of its last byte.\\
+\hline
+\hline
+\end{tabular}
+\caption{Table showing relevant TC-exclusive eBPF helpers.}
+\label{table:tc_helpers}
+\end{table}
+
+%ADD HOOKING SUBSECTION
+
+% Is this the best title?
+\section{Developing eBPF programs}
+In the previous sections, we discussed the overall architecture of the eBPF system which is now an integral part of the Linux kernel. We also studied the process which a piece of eBPF bytecode follows in order to be accepted in the kernel. However, for an eBPF developer, programming bytecode is not an easy task, therefore an additional layer of abstraction was needed. 
+
+Nowadays, there exist multiple popular alternatives for writing eBPF programs. We will overview which they are and proceed to analyse in further detail the option that we will use for the development of our rootkit.
+%TODO Continue, I decided to keep this separate for now
 
 
 

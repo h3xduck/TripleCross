@@ -19,6 +19,8 @@
 \defcounter {refsection}{0}\relax 
 \contentsline {figure}{\numberline {2.7}{\ignorespaces Figure showing overall eBPF architecture in the Linux kernel and the process of loading an eBPF program. Based on\cite {brendan_gregg_bpf_book} and \cite {ebpf_io_arch}.\relax }}{12}{figure.caption.15}%
 \defcounter {refsection}{0}\relax 
+\contentsline {figure}{\numberline {2.8}{\ignorespaces Figure showing how the eBPF XDP and TC modules are integrated in the network processing in the Linux kernel.\relax }}{19}{figure.caption.23}%
+\defcounter {refsection}{0}\relax 
 \addvspace {10\p@ }
 \defcounter {refsection}{0}\relax 
 \addvspace {10\p@ }

@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.21 (TeX Live 2020/Debian) (preloaded format=pdflatex 2022.4.27)  26 MAY 2022 15:20
+This is pdfTeX, Version 3.14159265-2.6-1.40.21 (TeX Live 2020/Debian) (preloaded format=pdflatex 2022.4.27)  26 MAY 2022 21:44
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1096,7 +1096,7 @@ File: t1txss.fd 2000/12/15 v3.1
 )
 LaTeX Font Info:    Font shape `T1/txss/m/n' will be
 (Font)              scaled to size 11.39996pt on input line 186.
-<images//Portada_Logo.png, id=109, 456.2865pt x 45.99pt>
+<images//Portada_Logo.png, id=125, 456.2865pt x 45.99pt>
 File: images//Portada_Logo.png Graphic file (type png)
 <use images//Portada_Logo.png>
 Package pdftex.def Info: images//Portada_Logo.png  used on input line 190.
@@ -1109,7 +1109,7 @@ LaTeX Font Info:    Font shape `T1/txss/m/n' will be
 (Font)              scaled to size 23.63593pt on input line 201.
 LaTeX Font Info:    Font shape `T1/txss/m/n' will be
 (Font)              scaled to size 19.70294pt on input line 205.
-<images/creativecommons.png, id=111, 338.76563pt x 118.19156pt>
+<images/creativecommons.png, id=127, 338.76563pt x 118.19156pt>
 File: images/creativecommons.png Graphic file (type png)
 <use images/creativecommons.png>
 Package pdftex.def Info: images/creativecommons.png  used on input line 215.
@@ -1150,13 +1150,13 @@ s been already used, duplicate ignored
 <to be read again> 
                    \relax 
 l.279 \tableofcontents
-                       [6] (./document.toc)
+                       [6] (./document.toc [7
+
+])
 \tf@toc=\write6
 \openout6 = `document.toc'.
 
- [7
-
-] [8] (./document.lof
+ [8] [9] (./document.lof
 LaTeX Font Info:    Trying to load font information for OT1+txr on input line 8
 .
 
@@ -1190,16 +1190,16 @@ File: utxsyc.fd 2000/12/15 v3.1
 \tf@lof=\write7
 \openout7 = `document.lof'.
 
- [9
+ [10
 
-] [10]
+] [11]
 (./document.lot)
 \tf@lot=\write8
 \openout8 = `document.lot'.
 
- [11
+ [12
 
-] [12]
+] [13]
 Chapter 1.
 LaTeX Font Info:    Trying to load font information for TS1+txr on input line 3
 30.
@@ -1220,7 +1220,7 @@ Chapter 2.
 LaTeX Warning: Reference `section:analysis_offensive_capabilities' on page 5 un
 defined on input line 412.
 
-<images//classic_bpf.jpg, id=343, 588.1975pt x 432.61626pt>
+<images//classic_bpf.jpg, id=387, 588.1975pt x 432.61626pt>
 File: images//classic_bpf.jpg Graphic file (type jpg)
 <use images//classic_bpf.jpg>
 Package pdftex.def Info: images//classic_bpf.jpg  used on input line 426.
@@ -1228,36 +1228,36 @@ Package pdftex.def Info: images//classic_bpf.jpg  used on input line 426.
 [5
 
 ] [6 <./images//classic_bpf.jpg>]
-<images//cbpf_prog.jpg, id=362, 403.5075pt x 451.6875pt>
+<images//cbpf_prog.jpg, id=405, 403.5075pt x 451.6875pt>
 File: images//cbpf_prog.jpg Graphic file (type jpg)
 <use images//cbpf_prog.jpg>
 Package pdftex.def Info: images//cbpf_prog.jpg  used on input line 453.
 (pdftex.def)             Requested size: 227.62204pt x 254.80415pt.
  [7 <./images/cBPF_prog.jpg>]
-<images//bpf_instructions.png, id=372, 380.92313pt x 475.27562pt>
+<images//bpf_instructions.png, id=415, 380.92313pt x 475.27562pt>
 File: images//bpf_instructions.png Graphic file (type png)
 <use images//bpf_instructions.png>
 Package pdftex.def Info: images//bpf_instructions.png  used on input line 493.
 (pdftex.def)             Requested size: 227.62204pt x 283.99998pt.
  [8 <./images//bpf_instructions.png>]
-<images//bpf_address_mode.png, id=382, 417.05812pt x 313.67188pt>
+<images//bpf_address_mode.png, id=425, 417.05812pt x 313.67188pt>
 File: images//bpf_address_mode.png Graphic file (type png)
 <use images//bpf_address_mode.png>
 Package pdftex.def Info: images//bpf_address_mode.png  used on input line 509.
 (pdftex.def)             Requested size: 227.62204pt x 171.19905pt.
  [9 <./images//bpf_address_mode.png>]
-<images//tcpdump_example.png, id=394, 534.99875pt x 454.69875pt>
+<images//tcpdump_example.png, id=437, 534.99875pt x 454.69875pt>
 File: images//tcpdump_example.png Graphic file (type png)
 <use images//tcpdump_example.png>
 Package pdftex.def Info: images//tcpdump_example.png  used on input line 524.
 (pdftex.def)             Requested size: 284.52756pt x 241.82869pt.
-<images//cBPF_prog_ex_sol.png, id=397, 242.9075pt x 321.2pt>
+<images//cBPF_prog_ex_sol.png, id=440, 242.9075pt x 321.2pt>
 File: images//cBPF_prog_ex_sol.png Graphic file (type png)
 <use images//cBPF_prog_ex_sol.png>
 Package pdftex.def Info: images//cBPF_prog_ex_sol.png  used on input line 535.
 (pdftex.def)             Requested size: 170.71652pt x 225.74026pt.
  [10 <./images//tcpdump_example.png>] [11 <./images//cBPF_prog_ex_sol.png>]
-<images//ebpf_arch.jpg, id=416, 739.76375pt x 472.76625pt>
+<images//ebpf_arch.jpg, id=459, 739.76375pt x 472.76625pt>
 File: images//ebpf_arch.jpg Graphic file (type jpg)
 <use images//ebpf_arch.jpg>
 Package pdftex.def Info: images//ebpf_arch.jpg  used on input line 574.
@@ -1304,78 +1304,78 @@ LaTeX Warning: Reference `section:TODO' on page 17 undefined on input line 746.
 
 
 
-LaTeX Warning: Citation 'ebpf_helpers' on page 17 undefined on input line 749.
-
-
-Overfull \hbox (34.64395pt too wide) in paragraph at lines 749--750
-\T1/txr/m/n/12 have free ac-cess to), the eBPF sys-tem of-fers a set of lim-ite
-d func-tions called helpers[],
- []
-
-
 Overfull \hbox (13.5802pt too wide) in paragraph at lines 756--784
  [][] 
  []
 
+[17]
+<images//xdp_diag.jpg, id=539, 649.42625pt x 472.76625pt>
+File: images//xdp_diag.jpg Graphic file (type jpg)
+<use images//xdp_diag.jpg>
+Package pdftex.def Info: images//xdp_diag.jpg  used on input line 800.
+(pdftex.def)             Requested size: 426.79134pt x 310.69934pt.
+ [18] [19 <./images//xdp_diag.jpg>]
+Overfull \hbox (5.80417pt too wide) in paragraph at lines 863--875
+ [][] 
+ []
 
-LaTeX Warning: Citation 'ebpf_helpers' on page 17 undefined on input line 784.
-
-LaTeX Font Info:    Font shape `T1/txr/b/n' in size <10.95> not available
-(Font)              Font shape `T1/txr/bx/n' tried instead on input line 784.
-
-LaTeX Warning: Citation 'ebpf_helpers' on page 17 undefined on input line 784.
-
-[17] [18]
+[20] [21]
 Chapter 3.
-[19
+[22
 
 ]
 Chapter 4.
-[20
+[23
 
 ]
 Chapter 5.
-[21
+[24
 
 ]
-LaTeX Font Info:    Trying to load font information for T1+txtt on input line 8
-30.
+LaTeX Font Info:    Trying to load font information for T1+txtt on input line 9
+57.
  (/usr/share/texlive/texmf-dist/tex/latex/txfonts/t1txtt.fd
 File: t1txtt.fd 2000/12/15 v3.1
 )
-Overfull \hbox (5.34976pt too wide) in paragraph at lines 831--831
+Overfull \hbox (5.34976pt too wide) in paragraph at lines 958--958
 \T1/txtt/m/n/12 threat -[] intelligence / cyber -[] year -[] in -[] retrospect 
 / yir -[] cyber -[] threats -[]
  []
 
-[22
+[25
 
 
 ]
-Overfull \hbox (6.22696pt too wide) in paragraph at lines 831--831
+Overfull \hbox (6.22696pt too wide) in paragraph at lines 958--958
 []\T1/txr/m/it/12 Bpf fea-tures by linux ker-nel ver-sion\T1/txr/m/n/12 , io-vi
 -sor. [On-line]. Avail-able: [][]$\T1/txtt/m/n/12 https : / / github .
  []
 
 
-Overfull \hbox (7.34976pt too wide) in paragraph at lines 831--831
+Overfull \hbox (7.34976pt too wide) in paragraph at lines 958--958
 [][]$\T1/txtt/m/n/12 https : / / ebpf . io / what -[] is -[] ebpf / #loader -[]
 -[] verification -[] architecture$[][]\T1/txr/m/n/12 . 
  []
 
 
-Overfull \hbox (21.24973pt too wide) in paragraph at lines 831--831
+Overfull \hbox (21.24973pt too wide) in paragraph at lines 958--958
 \T1/txtt/m/n/12 vger . kernel . org / netconf2015Starovoitov -[] bpf _ collabsu
 mmit _ 2015feb20 .
  []
 
-[23]
-Overfull \hbox (9.14975pt too wide) in paragraph at lines 831--831
+[26]
+Overfull \hbox (9.14975pt too wide) in paragraph at lines 958--958
 \T1/txtt/m/n/12 ch02 . xhtml# :-[]: text = With % 20JIT % 20compiled % 20code %
  2C % 20i ,[] %20other %
  []
 
-[24] [1
+
+Overfull \hbox (6.49615pt too wide) in paragraph at lines 958--958
+[]\T1/txr/m/n/12 D. Lavie. ^^P  A gen-tle in-tro-duc-tion to xdp.^^Q (Feb. 3, 2
+022), [On-line]. Avail-able: [][]$\T1/txtt/m/n/12 https :
+ []
+
+[27] [28] [1
 
 ]
 
@@ -1386,7 +1386,7 @@ pdfTeX warning (ext4): destination with the same identifier (name{page.}) has b
 een already used, duplicate ignored
 <to be read again> 
                    \relax 
-l.847 \end{document}
+l.974 \end{document}
                      [2
 
 ] (./document.aux)
@@ -1394,24 +1394,19 @@ l.847 \end{document}
 LaTeX Warning: There were undefined references.
 
 Package rerunfilecheck Info: File `document.out' has not changed.
-(rerunfilecheck)             Checksum: 64ACDA339F3877D1BEB5B5524019D5C5;1913.
-
-Package biblatex Warning: Please (re)run Biber on the file:
-(biblatex)                document
-(biblatex)                and rerun LaTeX afterwards.
-
+(rerunfilecheck)             Checksum: E5138CE4A4FC0333EA6AC0A0168DC432;2190.
 Package logreq Info: Writing requests to 'document.run.xml'.
 \openout1 = `document.run.xml'.
 
  ) 
 Here is how much of TeX's memory you used:
- 27408 strings out of 481209
- 437163 string characters out of 5914747
- 1177845 words of memory out of 5000000
- 43800 multiletter control sequences out of 15000+600000
- 457008 words of font info for 103 fonts, out of 8000000 for 9000
+ 27457 strings out of 481209
+ 438434 string characters out of 5914747
+ 1180810 words of memory out of 5000000
+ 43827 multiletter control sequences out of 15000+600000
+ 453959 words of font info for 100 fonts, out of 8000000 for 9000
  36 hyphenation exceptions out of 8191
- 88i,11n,90p,1029b,3095s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 88i,12n,90p,1029b,3681s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/share/texlive/texmf-dist/fonts/enc/dvips/base/8r.enc}</usr/share/texliv
 e/texmf-dist/fonts/type1/public/txfonts/rtcxi.pfb></usr/share/texlive/texmf-dis
 t/fonts/type1/public/txfonts/rtcxr.pfb></usr/share/texlive/texmf-dist/fonts/typ
@@ -1423,9 +1418,9 @@ texmf-dist/fonts/type1/urw/helvetic/uhvr8a.pfb></usr/share/texlive/texmf-dist/f
 onts/type1/urw/helvetic/uhvr8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/u
 rw/times/utmb8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/times/utmr8a
 .pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/times/utmri8a.pfb>
-Output written on document.pdf (40 pages, 593575 bytes).
+Output written on document.pdf (45 pages, 661173 bytes).
 PDF statistics:
- 691 PDF objects out of 1000 (max. 8388607)
- 123 named destinations out of 1000 (max. 500000)
- 266 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 796 PDF objects out of 1000 (max. 8388607)
+ 146 named destinations out of 1000 (max. 500000)
+ 303 words of extra memory for PDF output out of 10000 (max. 10000000)
 
