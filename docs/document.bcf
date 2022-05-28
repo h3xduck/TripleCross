@@ -2409,6 +2409,10 @@
     <bcf:citekey order="71">tc_direct_action</bcf:citekey>
     <bcf:citekey order="72">tc_ret_list_complete</bcf:citekey>
     <bcf:citekey order="73">tc_ret_list_complete</bcf:citekey>
+    <bcf:citekey order="74">tp_kernel</bcf:citekey>
+    <bcf:citekey order="75">kprobe_manual</bcf:citekey>
+    <bcf:citekey order="76">kallsyms_kernel</bcf:citekey>
+    <bcf:citekey order="77">bcc_github</bcf:citekey>
   </bcf:section>
   <!-- SORTING TEMPLATES -->
   <bcf:sortingtemplate name="none">

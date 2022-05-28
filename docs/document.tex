@@ -537,7 +537,7 @@ In the example, using the \textit{jf} and \textit{jt} fields, we can label the n
 	\label{fig:tcpdump_ex_sol}
 \end{figure}
 
-\section{Analysis of modern eBPF}
+\section{Analysis of modern eBPF} \label{section:modern_ebpf}
 This section discusses the current state of modern eBPF in the Linux kernel. By building on the previous architecture described in classic BPF, we will be able to provide a comprehensive picture of the underlying infrastructure in which eBPF relies today.
 
 The addition of classic BPF in the Linux kernel set the foundations of eBPF, but nowadays it has already extended its presence to many other components other than traffic filtering. Similarly to how BPF filters were included in the networking module of the Linux kernel, we will now study the necessary changes made in the kernel to support these new program types. Table \ref{table:ebpf_history} shows the main updates that were incorporated and shaped modern eBPF of today.
@@ -853,7 +853,7 @@ Traffic Control (TC) programs are also indicated for networking instrumentation.
 
 With respect to how TC programs operate, the Traffic Control system in Linux is greatly complex and would require a complete section by itself. In fact, it was already a complete system before the appearance of eBPF. Full documentation can be found at \cite{tc_docs_complete}. For this document, we will explain the overall process needed to load a TC program\cite{tc_direct_action}:
 \begin{enumerate}
-\item The TC program defines a so-called queuing discipline (qdisc), a packet scheduler that issues packets in a FIFO order as soon as they are received. This qdisc will be attached to an specific network interface (e.g.: wlan0).
+\item The TC program defines a so-called queuing discipline (qdisc), a packet scheduler that issues packets in a First-In-First-Out (FIFO) order as soon as they are received. This qdisc will be attached to an specific network interface (e.g.: wlan0).
 \item Our TC eBPF program is attached to the qdisc. It will work as a filter, being run for every of the packets dispatched by the qdisc.
 \end{enumerate}
 
@@ -876,7 +876,7 @@ TC\_ACT\_SHOT & Drops the packet completely, kernel networking will not be notif
 \label{table:tc_actions}
 \end{table}
 
-Finally, as in XDP, there exist a list of useful BPF helpers that will be relevant for the creation of our rootkit. They are shown in table \ref{table:tc_helpers}.
+Finally, as in XDP, there exists a list of useful BPF helpers that will be relevant for the creation of our rootkit. They are shown in table \ref{table:tc_helpers}.
 \begin{table}[H]
 \begin{tabular}{|c|>{\centering\arraybackslash}p{10cm}|}
 \hline
@@ -901,16 +901,62 @@ bpf\_skb\_change\_tail() & Enlarges or reduces the extension of a packet, by mov
 \label{table:tc_helpers}
 \end{table}
 
-%ADD HOOKING SUBSECTION
+
+%TODO This section might benefit from some diagrams, maybe. It was a bit to extense already, so skipping it from now
+\subsection{Tracepoints}
+Tracepoints are a technology in the Linux kernel that allows to hook functions in the kernel, connecting a 'probe': a function that is executed every time the hooked function is called\cite{tp_kernel}. These tracepoints are set statically during kernel development, meaning that for a function to be hooked, it needs to have been previously marked with a tracepoint statement indicating its traceability. At the same time, this limits the number of tracepoints available.
+
+The list of tracepoint events available depends on the kernel version and can be visited under the directory \textit{/sys/kernel/debug/tracing/events}.
+
+It is particularly relevant for our later research that most of the system calls incorporate a tracepoint, both when they are called (\textit{enter} tracepoint) and when they are exited (\textit{exit} tracepoints). This means that, for a system call sys\_open, both the tracepoint sys\_enter\_open and sys\_exit\_open are available. 
+
+Also, note that the probe functions that are called when hitting a tracepoint receive some parameters related to the context on which the tracepoint is located. In the case of syscalls, these include the parameters with which the syscall was called (only for \textit{enter} syscalls, \textit{exit} ones will only have access to the return value). The exact parameters and their format which a probe function receives can be visited in the file \textit{/sys/kernel/debug/tracing/events/<subsystem>/<tracepoint>/format}. In the previous example with sys\_enter\_open, this is \textit{/sys/kernel/debug/tracing/events/syscalls/sys\_enter\_open/format}.
+
+In eBPF, a program can issue a bpf() syscall with the command BPF\_PROG\_LOAD and the program type BPF\_PROG\_TYPE\_TRACEPOINT, specifying which is the function with the tracepoint to attach to and an arbitrary function probe to call when it is hit. This function probe is defined by the user in the eBPF program submitted to the kernel.
+
+\subsection{Kprobes}
+Kprobes are another tracing technology of the Linux kernel whose functionality has been become available to eBPF programs. Similarly to tracepoints, kprobes enable to hook a probe function, with the only difference that it is attached to an arbitrary instruction in the kernel, rather than to a function\cite{kprobe_manual}. It does not require that kernel developers specifically mark a function to be probed, but rather kprobes can be attached to any instruction, with a short list of blacklisted exceptions. 
+
+As it happened with tracepoints, the probed functions have access to the parameters received by the function at which the instructions is attached to. Also, the kernel maintains a list of kernel symbols (addresses) which are relevant for tracing and that offer us insight into which functions we can probe. It can be visited under the file \textit{/proc/kallsyms}, which exports symbols of kernel functions and loaded kernel modules\cite{kallsyms_kernel}.
+
+Also similarly, since tracepoints could be found in their \textit{enter} and \textit{exit} variations, kprobes have their counterpart, name kretprobes, which call the hooked probe once a return instruction is reached after the hooked symbol. This means that a kretprobe hooked to a kernel function will call the probe function once it exits.
+
+In eBPF, a program can issue a bpf() syscall with the command BPF\_PROG\_LOAD and the program type BPF\_PROG\_TYPE\_KPROBE, specifying which is the function with the kprobe to attach to and an arbitrary function probe to call when it is hit. This function probe is defined by the user in the eBPF program submitted to the kernel.
+
+\subsection{Uprobes}
+Uprobes is the last of the main tracing technologies which has been become accessible to eBPF programs. They are the counterparts of Kprobes, allowing for tracing the execution of an specific instruction in the user space, instead of in the kernel. When the exeuction flow reaches a hooked instruction, a probe function is run. 
+
+Similarly to kprobes, uprobes have access to the parameters received by the hooked function. Also, the complementary uretprobes also exist, running the probe function once the hooked function returns.
+
+In eBPF, programs can issue a bpf() syscall with the command BPF\_PROG\_LOAD and the program type BPF\_PROG\_TYPE\_UPROBE, specifying the function with the uprobe to attach to and an arbitrary function probe to call when it is hit. This function probe is also defined by the user in the eBPF program submitted to the kernel.
 
 % Is this the best title?
 \section{Developing eBPF programs}
-In the previous sections, we discussed the overall architecture of the eBPF system which is now an integral part of the Linux kernel. We also studied the process which a piece of eBPF bytecode follows in order to be accepted in the kernel. However, for an eBPF developer, programming bytecode is not an easy task, therefore an additional layer of abstraction was needed. 
+In section \ref{section:modern_ebpf}, we discussed the overall architecture of the eBPF system which is now an integral part of the Linux kernel. We also studied the process which a piece of eBPF bytecode follows in order to be accepted in the kernel. However, for an eBPF developer, programming bytecode and working with bpf() calls natively is not an easy task, therefore an additional layer of abstraction was needed. 
 
-Nowadays, there exist multiple popular alternatives for writing eBPF programs. We will overview which they are and proceed to analyse in further detail the option that we will use for the development of our rootkit.
-%TODO Continue, I decided to keep this separate for now
+Nowadays, there exist multiple popular alternatives for writing and running eBPF programs. We will overview which they are and proceed to analyse in further detail the option that we will use for the development of our rootkit.
 
+\subsection{BCC}
+BPF Compiler Collection (BCC) is one of the first and well-known toolkits for eBPF programming available\cite{bcc_github}. It allows to include eBPF code into user programs. These programs are developed in python, and the eBPF code is embedded as a plain string. An example of a BCC program is included in %TODO ANNEX???
 
+Although BCC offers a wide range of tools to easy the development of eBPF programs, we found it not to be the most appropriate for our large-scale eBPF project. This was in particular due to the feature of eBPF programs being stored as a python string, which leads to difficult scalability, poor development experience given that programming errors are detected at runtime (once the python program issues the compilation of the string), and simply better features from competing libraries.
+
+\subsection{Bpftool}
+bpftool is not a development framework like BCC, but one of the most relevant tools for eBPF program development. Some of its functionalities include:
+\begin{itemize}
+\item Loading eBPF programs.
+\item List running eBPF programs.
+\item Dumping bytecode from live eBPF programs.
+\item Extract program statistics and data from programs.
+\item List and operate over eBPF maps.
+\end{itemize}
+
+Although we will not be covering bpftool during our overview on the constructed eBPF rootkit, it was used extensively during the development and became a key tool for debugging eBPF programs, particularly to peek data at eBPF maps during runtime.
+
+\subsection{Libbpf}
+libbpf is a library for loading and interacting with eBPF programs. 
+
+%TALK ABOUT LLVM
 
 
 

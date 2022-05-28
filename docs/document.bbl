@@ -152,8 +152,8 @@
       \strng{authorbibnamehash}{5142e68c748eb70cb619b21160eb7f72}
       \strng{authornamehash}{5142e68c748eb70cb619b21160eb7f72}
       \strng{authorfullhash}{5142e68c748eb70cb619b21160eb7f72}
-      \field{sortinit}{1}
-      \field{sortinithash}{50c6687d7fc80f50136d75228e3c59ba}
+      \field{sortinit}{2}
+      \field{sortinithash}{ed39bb39cf854d5250e95b1c1f94f4ed}
       \field{labelnamesource}{author}
       \field{eventtitle}{Evil eBPF Practical Abuses of an In-Kernel Bytecode Runtime}
       \verb{urlraw}
@@ -402,8 +402,8 @@
       \strng{authornamehash}{b74c2671072cf5a1a1400dc035240dfd}
       \strng{authorfullhash}{b74c2671072cf5a1a1400dc035240dfd}
       \field{extraname}{4}
-      \field{sortinit}{2}
-      \field{sortinithash}{ed39bb39cf854d5250e95b1c1f94f4ed}
+      \field{sortinit}{3}
+      \field{sortinithash}{a37a8ef248a93c322189792c34fc68c9}
       \field{labelnamesource}{author}
       \field{labeltitlesource}{title}
       \field{day}{19}
@@ -523,8 +523,8 @@
       \endverb
     \endentry
     \entry{ebpf_inst_set}{manual}{}
-      \field{sortinit}{3}
-      \field{sortinithash}{a37a8ef248a93c322189792c34fc68c9}
+      \field{sortinit}{4}
+      \field{sortinithash}{e071e0bcb44634fab398d68ad04e69f4}
       \field{labeltitlesource}{title}
       \field{title}{eBPF instruction set}
       \verb{urlraw}
@@ -687,8 +687,8 @@
       \endverb
     \endentry
     \entry{jit_enable_setting}{manual}{}
-      \field{sortinit}{4}
-      \field{sortinithash}{e071e0bcb44634fab398d68ad04e69f4}
+      \field{sortinit}{5}
+      \field{sortinithash}{5dd416adbafacc8226114bc0202d5fdd}
       \field{labeltitlesource}{title}
       \field{title}{bpf\_jit\_enable}
       \verb{urlraw}
@@ -941,8 +941,8 @@
       \strng{authorbibnamehash}{6f963077bb5e5f5e471047d2f4a2e4e7}
       \strng{authornamehash}{6f963077bb5e5f5e471047d2f4a2e4e7}
       \strng{authorfullhash}{6f963077bb5e5f5e471047d2f4a2e4e7}
-      \field{sortinit}{6}
-      \field{sortinithash}{7851c86048328b027313775d8fbd2131}
+      \field{sortinit}{7}
+      \field{sortinithash}{f615fb9c6fba11c6f962fb3fd599810e}
       \field{labelnamesource}{author}
       \field{labeltitlesource}{title}
       \field{day}{1}
@@ -998,6 +998,102 @@
       \endverb
       \verb{url}
       \verb https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/include/uapi/linux/pkt_cls.h
+      \endverb
+    \endentry
+    \entry{tp_kernel}{manual}{}
+      \name{author}{1}{}{%
+        {{hash=5233bec95aa14fa3942f60f8fc369f5a}{%
+           family={Desnoyers},
+           familyi={D\bibinitperiod},
+           given={Mathieu},
+           giveni={M\bibinitperiod}}}%
+      }
+      \strng{namehash}{5233bec95aa14fa3942f60f8fc369f5a}
+      \strng{fullhash}{5233bec95aa14fa3942f60f8fc369f5a}
+      \strng{bibnamehash}{5233bec95aa14fa3942f60f8fc369f5a}
+      \strng{authorbibnamehash}{5233bec95aa14fa3942f60f8fc369f5a}
+      \strng{authornamehash}{5233bec95aa14fa3942f60f8fc369f5a}
+      \strng{authorfullhash}{5233bec95aa14fa3942f60f8fc369f5a}
+      \field{sortinit}{7}
+      \field{sortinithash}{f615fb9c6fba11c6f962fb3fd599810e}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Using the Linux Kernel Tracepoints}
+      \verb{urlraw}
+      \verb https://www.kernel.org/doc/html/latest/trace/tracepoints.html
+      \endverb
+      \verb{url}
+      \verb https://www.kernel.org/doc/html/latest/trace/tracepoints.html
+      \endverb
+    \endentry
+    \entry{kprobe_manual}{manual}{}
+      \name{author}{1}{}{%
+        {{hash=2cc2b9c9c507513d2985e72f46781aec}{%
+           family={Jim\bibnamedelima Keniston},
+           familyi={J\bibinitperiod\bibinitdelim K\bibinitperiod},
+           given={Masami\bibnamedelima Hiramatsu},
+           giveni={M\bibinitperiod\bibinitdelim H\bibinitperiod},
+           suffix={Prasanna\bibnamedelimb S\bibnamedelima Panchamukhi},
+           suffixi={P\bibinitperiod\bibinitdelim S\bibinitperiod\bibinitdelim P\bibinitperiod}}}%
+      }
+      \strng{namehash}{2cc2b9c9c507513d2985e72f46781aec}
+      \strng{fullhash}{2cc2b9c9c507513d2985e72f46781aec}
+      \strng{bibnamehash}{2cc2b9c9c507513d2985e72f46781aec}
+      \strng{authorbibnamehash}{2cc2b9c9c507513d2985e72f46781aec}
+      \strng{authornamehash}{2cc2b9c9c507513d2985e72f46781aec}
+      \strng{authorfullhash}{2cc2b9c9c507513d2985e72f46781aec}
+      \field{sortinit}{7}
+      \field{sortinithash}{f615fb9c6fba11c6f962fb3fd599810e}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Kernel Probes (Kprobes)}
+      \verb{urlraw}
+      \verb https://www.kernel.org/doc/html/latest/trace/kprobes.html
+      \endverb
+      \verb{url}
+      \verb https://www.kernel.org/doc/html/latest/trace/kprobes.html
+      \endverb
+    \endentry
+    \entry{kallsyms_kernel}{online}{}
+      \name{author}{1}{}{%
+        {{hash=d92b805bd53ec71a9ed691daf3c00fcc}{%
+           family={Alcock},
+           familyi={A\bibinitperiod},
+           given={Nick},
+           giveni={N\bibinitperiod}}}%
+      }
+      \strng{namehash}{d92b805bd53ec71a9ed691daf3c00fcc}
+      \strng{fullhash}{d92b805bd53ec71a9ed691daf3c00fcc}
+      \strng{bibnamehash}{d92b805bd53ec71a9ed691daf3c00fcc}
+      \strng{authorbibnamehash}{d92b805bd53ec71a9ed691daf3c00fcc}
+      \strng{authornamehash}{d92b805bd53ec71a9ed691daf3c00fcc}
+      \strng{authorfullhash}{d92b805bd53ec71a9ed691daf3c00fcc}
+      \field{sortinit}{7}
+      \field{sortinithash}{f615fb9c6fba11c6f962fb3fd599810e}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{day}{6}
+      \field{month}{6}
+      \field{title}{kallsyms: new /proc/kallmodsyms with builtin modules and symbol sizes}
+      \field{year}{2021}
+      \field{dateera}{ce}
+      \verb{urlraw}
+      \verb https://lwn.net/Articles/862021/
+      \endverb
+      \verb{url}
+      \verb https://lwn.net/Articles/862021/
+      \endverb
+    \endentry
+    \entry{bcc_github}{online}{}
+      \field{sortinit}{7}
+      \field{sortinithash}{f615fb9c6fba11c6f962fb3fd599810e}
+      \field{labeltitlesource}{title}
+      \field{title}{BPF Compiler Collection (BCC)}
+      \verb{urlraw}
+      \verb https://github.com/iovisor/bcc
+      \endverb
+      \verb{url}
+      \verb https://github.com/iovisor/bcc
       \endverb
     \endentry
   \enddatalist

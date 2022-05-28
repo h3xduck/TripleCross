@@ -51,13 +51,25 @@
 \defcounter {refsection}{0}\relax 
 \contentsline {subsection}{\numberline {2.3.2}Traffic Control}{20}{subsection.2.3.2}%
 \defcounter {refsection}{0}\relax 
-\contentsline {section}{\numberline {2.4}Developing eBPF programs}{21}{section.2.4}%
+\contentsline {subsection}{\numberline {2.3.3}Tracepoints}{21}{subsection.2.3.3}%
 \defcounter {refsection}{0}\relax 
-\contentsline {chapter}{\numberline {3}Methods??}{22}{chapter.3}%
+\contentsline {subsection}{\numberline {2.3.4}Kprobes}{22}{subsection.2.3.4}%
 \defcounter {refsection}{0}\relax 
-\contentsline {chapter}{\numberline {4}Results}{23}{chapter.4}%
+\contentsline {subsection}{\numberline {2.3.5}Uprobes}{22}{subsection.2.3.5}%
 \defcounter {refsection}{0}\relax 
-\contentsline {chapter}{\numberline {5}Conclusion and future work}{24}{chapter.5}%
+\contentsline {section}{\numberline {2.4}Developing eBPF programs}{23}{section.2.4}%
 \defcounter {refsection}{0}\relax 
-\contentsline {chapter}{Bibliography}{25}{chapter.5}%
+\contentsline {subsection}{\numberline {2.4.1}BCC}{23}{subsection.2.4.1}%
+\defcounter {refsection}{0}\relax 
+\contentsline {subsection}{\numberline {2.4.2}Bpftool}{23}{subsection.2.4.2}%
+\defcounter {refsection}{0}\relax 
+\contentsline {subsection}{\numberline {2.4.3}Libbpf}{24}{subsection.2.4.3}%
+\defcounter {refsection}{0}\relax 
+\contentsline {chapter}{\numberline {3}Methods??}{25}{chapter.3}%
+\defcounter {refsection}{0}\relax 
+\contentsline {chapter}{\numberline {4}Results}{26}{chapter.4}%
+\defcounter {refsection}{0}\relax 
+\contentsline {chapter}{\numberline {5}Conclusion and future work}{27}{chapter.5}%
+\defcounter {refsection}{0}\relax 
+\contentsline {chapter}{Bibliography}{28}{chapter.5}%
 \contentsfinish 
