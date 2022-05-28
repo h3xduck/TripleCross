@@ -65,11 +65,13 @@
 \defcounter {refsection}{0}\relax 
 \contentsline {subsection}{\numberline {2.4.3}Libbpf}{24}{subsection.2.4.3}%
 \defcounter {refsection}{0}\relax 
-\contentsline {chapter}{\numberline {3}Methods??}{25}{chapter.3}%
+\contentsline {chapter}{\numberline {3}Analysis of offensive capabilities}{27}{chapter.3}%
 \defcounter {refsection}{0}\relax 
-\contentsline {chapter}{\numberline {4}Results}{26}{chapter.4}%
+\contentsline {chapter}{\numberline {4}Methods??}{28}{chapter.4}%
 \defcounter {refsection}{0}\relax 
-\contentsline {chapter}{\numberline {5}Conclusion and future work}{27}{chapter.5}%
+\contentsline {chapter}{\numberline {5}Results}{29}{chapter.5}%
 \defcounter {refsection}{0}\relax 
-\contentsline {chapter}{Bibliography}{28}{chapter.5}%
+\contentsline {chapter}{\numberline {6}Conclusion and future work}{30}{chapter.6}%
+\defcounter {refsection}{0}\relax 
+\contentsline {chapter}{Bibliography}{31}{chapter.6}%
 \contentsfinish 

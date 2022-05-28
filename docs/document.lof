@@ -21,6 +21,10 @@
 \defcounter {refsection}{0}\relax 
 \contentsline {figure}{\numberline {2.8}{\ignorespaces Figure showing how the eBPF XDP and TC modules are integrated in the network processing in the Linux kernel.\relax }}{19}{figure.caption.23}%
 \defcounter {refsection}{0}\relax 
+\contentsline {figure}{\numberline {2.9}{\ignorespaces Sketch of the compilation and loading process of a program developed with libbpf.\relax }}{25}{figure.caption.28}%
+\defcounter {refsection}{0}\relax 
+\addvspace {10\p@ }
+\defcounter {refsection}{0}\relax 
 \addvspace {10\p@ }
 \defcounter {refsection}{0}\relax 
 \addvspace {10\p@ }

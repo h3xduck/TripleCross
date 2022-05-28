@@ -1096,6 +1096,59 @@
       \verb https://github.com/iovisor/bcc
       \endverb
     \endentry
+    \entry{libbpf_github}{online}{}
+      \field{sortinit}{7}
+      \field{sortinithash}{f615fb9c6fba11c6f962fb3fd599810e}
+      \field{indextitle}{libbpf GitHub}
+      \verb{urlraw}
+      \verb https://github.com/libbpf/libbpf
+      \endverb
+      \verb{url}
+      \verb https://github.com/libbpf/libbpf
+      \endverb
+    \endentry
+    \entry{libbpf_upstream}{online}{}
+      \field{sortinit}{7}
+      \field{sortinithash}{f615fb9c6fba11c6f962fb3fd599810e}
+      \field{labeltitlesource}{title}
+      \field{title}{BPF next kernel tree}
+      \verb{urlraw}
+      \verb https://kernel.googlesource.com/pub/scm/linux/kernel/git/bpf/bpf-next
+      \endverb
+      \verb{url}
+      \verb https://kernel.googlesource.com/pub/scm/linux/kernel/git/bpf/bpf-next
+      \endverb
+    \endentry
+    \entry{libbpf_core}{online}{}
+      \name{author}{1}{}{%
+        {{hash=c1dd9d38edae2e25017305f57983936e}{%
+           family={Nakryiko},
+           familyi={N\bibinitperiod},
+           given={Andrii},
+           giveni={A\bibinitperiod}}}%
+      }
+      \strng{namehash}{c1dd9d38edae2e25017305f57983936e}
+      \strng{fullhash}{c1dd9d38edae2e25017305f57983936e}
+      \strng{bibnamehash}{c1dd9d38edae2e25017305f57983936e}
+      \strng{authorbibnamehash}{c1dd9d38edae2e25017305f57983936e}
+      \strng{authornamehash}{c1dd9d38edae2e25017305f57983936e}
+      \strng{authorfullhash}{c1dd9d38edae2e25017305f57983936e}
+      \field{sortinit}{8}
+      \field{sortinithash}{1b24cab5087933ef0826a7cd3b99e994}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{day}{19}
+      \field{month}{2}
+      \field{title}{BPF Portability and CO-RE}
+      \field{year}{2020}
+      \field{dateera}{ce}
+      \verb{urlraw}
+      \verb https://facebookmicrosites.github.io/bpf/blog/2020/02/19/bpf-portability-and-co-re.html
+      \endverb
+      \verb{url}
+      \verb https://facebookmicrosites.github.io/bpf/blog/2020/02/19/bpf-portability-and-co-re.html
+      \endverb
+    \endentry
   \enddatalist
 \endrefsection
 \endinput

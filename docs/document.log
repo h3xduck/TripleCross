@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.21 (TeX Live 2020/Debian) (preloaded format=pdflatex 2022.4.27)  27 MAY 2022 20:55
+This is pdfTeX, Version 3.14159265-2.6-1.40.21 (TeX Live 2020/Debian) (preloaded format=pdflatex 2022.4.27)  28 MAY 2022 09:22
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1220,7 +1220,7 @@ Chapter 2.
 LaTeX Warning: Reference `section:analysis_offensive_capabilities' on page 5 un
 defined on input line 412.
 
-<images//classic_bpf.jpg, id=423, 588.1975pt x 432.61626pt>
+<images//classic_bpf.jpg, id=428, 588.1975pt x 432.61626pt>
 File: images//classic_bpf.jpg Graphic file (type jpg)
 <use images//classic_bpf.jpg>
 Package pdftex.def Info: images//classic_bpf.jpg  used on input line 426.
@@ -1228,36 +1228,36 @@ Package pdftex.def Info: images//classic_bpf.jpg  used on input line 426.
 [5
 
 ] [6 <./images//classic_bpf.jpg>]
-<images//cbpf_prog.jpg, id=441, 403.5075pt x 451.6875pt>
+<images//cbpf_prog.jpg, id=446, 403.5075pt x 451.6875pt>
 File: images//cbpf_prog.jpg Graphic file (type jpg)
 <use images//cbpf_prog.jpg>
 Package pdftex.def Info: images//cbpf_prog.jpg  used on input line 453.
 (pdftex.def)             Requested size: 227.62204pt x 254.80415pt.
  [7 <./images/cBPF_prog.jpg>]
-<images//bpf_instructions.png, id=451, 380.92313pt x 475.27562pt>
+<images//bpf_instructions.png, id=456, 380.92313pt x 475.27562pt>
 File: images//bpf_instructions.png Graphic file (type png)
 <use images//bpf_instructions.png>
 Package pdftex.def Info: images//bpf_instructions.png  used on input line 493.
 (pdftex.def)             Requested size: 227.62204pt x 283.99998pt.
  [8 <./images//bpf_instructions.png>]
-<images//bpf_address_mode.png, id=461, 417.05812pt x 313.67188pt>
+<images//bpf_address_mode.png, id=466, 417.05812pt x 313.67188pt>
 File: images//bpf_address_mode.png Graphic file (type png)
 <use images//bpf_address_mode.png>
 Package pdftex.def Info: images//bpf_address_mode.png  used on input line 509.
 (pdftex.def)             Requested size: 227.62204pt x 171.19905pt.
  [9 <./images//bpf_address_mode.png>]
-<images//tcpdump_example.png, id=473, 534.99875pt x 454.69875pt>
+<images//tcpdump_example.png, id=478, 534.99875pt x 454.69875pt>
 File: images//tcpdump_example.png Graphic file (type png)
 <use images//tcpdump_example.png>
 Package pdftex.def Info: images//tcpdump_example.png  used on input line 524.
 (pdftex.def)             Requested size: 284.52756pt x 241.82869pt.
-<images//cBPF_prog_ex_sol.png, id=476, 242.9075pt x 321.2pt>
+<images//cBPF_prog_ex_sol.png, id=481, 242.9075pt x 321.2pt>
 File: images//cBPF_prog_ex_sol.png Graphic file (type png)
 <use images//cBPF_prog_ex_sol.png>
 Package pdftex.def Info: images//cBPF_prog_ex_sol.png  used on input line 535.
 (pdftex.def)             Requested size: 170.71652pt x 225.74026pt.
  [10 <./images//tcpdump_example.png>] [11 <./images//cBPF_prog_ex_sol.png>]
-<images//ebpf_arch.jpg, id=495, 739.76375pt x 472.76625pt>
+<images//ebpf_arch.jpg, id=500, 739.76375pt x 472.76625pt>
 File: images//ebpf_arch.jpg Graphic file (type jpg)
 <use images//ebpf_arch.jpg>
 Package pdftex.def Info: images//ebpf_arch.jpg  used on input line 574.
@@ -1309,7 +1309,7 @@ Overfull \hbox (13.5802pt too wide) in paragraph at lines 756--784
  []
 
 [17]
-<images//xdp_diag.jpg, id=575, 649.42625pt x 472.76625pt>
+<images//xdp_diag.jpg, id=580, 649.42625pt x 472.76625pt>
 File: images//xdp_diag.jpg Graphic file (type jpg)
 <use images//xdp_diag.jpg>
 Package pdftex.def Info: images//xdp_diag.jpg  used on input line 800.
@@ -1319,63 +1319,83 @@ Overfull \hbox (5.80417pt too wide) in paragraph at lines 863--875
  [][] 
  []
 
-[20] [21] [22] [23] [24]
+[20] [21] [22] [23]
+<images//libbpf_prog.jpg, id=639, 543.02875pt x 502.87875pt>
+File: images//libbpf_prog.jpg Graphic file (type jpg)
+<use images//libbpf_prog.jpg>
+Package pdftex.def Info: images//libbpf_prog.jpg  used on input line 966.
+(pdftex.def)             Requested size: 341.43306pt x 316.20142pt.
+ [24]
+
+LaTeX Warning: Reference `TODO' on page 25 undefined on input line 994.
+
+[25 <./images//libbpf_prog.jpg>] [26]
 Chapter 3.
-[25
-
-]
-Chapter 4.
-[26
-
-]
-Chapter 5.
 [27
 
 ]
+Chapter 4.
+[28
+
+]
+Chapter 5.
+[29
+
+]
+Chapter 6.
+[30
+
+]
 LaTeX Font Info:    Trying to load font information for T1+txtt on input line 1
-001.
+031.
  (/usr/share/texlive/texmf-dist/tex/latex/txfonts/t1txtt.fd
 File: t1txtt.fd 2000/12/15 v3.1
 )
-Overfull \hbox (5.34976pt too wide) in paragraph at lines 1002--1002
+Overfull \hbox (5.34976pt too wide) in paragraph at lines 1032--1032
 \T1/txtt/m/n/12 threat -[] intelligence / cyber -[] year -[] in -[] retrospect 
 / yir -[] cyber -[] threats -[]
  []
 
-[28
+[31
 
 
 ]
-Overfull \hbox (6.22696pt too wide) in paragraph at lines 1002--1002
+Overfull \hbox (6.22696pt too wide) in paragraph at lines 1032--1032
 []\T1/txr/m/it/12 Bpf fea-tures by linux ker-nel ver-sion\T1/txr/m/n/12 , io-vi
 -sor. [On-line]. Avail-able: [][]$\T1/txtt/m/n/12 https : / / github .
  []
 
 
-Overfull \hbox (7.34976pt too wide) in paragraph at lines 1002--1002
+Overfull \hbox (7.34976pt too wide) in paragraph at lines 1032--1032
 [][]$\T1/txtt/m/n/12 https : / / ebpf . io / what -[] is -[] ebpf / #loader -[]
 -[] verification -[] architecture$[][]\T1/txr/m/n/12 . 
  []
 
 
-Overfull \hbox (21.24973pt too wide) in paragraph at lines 1002--1002
+Overfull \hbox (21.24973pt too wide) in paragraph at lines 1032--1032
 \T1/txtt/m/n/12 vger . kernel . org / netconf2015Starovoitov -[] bpf _ collabsu
 mmit _ 2015feb20 .
  []
 
-[29]
-Overfull \hbox (9.14975pt too wide) in paragraph at lines 1002--1002
+[32]
+Overfull \hbox (9.14975pt too wide) in paragraph at lines 1032--1032
 \T1/txtt/m/n/12 ch02 . xhtml# :-[]: text = With % 20JIT % 20compiled % 20code %
  2C % 20i ,[] %20other %
  []
 
 
-Overfull \hbox (6.49615pt too wide) in paragraph at lines 1002--1002
+Overfull \hbox (6.49615pt too wide) in paragraph at lines 1032--1032
 []\T1/txr/m/n/12 D. Lavie. ^^P  A gen-tle in-tro-duc-tion to xdp.^^Q (Feb. 3, 2
 022), [On-line]. Avail-able: [][]$\T1/txtt/m/n/12 https :
  []
 
-[30] [31] [1
+[33]
+Overfull \hbox (0.76683pt too wide) in paragraph at lines 1032--1032
+[]\T1/txr/m/n/12 ^^P  Bpf next ker-nel tree.^^Q (), [On-line]. Avail-able: [][]
+$\T1/txtt/m/n/12 https : / / kernel . googlesource .
+ []
+
+[34] [1
 
 ]
 
@@ -1386,7 +1406,7 @@ pdfTeX warning (ext4): destination with the same identifier (name{page.}) has b
 een already used, duplicate ignored
 <to be read again> 
                    \relax 
-l.1018 \end{document}
+l.1048 \end{document}
                       [2
 
 ] (./document.aux)
@@ -1399,17 +1419,17 @@ Package rerunfilecheck Warning: File `document.out' has changed.
 (rerunfilecheck)                or use package `bookmark'.
 
 Package rerunfilecheck Info: Checksums for `document.out':
-(rerunfilecheck)             Before: 76D08850B9857529ABB9875381AE8D26;2555
-(rerunfilecheck)             After:  DDEC2EA0BA9DDEC568FE05D8A7BB7EC7;2555.
+(rerunfilecheck)             Before: DDEC2EA0BA9DDEC568FE05D8A7BB7EC7;2555
+(rerunfilecheck)             After:  82639416354DA222C60093A493D29911;2634.
 Package logreq Info: Writing requests to 'document.run.xml'.
 \openout1 = `document.run.xml'.
 
  ) 
 Here is how much of TeX's memory you used:
- 27485 strings out of 481209
- 439113 string characters out of 5914747
- 1181078 words of memory out of 5000000
- 43842 multiletter control sequences out of 15000+600000
+ 27509 strings out of 481209
+ 439698 string characters out of 5914747
+ 1181434 words of memory out of 5000000
+ 43856 multiletter control sequences out of 15000+600000
  453959 words of font info for 100 fonts, out of 8000000 for 9000
  36 hyphenation exceptions out of 8191
  88i,12n,90p,1029b,3681s stack positions out of 5000i,500n,10000p,200000b,80000s
@@ -1424,9 +1444,9 @@ texmf-dist/fonts/type1/urw/helvetic/uhvr8a.pfb></usr/share/texlive/texmf-dist/f
 onts/type1/urw/helvetic/uhvr8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/u
 rw/times/utmb8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/times/utmr8a
 .pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/times/utmri8a.pfb>
-Output written on document.pdf (48 pages, 676250 bytes).
+Output written on document.pdf (51 pages, 726289 bytes).
 PDF statistics:
- 863 PDF objects out of 1000 (max. 8388607)
- 159 named destinations out of 1000 (max. 500000)
- 351 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 898 PDF objects out of 1000 (max. 8388607)
+ 168 named destinations out of 1000 (max. 500000)
+ 356 words of extra memory for PDF output out of 10000 (max. 10000000)
 

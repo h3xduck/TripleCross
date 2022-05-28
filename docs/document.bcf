@@ -2413,6 +2413,9 @@
     <bcf:citekey order="75">kprobe_manual</bcf:citekey>
     <bcf:citekey order="76">kallsyms_kernel</bcf:citekey>
     <bcf:citekey order="77">bcc_github</bcf:citekey>
+    <bcf:citekey order="78">libbpf_github</bcf:citekey>
+    <bcf:citekey order="79">libbpf_upstream</bcf:citekey>
+    <bcf:citekey order="80">libbpf_core</bcf:citekey>
   </bcf:section>
   <!-- SORTING TEMPLATES -->
   <bcf:sortingtemplate name="none">

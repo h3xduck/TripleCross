@@ -954,9 +954,44 @@ bpftool is not a development framework like BCC, but one of the most relevant to
 Although we will not be covering bpftool during our overview on the constructed eBPF rootkit, it was used extensively during the development and became a key tool for debugging eBPF programs, particularly to peek data at eBPF maps during runtime.
 
 \subsection{Libbpf}
-libbpf is a library for loading and interacting with eBPF programs. 
+libbpf\cite{libbpf_github} is a library for loading and interacting with eBPF programs, which is currently maintained in the Linux kernel source tree\cite{libbpf_upstream}. It is one of the most popular frameworks to develop eBPF applications, both because it makes eBPF programming similar to common kernel development and because it aims at reducing kernel-version dependencies, thus increasing programs portability between systems\cite{libbpf_core}. During our research, however, we will not make use of this functionalities given that a portable program is not in our research goals.
 
-%TALK ABOUT LLVM
+As we discussed in section \ref{section:modern_ebpf}, eBPF programs are composed of both the eBPF code in the kernel and a user space program that can interact with it. With libbpf, the eBPF kernel program is developed in C (a real program, not a string later compiled as with BCC), while user programs are usually developed in C, Rust or GO. For our project, we will use the C version of libbpf, so both the user and kernel side of our rootkit will be developed in this language.
+
+% Cites in the following paragraph?
+When using libbpf with the C language, both the user-side and kernel eBPF program are compiled together using the Clang/LLVM compiler, translating C instructions into eBPF bytecode. As a clarification, Clang is the front-end of the compiler, translating C instructions into an intermediate form understandable by LLVM, whilst LLVM is the back-end compiling the intermediate code into eBPF bytecode. As it can be observed in figure \ref{fig:libbpf}, the result of the compilation is a single program, comprising the user-side which will launch a user process, the eBPF bytecode to be run in the kernel, and other structures libbpf generates about eBPF maps and other meta data. This program is encapsulated as an ELF file (a common executable format).
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=12cm, keepaspectratio=true]{libbpf_prog.jpg}
+	\caption{Sketch of the compilation and loading process of a program developed with libbpf.}
+	\label{fig:libbpf}
+\end{figure}
+
+Finally, we will overview one of the main functionalities of libbpf to simplify eBPF programming, namely the BPF skeleton. This is auto-generated code by libbpf whose aim is to simplify working with eBPF from the user-side program. As a summary, it parses the eBPF programs developed (which may be using different technologies such as XDP, kprobes, TC...) and the eBPF maps used, and as a result offers a simple set of functions for dealing with these programs from the user program. In particular, it allows for loading and unloading an specific eBPF program from user space at runtime.
+
+Table \ref{table:libbpf_skel} describes the API offered by the BPF skeleton. Note that <name> is subtituted by the name of the program being compiled.
+
+\begin{table}[H]
+\begin{tabular}{|c|>{\centering\arraybackslash}p{10cm}|}
+\hline
+Function name & Description\\
+\hline
+\hline
+<name>\_\_open() & Parse the eBPF programs and maps.\\
+\hline
+<name>\_\_load() & Load the eBPF map in the kernel after its validation, create the maps. However the programs are not active yet.\\
+\hline
+<name>\_\_attach() & Activate the eBPF programs, attaching them to their corresponding parts in the kernel (e.g. kprobes to kernel functions).\\
+\hline
+<name>\_\_destroy() & Detach and unload the eBPF programs from the kernel.\\
+\hline
+\end{tabular}
+\caption{Table showing BPF skeleton functions.}
+\label{table:libbpf_skel}
+\end{table}
+
+Note that the BPF skeleton also offers further granularity at the time of dealing with programs, so that individual programs can be loaded or attached instead of all simultaneously. This is the approach we will generally use in the development of our rootkit, as it will be explained in section \ref{TODO}.
 
 
 
@@ -964,13 +999,8 @@ libbpf is a library for loading and interacting with eBPF programs.
 
 
 
-
-
-
-
-
-
-
+\chapter{Analysis of offensive capabilities}
+In the previous chapter, we detailed which functionalities eBPF offers and studied its underlying architecture. 
 
 
 
