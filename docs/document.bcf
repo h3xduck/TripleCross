@@ -2416,6 +2416,16 @@
     <bcf:citekey order="78">libbpf_github</bcf:citekey>
     <bcf:citekey order="79">libbpf_upstream</bcf:citekey>
     <bcf:citekey order="80">libbpf_core</bcf:citekey>
+    <bcf:citekey order="81">ubuntu_caps</bcf:citekey>
+    <bcf:citekey order="82">evil_ebpf_p9</bcf:citekey>
+    <bcf:citekey order="83">ebpf_caps_intro</bcf:citekey>
+    <bcf:citekey order="84">ebpf_caps_lwn</bcf:citekey>
+    <bcf:citekey order="85">unprivileged_ebpf</bcf:citekey>
+    <bcf:citekey order="86">cve_unpriv_ebpf</bcf:citekey>
+    <bcf:citekey order="87">unpriv_ebpf_ubuntu</bcf:citekey>
+    <bcf:citekey order="88">unpriv_ebpf_suse</bcf:citekey>
+    <bcf:citekey order="89">unpriv_ebpf_redhat</bcf:citekey>
+    <bcf:citekey order="90">8664_params_abi</bcf:citekey>
   </bcf:section>
   <!-- SORTING TEMPLATES -->
   <bcf:sortingtemplate name="none">

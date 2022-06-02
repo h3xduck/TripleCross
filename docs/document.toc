@@ -61,17 +61,31 @@
 \defcounter {refsection}{0}\relax 
 \contentsline {subsection}{\numberline {2.4.1}BCC}{23}{subsection.2.4.1}%
 \defcounter {refsection}{0}\relax 
-\contentsline {subsection}{\numberline {2.4.2}Bpftool}{23}{subsection.2.4.2}%
+\contentsline {subsection}{\numberline {2.4.2}Bpftool}{24}{subsection.2.4.2}%
 \defcounter {refsection}{0}\relax 
 \contentsline {subsection}{\numberline {2.4.3}Libbpf}{24}{subsection.2.4.3}%
 \defcounter {refsection}{0}\relax 
 \contentsline {chapter}{\numberline {3}Analysis of offensive capabilities}{27}{chapter.3}%
 \defcounter {refsection}{0}\relax 
-\contentsline {chapter}{\numberline {4}Methods??}{28}{chapter.4}%
+\contentsline {section}{\numberline {3.1}Security features in eBPF}{27}{section.3.1}%
 \defcounter {refsection}{0}\relax 
-\contentsline {chapter}{\numberline {5}Results}{29}{chapter.5}%
+\contentsline {subsection}{\numberline {3.1.1}Access control}{28}{subsection.3.1.1}%
 \defcounter {refsection}{0}\relax 
-\contentsline {chapter}{\numberline {6}Conclusion and future work}{30}{chapter.6}%
+\contentsline {subsection}{\numberline {3.1.2}eBPF maps security}{30}{subsection.3.1.2}%
 \defcounter {refsection}{0}\relax 
-\contentsline {chapter}{Bibliography}{31}{chapter.6}%
+\contentsline {section}{\numberline {3.2}Abusing tracing programs}{30}{section.3.2}%
+\defcounter {refsection}{0}\relax 
+\contentsline {subsection}{\numberline {3.2.1}Access to function arguments}{30}{subsection.3.2.1}%
+\defcounter {refsection}{0}\relax 
+\contentsline {section}{\numberline {3.3}Memory corruption}{32}{section.3.3}%
+\defcounter {refsection}{0}\relax 
+\contentsline {subsection}{\numberline {3.3.1}Accessing user memory}{32}{subsection.3.3.1}%
+\defcounter {refsection}{0}\relax 
+\contentsline {chapter}{\numberline {4}Methods??}{33}{chapter.4}%
+\defcounter {refsection}{0}\relax 
+\contentsline {chapter}{\numberline {5}Results}{34}{chapter.5}%
+\defcounter {refsection}{0}\relax 
+\contentsline {chapter}{\numberline {6}Conclusion and future work}{35}{chapter.6}%
+\defcounter {refsection}{0}\relax 
+\contentsline {chapter}{Bibliography}{36}{chapter.6}%
 \contentsfinish 

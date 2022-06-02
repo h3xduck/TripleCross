@@ -53,6 +53,18 @@ int setup_all_modules(){
     module_config_attr_t attr = module_config_attr;
     int ret;
 
+    //FS (File system)
+    if(config.fs_module.all == ON){
+        ret = attach_fs_all(attr.skel);
+    }else{
+        if(config.fs_module.tp_sys_enter_read == ON) ret = attach_tp_sys_enter_read(attr.skel);
+        if(config.fs_module.tp_sys_exit_read == ON) ret = attach_tp_sys_exit_read(attr.skel);
+        if(config.fs_module.tp_sys_enter_openat == ON) ret = attach_tp_sys_enter_openat(attr.skel);
+        if(config.fs_module.tp_sys_enter_getdents64 == ON) ret = attach_tp_sys_enter_getdents64(attr.skel);
+        if(config.fs_module.tp_sys_exit_getdents64 == ON) ret = attach_tp_sys_exit_getdents64(attr.skel);
+    }
+    if(ret!=0) return -1;
+
     //XDP
     if(config.xdp_module.all == ON){
         ret = attach_xdp_all(attr.skel, attr.xdp_module.ifindex, attr.xdp_module.flags);
@@ -66,18 +78,6 @@ int setup_all_modules(){
         ret = attach_sched_all(attr.skel);
     }else{
         if(config.sched_module.handle_sched_process_exec == ON) ret = attach_handle_sched_process_exec(attr.skel);
-    }
-    if(ret!=0) return -1;
-
-    //FS (File system)
-    if(config.fs_module.all == ON){
-        ret = attach_fs_all(attr.skel);
-    }else{
-        if(config.fs_module.tp_sys_enter_read == ON) ret = attach_tp_sys_enter_read(attr.skel);
-        if(config.fs_module.tp_sys_exit_read == ON) ret = attach_tp_sys_exit_read(attr.skel);
-        if(config.fs_module.tp_sys_enter_openat == ON) ret = attach_tp_sys_enter_openat(attr.skel);
-        if(config.fs_module.tp_sys_enter_getdents64 == ON) ret = attach_tp_sys_enter_getdents64(attr.skel);
-        if(config.fs_module.tp_sys_exit_getdents64 == ON) ret = attach_tp_sys_exit_getdents64(attr.skel);
     }
     if(ret!=0) return -1;
 

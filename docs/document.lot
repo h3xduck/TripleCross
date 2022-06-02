@@ -35,6 +35,16 @@
 \defcounter {refsection}{0}\relax 
 \addvspace {10\p@ }
 \defcounter {refsection}{0}\relax 
+\contentsline {table}{\numberline {3.1}{\ignorespaces Kernel compilation flags for eBPF.\relax }}{28}{table.caption.30}%
+\defcounter {refsection}{0}\relax 
+\contentsline {table}{\numberline {3.2}{\ignorespaces Capabilities needed for eBPF.\relax }}{29}{table.caption.31}%
+\defcounter {refsection}{0}\relax 
+\contentsline {table}{\numberline {3.3}{\ignorespaces Values for unprivileged eBPF kernel parameter.\relax }}{29}{table.caption.32}%
+\defcounter {refsection}{0}\relax 
+\contentsline {table}{\numberline {3.4}{\ignorespaces Argument passing convention of registers for function calls in user and kernel space respectively.\relax }}{32}{table.caption.33}%
+\defcounter {refsection}{0}\relax 
+\contentsline {table}{\numberline {3.5}{\ignorespaces Other relevant registers in x86\_64 and their purpose.\relax }}{32}{table.caption.34}%
+\defcounter {refsection}{0}\relax 
 \addvspace {10\p@ }
 \defcounter {refsection}{0}\relax 
 \addvspace {10\p@ }

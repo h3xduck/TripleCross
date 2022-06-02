@@ -164,7 +164,7 @@ hmargin=3cm
 \captionsetup[lstlisting]{font=small, labelsep=period}
 
 \lstset{style=estilo}
-\renewcommand{\lstlistingname}{\uppercase{Código}}
+\renewcommand{\lstlistingname}{\uppercase{Code}}
 
 % IEEE BIBLIOGRAPHY
 \usepackage[backend=biber, style=ieee, isbn=false,sortcites, maxbibnames=5, minbibnames=1]{biblatex}
@@ -356,9 +356,9 @@ Subsequent talks on 2021 by Pat Hogan at DEFCON 29\cite{bad_ebpf}, and by Guilla
 
 Taking the previous research into account, and on the basis of common functionality we described to be usually incorporated at rootkits, the objectives of our research on eBPF is set to be on the following topics:
 \begin{itemize}
+\item Analysing eBPF's possibilities when hooking system calls and kernel functions.
 \item Learning eBPF's potential to read/write arbitrary memory.
 \item Exploring networking capabilities with eBPF packet filters.
-\item Analysing eBPF's possibilities when hooking system calls and kernel functions.
 \end{itemize}
 
 The knowledge gathered by the previous three pillars will be then used as a basis for building our rootkit. We will present attack vectors and techniques different than the ones presented in previous research, although inevitably we will also tackle common points, which will be clearly indicated and on which we will try to perform further research. In essence, our eBPF-based rootkit aims at:
@@ -651,10 +651,10 @@ These checks are performed by two main algorithms:
 \item Simulate execution flow by starting on the first instruction and following each possible path, observing at each instruction the state of every register and of the stack.
 \end{itemize}
 
-\subsection{eBPF maps}
+\subsection{eBPF maps} \label{subsection:ebpf_maps}
 An eBPF map is a generic storage for eBPF programs used to share data between user and kernel space, to maintain persistent data between eBPF calls and to share information between multiple eBPF programs\cite{ebpf_maps_kernel}.
 
-A map consists of a key + value tuple. Both fields can have an arbitrary data type, the map only needs to know the length of the key and the value field at its creation\cite{bpf_syscall}. Programs can lookup or delete elements in the map by specifying its key, and insert new ones by supplying the element value and they key to store it with.
+A map consists of a key + value tuple. Both fields can have an arbitrary data type, the map only needs to know the length of the key and the value field at its creation\cite{bpf_syscall}. Programs can open maps by specifying their ID, and lookup or delete elements in the map by specifying its key, also insert new ones by supplying the element value and they key to store it with.
 
 Therefore, creating a map requires a struct with the following fields:
 
@@ -681,6 +681,8 @@ TYPE & DESCRIPTION\\
 BPF\_MAP\_TYPE\_HASH & A hast table-like storage, elements are stored in tuples.\\
 BPF\_MAP\_TYPE\_ARRAY & Elements are stored in an array.\\
 BPF\_MAP\_TYPE\_RINGBUF & Map providing alerts from kernel to user space, covered in subsection \ref{subsection:bpf_ring_buf}\\
+BPF\_MAP\_TYPE\_PROG\_ARRAY & Stores descriptors of eBPF programs\\
+\hline
 \hline
 \end{tabular}
 \caption{Table showing types of eBPF maps. Only those used in our rootkit are displayed, the full list can be consulted in the man page \cite{bpf_syscall}}
@@ -702,16 +704,16 @@ The main operations that can be issued are described in table \ref{table:bpf_sys
 \begin{table}[H]
 \begin{tabular}{|c|>{\centering\arraybackslash}p{5cm}|>{\centering\arraybackslash}p{5cm}|}
 \hline
-COMMAND & ATTRIBUTE & DESCRIPTION\\
+COMMAND & ATTRIBUTES & DESCRIPTION\\
 \hline
 \hline
 BPF\_MAP\_CREATE & Struct with map info as defined in table \ref{table:ebpf_map_struct} & Create a new map\\
 \hline
-BPF\_MAP\_LOOKUP\_ELEM & Struct with key to search in the map & Get the element on the map with an specific key\\
+BPF\_MAP\_LOOKUP\_ELEM & Map ID, and struct with key to search in the map & Get the element on the map with an specific key\\
 \hline
-BPF\_MAP\_UPDATE\_ELEM & Struct with key and new value & Update the element of an specific key with a new value\\
+BPF\_MAP\_UPDATE\_ELEM & Map ID, and struct with key and new value & Update the element of an specific key with a new value\\
 \hline
-BPF\_MAP\_DELETE\_ELEM & Struct with key to search in the map & Delete the element on the map with an specific key\\
+BPF\_MAP\_DELETE\_ELEM & Map ID and struct with key to search in the map & Delete the element on the map with an specific key\\
 \hline
 BPF\_PROG\_LOAD & Struct describing the type of eBPF program to load & Load an eBPF program in the kernel\\
 \hline
@@ -745,7 +747,7 @@ BPF\_PROG\_TYPE\_SCHED\_CLS & Program to filter, redirect and monitor events usi
 
 In section \ref{section:TODO}, we will proceed to analyse in detail the different program types and what capabilities` they offer.
 
-\subsection{eBPF helpers}
+\subsection{eBPF helpers} \label{subsection:ebpf_helpers}
 Our last component to cover of the eBPF architecture are the eBPF helpers. Since eBPF programs have limited accessibility to kernel functions (which kernel modules commonly have free access to), the eBPF system offers a set of limited functions called helpers\cite{ebpf_helpers}, which are used by eBPF programs to perform certain actions and interact with the context on which they are run. The list of helpers a program can call varies between eBPF program types, since different programs run in different contexts.
 
 It is important to highlight that, just like commands issued via the bpf() syscall can only be issued from the user space, eBPF helpers correspond to the kernel-side of eBPF program exclusively. Note that we will also find a symmetric correspondence to those functions of the bpf() syscall related to map operations (since these are accessible both from user and kernel space).
@@ -780,6 +782,8 @@ bpf\_override\_return() & Override return value of a probed function\\
 \hline
 bpf\_ringbuf\_submit() & Submit data to an specific eBPF ring buffer, and notify to subscribers\\
 \hline
+bpf\_tail\_call() & Jump to another eBPF program preserving the current stack\\
+\hline
 \end{tabular}
 \caption{Table showing common eBPF helpers. Only those relevant to our research are shown. Those helpers exclusive to an specific program type are not listed. The full list and attribute details can be consulted in the man page \cite{ebpf_helpers}.}
 \label{table:ebpf_helpers}
@@ -787,7 +791,7 @@ bpf\_ringbuf\_submit() & Submit data to an specific eBPF ring buffer, and notify
 
 
 % Is this the best title?
-\section{eBPF program types}
+\section{eBPF program types} \label{section:ebpf_prog_types}
 In the previous subsection \ref{subsection:bpf_syscall} we introduced the new types of eBPF programs that are supported and that we will be developing for our offensive analysis. In this section, we will analyse in greater detail how eBPF is integrated in the Linux kernel in order to support these new functionalities.
 
 \subsection{XDP}
@@ -915,9 +919,9 @@ Also, note that the probe functions that are called when hitting a tracepoint re
 In eBPF, a program can issue a bpf() syscall with the command BPF\_PROG\_LOAD and the program type BPF\_PROG\_TYPE\_TRACEPOINT, specifying which is the function with the tracepoint to attach to and an arbitrary function probe to call when it is hit. This function probe is defined by the user in the eBPF program submitted to the kernel.
 
 \subsection{Kprobes}
-Kprobes are another tracing technology of the Linux kernel whose functionality has been become available to eBPF programs. Similarly to tracepoints, kprobes enable to hook a probe function, with the only difference that it is attached to an arbitrary instruction in the kernel, rather than to a function\cite{kprobe_manual}. It does not require that kernel developers specifically mark a function to be probed, but rather kprobes can be attached to any instruction, with a short list of blacklisted exceptions. 
+Kprobes are another tracing technology of the Linux kernel whose functionality has been become available to eBPF programs. Similarly to tracepoints, kprobes enable to hook functions in the kernel, with the only difference that it is dynamically attached to any arbitrary function, rather than to a set of predefined positions\cite{kprobe_manual}. It does not require that kernel developers specifically mark a function to be probed, but rather kprobes can be attached to any instruction, with a short list of blacklisted exceptions. 
 
-As it happened with tracepoints, the probed functions have access to the parameters received by the function at which the instructions is attached to. Also, the kernel maintains a list of kernel symbols (addresses) which are relevant for tracing and that offer us insight into which functions we can probe. It can be visited under the file \textit{/proc/kallsyms}, which exports symbols of kernel functions and loaded kernel modules\cite{kallsyms_kernel}.
+As it happened with tracepoints, the probe functions have access to the parameters of the original hooked function. Also, the kernel maintains a list of kernel symbols (addresses) which are relevant for tracing and that offer us insight into which functions we can probe. It can be visited under the file \textit{/proc/kallsyms}, which exports symbols of kernel functions and loaded kernel modules\cite{kallsyms_kernel}.
 
 Also similarly, since tracepoints could be found in their \textit{enter} and \textit{exit} variations, kprobes have their counterpart, name kretprobes, which call the hooked probe once a return instruction is reached after the hooked symbol. This means that a kretprobe hooked to a kernel function will call the probe function once it exits.
 
@@ -925,6 +929,13 @@ In eBPF, a program can issue a bpf() syscall with the command BPF\_PROG\_LOAD an
 
 \subsection{Uprobes}
 Uprobes is the last of the main tracing technologies which has been become accessible to eBPF programs. They are the counterparts of Kprobes, allowing for tracing the execution of an specific instruction in the user space, instead of in the kernel. When the exeuction flow reaches a hooked instruction, a probe function is run. 
+
+For setting an uprobe on an specific instruction of a program, we need to know three components:
+\begin{itemize}
+\item The name of the program.
+\item The address of the function where the instruction is contained.
+\item The offset at which the specific instruction is placed from the start of the function.
+\end{itemize}
 
 Similarly to kprobes, uprobes have access to the parameters received by the hooked function. Also, the complementary uretprobes also exist, running the probe function once the hooked function returns.
 
@@ -1000,11 +1011,259 @@ Note that the BPF skeleton also offers further granularity at the time of dealin
 
 
 \chapter{Analysis of offensive capabilities}
-In the previous chapter, we detailed which functionalities eBPF offers and studied its underlying architecture. 
+In the previous chapter, we detailed which functionalities eBPF offers and studied its underlying architecture. As with every technology, a prior deep understanding is fundamental for discussing its security implications. 
+
+Therefore, given the previous background, this chapter is dedicated to an analysis in detail of the security implications of a malicious use of eBPF. For this, we will firstly explore the security features incorporated in the eBPF system. Then, we will revise previous research to identify the fundamental pillars onto which malware can build their functionality. As we mentioned during the project goals, these main topics of research will be the following:
+\begin{itemize}
+\item Analysing eBPF's possibilities when hooking system calls and kernel functions.
+\item Learning eBPF's potential to read/write arbitrary memory.
+\item Exploring networking capabilities with eBPF packet filters.
+\end{itemize}
+
+Finally, we will study in detail some of the malicious applications that previous researchers have proposed to take advantage of these capabilities of eBPF. In the next chapter, we will proceed to elaborate on these ideas, find new purposes and design our own rootkit.
+
+\section{Security features in eBPF}
+As we shown in section \ref{section:modern_ebpf}, eBPF has been an active part of the Linux kernel from its 3.18 version. However, as with many other components of the kernel, its availability to the user depends on the parameters with which the kernel has been compiled. Specifically, eBPF is only available to kernels compiled with the flags specified in table \ref{table:ebpf_kernel_flags}.
+
+\begin{table}[H]
+\begin{tabular}{|c|c|>{\centering\arraybackslash}p{8cm}|}
+\hline
+Flag & Value & Description\\
+\hline
+\hline
+\multicolumn{1}{|c|}{CONFIG\_BPF} & \multicolumn{1}{|c|}{y} & \multirow{2}{*}{Basic BPF compilation (mandatory)}\\
+\cline{1-2}
+\multicolumn{1}{|c|}{CONFIG\_BPF\_SYSCALL} & \multicolumn{1}{|c|}{m} & \\
+\hline
+\multicolumn{1}{|c|}{CONFIG\_NET\_ACT\_BPF} & \multicolumn{1}{|c|}{m} & \multirow{2}{*}{Traffic Control functionality}\\
+\cline{1-2}
+\multicolumn{1}{|c|}{CONFIG\_NET\_CLS\_BPF} & \multicolumn{1}{|c|}{y} & \\
+\hline
+\multicolumn{1}{|c|}{CONFIG\_BPF\_JIT} & \multicolumn{1}{|c|}{y} & \multirow{2}{*}{Enable JIT compliation}\\
+\cline{1-2}
+\multicolumn{1}{|c|}{CONFIG\_HAVE\_BPF\_JIT} & \multicolumn{1}{|c|}{y} & \\
+\hline
+\multicolumn{1}{|c|}{CONFIG\_BPF\_EVENTS} & \multicolumn{1}{|c|}{y} & \multirow{4}{*}{Enable kprobes, uprobes and tracepoints}\\
+\cline{1-2}
+\multicolumn{1}{|c|}{CONFIG\_KPROBE\_EVENTS} & \multicolumn{1}{|c|}{y} & \\
+\cline{1-2}
+\multicolumn{1}{|c|}{CONFIG\_UPROBE\_EVENTS} & \multicolumn{1}{|c|}{y} & \\
+\cline{1-2}
+\multicolumn{1}{|c|}{CONFIG\_TRACING} & \multicolumn{1}{|c|}{y} & \\
+\hline
+CONFIG\_XDP\_SOCKETS & y & Enable XDP\\
+\hline
+\end{tabular}
+\caption{Kernel compilation flags for eBPF.}
+\label{table:ebpf_kernel_flags}
+\end{table}
+
+The above table is based on BCC's documentation\ref{table:ebpf_kernel_flags}, but the full list of eBPF-related flags can be extracted in a live system via bpftool, as detailed in Annex \ref{annex:bpftool_flags_kernel}. Nowadays, all mainstream Linux distributions include kernels with full support for eBPF.
+
+\subsection{Access control}
+
+It must be noted that, similarly to kernel modules, loading an eBPF program requires privileged access in the system. In old kernel versions, this means either an user having full root permissions, or having the Linux capability\cite{ubuntu_caps} CAP\_SYS\_ADMIN. Therefore, there existed two main options:
+%Should we explain what is a capability?
+\begin{itemize}
+\item \textbf{Privileged users} can load any kind of eBPF program and use any functionality.
+\item \textbf{Unprivileged users} can only load and attach eBPF programs of type BPF\_PROG\_TYPE\_SOCKET\_FILTER\cite{evil_ebpf_p9}, offering the very limited functionality of filtering packets received on a socket.
+\end{itemize}
+
+More recently, in an effort to further granulate the permissions needed for loading, attaching and running eBPF programs, CAP\_SYS\_ADMIN has been substituted by more specific capabilities\cite{ebpf_caps_intro}\cite{ebpf_caps_lwn}. The current system is therefore described in table \ref{table:ebpf_caps_current}.
+
+\begin{table}[H]
+\begin{tabular}{|>{\centering\arraybackslash}p{4cm}|>{\centering\arraybackslash}p{10cm}|}
+\hline
+Capabilities & eBPF functionality\\
+\hline
+\hline
+No capabilities & Load and attach BPF\_PROG\_TYPE\_SOCKET\_FILTER, load BPF\_PROG\_TYPE\_CGROUP\_SKB programs.\\
+\hline
+CAP\_BPF & Load (but not attach) any type of program, create most types of eBPF map and access them if their id is known\\
+\hline
+CAP\_NET\_ADMIN & Attach networking programs (Traffic Control, XDP, ...)\\
+\hline
+CAP\_PERFMON & Attaching kprobes, uprobes and tracepoints. Read access to kernel memory.\\
+\hline
+CAP\_SYS\_ADMIN & Privileged eBPF. Includes iterating over eBPF maps, and CAP\_BPF, CAP\_NET\_ADMIN, CAP\_PERFMON functionalities.\\
+\hline
+\end{tabular}
+\caption{Capabilities needed for eBPF.}
+\label{table:ebpf_caps_current}
+\end{table}
+
+Therefore, eBPF network programs usually require both CAP\_BPF and CAP\_NET\_ADMIN, whilst tracing programs require CAP\_BPF and CAP\_PERFMON. CAP\_SYS\_ADMIN still remains as the (non-preferred) capability to assign to eBPF programs with complete access in the system.
+
+Although for a long time there have existed efforts towards enhancing unprivileged eBPF, it remains a worrying feature\cite{unprivileged_ebpf}. The main issue is that the verifier must be prepared to detect any attempt to extract kernel memory access or user memory modification by unprivileged eBPF programs, which is a complex task. In fact, there have existed numerous security vulnerabilities which allow for privilege escalation using eBPF, that is, execution of privileged eBPF programs by exploiting vulnerabilities in unprivileged eBPF\cite{cve_unpriv_ebpf}.
+
+This influx of security vulnerabilities leads to the recent inclusion of an attribute into the kernel which allows for setting whether unprivileged eBPF is allowed in the system or not. This parameter is named \textit{kernel.unprivileged\_bpf\_disabled}, its values can be seen in table \ref{table:unpriv_ebpf_values}.
+
+\begin{table}[H]
+\begin{tabular}{|>{\centering\arraybackslash}p{4cm}|>{\centering\arraybackslash}p{10cm}|}
+\hline
+Value & Meaning\\
+\hline
+\hline
+0 & Unprivileged eBPF is enabled.\\
+\hline
+1 & Unprivileged eBPF is disabled. A system reboot is needed to enable it after changing this value.\\
+\hline
+2 & Unprivileged eBPF is disabled. A system reboot is not needed to enable it after changing this value.\\
+\hline
+\end{tabular}
+\caption{Values for unprivileged eBPF kernel parameter.}
+\label{table:unpriv_ebpf_values}
+\end{table}
+
+Nowadays, most Linux distributions have set value 1 to this parameter, therefore disallowing unprivileged eBPF completely. These include Ubuntu\cite{unpriv_ebpf_ubuntu}, Suse Linux\cite{unpriv_ebpf_suse} or Red Hat Linux\cite{unpriv_ebpf_redhat}, between others.
+
+\subsection{eBPF maps security}
+In table \ref{table:ebpf_caps_current}, we observed that only programs with CAP\_SYS\_ADMIN are allowed to iterate over eBPF maps. The reason why this is restricted to privileged programs is because it is functionality that is a potential security vulnerability, which we will now proceed to analyse.
+
+In subsection \ref{subsection:ebpf_maps} we mentioned that eBPF maps are opened by specifying an ID (which works similarly to the typical file descriptors), while in table \ref{table:ebpf_map_types} we showed that, for performing operations over eBPF maps using the bpf() syscall, the map ID must be specified too. 
+
+Map IDs are known by a program after creating the eBPF map, however, a program can also explore all the available maps in the system by using the BPF\_MAP\_GET\_NEXT\_ID operation in the bpf() syscall, which allows for iterating through a complete hidden list of all the maps created. This means that privileged programs can find and have read and write access to any eBPF map used by any program in the system.
+
+Therefore, a malicious privileged eBPF program can access and modify other programs' maps, which can lead to:
+\begin{itemize}
+\item Modify data used for the program operation. This is the case for maps which mainly store data structures, such as BPF\_MAP\_TYPE\_HASH.
+\item Modify the program control flow, altering the instructions executed by an eBPF program. This can be achieved if a program is using the bpf\_tail\_call() helper (introduced in table \ref{table:ebpf_helpers}) which is taking data from a map storing eBPF programs (BPF\_MAP\_TYPE\_PROG\_ARRAY, introduced in table \ref{table:ebpf_map_types}).
+\end{itemize}
+
+
+\section{Abusing tracing programs}
+eBPF tracing programs (kprobes, uprobes and tracepoints) are hooked to specific points in the kernel or in the user space, and call probe functions once the flow of execution reaches the instruction to which they are attached. This section details the main security concerns regarding this type of programs.
+
+\subsection{Access to function arguments}
+As we saw in section \ref{section:ebpf_prog_types}, tracing programs receive as a parameter those arguments with which the hooked function originally was called. The next code snippets show the format in which they are received when using libbpf (Note that libbpf also included macros that offer an alternative format, but the parameters are the same).
+
+
+\begin{lstlisting}[language=C, caption={Probe function for a kprobe on the kernel function vfs\_write.}, label={code:format_kprobe}]
+SEC("kprobe/vfs_write")
+int kprobe_vfs_write(struct pt_regs* ctx){
+\end{lstlisting}
+
+\begin{lstlisting}[language=C, caption={Probe function for an uprobe, execute\_command is defined from user space.}, label={code:format_uprobe}]
+SEC("uprobe/execute_command")
+int uprobe_execute_command(struct pt_regs *ctx){
+\end{lstlisting}
+
+\begin{lstlisting}[language=C, caption={Probe function for a tracepoint on the start of the syscall sys\_read.}, label={code:format_tracepoint}]
+SEC("tp/syscalls/sys_enter_read") 
+int tp_sys_enter_read(struct sys_read_enter_ctx *ctx) { 
+\end{lstlisting}
+
+In code snippets \ref{code:format_kprobe} and \ref{code:format_uprobe} we can identify that the parameters are passed to kprobe and uprobe programs as a pointer to a \textit{struct pt\_regs*}. This struct contains as many attributes as registers exist in the system architecture, in our case x86\_64. Therefore, on each probe function, we will receive the state of the registers at the original hooked function. This explains the format of the \textit{struct pt\_regs}, shown in code snippet \ref{code:format_ptregs}:
+
+\begin{lstlisting}[language=C, caption={Format of struct pt\_regs.}, label={code:format_ptregs}]
+struct pt_regs {
+	long unsigned int r15;
+	long unsigned int r14;
+	long unsigned int r13;
+	long unsigned int r12;
+	long unsigned int bp;
+	long unsigned int bx;
+	long unsigned int r11;
+	long unsigned int r10;
+	long unsigned int r9;
+	long unsigned int r8;
+	long unsigned int ax;
+	long unsigned int cx;
+	long unsigned int dx;
+	long unsigned int si;
+	long unsigned int di;
+	long unsigned int orig_ax;
+	long unsigned int ip;
+	long unsigned int cs;
+	long unsigned int flags;
+	long unsigned int sp;
+	long unsigned int ss;
+};
+\end{lstlisting}
+
+By observing the value of the registers, we are able to extract the parameters of the original hooked function. This can be done by using the System V AMD64 ABI\cite{8664_params_abi}, the calling convention used in Linux. Depending on whether we are in the kernel or in user space, the registers used are different to store the values of the function arguments. Table \ref{table:systemv_abi} summarizes these two interfaces. Some other relevant registers are also displayed as a reference in table \ref{table:systemv_abi_other}.
+
+\begin{table}[H]
+\begin{tabular}{|>{\centering\arraybackslash}p{2cm}|>{\centering\arraybackslash}p{3cm}|}
+\hline
+Register & Purpose\\
+\hline
+\hline
+rdi & 1st argument\\
+\hline
+rsi & 2nd argument\\
+\hline
+rdx & 3rd argument\\
+\hline
+rcx & 4th argument\\
+\hline
+r8 & 5th argument\\
+\hline
+r9 & 6th argument\\
+\hline
+rax & Return value\\
+\hline
+\end{tabular}
+\quad
+\begin{tabular}{|>{\centering\arraybackslash}p{2cm}|>{\centering\arraybackslash}p{3cm}|}
+\hline
+Register & Purpose\\
+\hline
+\hline
+rdi & 1st argument\\
+\hline
+rsi & 2nd argument\\
+\hline
+rdx & 3rd argument\\
+\hline
+r10 & 4th argument\\
+\hline
+r8 & 5th argument\\
+\hline
+r9 & 6th argument\\
+\hline
+rax & Return value\\
+\hline
+\end{tabular}
+\caption{Argument passing convention of registers for function calls in user and kernel space respectively.}
+\label{table:systemv_abi}
+\end{table}
+
+
+\begin{table}[H]
+\begin{tabular}{|>{\centering\arraybackslash}p{2cm}|>{\centering\arraybackslash}p{10cm}|}
+\hline
+Register & Purpose\\
+\hline
+\hline
+rip & Instruction Pointer - Memory address of the next instruction to execute\\
+\hline
+rsp & Stack Pointer - Memory address where next stack operation takes place\\
+\hline
+rbp & Base/Frame Pointer - Memory address of the start of the stack frame\\
+\hline
+\end{tabular}
+\caption{Other relevant registers in x86\_64 and their purpose.}
+\label{table:systemv_abi_other}
+\end{table}
 
 
 
-%TODO Talk about the difference between having always on BPF and always on kernel modules
+
+
+
+
+\section{Memory corruption}
+Privileged malicious eBPF programs (or those with the CAP\_BPF + CAP\_PERFMON capabilities) have the potential to get:
+\begin{itemize}
+\item Read and write access in user memory.
+\item Read-only access in kernel memory.
+\end{itemize}
+
+\subsection{Accessing user memory}
+
+
+%TODO Talk about the difference between having always on BPF and always on kernel modules (maybe this is better in the introduction)
 
 
 \chapter{Methods??}
@@ -1039,8 +1298,52 @@ In the previous chapter, we detailed which functionalities eBPF offers and studi
 %M-> Mentioned putting some demos and PoCs here...
 %
 
-\chapter* {Appendix A}
+%Including bpftool commands here to be referenced. Is it a good idea?
+
+
+\chapter* {Appendix A - Bpftool commands} \label{annex:bpftool_flags_kernel}
 \pagenumbering{gobble} % Las páginas de los anexos no se numeran
+\section*{eBPF-related kernel compilation flags} 
+\begin{lstlisting}[language=bash]
+$ bpftool feature
+\end{lstlisting}
+
+\begin{verbatim}
+CONFIG_BPF is set to y
+CONFIG_BPF_SYSCALL is set to y
+CONFIG_HAVE_EBPF_JIT is set to y
+CONFIG_BPF_JIT is set to y
+CONFIG_BPF_JIT_ALWAYS_ON is set to y
+CONFIG_CGROUPS is set to y
+CONFIG_CGROUP_BPF is set to y
+CONFIG_CGROUP_NET_CLASSID is set to y
+CONFIG_SOCK_CGROUP_DATA is set to y
+CONFIG_BPF_EVENTS is set to y
+CONFIG_KPROBE_EVENTS is set to y
+CONFIG_UPROBE_EVENTS is set to y
+CONFIG_TRACING is set to y
+CONFIG_FTRACE_SYSCALLS is set to y
+CONFIG_FUNCTION_ERROR_INJECTION is set to y
+CONFIG_BPF_KPROBE_OVERRIDE is set to y
+CONFIG_NET is set to y
+CONFIG_XDP_SOCKETS is set to y
+CONFIG_LWTUNNEL_BPF is set to y
+CONFIG_NET_ACT_BPF is set to m
+CONFIG_NET_CLS_BPF is set to m
+CONFIG_NET_CLS_ACT is set to y
+CONFIG_NET_SCH_INGRESS is set to m
+CONFIG_XFRM is set to y
+CONFIG_IP_ROUTE_CLASSID is set to y
+CONFIG_IPV6_SEG6_BPF is set to y
+CONFIG_BPF_LIRC_MODE2 is not set
+CONFIG_BPF_STREAM_PARSER is set to y
+CONFIG_NETFILTER_XT_MATCH_BPF is set to m
+CONFIG_BPFILTER is set to y
+CONFIG_BPFILTER_UMH is set to m
+CONFIG_TEST_BPF is set to m
+CONFIG_HZ is set to 250
+\end{verbatim}
+
 
 \chapter* {Appendix B}
 
