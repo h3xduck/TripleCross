@@ -36,9 +36,10 @@
 \BOOKMARK [2][-]{subsection.3.1.2}{eBPF\040maps\040security}{section.3.1}% 36
 \BOOKMARK [1][-]{section.3.2}{Abusing\040tracing\040programs}{chapter.3}% 37
 \BOOKMARK [2][-]{subsection.3.2.1}{Access\040to\040function\040arguments}{section.3.2}% 38
-\BOOKMARK [1][-]{section.3.3}{Memory\040corruption}{chapter.3}% 39
-\BOOKMARK [2][-]{subsection.3.3.1}{Accessing\040user\040memory}{section.3.3}% 40
-\BOOKMARK [0][-]{chapter.4}{Methods??}{}% 41
-\BOOKMARK [0][-]{chapter.5}{Results}{}% 42
-\BOOKMARK [0][-]{chapter.6}{Conclusion\040and\040future\040work}{}% 43
-\BOOKMARK [0][-]{chapter.6}{Bibliography}{}% 44
+\BOOKMARK [2][-]{subsection.3.2.2}{Reading\040memory\040out\040of\040bounds}{section.3.2}% 39
+\BOOKMARK [1][-]{section.3.3}{Memory\040corruption}{chapter.3}% 40
+\BOOKMARK [2][-]{subsection.3.3.1}{Accessing\040user\040memory}{section.3.3}% 41
+\BOOKMARK [0][-]{chapter.4}{Methods??}{}% 42
+\BOOKMARK [0][-]{chapter.5}{Results}{}% 43
+\BOOKMARK [0][-]{chapter.6}{Conclusion\040and\040future\040work}{}% 44
+\BOOKMARK [0][-]{chapter.6}{Bibliography}{}% 45

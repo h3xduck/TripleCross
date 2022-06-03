@@ -77,15 +77,17 @@
 \defcounter {refsection}{0}\relax 
 \contentsline {subsection}{\numberline {3.2.1}Access to function arguments}{30}{subsection.3.2.1}%
 \defcounter {refsection}{0}\relax 
-\contentsline {section}{\numberline {3.3}Memory corruption}{32}{section.3.3}%
+\contentsline {subsection}{\numberline {3.2.2}Reading memory out of bounds}{33}{subsection.3.2.2}%
 \defcounter {refsection}{0}\relax 
-\contentsline {subsection}{\numberline {3.3.1}Accessing user memory}{32}{subsection.3.3.1}%
+\contentsline {section}{\numberline {3.3}Memory corruption}{34}{section.3.3}%
 \defcounter {refsection}{0}\relax 
-\contentsline {chapter}{\numberline {4}Methods??}{33}{chapter.4}%
+\contentsline {subsection}{\numberline {3.3.1}Accessing user memory}{34}{subsection.3.3.1}%
 \defcounter {refsection}{0}\relax 
-\contentsline {chapter}{\numberline {5}Results}{34}{chapter.5}%
+\contentsline {chapter}{\numberline {4}Methods??}{35}{chapter.4}%
 \defcounter {refsection}{0}\relax 
-\contentsline {chapter}{\numberline {6}Conclusion and future work}{35}{chapter.6}%
+\contentsline {chapter}{\numberline {5}Results}{36}{chapter.5}%
 \defcounter {refsection}{0}\relax 
-\contentsline {chapter}{Bibliography}{36}{chapter.6}%
+\contentsline {chapter}{\numberline {6}Conclusion and future work}{37}{chapter.6}%
+\defcounter {refsection}{0}\relax 
+\contentsline {chapter}{Bibliography}{38}{chapter.6}%
 \contentsfinish 

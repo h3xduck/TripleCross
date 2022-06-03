@@ -907,7 +907,7 @@ bpf\_skb\_change\_tail() & Enlarges or reduces the extension of a packet, by mov
 
 
 %TODO This section might benefit from some diagrams, maybe. It was a bit to extense already, so skipping it from now
-\subsection{Tracepoints}
+\subsection{Tracepoints} \label{subsection:tracepoints}
 Tracepoints are a technology in the Linux kernel that allows to hook functions in the kernel, connecting a 'probe': a function that is executed every time the hooked function is called\cite{tp_kernel}. These tracepoints are set statically during kernel development, meaning that for a function to be hooked, it needs to have been previously marked with a tracepoint statement indicating its traceability. At the same time, this limits the number of tracepoints available.
 
 The list of tracepoint events available depends on the kernel version and can be visited under the directory \textit{/sys/kernel/debug/tracing/events}.
@@ -1013,7 +1013,7 @@ Note that the BPF skeleton also offers further granularity at the time of dealin
 \chapter{Analysis of offensive capabilities}
 In the previous chapter, we detailed which functionalities eBPF offers and studied its underlying architecture. As with every technology, a prior deep understanding is fundamental for discussing its security implications. 
 
-Therefore, given the previous background, this chapter is dedicated to an analysis in detail of the security implications of a malicious use of eBPF. For this, we will firstly explore the security features incorporated in the eBPF system. Then, we will revise previous research to identify the fundamental pillars onto which malware can build their functionality. As we mentioned during the project goals, these main topics of research will be the following:
+Therefore, given the previous background, this chapter is dedicated to an analysis in detail of the security implications of a malicious use of eBPF. For this, we will firstly explore the security features incorporated in the eBPF system. Then, we will identify the fundamental pillars onto which malware can build their functionality. As we mentioned during the project goals, these main topics of research will be the following:
 \begin{itemize}
 \item Analysing eBPF's possibilities when hooking system calls and kernel functions.
 \item Learning eBPF's potential to read/write arbitrary memory.
@@ -1135,7 +1135,7 @@ Therefore, a malicious privileged eBPF program can access and modify other progr
 eBPF tracing programs (kprobes, uprobes and tracepoints) are hooked to specific points in the kernel or in the user space, and call probe functions once the flow of execution reaches the instruction to which they are attached. This section details the main security concerns regarding this type of programs.
 
 \subsection{Access to function arguments}
-As we saw in section \ref{section:ebpf_prog_types}, tracing programs receive as a parameter those arguments with which the hooked function originally was called. The next code snippets show the format in which they are received when using libbpf (Note that libbpf also included macros that offer an alternative format, but the parameters are the same).
+As we saw in section \ref{section:ebpf_prog_types}, tracing programs receive as a parameter those arguments with which the hooked function originally was called. These parameters are read-only and thus, in principle, they cannot be modified inside the tracing program (we will show this is not entirely true in section \ref{section:mem_corruption}). The next code snippets show the format in which parameters are received when using libbpf (Note that libbpf also includes  some macros that offer an alternative format, but the parameters are the same).
 
 
 \begin{lstlisting}[language=C, caption={Probe function for a kprobe on the kernel function vfs\_write.}, label={code:format_kprobe}]
@@ -1247,13 +1247,52 @@ rbp & Base/Frame Pointer - Memory address of the start of the stack frame\\
 \label{table:systemv_abi_other}
 \end{table}
 
+In the case of tracepoints, we can see in code snippet \ref{code:format_tracepoint} that it receives a \textit{struct sys\_read\_enter\_ctx*}. This struct must be manually defined, as explained in \ref{subsection:tracepoints}, by looking at the file \textit{/sys/kernel/debug/tracing/events/syscalls/sys\_enter\_read/format}. Code snippet \ref{code:sys_enter_read_tp} shows the format of the struct.
+
+\begin{lstlisting}[language=C, caption={Format of custom struct sys\_read\_enter\_ctx.}, label={code:sys_enter_read_tp}]
+struct sys_read_enter_ctx {
+    unsigned long long pt_regs;
+    int __syscall_nr;
+    unsigned int padding;
+    unsigned long fd;
+    char* buf;
+    size_t count;
+};
+\end{lstlisting}
+
+As we can observe, we are given a set of attributes which include the parameters with which the syscall was called, and a first attribute containing the address pointing to another \textit{struct pt\_regs} as in kprobes and uprobes, so that we will be able to extract the value of the rest of the registers too. It must be noted that, in syscalls, in addition to use the kernel parameter passing convention specified in table \ref{table:systemv_abi}, the number specifying the syscall must be passed in register rax too.
+
+On a final note, as we mentioned in section \ref{section:ebpf_prog_types}, there exist differences in the parameters received in probe functions depending on the two variations of tracing programs. Therefore:
+\begin{itemize}
+\item kprobe, uprobe and \textit{enter} tracepoints will receive the full parameters as we specified before, but not the return value of the function (since it is not executed yet).
+\item kretprobes, uretprobes and \textit{exit} tracepoints will still receive the \textit{struct pt\_regs}, but without any of the parameters and with only the return value of the function.
+\end{itemize}
+
+Taking into account all the previous, the fact that tracing programs have read-only access to function arguments can be considered an useful and needed feature for tracing applications, but malicious eBPF can use this for purposes such as:
+\begin{itemize}
+\item Gather kernel and user data passed to a function as a parameter. In many cases this information can be potentially interesting for an attacker, such as passwords.
+\item Store in eBPF maps information about system activities, to be used by other malicious eBPF programs.
+\end{itemize}
+
+Usually, since many function arguments are pointers to user or kernel addresses (such as buffers where a string or a struct with data is located), eBPF tracing programs can use two eBPF helpers that enable to read large byte arrays from both kernel and user space:
+\begin{itemize}
+\item bpf\_probe\_read\_user()
+\item bpf\_probe\_read\_kernel()
+\end{itemize}
+
+These helpers, previously introduced in table \ref{table:ebpf_helpers}, enable to read an arbitrary number of bytes from an user or kernel address respectively, allowing us to extract the information pointed by the parameters received by eBPF programs.
+
+\subsection{Reading memory out of bounds}
+As we introduced in the previous subsection, the bpf\_probe\_read\_user() and bpf\_probe\_read\_kernel() helpers can be used to access memory of pointers received as parameters in the hooked functions. 
+
+In general, the eBPF verifier attempts to reject illegal memory accesses, however it does not prevent a malicious program from passing an arbitrary memory address (in kernel or user space) to the above helpers. This means that an eBPF program can read any address in user or kernel space. Furthermore, an attacker can locate specific data structures and memory sections by taking the function parameter as a reference point in memory.
+
+A particularly relevant case (which we will later use for our rootkit) involves accessing user memory via the parameters of tracepoints attached at system calls. Provided the nature of syscalls, whose purpose is to communicate user and kernel space, all parameters received will belong to the user space, and therefore any pointer passed will be an address in user memory.
+
+%TODO continue here, next is explaining stack scanning technique
 
 
-
-
-
-
-\section{Memory corruption}
+\section{Memory corruption} \label{section:mem_corruption}
 Privileged malicious eBPF programs (or those with the CAP\_BPF + CAP\_PERFMON capabilities) have the potential to get:
 \begin{itemize}
 \item Read and write access in user memory.
