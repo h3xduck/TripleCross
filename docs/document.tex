@@ -1343,19 +1343,54 @@ Taking the previous information into account, we can find that a malicious eBPF 
 \subsection{Sending signals to user programs}
 Another eBPF helper that is subject to malicious purposes is bpf\_send\_signal. This helper enables to send an arbitrary signal to the thread of the process running a hooked function.
 
-Therefore, this helper can be used to forcefully terminate running user processes, by sending the SIGKILL signal. In this way, combined with the observability into the parameters received at a call, a malicious eBPF can kill and deactivate processes to favour its malicious purposes.
+Therefore, this helper can be used to forcefully terminate running user processes, by sending the SIGKILL signal. In this way, combined with the observability into the parameters received at a function call, malicious eBPF can kill and deactivate processes to favour its malicious purposes.
 
 \subsection{Conclusion}
 As a summary, a malicious eBPF program loaded and attached as a tracing program undermines the existing trust between user programs and the kernel space. 
 
-Its ability to access sensitive data in function parameters and reading arbitrary memory can lead to gathering extensive information on the running processes of a system, whilst the malicious use of eBPF helpers means the modification of the data passed to the user space, and the control over which programs are allowed to be running on the system.
+Its ability to access sensitive data in function parameters and reading arbitrary memory can lead to gathering extensive information on the running processes of a system, whilst the malicious use of eBPF helpers enables the modification of the data passed to the user space from the kernel, and the control over which programs are allowed to be running on the system.
 
 \section{Memory corruption} \label{section:mem_corruption}
-Privileged malicious eBPF programs (or those with the CAP\_BPF + CAP\_PERFMON capabilities) have the potential to get:
+In the previous section we described how tracing programs can read user memory out of the bounds of function parameters via the helpers bpf\_probe\_read\_user() and bpf\_probe\_read\_kernel(). In this section, we will analyse another eBPF helper can be found to be the heart of malicious programs.
+
+Privileged eBPF programs (or those with at least CAP\_BPF + CAP\_PERFMON capabilities) have the potential to use an experimental (it is labelled as so \cite{ebpf_helpers}) helper called bpf\_probe\_write\_user(). This helper enables to write into user memory from within an eBPF program. 
+
+However, this helper has certain limitations that restrict its use. We will now proceed to review some background into how user memory works and, afterwards, we will analyse the restrictions and possible uses of this eBPF helper in the context of malicious applications.
+
+\subsection{Memory management in Linux}
+Linux systems divide the available random access memory (RAM) into 'pages', subsections of an specific length, usually 4 KB. The collection of all pages is called physical memory.
+
+Likewise, individual memory sections need to be assigned to each running process in the system, but instead of assigning a set of pages from physical memory, a new address space is defined, named virtual memory, which is divided into pages as well. These virtual memory pages are related to physical memory pages via a page table, so that each virtual memory address of a process can be translated into a real, physical memory address in RAM\cite{mem_page_arch}. Figure \ref{fig:mem_arch_pages} shows a diagram of the described architecture.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=13cm]{mem_arch_pages.jpg}
+	\caption{Memory translation of virtual pages to physical pages.}
+	\label{fig:mem_arch_pages}
+\end{figure}
+
+As we can observe in the figure, each virtual page is related to one physical page. However, RAM needs to maintain multiple processes and data simultaneously, and therefore sometimes the operating system (OS) will remove them from physical memory when it believes they are no longer being used. This leads to the occurrence of two type of memory events\cite{page_faults}:
 \begin{itemize}
-\item Read and write access in user memory.
-\item Read-only access in kernel memory.
+\item \textbf{Major page faults} occur when a process tries to access a virtual page, but the related physical page has been removed from RAM. In this case, the OS will need to request a secondary storage (such as a hard disk) for the data removed, and allocate a new physical page for the virtual page. Figure \ref{fig:mem_major_page_fault} illustrates a major page fault.
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=11cm]{mem_major_page_fault.jpg}
+	\caption{Major page fault after a page was removed from RAM.}
+	\label{fig:mem_major_page_fault}
+\end{figure}
+\item \textbf{Minor page faults} occur when a process tries to access a virtual page, and although the related physical page exists, the connection in the page table has not been completed. A common event when these fault happen is on fork() calls, since with the purpose of making the call more efficient, the page table of the parent is not always completely copied into the child, leading into multiple minor page faults once the child tries to access the data on them. Figure \ref{fig:mem_minor_page_fault} illustrates a minor page fault after a fork.
 \end{itemize}
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=11cm]{mem_minor_page_fault.jpg}
+	\caption{Minor page fault after a fork() in which the page table was not copied completely.}
+	\label{fig:mem_minor_page_fault}
+\end{figure}
+
+\subsection{Process virtual memory}
+In the previous subsection we have studied that each process disposes of a virtual address space. We will now describe how this virtual memory is organized, since it will be necessary to understand the implication
+
+
 
 
 \subsection{Accessing user memory}

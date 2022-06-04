@@ -2433,6 +2433,9 @@
     <bcf:citekey order="95">code_kernel_open</bcf:citekey>
     <bcf:citekey order="96">code_kernel_open</bcf:citekey>
     <bcf:citekey order="97">fault_injection</bcf:citekey>
+    <bcf:citekey order="98">ebpf_helpers</bcf:citekey>
+    <bcf:citekey order="99">mem_page_arch</bcf:citekey>
+    <bcf:citekey order="100">page_faults</bcf:citekey>
   </bcf:section>
   <!-- SORTING TEMPLATES -->
   <bcf:sortingtemplate name="none">

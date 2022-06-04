@@ -1378,8 +1378,10 @@
     \entry{fault_injection}{online}{}
       \field{sortinit}{9}
       \field{sortinithash}{54047ffb55bdefa0694bbd554c1b11a0}
+      \field{labeltitlesource}{title}
       \field{day}{4}
       \field{month}{11}
+      \field{title}{Injecting faults into the kernel}
       \field{year}{2006}
       \field{dateera}{ce}
       \verb{urlraw}
@@ -1387,6 +1389,72 @@
       \endverb
       \verb{url}
       \verb https://lwn.net/Articles/209257/
+      \endverb
+    \endentry
+    \entry{mem_page_arch}{online}{}
+      \name{author}{1}{}{%
+        {{hash=47635127541392c1419dbc4a4d3153c6}{%
+           family={Lameter},
+           familyi={L\bibinitperiod},
+           given={Christopher},
+           giveni={C\bibinitperiod}}}%
+      }
+      \list{institution}{1}{%
+        {Jump Trading LLC}%
+      }
+      \list{organization}{1}{%
+        {The Linux Foundation Open Source Summit}%
+      }
+      \strng{namehash}{47635127541392c1419dbc4a4d3153c6}
+      \strng{fullhash}{47635127541392c1419dbc4a4d3153c6}
+      \strng{bibnamehash}{47635127541392c1419dbc4a4d3153c6}
+      \strng{authorbibnamehash}{47635127541392c1419dbc4a4d3153c6}
+      \strng{authornamehash}{47635127541392c1419dbc4a4d3153c6}
+      \strng{authorfullhash}{47635127541392c1419dbc4a4d3153c6}
+      \field{sortinit}{9}
+      \field{sortinithash}{54047ffb55bdefa0694bbd554c1b11a0}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{day}{1}
+      \field{month}{12}
+      \field{title}{Memory Management 101: Introduction to Memory Management in Linux}
+      \field{year}{2017}
+      \field{dateera}{ce}
+      \verb{urlraw}
+      \verb https://events19.linuxfoundation.org/wp-content/uploads/2017/12/MM-101-Introduction-to-Linux-Memory-Management-Christoph-Lameter-Jump-Trading-LLC-1.pdf
+      \endverb
+      \verb{url}
+      \verb https://events19.linuxfoundation.org/wp-content/uploads/2017/12/MM-101-Introduction-to-Linux-Memory-Management-Christoph-Lameter-Jump-Trading-LLC-1.pdf
+      \endverb
+    \endentry
+    \entry{page_faults}{online}{}
+      \name{author}{1}{}{%
+        {{hash=28efc25c8eae7f3d05fad64c4679158f}{%
+           family={Breaker},
+           familyi={B\bibinitperiod},
+           given={Doug},
+           giveni={D\bibinitperiod}}}%
+      }
+      \strng{namehash}{28efc25c8eae7f3d05fad64c4679158f}
+      \strng{fullhash}{28efc25c8eae7f3d05fad64c4679158f}
+      \strng{bibnamehash}{28efc25c8eae7f3d05fad64c4679158f}
+      \strng{authorbibnamehash}{28efc25c8eae7f3d05fad64c4679158f}
+      \strng{authornamehash}{28efc25c8eae7f3d05fad64c4679158f}
+      \strng{authorfullhash}{28efc25c8eae7f3d05fad64c4679158f}
+      \field{sortinit}{1}
+      \field{sortinithash}{50c6687d7fc80f50136d75228e3c59ba}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{day}{19}
+      \field{month}{8}
+      \field{title}{Understanding page faults and memory swap-in/outs}
+      \field{year}{2019}
+      \field{dateera}{ce}
+      \verb{urlraw}
+      \verb https://scoutapm.com/blog/understanding-page-faults-and-memory-swap-in-outs-when-should-you-worry
+      \endverb
+      \verb{url}
+      \verb https://scoutapm.com/blog/understanding-page-faults-and-memory-swap-in-outs-when-should-you-worry
       \endverb
     \endentry
   \enddatalist

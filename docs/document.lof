@@ -25,6 +25,12 @@
 \defcounter {refsection}{0}\relax 
 \addvspace {10\p@ }
 \defcounter {refsection}{0}\relax 
+\contentsline {figure}{\numberline {3.1}{\ignorespaces Memory translation of virtual pages to physical pages.\relax }}{37}{figure.caption.35}%
+\defcounter {refsection}{0}\relax 
+\contentsline {figure}{\numberline {3.2}{\ignorespaces Major page fault after a page was removed from RAM.\relax }}{38}{figure.caption.36}%
+\defcounter {refsection}{0}\relax 
+\contentsline {figure}{\numberline {3.3}{\ignorespaces Minor page fault after a fork() in which the page table was not copied completely.\relax }}{38}{figure.caption.37}%
+\defcounter {refsection}{0}\relax 
 \addvspace {10\p@ }
 \defcounter {refsection}{0}\relax 
 \addvspace {10\p@ }

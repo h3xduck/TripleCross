@@ -87,13 +87,17 @@
 \defcounter {refsection}{0}\relax 
 \contentsline {section}{\numberline {3.3}Memory corruption}{36}{section.3.3}%
 \defcounter {refsection}{0}\relax 
-\contentsline {subsection}{\numberline {3.3.1}Accessing user memory}{36}{subsection.3.3.1}%
+\contentsline {subsection}{\numberline {3.3.1}Memory management in Linux}{36}{subsection.3.3.1}%
 \defcounter {refsection}{0}\relax 
-\contentsline {chapter}{\numberline {4}Methods??}{37}{chapter.4}%
+\contentsline {subsection}{\numberline {3.3.2}Process virtual memory}{39}{subsection.3.3.2}%
 \defcounter {refsection}{0}\relax 
-\contentsline {chapter}{\numberline {5}Results}{38}{chapter.5}%
+\contentsline {subsection}{\numberline {3.3.3}Accessing user memory}{39}{subsection.3.3.3}%
 \defcounter {refsection}{0}\relax 
-\contentsline {chapter}{\numberline {6}Conclusion and future work}{39}{chapter.6}%
+\contentsline {chapter}{\numberline {4}Methods??}{40}{chapter.4}%
 \defcounter {refsection}{0}\relax 
-\contentsline {chapter}{Bibliography}{40}{chapter.6}%
+\contentsline {chapter}{\numberline {5}Results}{41}{chapter.5}%
+\defcounter {refsection}{0}\relax 
+\contentsline {chapter}{\numberline {6}Conclusion and future work}{42}{chapter.6}%
+\defcounter {refsection}{0}\relax 
+\contentsline {chapter}{Bibliography}{43}{chapter.6}%
 \contentsfinish 
