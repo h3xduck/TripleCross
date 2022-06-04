@@ -2426,6 +2426,13 @@
     <bcf:citekey order="88">unpriv_ebpf_suse</bcf:citekey>
     <bcf:citekey order="89">unpriv_ebpf_redhat</bcf:citekey>
     <bcf:citekey order="90">8664_params_abi</bcf:citekey>
+    <bcf:citekey order="91">ebpf_friends_p15</bcf:citekey>
+    <bcf:citekey order="92">ebpf_override_return</bcf:citekey>
+    <bcf:citekey order="93">code_kernel_open</bcf:citekey>
+    <bcf:citekey order="94">code_kernel_open</bcf:citekey>
+    <bcf:citekey order="95">code_kernel_open</bcf:citekey>
+    <bcf:citekey order="96">code_kernel_open</bcf:citekey>
+    <bcf:citekey order="97">fault_injection</bcf:citekey>
   </bcf:section>
   <!-- SORTING TEMPLATES -->
   <bcf:sortingtemplate name="none">

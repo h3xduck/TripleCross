@@ -77,17 +77,23 @@
 \defcounter {refsection}{0}\relax 
 \contentsline {subsection}{\numberline {3.2.1}Access to function arguments}{30}{subsection.3.2.1}%
 \defcounter {refsection}{0}\relax 
-\contentsline {subsection}{\numberline {3.2.2}Reading memory out of bounds}{33}{subsection.3.2.2}%
+\contentsline {subsection}{\numberline {3.2.2}Reading memory out of bounds}{34}{subsection.3.2.2}%
 \defcounter {refsection}{0}\relax 
-\contentsline {section}{\numberline {3.3}Memory corruption}{34}{section.3.3}%
+\contentsline {subsection}{\numberline {3.2.3}Overriding function return values}{34}{subsection.3.2.3}%
 \defcounter {refsection}{0}\relax 
-\contentsline {subsection}{\numberline {3.3.1}Accessing user memory}{34}{subsection.3.3.1}%
+\contentsline {subsection}{\numberline {3.2.4}Sending signals to user programs}{35}{subsection.3.2.4}%
 \defcounter {refsection}{0}\relax 
-\contentsline {chapter}{\numberline {4}Methods??}{35}{chapter.4}%
+\contentsline {subsection}{\numberline {3.2.5}Conclusion}{36}{subsection.3.2.5}%
 \defcounter {refsection}{0}\relax 
-\contentsline {chapter}{\numberline {5}Results}{36}{chapter.5}%
+\contentsline {section}{\numberline {3.3}Memory corruption}{36}{section.3.3}%
 \defcounter {refsection}{0}\relax 
-\contentsline {chapter}{\numberline {6}Conclusion and future work}{37}{chapter.6}%
+\contentsline {subsection}{\numberline {3.3.1}Accessing user memory}{36}{subsection.3.3.1}%
 \defcounter {refsection}{0}\relax 
-\contentsline {chapter}{Bibliography}{38}{chapter.6}%
+\contentsline {chapter}{\numberline {4}Methods??}{37}{chapter.4}%
+\defcounter {refsection}{0}\relax 
+\contentsline {chapter}{\numberline {5}Results}{38}{chapter.5}%
+\defcounter {refsection}{0}\relax 
+\contentsline {chapter}{\numberline {6}Conclusion and future work}{39}{chapter.6}%
+\defcounter {refsection}{0}\relax 
+\contentsline {chapter}{Bibliography}{40}{chapter.6}%
 \contentsfinish 

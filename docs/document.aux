@@ -298,24 +298,47 @@
 \newlabel{table:systemv_abi}{{3.4}{32}{Argument passing convention of registers for function calls in user and kernel space respectively.\relax }{table.caption.33}{}}
 \@writefile{lot}{\defcounter {refsection}{0}\relax }\@writefile{lot}{\contentsline {table}{\numberline {3.5}{\ignorespaces Other relevant registers in x86\_64 and their purpose.\relax }}{32}{table.caption.34}\protected@file@percent }
 \newlabel{table:systemv_abi_other}{{3.5}{32}{Other relevant registers in x86\_64 and their purpose.\relax }{table.caption.34}{}}
-\newlabel{code:sys_enter_read_tp}{{3.5}{32}{Format of custom struct sys\_read\_enter\_ctx}{lstlisting.3.5}{}}
-\@writefile{lol}{\defcounter {refsection}{0}\relax }\@writefile{lol}{\contentsline {lstlisting}{\numberline {3.5}Format of custom struct sys\_read\_enter\_ctx.}{32}{lstlisting.3.5}\protected@file@percent }
-\@writefile{toc}{\defcounter {refsection}{0}\relax }\@writefile{toc}{\contentsline {subsection}{\numberline {3.2.2}Reading memory out of bounds}{33}{subsection.3.2.2}\protected@file@percent }
-\@writefile{toc}{\defcounter {refsection}{0}\relax }\@writefile{toc}{\contentsline {section}{\numberline {3.3}Memory corruption}{34}{section.3.3}\protected@file@percent }
-\newlabel{section:mem_corruption}{{3.3}{34}{Memory corruption}{section.3.3}{}}
-\@writefile{toc}{\defcounter {refsection}{0}\relax }\@writefile{toc}{\contentsline {subsection}{\numberline {3.3.1}Accessing user memory}{34}{subsection.3.3.1}\protected@file@percent }
-\@writefile{toc}{\defcounter {refsection}{0}\relax }\@writefile{toc}{\contentsline {chapter}{\numberline {4}Methods??}{35}{chapter.4}\protected@file@percent }
+\newlabel{code:sys_enter_read_tp_format}{{3.5}{32}{Format for parameters in sys\_enter\_read specified at the format file}{lstlisting.3.5}{}}
+\@writefile{lol}{\defcounter {refsection}{0}\relax }\@writefile{lol}{\contentsline {lstlisting}{\numberline {3.5}Format for parameters in sys\_enter\_read specified at the format file.}{32}{lstlisting.3.5}\protected@file@percent }
+\newlabel{code:sys_enter_read_tp}{{3.6}{33}{Format of custom struct sys\_read\_enter\_ctx}{lstlisting.3.6}{}}
+\@writefile{lol}{\defcounter {refsection}{0}\relax }\@writefile{lol}{\contentsline {lstlisting}{\numberline {3.6}Format of custom struct sys\_read\_enter\_ctx.}{33}{lstlisting.3.6}\protected@file@percent }
+\abx@aux@cite{ebpf_friends_p15}
+\abx@aux@segm{0}{0}{ebpf_friends_p15}
+\abx@aux@cite{ebpf_override_return}
+\abx@aux@segm{0}{0}{ebpf_override_return}
+\abx@aux@cite{code_kernel_open}
+\abx@aux@segm{0}{0}{code_kernel_open}
+\abx@aux@cite{code_kernel_open}
+\abx@aux@segm{0}{0}{code_kernel_open}
+\@writefile{toc}{\defcounter {refsection}{0}\relax }\@writefile{toc}{\contentsline {subsection}{\numberline {3.2.2}Reading memory out of bounds}{34}{subsection.3.2.2}\protected@file@percent }
+\@writefile{toc}{\defcounter {refsection}{0}\relax }\@writefile{toc}{\contentsline {subsection}{\numberline {3.2.3}Overriding function return values}{34}{subsection.3.2.3}\protected@file@percent }
+\newlabel{code:override_return_1}{{3.7}{34}{Definition of the syscall sys\_open in the kernel \cite {code_kernel_open}}{lstlisting.3.7}{}}
+\@writefile{lol}{\defcounter {refsection}{0}\relax }\@writefile{lol}{\contentsline {lstlisting}{\numberline {3.7}Definition of the syscall sys\_open in the kernel \cite {code_kernel_open}}{34}{lstlisting.3.7}\protected@file@percent }
+\abx@aux@cite{code_kernel_open}
+\abx@aux@segm{0}{0}{code_kernel_open}
+\abx@aux@cite{code_kernel_open}
+\abx@aux@segm{0}{0}{code_kernel_open}
+\abx@aux@cite{fault_injection}
+\abx@aux@segm{0}{0}{fault_injection}
+\newlabel{code:override_return_2}{{3.8}{35}{Definition of the macro for creating syscalls, containing the error injection macro. Only relevant instructions included, complete macro can be found in the kernel \cite {code_kernel_open}}{lstlisting.3.8}{}}
+\@writefile{lol}{\defcounter {refsection}{0}\relax }\@writefile{lol}{\contentsline {lstlisting}{\numberline {3.8}Definition of the macro for creating syscalls, containing the error injection macro. Only relevant instructions included, complete macro can be found in the kernel \cite {code_kernel_open}}{35}{lstlisting.3.8}\protected@file@percent }
+\@writefile{toc}{\defcounter {refsection}{0}\relax }\@writefile{toc}{\contentsline {subsection}{\numberline {3.2.4}Sending signals to user programs}{35}{subsection.3.2.4}\protected@file@percent }
+\@writefile{toc}{\defcounter {refsection}{0}\relax }\@writefile{toc}{\contentsline {subsection}{\numberline {3.2.5}Conclusion}{36}{subsection.3.2.5}\protected@file@percent }
+\@writefile{toc}{\defcounter {refsection}{0}\relax }\@writefile{toc}{\contentsline {section}{\numberline {3.3}Memory corruption}{36}{section.3.3}\protected@file@percent }
+\newlabel{section:mem_corruption}{{3.3}{36}{Memory corruption}{section.3.3}{}}
+\@writefile{toc}{\defcounter {refsection}{0}\relax }\@writefile{toc}{\contentsline {subsection}{\numberline {3.3.1}Accessing user memory}{36}{subsection.3.3.1}\protected@file@percent }
+\@writefile{toc}{\defcounter {refsection}{0}\relax }\@writefile{toc}{\contentsline {chapter}{\numberline {4}Methods??}{37}{chapter.4}\protected@file@percent }
 \@writefile{lof}{\defcounter {refsection}{0}\relax }\@writefile{lof}{\addvspace {10\p@ }}
 \@writefile{lot}{\defcounter {refsection}{0}\relax }\@writefile{lot}{\addvspace {10\p@ }}
-\@writefile{toc}{\defcounter {refsection}{0}\relax }\@writefile{toc}{\contentsline {chapter}{\numberline {5}Results}{36}{chapter.5}\protected@file@percent }
+\@writefile{toc}{\defcounter {refsection}{0}\relax }\@writefile{toc}{\contentsline {chapter}{\numberline {5}Results}{38}{chapter.5}\protected@file@percent }
 \@writefile{lof}{\defcounter {refsection}{0}\relax }\@writefile{lof}{\addvspace {10\p@ }}
 \@writefile{lot}{\defcounter {refsection}{0}\relax }\@writefile{lot}{\addvspace {10\p@ }}
-\@writefile{toc}{\defcounter {refsection}{0}\relax }\@writefile{toc}{\contentsline {chapter}{\numberline {6}Conclusion and future work}{37}{chapter.6}\protected@file@percent }
+\@writefile{toc}{\defcounter {refsection}{0}\relax }\@writefile{toc}{\contentsline {chapter}{\numberline {6}Conclusion and future work}{39}{chapter.6}\protected@file@percent }
 \@writefile{lof}{\defcounter {refsection}{0}\relax }\@writefile{lof}{\addvspace {10\p@ }}
 \@writefile{lot}{\defcounter {refsection}{0}\relax }\@writefile{lot}{\addvspace {10\p@ }}
-\@writefile{toc}{\defcounter {refsection}{0}\relax }\@writefile{toc}{\contentsline {chapter}{Bibliography}{38}{chapter.6}\protected@file@percent }
+\@writefile{toc}{\defcounter {refsection}{0}\relax }\@writefile{toc}{\contentsline {chapter}{Bibliography}{40}{chapter.6}\protected@file@percent }
 \newlabel{annex:bpftool_flags_kernel}{{6}{}{Appendix A - Bpftool commands}{chapter*.36}{}}
-\abx@aux@read@bbl@mdfivesum{F47E3F72E57DA91BA8A2EEF65A74B9DA}
+\abx@aux@read@bbl@mdfivesum{93A081D5B69A2A9782DE1688707BDCA2}
 \abx@aux@refcontextdefaultsdone
 \abx@aux@defaultrefcontext{0}{ransomware_pwc}{none/global//global/global}
 \abx@aux@defaultrefcontext{0}{rootkit_ptsecurity}{none/global//global/global}
@@ -378,5 +401,9 @@
 \abx@aux@defaultrefcontext{0}{unpriv_ebpf_suse}{none/global//global/global}
 \abx@aux@defaultrefcontext{0}{unpriv_ebpf_redhat}{none/global//global/global}
 \abx@aux@defaultrefcontext{0}{8664_params_abi}{none/global//global/global}
+\abx@aux@defaultrefcontext{0}{ebpf_friends_p15}{none/global//global/global}
+\abx@aux@defaultrefcontext{0}{ebpf_override_return}{none/global//global/global}
+\abx@aux@defaultrefcontext{0}{code_kernel_open}{none/global//global/global}
+\abx@aux@defaultrefcontext{0}{fault_injection}{none/global//global/global}
 \ttl@finishall
-\gdef \@abspage@last{60}
+\gdef \@abspage@last{62}

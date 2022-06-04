@@ -212,6 +212,7 @@
       \strng{authorbibnamehash}{2994fc802c0b46f7289cf001e2c26cfe}
       \strng{authornamehash}{2994fc802c0b46f7289cf001e2c26cfe}
       \strng{authorfullhash}{2994fc802c0b46f7289cf001e2c26cfe}
+      \field{extraname}{1}
       \field{sortinit}{2}
       \field{sortinithash}{ed39bb39cf854d5250e95b1c1f94f4ed}
       \field{labelnamesource}{author}
@@ -1315,6 +1316,77 @@
       \endverb
       \verb{url}
       \verb https://raw.githubusercontent.com/wiki/hjl-tools/x86-psABI/x86-64-psABI-1.0.pdf
+      \endverb
+    \endentry
+    \entry{ebpf_friends_p15}{proceedings}{}
+      \name{author}{1}{}{%
+        {{hash=2994fc802c0b46f7289cf001e2c26cfe}{%
+           family={Guillaume\bibnamedelima Fournier},
+           familyi={G\bibinitperiod\bibinitdelim F\bibinitperiod},
+           given={Sylvain\bibnamedelima Afchainthe},
+           giveni={S\bibinitperiod\bibinitdelim A\bibinitperiod}}}%
+      }
+      \list{institution}{1}{%
+        {Datadog}%
+      }
+      \list{organization}{1}{%
+        {DEFCON 29}%
+      }
+      \strng{namehash}{2994fc802c0b46f7289cf001e2c26cfe}
+      \strng{fullhash}{2994fc802c0b46f7289cf001e2c26cfe}
+      \strng{bibnamehash}{2994fc802c0b46f7289cf001e2c26cfe}
+      \strng{authorbibnamehash}{2994fc802c0b46f7289cf001e2c26cfe}
+      \strng{authornamehash}{2994fc802c0b46f7289cf001e2c26cfe}
+      \strng{authorfullhash}{2994fc802c0b46f7289cf001e2c26cfe}
+      \field{extraname}{2}
+      \field{sortinit}{9}
+      \field{sortinithash}{54047ffb55bdefa0694bbd554c1b11a0}
+      \field{labelnamesource}{author}
+      \field{eventtitle}{Cyber Threats 2021: A year in Retrospect}
+      \field{pages}{15}
+      \range{pages}{1}
+      \verb{urlraw}
+      \verb https://media.defcon.org/DEF%20CON%2029/DEF%20CON%2029%20presentations/Guillaume%20Fournier%20Sylvain%20Afchain%20Sylvain%20Baubeau%20-%20eBPF%2C%20I%20thought%20we%20were%20friends.pdf
+      \endverb
+      \verb{url}
+      \verb https://media.defcon.org/DEF%20CON%2029/DEF%20CON%2029%20presentations/Guillaume%20Fournier%20Sylvain%20Afchain%20Sylvain%20Baubeau%20-%20eBPF%2C%20I%20thought%20we%20were%20friends.pdf
+      \endverb
+    \endentry
+    \entry{ebpf_override_return}{online}{}
+      \field{sortinit}{9}
+      \field{sortinithash}{54047ffb55bdefa0694bbd554c1b11a0}
+      \field{labeltitlesource}{title}
+      \field{title}{BPF-based error injection for the kernel}
+      \verb{urlraw}
+      \verb https://lwn.net/Articles/740146/
+      \endverb
+      \verb{url}
+      \verb https://lwn.net/Articles/740146/
+      \endverb
+    \endentry
+    \entry{code_kernel_open}{online}{}
+      \field{sortinit}{9}
+      \field{sortinithash}{54047ffb55bdefa0694bbd554c1b11a0}
+      \field{indextitle}{Linux kernel source code}
+      \verb{urlraw}
+      \verb https://elixir.bootlin.com/linux/v5.11/source/fs/open.c#L1192
+      \endverb
+      \verb{url}
+      \verb https://elixir.bootlin.com/linux/v5.11/source/fs/open.c#L1192
+      \endverb
+    \endentry
+    \entry{fault_injection}{online}{}
+      \field{sortinit}{9}
+      \field{sortinithash}{54047ffb55bdefa0694bbd554c1b11a0}
+      \field{day}{4}
+      \field{month}{11}
+      \field{year}{2006}
+      \field{dateera}{ce}
+      \verb{urlraw}
+      \verb https://lwn.net/Articles/209257/
+      \endverb
+      \verb{url}
+      \verb https://lwn.net/Articles/209257/
       \endverb
     \endentry
   \enddatalist

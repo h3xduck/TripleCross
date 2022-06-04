@@ -1181,10 +1181,12 @@ struct pt_regs {
 };
 \end{lstlisting}
 
-By observing the value of the registers, we are able to extract the parameters of the original hooked function. This can be done by using the System V AMD64 ABI\cite{8664_params_abi}, the calling convention used in Linux. Depending on whether we are in the kernel or in user space, the registers used are different to store the values of the function arguments. Table \ref{table:systemv_abi} summarizes these two interfaces. Some other relevant registers are also displayed as a reference in table \ref{table:systemv_abi_other}.
+By observing the value of the registers, we are able to extract the parameters of the original hooked function. This can be done by using the System V AMD64 ABI\cite{8664_params_abi}, the calling convention used in Linux. Depending on whether we are in the kernel or in user space, the registers used to store the values of the function arguments are different. Table \ref{table:systemv_abi} summarizes these two interfaces. Some other relevant registers are also displayed as a reference in table \ref{table:systemv_abi_other}.
 
 \begin{table}[H]
 \begin{tabular}{|>{\centering\arraybackslash}p{2cm}|>{\centering\arraybackslash}p{3cm}|}
+\hline
+\multicolumn{2}{|c|}{User interface}\\
 \hline
 Register & Purpose\\
 \hline
@@ -1206,6 +1208,8 @@ rax & Return value\\
 \end{tabular}
 \quad
 \begin{tabular}{|>{\centering\arraybackslash}p{2cm}|>{\centering\arraybackslash}p{3cm}|}
+\hline
+\multicolumn{2}{|c|}{Kernel interface}\\
 \hline
 Register & Purpose\\
 \hline
@@ -1249,6 +1253,17 @@ rbp & Base/Frame Pointer - Memory address of the start of the stack frame\\
 
 In the case of tracepoints, we can see in code snippet \ref{code:format_tracepoint} that it receives a \textit{struct sys\_read\_enter\_ctx*}. This struct must be manually defined, as explained in \ref{subsection:tracepoints}, by looking at the file \textit{/sys/kernel/debug/tracing/events/syscalls/sys\_enter\_read/format}. Code snippet \ref{code:sys_enter_read_tp} shows the format of the struct.
 
+\begin{lstlisting}[language=C, caption={Format for parameters in sys\_enter\_read specified at the format file.}, label={code:sys_enter_read_tp_format}]
+field:unsigned short common_type; offset:0; size:2; signed:0;
+field:unsigned char common_flags; offset:2; size:1; signed:0;
+field:unsigned char common_preempt_count; offset:3; size:1; signed:0;
+field:int common_pid; offset:4; size:4; signed:1;
+field:int __syscall_nr;	offset:8; size:4; signed:1;
+field:unsigned int fd; offset:16; size:8; signed:0;
+field:char * buf; offset:24; size:8; signed:0;
+field:size_t count; offset:32; size:8; signed:0;
+\end{lstlisting}
+
 \begin{lstlisting}[language=C, caption={Format of custom struct sys\_read\_enter\_ctx.}, label={code:sys_enter_read_tp}]
 struct sys_read_enter_ctx {
     unsigned long long pt_regs;
@@ -1260,7 +1275,9 @@ struct sys_read_enter_ctx {
 };
 \end{lstlisting}
 
-As we can observe, we are given a set of attributes which include the parameters with which the syscall was called, and a first attribute containing the address pointing to another \textit{struct pt\_regs} as in kprobes and uprobes, so that we will be able to extract the value of the rest of the registers too. It must be noted that, in syscalls, in addition to use the kernel parameter passing convention specified in table \ref{table:systemv_abi}, the number specifying the syscall must be passed in register rax too.
+As we can observe, we are given a set of attributes which include the parameters with which the syscall was called. Moreover, we can still obtain an address pointing to another \textit{struct pt\_regs}, as in kprobes and uprobes, by combining the first four fields and considering it as a 32-bit long address. This means we will still be able to extract the value of the rest of the registers too. 
+
+It must be noted that, in syscalls, in addition to use the kernel parameter passing convention specified in table \ref{table:systemv_abi}, the number specifying the syscall must be passed in register rax too.
 
 On a final note, as we mentioned in section \ref{section:ebpf_prog_types}, there exist differences in the parameters received in probe functions depending on the two variations of tracing programs. Therefore:
 \begin{itemize}
@@ -1285,12 +1302,53 @@ These helpers, previously introduced in table \ref{table:ebpf_helpers}, enable t
 \subsection{Reading memory out of bounds}
 As we introduced in the previous subsection, the bpf\_probe\_read\_user() and bpf\_probe\_read\_kernel() helpers can be used to access memory of pointers received as parameters in the hooked functions. 
 
-In general, the eBPF verifier attempts to reject illegal memory accesses, however it does not prevent a malicious program from passing an arbitrary memory address (in kernel or user space) to the above helpers. This means that an eBPF program can read any address in user or kernel space. Furthermore, an attacker can locate specific data structures and memory sections by taking the function parameter as a reference point in memory.
+However, although in general the eBPF verifier attempts to reject illegal memory accesses, it does not prevent a malicious program from passing an arbitrary memory address (in kernel or user space) to the above helpers. This means that an eBPF program can potentially read any address in user or kernel space, (as long as it is marked as readable in the corresponding memory pages). Furthermore, an attacker can locate specific data structures and memory sections by taking the function parameter as a reference point in memory.
 
-A particularly relevant case (which we will later use for our rootkit) involves accessing user memory via the parameters of tracepoints attached at system calls. Provided the nature of syscalls, whose purpose is to communicate user and kernel space, all parameters received will belong to the user space, and therefore any pointer passed will be an address in user memory.
+A particularly relevant case (which we will later use for our rootkit) involves accessing user memory via the parameters of tracepoints attached at system calls. Provided the nature of syscalls, whose purpose is to communicate user and kernel space, all parameters received will belong to the user space, and therefore any pointer passed will be an address in user memory. This enables an eBPF program to get a foothold into the virtual address space of the process calling the syscall, which it can proceed to scan looking for data or specific instructions. This technique will be further elaborated in section \ref{TODO}.
 
-%TODO continue here, next is explaining stack scanning technique
+\subsection{Overriding function return values}
+A potentially dangerous functionality in eBPF tracing programs is the ability to modify the return value of kernel functions\cite{ebpf_friends_p15}\cite{ebpf_override_return}. This can be done via the eBPF helper bpf\_override\_return, and it works exclusively from kretprobes.
 
+Apart from only working on kretprobes, additional restrictions are applied to this helper. It will only work if the kernel was compiled with the CONFIG\_BPF\_KPROBE\_OVERRIDE flag, and only if the kretprobe is attached to a function to which, during the kernel development, the macro ALLOW\_ERROR\_INJECTION() has been indicated. Currently, only a small selection of functions include this macro, but most system calls can be found to implement it. The following code snippets show how a system call like sys\_open is defined in kernel v5.11:
+
+\begin{lstlisting}[language=C, caption={Definition of the syscall sys\_open in the kernel \cite{code_kernel_open}}, label={code:override_return_1}]
+SYSCALL_DEFINE3(open, const char __user *, filename, int, flags, umode_t, mode)
+{
+	if (force_o_largefile())
+		flags |= O_LARGEFILE;
+	return do_sys_open(AT_FDCWD, filename, flags, mode);
+}
+\end{lstlisting}
+
+\begin{lstlisting}[language=C, caption={Definition of the macro for creating syscalls, containing the error injection macro. Only relevant instructions included, complete macro can be found in the kernel \cite{code_kernel_open}}, label={code:override_return_2}]
+#define SYSCALL_DEFINE3(name, ...) SYSCALL_DEFINEx(3, _##name, __VA_ARGS__)
+#ifndef __SYSCALL_DEFINEx
+#define __SYSCALL_DEFINEx(x, name, ...)\
+	[...]
+	ALLOW_ERROR_INJECTION(sys##name, ERRNO);\
+	[...]
+\end{lstlisting}
+
+
+By looking at snippets \ref{code:override_return_1} and \ref{code:override_return_2}, we can observe that the system call sys\_open involves the inclusion of the ALLOW\_ERROR\_INJECTION macro. Therefore, any kretprobe attached to a system call function will be able to modify its return value.
+
+In order to be able to modify the return value of functions, the aforementioned eBPF helper makes use of the fault injection framework of the Linux kernel\cite{fault_injection}, which was created before eBPF itself, and whose original purpose is to allow for generating errors in kernel programs for debugging purposes.
+
+Taking the previous information into account, we can find that a malicious eBPF program, by tampering with the kernel-user space interface which are system calls, can mislead user programs, which trust the output of kernel code. This can lead to:
+\begin{itemize}
+\item A program believes a system call exited with an error, while in reality the kernel completed the operation with success, or viceversa. For instance, the result of a call to sys\_open can mislead a user program into thinking that a file does not exist.
+\item A program receives incorrect data on purpose. For instance, a buffer may look empty or of a reduced size upon a sys\_read call, while in reality more data is available to be read.
+\end{itemize}
+
+\subsection{Sending signals to user programs}
+Another eBPF helper that is subject to malicious purposes is bpf\_send\_signal. This helper enables to send an arbitrary signal to the thread of the process running a hooked function.
+
+Therefore, this helper can be used to forcefully terminate running user processes, by sending the SIGKILL signal. In this way, combined with the observability into the parameters received at a call, a malicious eBPF can kill and deactivate processes to favour its malicious purposes.
+
+\subsection{Conclusion}
+As a summary, a malicious eBPF program loaded and attached as a tracing program undermines the existing trust between user programs and the kernel space. 
+
+Its ability to access sensitive data in function parameters and reading arbitrary memory can lead to gathering extensive information on the running processes of a system, whilst the malicious use of eBPF helpers means the modification of the data passed to the user space, and the control over which programs are allowed to be running on the system.
 
 \section{Memory corruption} \label{section:mem_corruption}
 Privileged malicious eBPF programs (or those with the CAP\_BPF + CAP\_PERFMON capabilities) have the potential to get:
@@ -1298,6 +1356,7 @@ Privileged malicious eBPF programs (or those with the CAP\_BPF + CAP\_PERFMON ca
 \item Read and write access in user memory.
 \item Read-only access in kernel memory.
 \end{itemize}
+
 
 \subsection{Accessing user memory}
 
