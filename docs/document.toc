@@ -77,13 +77,13 @@
 \defcounter {refsection}{0}\relax 
 \contentsline {subsection}{\numberline {3.2.1}Access to function arguments}{30}{subsection.3.2.1}%
 \defcounter {refsection}{0}\relax 
-\contentsline {subsection}{\numberline {3.2.2}Reading memory out of bounds}{34}{subsection.3.2.2}%
+\contentsline {subsection}{\numberline {3.2.2}Reading memory out of bounds}{33}{subsection.3.2.2}%
 \defcounter {refsection}{0}\relax 
 \contentsline {subsection}{\numberline {3.2.3}Overriding function return values}{34}{subsection.3.2.3}%
 \defcounter {refsection}{0}\relax 
 \contentsline {subsection}{\numberline {3.2.4}Sending signals to user programs}{35}{subsection.3.2.4}%
 \defcounter {refsection}{0}\relax 
-\contentsline {subsection}{\numberline {3.2.5}Conclusion}{36}{subsection.3.2.5}%
+\contentsline {subsection}{\numberline {3.2.5}Conclusion}{35}{subsection.3.2.5}%
 \defcounter {refsection}{0}\relax 
 \contentsline {section}{\numberline {3.3}Memory corruption}{36}{section.3.3}%
 \defcounter {refsection}{0}\relax 
@@ -91,13 +91,15 @@
 \defcounter {refsection}{0}\relax 
 \contentsline {subsection}{\numberline {3.3.2}Process virtual memory}{39}{subsection.3.3.2}%
 \defcounter {refsection}{0}\relax 
-\contentsline {subsection}{\numberline {3.3.3}Accessing user memory}{39}{subsection.3.3.3}%
+\contentsline {subsection}{\numberline {3.3.3}The process stack}{40}{subsection.3.3.3}%
 \defcounter {refsection}{0}\relax 
-\contentsline {chapter}{\numberline {4}Methods??}{40}{chapter.4}%
+\contentsline {subsection}{\numberline {3.3.4}Attacks and limitations of bpf\_probe\_write\_user()}{43}{subsection.3.3.4}%
 \defcounter {refsection}{0}\relax 
-\contentsline {chapter}{\numberline {5}Results}{41}{chapter.5}%
+\contentsline {chapter}{\numberline {4}Methods??}{45}{chapter.4}%
 \defcounter {refsection}{0}\relax 
-\contentsline {chapter}{\numberline {6}Conclusion and future work}{42}{chapter.6}%
+\contentsline {chapter}{\numberline {5}Results}{46}{chapter.5}%
 \defcounter {refsection}{0}\relax 
-\contentsline {chapter}{Bibliography}{43}{chapter.6}%
+\contentsline {chapter}{\numberline {6}Conclusion and future work}{47}{chapter.6}%
+\defcounter {refsection}{0}\relax 
+\contentsline {chapter}{Bibliography}{48}{chapter.6}%
 \contentsfinish 

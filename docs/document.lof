@@ -25,11 +25,21 @@
 \defcounter {refsection}{0}\relax 
 \addvspace {10\p@ }
 \defcounter {refsection}{0}\relax 
-\contentsline {figure}{\numberline {3.1}{\ignorespaces Memory translation of virtual pages to physical pages.\relax }}{37}{figure.caption.35}%
+\contentsline {figure}{\numberline {3.1}{\ignorespaces Memory translation of virtual pages to physical pages.\relax }}{37}{figure.caption.34}%
 \defcounter {refsection}{0}\relax 
-\contentsline {figure}{\numberline {3.2}{\ignorespaces Major page fault after a page was removed from RAM.\relax }}{38}{figure.caption.36}%
+\contentsline {figure}{\numberline {3.2}{\ignorespaces Major page fault after a page was removed from RAM.\relax }}{38}{figure.caption.35}%
 \defcounter {refsection}{0}\relax 
-\contentsline {figure}{\numberline {3.3}{\ignorespaces Minor page fault after a fork() in which the page table was not copied completely.\relax }}{38}{figure.caption.37}%
+\contentsline {figure}{\numberline {3.3}{\ignorespaces Minor page fault after a fork() in which the page table was not copied completely.\relax }}{38}{figure.caption.36}%
+\defcounter {refsection}{0}\relax 
+\contentsline {figure}{\numberline {3.4}{\ignorespaces Virtual memory architecture of a process\cite {mem_arch_proc}.\relax }}{39}{figure.caption.37}%
+\defcounter {refsection}{0}\relax 
+\contentsline {figure}{\numberline {3.5}{\ignorespaces Simplified stack representation showing only stack frames.\relax }}{40}{figure.caption.38}%
+\defcounter {refsection}{0}\relax 
+\contentsline {figure}{\numberline {3.6}{\ignorespaces Representation of push and pop operations in the stack.\relax }}{41}{figure.caption.40}%
+\defcounter {refsection}{0}\relax 
+\contentsline {figure}{\numberline {3.7}{\ignorespaces Stack representation right before starting the function call process.\relax }}{42}{figure.caption.41}%
+\defcounter {refsection}{0}\relax 
+\contentsline {figure}{\numberline {3.8}{\ignorespaces Stack representation right after the function preamble.\relax }}{42}{figure.caption.42}%
 \defcounter {refsection}{0}\relax 
 \addvspace {10\p@ }
 \defcounter {refsection}{0}\relax 

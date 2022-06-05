@@ -121,8 +121,8 @@
       \endverb
     \endentry
     \entry{ebpf_android}{online}{}
-      \field{sortinit}{1}
-      \field{sortinithash}{50c6687d7fc80f50136d75228e3c59ba}
+      \field{sortinit}{2}
+      \field{sortinithash}{ed39bb39cf854d5250e95b1c1f94f4ed}
       \field{labeltitlesource}{title}
       \field{title}{eBPF for Windows}
       \verb{urlraw}
@@ -371,8 +371,8 @@
       \endverb
     \endentry
     \entry{bpf_organicprogrammer_analysis}{online}{}
-      \field{sortinit}{2}
-      \field{sortinithash}{ed39bb39cf854d5250e95b1c1f94f4ed}
+      \field{sortinit}{3}
+      \field{sortinithash}{a37a8ef248a93c322189792c34fc68c9}
       \field{labeltitlesource}{title}
       \field{day}{28}
       \field{month}{3}
@@ -513,8 +513,8 @@
       \endverb
     \endentry
     \entry{ebpf_io_arch}{manual}{}
-      \field{sortinit}{3}
-      \field{sortinithash}{a37a8ef248a93c322189792c34fc68c9}
+      \field{sortinit}{4}
+      \field{sortinithash}{e071e0bcb44634fab398d68ad04e69f4}
       \field{labeltitlesource}{title}
       \field{title}{eBPF Documentation: Loader and verification architecture}
       \verb{urlraw}
@@ -670,8 +670,8 @@
       \strng{authornamehash}{0fcaa32b080db12cbc8b11b27d05ad61}
       \strng{authorfullhash}{0fcaa32b080db12cbc8b11b27d05ad61}
       \field{extraname}{2}
-      \field{sortinit}{4}
-      \field{sortinithash}{e071e0bcb44634fab398d68ad04e69f4}
+      \field{sortinit}{5}
+      \field{sortinithash}{5dd416adbafacc8226114bc0202d5fdd}
       \field{labelnamesource}{author}
       \field{labeltitlesource}{title}
       \field{day}{11}
@@ -916,8 +916,8 @@
       \strng{authorbibnamehash}{5442e761747b6fce78f695385639556e}
       \strng{authornamehash}{5442e761747b6fce78f695385639556e}
       \strng{authorfullhash}{5442e761747b6fce78f695385639556e}
-      \field{sortinit}{6}
-      \field{sortinithash}{7851c86048328b027313775d8fbd2131}
+      \field{sortinit}{7}
+      \field{sortinithash}{f615fb9c6fba11c6f962fb3fd599810e}
       \field{labelnamesource}{author}
       \field{labeltitlesource}{title}
       \field{day}{13}
@@ -1113,8 +1113,8 @@
       \endverb
     \endentry
     \entry{libbpf_upstream}{online}{}
-      \field{sortinit}{7}
-      \field{sortinithash}{f615fb9c6fba11c6f962fb3fd599810e}
+      \field{sortinit}{8}
+      \field{sortinithash}{1b24cab5087933ef0826a7cd3b99e994}
       \field{labeltitlesource}{title}
       \field{title}{BPF next kernel tree}
       \verb{urlraw}
@@ -1273,8 +1273,8 @@
       \endverb
     \endentry
     \entry{unpriv_ebpf_redhat}{online}{}
-      \field{sortinit}{8}
-      \field{sortinithash}{1b24cab5087933ef0826a7cd3b99e994}
+      \field{sortinit}{9}
+      \field{sortinithash}{54047ffb55bdefa0694bbd554c1b11a0}
       \field{labeltitlesource}{title}
       \field{title}{CVE-2022-0002}
       \verb{urlraw}
@@ -1411,8 +1411,8 @@
       \strng{authorbibnamehash}{47635127541392c1419dbc4a4d3153c6}
       \strng{authornamehash}{47635127541392c1419dbc4a4d3153c6}
       \strng{authorfullhash}{47635127541392c1419dbc4a4d3153c6}
-      \field{sortinit}{9}
-      \field{sortinithash}{54047ffb55bdefa0694bbd554c1b11a0}
+      \field{sortinit}{1}
+      \field{sortinithash}{50c6687d7fc80f50136d75228e3c59ba}
       \field{labelnamesource}{author}
       \field{labeltitlesource}{title}
       \field{day}{1}
@@ -1455,6 +1455,36 @@
       \endverb
       \verb{url}
       \verb https://scoutapm.com/blog/understanding-page-faults-and-memory-swap-in-outs-when-should-you-worry
+      \endverb
+    \endentry
+    \entry{mem_arch_proc}{online}{}
+      \name{author}{1}{}{%
+        {{hash=c6b49e9e6fbe96fdd89720e842dc0b03}{%
+           family={Bajo},
+           familyi={B\bibinitperiod},
+           given={Marcos\bibnamedelima Sánchez},
+           giveni={M\bibinitperiod\bibinitdelim S\bibinitperiod}}}%
+      }
+      \strng{namehash}{c6b49e9e6fbe96fdd89720e842dc0b03}
+      \strng{fullhash}{c6b49e9e6fbe96fdd89720e842dc0b03}
+      \strng{bibnamehash}{c6b49e9e6fbe96fdd89720e842dc0b03}
+      \strng{authorbibnamehash}{c6b49e9e6fbe96fdd89720e842dc0b03}
+      \strng{authornamehash}{c6b49e9e6fbe96fdd89720e842dc0b03}
+      \strng{authorfullhash}{c6b49e9e6fbe96fdd89720e842dc0b03}
+      \field{sortinit}{1}
+      \field{sortinithash}{50c6687d7fc80f50136d75228e3c59ba}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{day}{23}
+      \field{month}{5}
+      \field{title}{Stack-based Buffer Overflow - Part 1}
+      \field{year}{2021}
+      \field{dateera}{ce}
+      \verb{urlraw}
+      \verb https://h3xduck.github.io/exploit/2021/05/23/stackbufferoverflow-part1.html
+      \endverb
+      \verb{url}
+      \verb https://h3xduck.github.io/exploit/2021/05/23/stackbufferoverflow-part1.html
       \endverb
     \endentry
   \enddatalist

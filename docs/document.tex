@@ -629,7 +629,7 @@ Therefore, when using JIT compiling (a setting defined by the variable \textit{b
 The programs developed during this project will always have JIT compiling active.
 
 
-\subsection{The eBPF verifier}
+\subsection{The eBPF verifier} \label{subsection:ebpf_verifier}
 We introduced in figure \ref{fig:ebpf_architecture} the presence of the so-called eBPF verifier. Provided that we will be loading programs in the kernel from user space, these programs need to be checked for safety before being valid to be executed.
 
 The verifier performs a series of tests which every eBPF program must pass in order to be accepted. Otherwise, user programs could leak privileged data, result in kernel memory corruption, or hang the kernel in an infinite loop, between others. Therefore, the verifier limits multiple aspects of eBPF programs so that they are restricted to the intended functionality, whilst at the same time offering a reasonable amount of freedom to the developer.
@@ -639,6 +639,7 @@ The following are the most relevant checks that the verifier performs in eBPF pr
 \item Tests for ensuring overall control flow safety:
 	\subitem No loops allowed (bounded loops accepted since kernel version 5.3\cite{ebpf_bounded_loops}.
 	\subitem Function call and jumps safety to known, reachable functions.
+	\subitem Sleep and blocking operations not allowed (to prevent hanging the kernel).
 \item Tests for individual instructions:
 	 \subitem Divisions by zero and invalid shift operations.
 	 \subitem Invalid stack access and invalid out-of-bound access to data structures.
@@ -1007,9 +1008,6 @@ Note that the BPF skeleton also offers further granularity at the time of dealin
 
 
 
-
-
-
 \chapter{Analysis of offensive capabilities}
 In the previous chapter, we detailed which functionalities eBPF offers and studied its underlying architecture. As with every technology, a prior deep understanding is fundamental for discussing its security implications. 
 
@@ -1181,7 +1179,7 @@ struct pt_regs {
 };
 \end{lstlisting}
 
-By observing the value of the registers, we are able to extract the parameters of the original hooked function. This can be done by using the System V AMD64 ABI\cite{8664_params_abi}, the calling convention used in Linux. Depending on whether we are in the kernel or in user space, the registers used to store the values of the function arguments are different. Table \ref{table:systemv_abi} summarizes these two interfaces. Some other relevant registers are also displayed as a reference in table \ref{table:systemv_abi_other}.
+By observing the value of the registers, we are able to extract the parameters of the original hooked function. This can be done by using the System V AMD64 ABI\cite{8664_params_abi}, the calling convention used in Linux. Depending on whether we are in the kernel or in user space, the registers used to store the values of the function arguments are different. Table \ref{table:systemv_abi} summarizes these two interfaces. 
 
 \begin{table}[H]
 \begin{tabular}{|>{\centering\arraybackslash}p{2cm}|>{\centering\arraybackslash}p{3cm}|}
@@ -1233,23 +1231,6 @@ rax & Return value\\
 \label{table:systemv_abi}
 \end{table}
 
-
-\begin{table}[H]
-\begin{tabular}{|>{\centering\arraybackslash}p{2cm}|>{\centering\arraybackslash}p{10cm}|}
-\hline
-Register & Purpose\\
-\hline
-\hline
-rip & Instruction Pointer - Memory address of the next instruction to execute\\
-\hline
-rsp & Stack Pointer - Memory address where next stack operation takes place\\
-\hline
-rbp & Base/Frame Pointer - Memory address of the start of the stack frame\\
-\hline
-\end{tabular}
-\caption{Other relevant registers in x86\_64 and their purpose.}
-\label{table:systemv_abi_other}
-\end{table}
 
 In the case of tracepoints, we can see in code snippet \ref{code:format_tracepoint} that it receives a \textit{struct sys\_read\_enter\_ctx*}. This struct must be manually defined, as explained in \ref{subsection:tracepoints}, by looking at the file \textit{/sys/kernel/debug/tracing/events/syscalls/sys\_enter\_read/format}. Code snippet \ref{code:sys_enter_read_tp} shows the format of the struct.
 
@@ -1388,12 +1369,115 @@ As we can observe in the figure, each virtual page is related to one physical pa
 \end{figure}
 
 \subsection{Process virtual memory}
-In the previous subsection we have studied that each process disposes of a virtual address space. We will now describe how this virtual memory is organized, since it will be necessary to understand the implication
+In the previous subsection we have studied that each process disposes of a virtual address space. We will now describe how this virtual memory is organized in a Linux system.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=6cm]{memory.jpg}
+	\caption{Virtual memory architecture of a process\cite{mem_arch_proc}.}
+	\label{fig:mem_proc_arch}
+\end{figure}
+
+Figure \ref{fig:mem_proc_arch} describes how virtual memory is distributed within a process in the x86\_64 architecture. As we can observe, it is partitioned into multiple sections:
+\begin{itemize}
+\item Lower and upper memory addresses are reserved for the kernel.
+\item A section where shared libraries code is stored.
+\item A .text section, which contains the code of the program being run.
+\item A .bss section, which contains global static variables.
+\item The heap, a section which grows from lower to higher memory addresses, and which contains memory dynamically allocated by the program.
+\item The stack, a section which grows from higher to lower memory addresses, towards the heap. It is a Last In First Out (LIFO) structure used to store local variables, function parameters and return addresses.
+\item Right at the start of the stack we can find the arguments with which the programs has been executed.
+\end{itemize}
+
+\subsection{The process stack}
+Between all the sections we identified in a process virtual memory, the stack will be particularly relevant during our research. We will therefore study it now in detail. 
+
+Firstly, we will present how the stack is structured, and which operations can be executed on it. Figure \ref{fig:stack_pres} presents a stack during the execution of a program. Table \ref{table:systemv_abi_other} explains the purpose of the most relevant registers related to the stack and program execution:
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=14cm]{stack_pres.jpg}
+	\caption{Simplified stack representation showing only stack frames.}
+	\label{fig:stack_pres}
+\end{figure}
+
+\begin{table}[H]
+\begin{tabular}{|>{\centering\arraybackslash}p{2cm}|>{\centering\arraybackslash}p{10cm}|}
+\hline
+Register & Purpose\\
+\hline
+\hline
+rip & Instruction Pointer - Memory address of the next instruction to execute\\
+\hline
+rsp & Stack Pointer - Memory address where next stack operation takes place\\
+\hline
+rbp & Base/Frame Pointer - Memory address of the start of the stack frame\\
+\hline
+\end{tabular}
+\caption{Relevant registers in x86\_64 for the stack and control flow and their purpose.}
+\label{table:systemv_abi_other}
+\end{table}
+
+As it can be observed in figure \ref{fig:stack_pres}, the stack grows towards lower memory addresses, and it is organized in stack frames, delimited by the registers rsp and rbp. An stack frame is a division of the stack which contains all the data (variables, call arguments...) belonging to a single function execution. When a function is exited, its stack frame is removed, and if a function calls a nested function, then its stack frame is preserved and a new stack frame is inserted into the stack. 
+
+As table \ref{table:systemv_abi_other} explains, the rbp and rsp registers are used for keeping track of the starting and final position of the current stack frame respectively. We can see in figure \ref{fig:stack_pres} that their value is a memory address pointing to their stack positions. On the other hand, the rip register does not point to the stack, but rather to the .text section (see figure \ref{fig:mem_proc_arch}), where it points to the next instruction to be executed. However, as we will now see, its value must also be stored in the stack frame when a nested function is called, since after the nested function exits we need to restore the execution in the same instruction of the original function.
+
+As with any LIFO structure, the stack supports two main operations: \textit{push} and \textit{pop}. In the x86\_64 architecture, it operates with chunks of data of either 16, 32 or 64 bytes.
+\begin{itemize}
+\item A \textbf{push} operation writes data in the free memory pointed by register rsp. It then moves the value of rsp to point to the new end of the stack.
+\item A \textbf{pop} operation moves the value of rsp by 16, 32 or 64 bytes, and reads the data previously saved in that position.
+\end{itemize}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=10cm]{stack_ops.jpg}
+	\caption{Representation of push and pop operations in the stack.}
+	\label{fig:stack_ops}
+\end{figure}
 
 
 
+As we mentioned, the stack stores function parameters, return addresses and local variables inside a stack frame. We will now study how the processor uses the stack in order to call, execute, and exit a function. To illustrate this process, we will simulate the execution of function \lstinline{func(char* a, char* b, char* c)} \lstinline{}:
 
-\subsection{Accessing user memory}
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=14cm]{stack_before.jpg}
+	\caption{Stack representation right before starting the function call process.}
+	\label{fig:stack_before}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=14cm]{stack.jpg}
+	\caption{Stack representation right after the function preamble.}
+	\label{fig:stack}
+\end{figure}
+
+\begin{enumerate}
+\item The function arguments are pushed into the stack. We can see them in the stack in reverse order. 
+\item The function is called:
+	\subitem The value of register rip is pushed into the stack, so that it is saved for when the function exists. We can see it on the figure as 'ret'.
+	\subitem The value of rip changes to point to the first instruction of the called function.
+\item We execute what is called as the \textit{function preamble}\cite{8664_params_abi_p18}, which prepares the stack frame for the called function:
+	\subitem The value of rbp is pushed into the stack, so that we can restore the previous stack frame when the function exits. We can see it on the figure as the 'saved frame pointer'.
+	\subitem The value of rsp is moved into rbp. Therefore, now rbp points to the end of the previous stack frame.
+	\subitem The value of rsp is usually decremented (since the stack needs to go to lower memory addresses) so that we allocate some space for function variables.
+\item The function instructions are executed. The stack may be further modified, but on its end rsp must point to the same address of the beginning. Register rbp always keeps pointing to the end of the stack.
+\item We execute what is called as the \textit{function epilogue}, which removes the stack frame and restores the original function:
+	\subitem The value of rbp is moved into rsp, so that rsp points to the start of the previous stack frame. All data allocated in the previous stack frame is considered to be free.
+	\subitem The value of the saved frame pointer is popped and stored into rbp, so that rbp now points to the start of the previous stack frame.
+	\subitem The value of the saved rip value is popped into register rip, so that the next instruction to execute is the instruction right after the function call.
+\item Since the function arguments where pushed into the stack, they are popped now.
+\end{enumerate}
+
+\subsection{Attacks and limitations of bpf\_probe\_write\_user()}
+Provided the background into memory architecture and the stack operation, we will now study the offensive capabilities of the bpf\_probe\_write\_user() helper and which restrictions are imposed into its use by eBPF programs.
+
+The bpf\_probe\_write\_user() helper, when used from a tracing eBPF program, can write into any memory address in the user space of the process responsible from calling the hooked function. However, the write operation fails if:
+\begin{itemize}
+\item{The memory space pointed by the address is marked as non-writeable by the user space process. For instance, if we try to write into the .text section, the helpers fails because this section is only marked as readable and executable (for protection reasons).} Therefore, the process must indicate a writeable flag in the memory section for the helper to succeed.
+\item{The memory page is served with a minor or major page fault. As we saw in section \ref{subsection:ebpf_verifier}, eBPF programs are restricted from executing any sleeping or blocking operations, to prevent hanging the kernel. Therefore, since during a page fault the operating system needs to block the execution and write into the page table or retrieve data from the secondary disk, bpf\_probe\_write\_user() is defined as a non-faulting helper\cite{write_helper_non_fault}, meaning that if it needs to issue a page fault for accessing data, it will just return and fail.}
+\end{itemize}
 
 
 %TODO Talk about the difference between having always on BPF and always on kernel modules (maybe this is better in the introduction)

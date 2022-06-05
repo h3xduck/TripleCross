@@ -158,6 +158,7 @@
 \abx@aux@cite{ebpf_bounded_loops}
 \abx@aux@segm{0}{0}{ebpf_bounded_loops}
 \@writefile{toc}{\defcounter {refsection}{0}\relax }\@writefile{toc}{\contentsline {subsection}{\numberline {2.2.3}The eBPF verifier}{14}{subsection.2.2.3}\protected@file@percent }
+\newlabel{subsection:ebpf_verifier}{{2.2.3}{14}{The eBPF verifier}{subsection.2.2.3}{}}
 \abx@aux@cite{ebpf_maps_kernel}
 \abx@aux@segm{0}{0}{ebpf_maps_kernel}
 \abx@aux@cite{bpf_syscall}
@@ -296,12 +297,11 @@
 \@writefile{lol}{\defcounter {refsection}{0}\relax }\@writefile{lol}{\contentsline {lstlisting}{\numberline {3.4}Format of struct pt\_regs.}{31}{lstlisting.3.4}\protected@file@percent }
 \@writefile{lot}{\defcounter {refsection}{0}\relax }\@writefile{lot}{\contentsline {table}{\numberline {3.4}{\ignorespaces Argument passing convention of registers for function calls in user and kernel space respectively.\relax }}{32}{table.caption.33}\protected@file@percent }
 \newlabel{table:systemv_abi}{{3.4}{32}{Argument passing convention of registers for function calls in user and kernel space respectively.\relax }{table.caption.33}{}}
-\@writefile{lot}{\defcounter {refsection}{0}\relax }\@writefile{lot}{\contentsline {table}{\numberline {3.5}{\ignorespaces Other relevant registers in x86\_64 and their purpose.\relax }}{32}{table.caption.34}\protected@file@percent }
-\newlabel{table:systemv_abi_other}{{3.5}{32}{Other relevant registers in x86\_64 and their purpose.\relax }{table.caption.34}{}}
 \newlabel{code:sys_enter_read_tp_format}{{3.5}{32}{Format for parameters in sys\_enter\_read specified at the format file}{lstlisting.3.5}{}}
 \@writefile{lol}{\defcounter {refsection}{0}\relax }\@writefile{lol}{\contentsline {lstlisting}{\numberline {3.5}Format for parameters in sys\_enter\_read specified at the format file.}{32}{lstlisting.3.5}\protected@file@percent }
-\newlabel{code:sys_enter_read_tp}{{3.6}{33}{Format of custom struct sys\_read\_enter\_ctx}{lstlisting.3.6}{}}
-\@writefile{lol}{\defcounter {refsection}{0}\relax }\@writefile{lol}{\contentsline {lstlisting}{\numberline {3.6}Format of custom struct sys\_read\_enter\_ctx.}{33}{lstlisting.3.6}\protected@file@percent }
+\newlabel{code:sys_enter_read_tp}{{3.6}{32}{Format of custom struct sys\_read\_enter\_ctx}{lstlisting.3.6}{}}
+\@writefile{lol}{\defcounter {refsection}{0}\relax }\@writefile{lol}{\contentsline {lstlisting}{\numberline {3.6}Format of custom struct sys\_read\_enter\_ctx.}{32}{lstlisting.3.6}\protected@file@percent }
+\@writefile{toc}{\defcounter {refsection}{0}\relax }\@writefile{toc}{\contentsline {subsection}{\numberline {3.2.2}Reading memory out of bounds}{33}{subsection.3.2.2}\protected@file@percent }
 \abx@aux@cite{ebpf_friends_p15}
 \abx@aux@segm{0}{0}{ebpf_friends_p15}
 \abx@aux@cite{ebpf_override_return}
@@ -310,49 +310,68 @@
 \abx@aux@segm{0}{0}{code_kernel_open}
 \abx@aux@cite{code_kernel_open}
 \abx@aux@segm{0}{0}{code_kernel_open}
-\@writefile{toc}{\defcounter {refsection}{0}\relax }\@writefile{toc}{\contentsline {subsection}{\numberline {3.2.2}Reading memory out of bounds}{34}{subsection.3.2.2}\protected@file@percent }
+\abx@aux@cite{code_kernel_open}
+\abx@aux@segm{0}{0}{code_kernel_open}
+\abx@aux@cite{code_kernel_open}
+\abx@aux@segm{0}{0}{code_kernel_open}
 \@writefile{toc}{\defcounter {refsection}{0}\relax }\@writefile{toc}{\contentsline {subsection}{\numberline {3.2.3}Overriding function return values}{34}{subsection.3.2.3}\protected@file@percent }
 \newlabel{code:override_return_1}{{3.7}{34}{Definition of the syscall sys\_open in the kernel \cite {code_kernel_open}}{lstlisting.3.7}{}}
 \@writefile{lol}{\defcounter {refsection}{0}\relax }\@writefile{lol}{\contentsline {lstlisting}{\numberline {3.7}Definition of the syscall sys\_open in the kernel \cite {code_kernel_open}}{34}{lstlisting.3.7}\protected@file@percent }
-\abx@aux@cite{code_kernel_open}
-\abx@aux@segm{0}{0}{code_kernel_open}
-\abx@aux@cite{code_kernel_open}
-\abx@aux@segm{0}{0}{code_kernel_open}
+\newlabel{code:override_return_2}{{3.8}{34}{Definition of the macro for creating syscalls, containing the error injection macro. Only relevant instructions included, complete macro can be found in the kernel \cite {code_kernel_open}}{lstlisting.3.8}{}}
+\@writefile{lol}{\defcounter {refsection}{0}\relax }\@writefile{lol}{\contentsline {lstlisting}{\numberline {3.8}Definition of the macro for creating syscalls, containing the error injection macro. Only relevant instructions included, complete macro can be found in the kernel \cite {code_kernel_open}}{34}{lstlisting.3.8}\protected@file@percent }
 \abx@aux@cite{fault_injection}
 \abx@aux@segm{0}{0}{fault_injection}
-\newlabel{code:override_return_2}{{3.8}{35}{Definition of the macro for creating syscalls, containing the error injection macro. Only relevant instructions included, complete macro can be found in the kernel \cite {code_kernel_open}}{lstlisting.3.8}{}}
-\@writefile{lol}{\defcounter {refsection}{0}\relax }\@writefile{lol}{\contentsline {lstlisting}{\numberline {3.8}Definition of the macro for creating syscalls, containing the error injection macro. Only relevant instructions included, complete macro can be found in the kernel \cite {code_kernel_open}}{35}{lstlisting.3.8}\protected@file@percent }
 \@writefile{toc}{\defcounter {refsection}{0}\relax }\@writefile{toc}{\contentsline {subsection}{\numberline {3.2.4}Sending signals to user programs}{35}{subsection.3.2.4}\protected@file@percent }
+\@writefile{toc}{\defcounter {refsection}{0}\relax }\@writefile{toc}{\contentsline {subsection}{\numberline {3.2.5}Conclusion}{35}{subsection.3.2.5}\protected@file@percent }
 \abx@aux@cite{ebpf_helpers}
 \abx@aux@segm{0}{0}{ebpf_helpers}
 \abx@aux@cite{mem_page_arch}
 \abx@aux@segm{0}{0}{mem_page_arch}
-\@writefile{toc}{\defcounter {refsection}{0}\relax }\@writefile{toc}{\contentsline {subsection}{\numberline {3.2.5}Conclusion}{36}{subsection.3.2.5}\protected@file@percent }
 \@writefile{toc}{\defcounter {refsection}{0}\relax }\@writefile{toc}{\contentsline {section}{\numberline {3.3}Memory corruption}{36}{section.3.3}\protected@file@percent }
 \newlabel{section:mem_corruption}{{3.3}{36}{Memory corruption}{section.3.3}{}}
 \@writefile{toc}{\defcounter {refsection}{0}\relax }\@writefile{toc}{\contentsline {subsection}{\numberline {3.3.1}Memory management in Linux}{36}{subsection.3.3.1}\protected@file@percent }
 \abx@aux@cite{page_faults}
 \abx@aux@segm{0}{0}{page_faults}
-\@writefile{lof}{\defcounter {refsection}{0}\relax }\@writefile{lof}{\contentsline {figure}{\numberline {3.1}{\ignorespaces Memory translation of virtual pages to physical pages.\relax }}{37}{figure.caption.35}\protected@file@percent }
-\newlabel{fig:mem_arch_pages}{{3.1}{37}{Memory translation of virtual pages to physical pages.\relax }{figure.caption.35}{}}
-\@writefile{lof}{\defcounter {refsection}{0}\relax }\@writefile{lof}{\contentsline {figure}{\numberline {3.2}{\ignorespaces Major page fault after a page was removed from RAM.\relax }}{38}{figure.caption.36}\protected@file@percent }
-\newlabel{fig:mem_major_page_fault}{{3.2}{38}{Major page fault after a page was removed from RAM.\relax }{figure.caption.36}{}}
-\@writefile{lof}{\defcounter {refsection}{0}\relax }\@writefile{lof}{\contentsline {figure}{\numberline {3.3}{\ignorespaces Minor page fault after a fork() in which the page table was not copied completely.\relax }}{38}{figure.caption.37}\protected@file@percent }
-\newlabel{fig:mem_minor_page_fault}{{3.3}{38}{Minor page fault after a fork() in which the page table was not copied completely.\relax }{figure.caption.37}{}}
+\@writefile{lof}{\defcounter {refsection}{0}\relax }\@writefile{lof}{\contentsline {figure}{\numberline {3.1}{\ignorespaces Memory translation of virtual pages to physical pages.\relax }}{37}{figure.caption.34}\protected@file@percent }
+\newlabel{fig:mem_arch_pages}{{3.1}{37}{Memory translation of virtual pages to physical pages.\relax }{figure.caption.34}{}}
+\abx@aux@cite{mem_arch_proc}
+\abx@aux@segm{0}{0}{mem_arch_proc}
+\@writefile{lof}{\defcounter {refsection}{0}\relax }\@writefile{lof}{\contentsline {figure}{\numberline {3.2}{\ignorespaces Major page fault after a page was removed from RAM.\relax }}{38}{figure.caption.35}\protected@file@percent }
+\newlabel{fig:mem_major_page_fault}{{3.2}{38}{Major page fault after a page was removed from RAM.\relax }{figure.caption.35}{}}
+\@writefile{lof}{\defcounter {refsection}{0}\relax }\@writefile{lof}{\contentsline {figure}{\numberline {3.3}{\ignorespaces Minor page fault after a fork() in which the page table was not copied completely.\relax }}{38}{figure.caption.36}\protected@file@percent }
+\newlabel{fig:mem_minor_page_fault}{{3.3}{38}{Minor page fault after a fork() in which the page table was not copied completely.\relax }{figure.caption.36}{}}
 \@writefile{toc}{\defcounter {refsection}{0}\relax }\@writefile{toc}{\contentsline {subsection}{\numberline {3.3.2}Process virtual memory}{39}{subsection.3.3.2}\protected@file@percent }
-\@writefile{toc}{\defcounter {refsection}{0}\relax }\@writefile{toc}{\contentsline {subsection}{\numberline {3.3.3}Accessing user memory}{39}{subsection.3.3.3}\protected@file@percent }
-\@writefile{toc}{\defcounter {refsection}{0}\relax }\@writefile{toc}{\contentsline {chapter}{\numberline {4}Methods??}{40}{chapter.4}\protected@file@percent }
+\@writefile{lof}{\defcounter {refsection}{0}\relax }\@writefile{lof}{\contentsline {figure}{\numberline {3.4}{\ignorespaces Virtual memory architecture of a process\cite {mem_arch_proc}.\relax }}{39}{figure.caption.37}\protected@file@percent }
+\newlabel{fig:mem_proc_arch}{{3.4}{39}{Virtual memory architecture of a process\cite {mem_arch_proc}.\relax }{figure.caption.37}{}}
+\@writefile{toc}{\defcounter {refsection}{0}\relax }\@writefile{toc}{\contentsline {subsection}{\numberline {3.3.3}The process stack}{40}{subsection.3.3.3}\protected@file@percent }
+\@writefile{lof}{\defcounter {refsection}{0}\relax }\@writefile{lof}{\contentsline {figure}{\numberline {3.5}{\ignorespaces Simplified stack representation showing only stack frames.\relax }}{40}{figure.caption.38}\protected@file@percent }
+\newlabel{fig:stack_pres}{{3.5}{40}{Simplified stack representation showing only stack frames.\relax }{figure.caption.38}{}}
+\@writefile{lot}{\defcounter {refsection}{0}\relax }\@writefile{lot}{\contentsline {table}{\numberline {3.5}{\ignorespaces Relevant registers in x86\_64 for the stack and control flow and their purpose.\relax }}{40}{table.caption.39}\protected@file@percent }
+\newlabel{table:systemv_abi_other}{{3.5}{40}{Relevant registers in x86\_64 for the stack and control flow and their purpose.\relax }{table.caption.39}{}}
+\@writefile{lof}{\defcounter {refsection}{0}\relax }\@writefile{lof}{\contentsline {figure}{\numberline {3.6}{\ignorespaces Representation of push and pop operations in the stack.\relax }}{41}{figure.caption.40}\protected@file@percent }
+\newlabel{fig:stack_ops}{{3.6}{41}{Representation of push and pop operations in the stack.\relax }{figure.caption.40}{}}
+\abx@aux@cite{8664_params_abi_p18}
+\abx@aux@segm{0}{0}{8664_params_abi_p18}
+\@writefile{lof}{\defcounter {refsection}{0}\relax }\@writefile{lof}{\contentsline {figure}{\numberline {3.7}{\ignorespaces Stack representation right before starting the function call process.\relax }}{42}{figure.caption.41}\protected@file@percent }
+\newlabel{fig:stack_before}{{3.7}{42}{Stack representation right before starting the function call process.\relax }{figure.caption.41}{}}
+\@writefile{lof}{\defcounter {refsection}{0}\relax }\@writefile{lof}{\contentsline {figure}{\numberline {3.8}{\ignorespaces Stack representation right after the function preamble.\relax }}{42}{figure.caption.42}\protected@file@percent }
+\newlabel{fig:stack}{{3.8}{42}{Stack representation right after the function preamble.\relax }{figure.caption.42}{}}
+\abx@aux@cite{write_helper_non_fault}
+\abx@aux@segm{0}{0}{write_helper_non_fault}
+\@writefile{toc}{\defcounter {refsection}{0}\relax }\@writefile{toc}{\contentsline {subsection}{\numberline {3.3.4}Attacks and limitations of bpf\_probe\_write\_user()}{43}{subsection.3.3.4}\protected@file@percent }
+\@writefile{toc}{\defcounter {refsection}{0}\relax }\@writefile{toc}{\contentsline {chapter}{\numberline {4}Methods??}{45}{chapter.4}\protected@file@percent }
 \@writefile{lof}{\defcounter {refsection}{0}\relax }\@writefile{lof}{\addvspace {10\p@ }}
 \@writefile{lot}{\defcounter {refsection}{0}\relax }\@writefile{lot}{\addvspace {10\p@ }}
-\@writefile{toc}{\defcounter {refsection}{0}\relax }\@writefile{toc}{\contentsline {chapter}{\numberline {5}Results}{41}{chapter.5}\protected@file@percent }
+\@writefile{toc}{\defcounter {refsection}{0}\relax }\@writefile{toc}{\contentsline {chapter}{\numberline {5}Results}{46}{chapter.5}\protected@file@percent }
 \@writefile{lof}{\defcounter {refsection}{0}\relax }\@writefile{lof}{\addvspace {10\p@ }}
 \@writefile{lot}{\defcounter {refsection}{0}\relax }\@writefile{lot}{\addvspace {10\p@ }}
-\@writefile{toc}{\defcounter {refsection}{0}\relax }\@writefile{toc}{\contentsline {chapter}{\numberline {6}Conclusion and future work}{42}{chapter.6}\protected@file@percent }
+\@writefile{toc}{\defcounter {refsection}{0}\relax }\@writefile{toc}{\contentsline {chapter}{\numberline {6}Conclusion and future work}{47}{chapter.6}\protected@file@percent }
 \@writefile{lof}{\defcounter {refsection}{0}\relax }\@writefile{lof}{\addvspace {10\p@ }}
 \@writefile{lot}{\defcounter {refsection}{0}\relax }\@writefile{lot}{\addvspace {10\p@ }}
-\@writefile{toc}{\defcounter {refsection}{0}\relax }\@writefile{toc}{\contentsline {chapter}{Bibliography}{43}{chapter.6}\protected@file@percent }
-\newlabel{annex:bpftool_flags_kernel}{{6}{}{Appendix A - Bpftool commands}{chapter*.39}{}}
-\abx@aux@read@bbl@mdfivesum{B5521B82B204530DC3CD5A9274665FC8}
+\@writefile{toc}{\defcounter {refsection}{0}\relax }\@writefile{toc}{\contentsline {chapter}{Bibliography}{48}{chapter.6}\protected@file@percent }
+\newlabel{annex:bpftool_flags_kernel}{{6}{}{Appendix A - Bpftool commands}{chapter*.44}{}}
+\abx@aux@read@bbl@mdfivesum{5BC491FF2560E8B85979411211F855E2}
+\abx@aux@read@bblrerun
 \abx@aux@refcontextdefaultsdone
 \abx@aux@defaultrefcontext{0}{ransomware_pwc}{none/global//global/global}
 \abx@aux@defaultrefcontext{0}{rootkit_ptsecurity}{none/global//global/global}
@@ -421,5 +440,6 @@
 \abx@aux@defaultrefcontext{0}{fault_injection}{none/global//global/global}
 \abx@aux@defaultrefcontext{0}{mem_page_arch}{none/global//global/global}
 \abx@aux@defaultrefcontext{0}{page_faults}{none/global//global/global}
+\abx@aux@defaultrefcontext{0}{mem_arch_proc}{none/global//global/global}
 \ttl@finishall
-\gdef \@abspage@last{65}
+\gdef \@abspage@last{70}
