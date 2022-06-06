@@ -1300,6 +1300,7 @@
       \strng{authorbibnamehash}{871f02558cb7234c22cde24811cf53a7}
       \strng{authornamehash}{871f02558cb7234c22cde24811cf53a7}
       \strng{authorfullhash}{871f02558cb7234c22cde24811cf53a7}
+      \field{extraname}{1}
       \field{sortinit}{9}
       \field{sortinithash}{54047ffb55bdefa0694bbd554c1b11a0}
       \field{labelnamesource}{author}
@@ -1373,6 +1374,17 @@
       \endverb
       \verb{url}
       \verb https://elixir.bootlin.com/linux/v5.11/source/fs/open.c#L1192
+      \endverb
+    \endentry
+    \entry{code_kernel_syscall}{online}{}
+      \field{sortinit}{9}
+      \field{sortinithash}{54047ffb55bdefa0694bbd554c1b11a0}
+      \field{indextitle}{Linux kernel source code}
+      \verb{urlraw}
+      \verb https://elixir.bootlin.com/linux/v5.11/source/include/linux/syscalls.h#L233
+      \endverb
+      \verb{url}
+      \verb https://elixir.bootlin.com/linux/v5.11/source/include/linux/syscalls.h#L233
       \endverb
     \endentry
     \entry{fault_injection}{online}{}
@@ -1485,6 +1497,99 @@
       \endverb
       \verb{url}
       \verb https://h3xduck.github.io/exploit/2021/05/23/stackbufferoverflow-part1.html
+      \endverb
+    \endentry
+    \entry{8664_params_abi_p18}{manual}{}
+      \name{author}{1}{}{%
+        {{hash=871f02558cb7234c22cde24811cf53a7}{%
+           family={al.},
+           familyi={a\bibinitperiod},
+           given={H.J.\bibnamedelimi Lu},
+           giveni={H\bibinitperiod\bibinitdelim L\bibinitperiod},
+           prefix={et},
+           prefixi={e\bibinitperiod}}}%
+      }
+      \strng{namehash}{871f02558cb7234c22cde24811cf53a7}
+      \strng{fullhash}{871f02558cb7234c22cde24811cf53a7}
+      \strng{bibnamehash}{871f02558cb7234c22cde24811cf53a7}
+      \strng{authorbibnamehash}{871f02558cb7234c22cde24811cf53a7}
+      \strng{authornamehash}{871f02558cb7234c22cde24811cf53a7}
+      \strng{authorfullhash}{871f02558cb7234c22cde24811cf53a7}
+      \field{extraname}{2}
+      \field{sortinit}{1}
+      \field{sortinithash}{50c6687d7fc80f50136d75228e3c59ba}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{day}{28}
+      \field{month}{1}
+      \field{title}{System V Application Binary Interface AMD64 Architecture Processor Supplement}
+      \field{year}{2018}
+      \field{dateera}{ce}
+      \field{pages}{18}
+      \range{pages}{1}
+      \verb{urlraw}
+      \verb https://raw.githubusercontent.com/wiki/hjl-tools/x86-psABI/x86-64-psABI-1.0.pdf
+      \endverb
+      \verb{url}
+      \verb https://raw.githubusercontent.com/wiki/hjl-tools/x86-psABI/x86-64-psABI-1.0.pdf
+      \endverb
+    \endentry
+    \entry{write_helper_non_fault}{online}{}
+      \field{sortinit}{1}
+      \field{sortinithash}{50c6687d7fc80f50136d75228e3c59ba}
+      \field{labeltitlesource}{title}
+      \field{title}{probe\_write\_common\_error}
+      \verb{urlraw}
+      \verb https://www.spinics.net/lists/bpf/msg16795.html
+      \endverb
+      \verb{url}
+      \verb https://www.spinics.net/lists/bpf/msg16795.html
+      \endverb
+    \endentry
+    \entry{code_vfs_read}{online}{}
+      \field{sortinit}{1}
+      \field{sortinithash}{50c6687d7fc80f50136d75228e3c59ba}
+      \field{indextitle}{Linux kernel source code}
+      \verb{urlraw}
+      \verb https://elixir.bootlin.com/linux/v5.11/source/fs/read_write.c#L476
+      \endverb
+      \verb{url}
+      \verb https://elixir.bootlin.com/linux/v5.11/source/fs/read_write.c#L476
+      \endverb
+    \endentry
+    \entry{8664_params_abi_p1922}{manual}{}
+      \name{author}{1}{}{%
+        {{hash=871f02558cb7234c22cde24811cf53a7}{%
+           family={al.},
+           familyi={a\bibinitperiod},
+           given={H.J.\bibnamedelimi Lu},
+           giveni={H\bibinitperiod\bibinitdelim L\bibinitperiod},
+           prefix={et},
+           prefixi={e\bibinitperiod}}}%
+      }
+      \strng{namehash}{871f02558cb7234c22cde24811cf53a7}
+      \strng{fullhash}{871f02558cb7234c22cde24811cf53a7}
+      \strng{bibnamehash}{871f02558cb7234c22cde24811cf53a7}
+      \strng{authorbibnamehash}{871f02558cb7234c22cde24811cf53a7}
+      \strng{authornamehash}{871f02558cb7234c22cde24811cf53a7}
+      \strng{authorfullhash}{871f02558cb7234c22cde24811cf53a7}
+      \field{extraname}{3}
+      \field{sortinit}{1}
+      \field{sortinithash}{50c6687d7fc80f50136d75228e3c59ba}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{day}{28}
+      \field{month}{1}
+      \field{title}{System V Application Binary Interface AMD64 Architecture Processor Supplement}
+      \field{year}{2018}
+      \field{dateera}{ce}
+      \field{pages}{19\bibrangedash 22}
+      \range{pages}{4}
+      \verb{urlraw}
+      \verb https://raw.githubusercontent.com/wiki/hjl-tools/x86-psABI/x86-64-psABI-1.0.pdf
+      \endverb
+      \verb{url}
+      \verb https://raw.githubusercontent.com/wiki/hjl-tools/x86-psABI/x86-64-psABI-1.0.pdf
       \endverb
     \endentry
   \enddatalist

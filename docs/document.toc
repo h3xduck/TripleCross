@@ -95,11 +95,15 @@
 \defcounter {refsection}{0}\relax 
 \contentsline {subsection}{\numberline {3.3.4}Attacks and limitations of bpf\_probe\_write\_user()}{43}{subsection.3.3.4}%
 \defcounter {refsection}{0}\relax 
-\contentsline {chapter}{\numberline {4}Methods??}{45}{chapter.4}%
+\contentsline {subsection}{\numberline {3.3.5}Conclusion}{46}{subsection.3.3.5}%
 \defcounter {refsection}{0}\relax 
-\contentsline {chapter}{\numberline {5}Results}{46}{chapter.5}%
+\contentsline {section}{\numberline {3.4}Abusing networking programs}{46}{section.3.4}%
 \defcounter {refsection}{0}\relax 
-\contentsline {chapter}{\numberline {6}Conclusion and future work}{47}{chapter.6}%
+\contentsline {subsection}{\numberline {3.4.1}Attacks and limitations of networking programs}{47}{subsection.3.4.1}%
 \defcounter {refsection}{0}\relax 
-\contentsline {chapter}{Bibliography}{48}{chapter.6}%
+\contentsline {chapter}{\numberline {4}Results}{48}{chapter.4}%
+\defcounter {refsection}{0}\relax 
+\contentsline {chapter}{\numberline {5}Conclusion and future work}{49}{chapter.5}%
+\defcounter {refsection}{0}\relax 
+\contentsline {chapter}{Bibliography}{50}{chapter.5}%
 \contentsfinish 

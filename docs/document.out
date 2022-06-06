@@ -45,7 +45,9 @@
 \BOOKMARK [2][-]{subsection.3.3.2}{Process\040virtual\040memory}{section.3.3}% 45
 \BOOKMARK [2][-]{subsection.3.3.3}{The\040process\040stack}{section.3.3}% 46
 \BOOKMARK [2][-]{subsection.3.3.4}{Attacks\040and\040limitations\040of\040bpf_probe_write_user\(\)}{section.3.3}% 47
-\BOOKMARK [0][-]{chapter.4}{Methods??}{}% 48
-\BOOKMARK [0][-]{chapter.5}{Results}{}% 49
-\BOOKMARK [0][-]{chapter.6}{Conclusion\040and\040future\040work}{}% 50
-\BOOKMARK [0][-]{chapter.6}{Bibliography}{}% 51
+\BOOKMARK [2][-]{subsection.3.3.5}{Conclusion}{section.3.3}% 48
+\BOOKMARK [1][-]{section.3.4}{Abusing\040networking\040programs}{chapter.3}% 49
+\BOOKMARK [2][-]{subsection.3.4.1}{Attacks\040and\040limitations\040of\040networking\040programs}{section.3.4}% 50
+\BOOKMARK [0][-]{chapter.4}{Results}{}% 51
+\BOOKMARK [0][-]{chapter.5}{Conclusion\040and\040future\040work}{}% 52
+\BOOKMARK [0][-]{chapter.5}{Bibliography}{}% 53

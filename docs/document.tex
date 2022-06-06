@@ -795,7 +795,7 @@ bpf\_tail\_call() & Jump to another eBPF program preserving the current stack\\
 \section{eBPF program types} \label{section:ebpf_prog_types}
 In the previous subsection \ref{subsection:bpf_syscall} we introduced the new types of eBPF programs that are supported and that we will be developing for our offensive analysis. In this section, we will analyse in greater detail how eBPF is integrated in the Linux kernel in order to support these new functionalities.
 
-\subsection{XDP}
+\subsection{XDP} \label{subsection:xdp}
 eXpress Data Path (XDP) programs are a novel type of eBPF program that allows for the lowest-latency traffic filtering and monitoring in the whole Linux kernel. In order to load an XDP program, a bpf() syscall with the command BPF\_PROG\_LOAD and the program type BPF\_PROG\_TYPE\_XDP must be issued. 
 
 These programs are directly attached to the Network Interface Controller (NIC) driver, and thus they can process the packet before any other module\cite{xdp_gentle_intro}.
@@ -849,7 +849,7 @@ bpf\_xdp\_adjust\_tail() & Enlarges or reduces the extension of a packet, by mov
 \end{table}
 
 
-\subsection{Traffic Control}
+\subsection{Traffic Control} \label{subsection:tc}
 Traffic Control (TC) programs are also indicated for networking instrumentation. Similarly to XDP, their module is positioned before entering the overall network processing of the kernel. However, as it can be observed in figure \ref{fig:xdp_diag}, they differ in some aspects:
 \begin{itemize}
 \item TC programs receive a network buffer with metadata (in the figure, \textit{sk\_buff}) about the packet in it. This renders TC programs less ideal than XDP for performing large packet modifications (like new headers), but at the same time the additional metadata fields make it easier to locate and modify specific packet fields\cite{tc_differences}.
@@ -1231,7 +1231,6 @@ rax & Return value\\
 \label{table:systemv_abi}
 \end{table}
 
-
 In the case of tracepoints, we can see in code snippet \ref{code:format_tracepoint} that it receives a \textit{struct sys\_read\_enter\_ctx*}. This struct must be manually defined, as explained in \ref{subsection:tracepoints}, by looking at the file \textit{/sys/kernel/debug/tracing/events/syscalls/sys\_enter\_read/format}. Code snippet \ref{code:sys_enter_read_tp} shows the format of the struct.
 
 \begin{lstlisting}[language=C, caption={Format for parameters in sys\_enter\_read specified at the format file.}, label={code:sys_enter_read_tp_format}]
@@ -1280,12 +1279,12 @@ Usually, since many function arguments are pointers to user or kernel addresses 
 
 These helpers, previously introduced in table \ref{table:ebpf_helpers}, enable to read an arbitrary number of bytes from an user or kernel address respectively, allowing us to extract the information pointed by the parameters received by eBPF programs.
 
-\subsection{Reading memory out of bounds}
+\subsection{Reading memory out of bounds} \label{subsection:out_read_bounds}
 As we introduced in the previous subsection, the bpf\_probe\_read\_user() and bpf\_probe\_read\_kernel() helpers can be used to access memory of pointers received as parameters in the hooked functions. 
 
 However, although in general the eBPF verifier attempts to reject illegal memory accesses, it does not prevent a malicious program from passing an arbitrary memory address (in kernel or user space) to the above helpers. This means that an eBPF program can potentially read any address in user or kernel space, (as long as it is marked as readable in the corresponding memory pages). Furthermore, an attacker can locate specific data structures and memory sections by taking the function parameter as a reference point in memory.
 
-A particularly relevant case (which we will later use for our rootkit) involves accessing user memory via the parameters of tracepoints attached at system calls. Provided the nature of syscalls, whose purpose is to communicate user and kernel space, all parameters received will belong to the user space, and therefore any pointer passed will be an address in user memory. This enables an eBPF program to get a foothold into the virtual address space of the process calling the syscall, which it can proceed to scan looking for data or specific instructions. This technique will be further elaborated in section \ref{TODO}.
+A particularly relevant case (which we will later use for our rootkit) involves accessing user memory via the parameters of tracepoints attached at system calls. Provided the nature of syscalls, whose purpose is to communicate user and kernel space, all parameters received will belong to the user space, and therefore any pointer passed will be an address in user memory. This enables an eBPF program to get a foothold into the virtual address space of the process calling the syscall, which it can proceed to scan looking for data or specific instructions. This technique will be further elaborated in section \ref{subsection_bpf_probe_write_apps}.
 
 \subsection{Overriding function return values}
 A potentially dangerous functionality in eBPF tracing programs is the ability to modify the return value of kernel functions\cite{ebpf_friends_p15}\cite{ebpf_override_return}. This can be done via the eBPF helper bpf\_override\_return, and it works exclusively from kretprobes.
@@ -1301,7 +1300,7 @@ SYSCALL_DEFINE3(open, const char __user *, filename, int, flags, umode_t, mode)
 }
 \end{lstlisting}
 
-\begin{lstlisting}[language=C, caption={Definition of the macro for creating syscalls, containing the error injection macro. Only relevant instructions included, complete macro can be found in the kernel \cite{code_kernel_open}}, label={code:override_return_2}]
+\begin{lstlisting}[language=C, caption={Definition of the macro for creating syscalls, containing the error injection macro. Only relevant instructions included, complete macro can be found in the kernel \cite{code_kernel_syscall}}, label={code:override_return_2}]
 #define SYSCALL_DEFINE3(name, ...) SYSCALL_DEFINEx(3, _##name, __VA_ARGS__)
 #ifndef __SYSCALL_DEFINEx
 #define __SYSCALL_DEFINEx(x, name, ...)\
@@ -1326,7 +1325,7 @@ Another eBPF helper that is subject to malicious purposes is bpf\_send\_signal. 
 
 Therefore, this helper can be used to forcefully terminate running user processes, by sending the SIGKILL signal. In this way, combined with the observability into the parameters received at a function call, malicious eBPF can kill and deactivate processes to favour its malicious purposes.
 
-\subsection{Conclusion}
+\subsection{Conclusion} \label{subsection:tracing_attacks_conclusion}
 As a summary, a malicious eBPF program loaded and attached as a tracing program undermines the existing trust between user programs and the kernel space. 
 
 Its ability to access sensitive data in function parameters and reading arbitrary memory can lead to gathering extensive information on the running processes of a system, whilst the malicious use of eBPF helpers enables the modification of the data passed to the user space from the kernel, and the control over which programs are allowed to be running on the system.
@@ -1371,6 +1370,7 @@ As we can observe in the figure, each virtual page is related to one physical pa
 \subsection{Process virtual memory}
 In the previous subsection we have studied that each process disposes of a virtual address space. We will now describe how this virtual memory is organized in a Linux system.
 
+%TODO Add the .data section here
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=6cm]{memory.jpg}
@@ -1456,35 +1456,137 @@ As we mentioned, the stack stores function parameters, return addresses and loca
 \begin{enumerate}
 \item The function arguments are pushed into the stack. We can see them in the stack in reverse order. 
 \item The function is called:
-	\subitem The value of register rip is pushed into the stack, so that it is saved for when the function exists. We can see it on the figure as 'ret'.
-	\subitem The value of rip changes to point to the first instruction of the called function.
+\begin{enumerate}
+	\item The value of register rip is pushed into the stack, so that it is saved for when the function exists. We can see it on the figure as 'ret'.
+	\item The value of rip changes to point to the first instruction of the called function.
 \item We execute what is called as the \textit{function preamble}\cite{8664_params_abi_p18}, which prepares the stack frame for the called function:
-	\subitem The value of rbp is pushed into the stack, so that we can restore the previous stack frame when the function exits. We can see it on the figure as the 'saved frame pointer'.
-	\subitem The value of rsp is moved into rbp. Therefore, now rbp points to the end of the previous stack frame.
-	\subitem The value of rsp is usually decremented (since the stack needs to go to lower memory addresses) so that we allocate some space for function variables.
+	\item The value of rbp is pushed into the stack, so that we can restore the previous stack frame when the function exits. We can see it on the figure as the 'saved frame pointer'.
+	\item The value of rsp is moved into rbp. Therefore, now rbp points to the end of the previous stack frame.
+	\item The value of rsp is usually decremented (since the stack needs to go to lower memory addresses) so that we allocate some space for function variables.
+\end{enumerate}
 \item The function instructions are executed. The stack may be further modified, but on its end rsp must point to the same address of the beginning. Register rbp always keeps pointing to the end of the stack.
 \item We execute what is called as the \textit{function epilogue}, which removes the stack frame and restores the original function:
-	\subitem The value of rbp is moved into rsp, so that rsp points to the start of the previous stack frame. All data allocated in the previous stack frame is considered to be free.
-	\subitem The value of the saved frame pointer is popped and stored into rbp, so that rbp now points to the start of the previous stack frame.
-	\subitem The value of the saved rip value is popped into register rip, so that the next instruction to execute is the instruction right after the function call.
+\begin{enumerate}
+	\item The value of rbp is moved into rsp, so that rsp points to the start of the previous stack frame. All data allocated in the previous stack frame is considered to be free.
+	\item The value of the saved frame pointer is popped and stored into rbp, so that rbp now points to the start of the previous stack frame.
+	\item The value of the saved rip value is popped into register rip, so that the next instruction to execute is the instruction right after the function call.
+\end{enumerate}
 \item Since the function arguments where pushed into the stack, they are popped now.
 \end{enumerate}
 
-\subsection{Attacks and limitations of bpf\_probe\_write\_user()}
+\subsection{Attacks and limitations of bpf\_probe\_write\_user()} \label{subsection_bpf_probe_write_apps}
 Provided the background into memory architecture and the stack operation, we will now study the offensive capabilities of the bpf\_probe\_write\_user() helper and which restrictions are imposed into its use by eBPF programs.
 
-The bpf\_probe\_write\_user() helper, when used from a tracing eBPF program, can write into any memory address in the user space of the process responsible from calling the hooked function. However, the write operation fails if:
+The bpf\_probe\_write\_user() helper, when used from a tracing eBPF program, can write into any memory address in the user space of the process responsible from calling the hooked function. However, the write operation fails has some restrictions:
 \begin{itemize}
-\item{The memory space pointed by the address is marked as non-writeable by the user space process. For instance, if we try to write into the .text section, the helpers fails because this section is only marked as readable and executable (for protection reasons).} Therefore, the process must indicate a writeable flag in the memory section for the helper to succeed.
-\item{The memory page is served with a minor or major page fault. As we saw in section \ref{subsection:ebpf_verifier}, eBPF programs are restricted from executing any sleeping or blocking operations, to prevent hanging the kernel. Therefore, since during a page fault the operating system needs to block the execution and write into the page table or retrieve data from the secondary disk, bpf\_probe\_write\_user() is defined as a non-faulting helper\cite{write_helper_non_fault}, meaning that if it needs to issue a page fault for accessing data, it will just return and fail.}
+\item{The operation fails if the memory space pointed by the address is marked as non-writeable by the user space process. For instance, if we try to write into the .text section, the helpers fails because this section is only marked as readable and executable (for protection reasons).} Therefore, the process must indicate a writeable flag in the memory section for the helper to succeed.
+\item{The operation fails if the memory page is served with a minor or major page fault. As we saw in section \ref{subsection:ebpf_verifier}, eBPF programs are restricted from executing any sleeping or blocking operations, to prevent hanging the kernel. Therefore, since during a page fault the operating system needs to block the execution and write into the page table or retrieve data from the secondary disk, bpf\_probe\_write\_user() is defined as a non-faulting helper\cite{write_helper_non_fault}, meaning that instead of issuing a page fault for accessing data, it will just return and fail.}
+\item{Each time the helper is called, an alert message is written into the kernel logs, alerting that a potentially dangerous eBPF program is making use of the helper. Note that this message appears when the eBPF program is attached, and not each time the helper is called. This will be particularly relevant since we will be able to bypass this alert by taking advantage of this.}
 \end{itemize}
+
+Although we will not be able to modify kernel memory or the instructions of a program, this eBPF helper opens a range of possible attacks:
+\begin{itemize}
+\item Modify any of the arguments with which a system call is called (either with a tracepoint or a kprobe). Therefore, a malicious program can hijack any call to the kernel with its own arguments.
+\item Modify user-provided arguments in kernel functions. When reading kernel code, we can find that data provided by the user is marked with the keyword \textit{\_\_user}. For instance, an internal kernel function in a nested call of the system call sys\_read receives an user buffer:
+\begin{lstlisting}[language=C, caption={Definition of kernel function vfs\_read. \cite{code_vfs_read}}, label={code:vfs_read}]
+ssize_t vfs_read(struct file *file, char __user *buf, size_t count, loff_t *pos)
+\end{lstlisting}
+Then, if we attach a kprobe to vfs\_read, we would be able to modify the value of the buffer.
+\item Modify process memory by taking function parameters as a reference and scanning the stack. This technique, first introduced in section \ref{subsection:out_read_bounds} when we mentioned that tracing programs can read any user memory location with the bpf\_probe\_read\_user() helper, consists of:
+\begin{enumerate}
+\item Take an user-passed parameter received on a tracing program. The parameter must be a pointer to a memory location (such as a pointer to a buffer), so that we can use that memory address as the reference point in user space. According to the x86\_64 documentation, this parameter will be stored in the stack\cite{8664_params_abi_p1922}, so we will receive an stack address.
+\item Locate the target data which we aim to write. There are two main methods for this:
+\begin{itemize}
+	\item Sequentially read the stack, using bpf\_probe\_read\_user(), until we locate the bytes we are looking for. This requires knowing which data we want to overwrite.
+	\item By previously reverse engineering the user program, we can calculate the offset at which an specific data section will be stored in virtual memory with respect to the reference address we received as a parameter.
+\end{itemize}
+\item Overwrite the memory buffer using bpf\_probe\_write\_user().
+\end{enumerate}
+\end{itemize}
+
+Figure \ref{fig:stack_scan_write_tech} illustrates a high-level overview of the stack scanning technique previously described:
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=16cm]{stack_scan_write_tech.jpg}
+	\caption{Overview of stack scanning and writing technique.}
+	\label{fig:stack_scan_write_tech}
+\end{figure}
+
+The above figure shows process memory executing a program similar to the following:
+\begin{lstlisting}[language=C, caption={Sample program being executed on figure \ref{fig:stack_scan_write_tech}.}, label={code:stack_scan_write_tech}]
+void func(char* a, char* b, char* c){
+	int fd = open("FILE", 0);
+	write(fd, a, 1);
+}
+
+int main(){
+	char a[] = "AAA";
+	char b[] = "BBB";
+	char c[] = "CCC";
+	func(a, b, c);
+}
+\end{lstlisting}
+
+In the figure, we can clearly observe how the technique is used to overwrite an specific buffer. The attacker goal is to overwrite buffer \textit{c} with some other bytes, but the kprobe program only has direct access to buffer \textit{a}:
+\begin{enumerate}
+\item By reverse engineering the program (we will see how this process works in section \ref{TODO}) we notice that buffer \textit{c} is stored 8 bytes lower on the stack than buffer \textit{a}.
+\item When register rip points to the write() instruction, the processor executes the instruction and a system call is issued to sys\_write().
+\item The kprobe eBPF program hooked to the syscall hijacks the program execution. Since it has access to the memory address of buffer \textit{a} and it knows the relative position of buffer \textit{c}, it writes to that location whatever it wants (e.g.: "DDD") with the bpf\_probe\_write\_user() helper.
+\item The eBPF program ends and the control flow goes back to the system call. It ends its execution successfully, and returns a value to the user space. The result of the program is that 1 byte has been written into file "FILE", and that buffer \textit{c} now contains "DDD".
+\end{enumerate}
+
+\subsection{Conclusion}
+As a summary, the bpf\_probe\_write\_user() helper is one of the main attack vectors for malicious eBPF programs. Although it does contain some restrictions, its ability to overwrite any user parameter enables it to, in practice, execute arbitrary code by hijacking that of others. When it is combined with tracing programs' ability to read memory out of bounds, it unlocks a wide range of attacks, since any writeable section of the process memory is a possible target. 
+
+Therefore, if on the conclusion of section \ref{subsection:tracing_attacks_conclusion} we discussed that the ability to change the return value of kernel functions and kill processes hinders the trust between the user and kernel space (since what the kernel returns may not be a correct result), then the ability to directly overwrite process data is a complete disrupt of trust in any of the data in the user space itself, since it is subject to the control of a malicious eBPF program.
+
+Moreover, in the next sections we will discuss how we can create advanced attacks on the basis of the background and techniques previously discussed. We will research further into which sections of a process memory are writeable and whether they can lead to new attack vectors.
+
+
+\section{Abusing networking programs}
+The final main piece of a malicious eBPF program comes from taking advantage of the networking capabilities of TC and XDP programs. As we mentioned during sections \ref{subsection:xdp} and \ref{subsection:tc}, these type of programs have access to network traffic:
+\begin{itemize}
+\item Traffic Control programs can be placed either on egress or ingress traffic, and receive a struct \textit{sk\_buff}, containing the packet bytes and meta data that helps operating on it.
+\item External Data Path programs can only be attached to ingress traffic, but in turn they receive the packet before any kernel processing (as a struct \textit{xdp\_md}) being able to access the raw data directly.
+\end{itemize}
+
+Networking eBPF programs not only have read access to the network packets, but also write access:
+\begin{itemize}
+\item XDP programs can directly modify the raw packet via memcpy() operations. They can also increment or reduce the size of the packet by any of its ends (adding bytes before the head or after the packet tail). This is done via the multiple helpers previously presented on table \ref{table:xdp_helpers}.
+\item TC programs can also modify the packet via the helpers presented on table \ref{table:tc_helpers}. The packet can be expanded or reduced via these eBPF helpers too.
+\end{itemize} 
+
+Apart from write access to the packet, the other critical feature of networking programs is their ability to drop packets. As we presented in tables \ref{table:xdp_actions_av} and \ref{table:tc_actions}, this can be achieved by returning specific values.
+
+
+\subsection{Attacks and limitations of networking programs}
+Multiple restrictions exist on network eBPF programs:
+\begin{itemize}
+\item Read and write access to the packet is heavily controlled by the eBPF verifier. It is not possible to read or write data out of bounds. Extreme care must also be taken before attempting to read any data inside the packet, since the verifier first requires making lots of checks beforehand. For any access to take place, the program must first classify the packet according to the network protocol it belongs, and later check that every header of every network layer is well defined (e.g: Ethernet, IP and TCP). Only after that, the headers can be modified. 
+
+If the program also wants to modify the packet payload, then it must be checked to be between the bounds of the packet and well defined according to the packet headers. Also, after using any of the helpers that enlarge or reduce the size of the packet, all check operations must be repeated again before any subsequent operation.
+
+Finally, note that after any modification in the packet, some network protocols (such as IP and TCP) require to recalculate their checksum fields. 
+
+\item XDP and TC programs are not able to create packets, they can only operate over existing traffic.
+\end{itemize}
+
+
+
+%TODO talk about TCP connection and its repeating packets.
+% Talk about attacks.
+% Conclusion of the section.
+
+
+
+
+
+
 
 
 %TODO Talk about the difference between having always on BPF and always on kernel modules (maybe this is better in the introduction)
 
-
-\chapter{Methods??}
-%M-> Following the particular TFG we discussed and also others, it looks like the main chapter(s) varies name depending on the TFG topic. Also is there a prefered way to distribute this?
 
 
 \chapter{Results}
