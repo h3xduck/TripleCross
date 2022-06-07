@@ -346,7 +346,7 @@ Although eBPF has built an outstanding environment for the creation of networkin
 Moreover, there currently exists official efforts to extend the eBPF technology into Windows\cite{ebpf_windows} and Android systems\cite{ebpf_android}, which spreads the mentioned risks to new platforms. Therefore, we can confidently claim that there is a growing interest on researching the capabilities of eBPF in the context of offensive security, in particular given its potential on becoming a common component found of modern rootkits. This knowledge would be valuable to the computer security community, both in the context of pen-testing and for analysts which need to know about the latest trends in malware to prepare their defences.
 
 
-\section{Project objectives}
+\section{Project objectives} \label{section:project_objectives}
 The main objective of this project is to compile a comprehensive report of the capabilities in the eBPF technology that could be weaponized by a malicious actor. In particular, we will be focusing on functionalities present in the Linux platform, given the maturity of eBPF on these environments and which therefore offers a wider range of possibilities. We will be approaching this study from the perspective of a threat actor, meaning that we will develop an eBPF-based rootkit which shows these capabilities live in a current Linux system, including proof of concepts (PoC) showing an specific feature, and also by building a realistic rootkit system which weaponizes these PoCs and operates malicious activities. 
 
 %According to the library guide, previous research should be around here. %Is it the best place tho?
@@ -1018,6 +1018,8 @@ Therefore, given the previous background, this chapter is dedicated to an analys
 \item Exploring networking capabilities with eBPF packet filters.
 \end{itemize}
 
+
+%TODO if this is finally not included, change the intro
 Finally, we will study in detail some of the malicious applications that previous researchers have proposed to take advantage of these capabilities of eBPF. In the next chapter, we will proceed to elaborate on these ideas, find new purposes and design our own rootkit.
 
 \section{Security features in eBPF}
@@ -1474,7 +1476,7 @@ As we mentioned, the stack stores function parameters, return addresses and loca
 \item Since the function arguments where pushed into the stack, they are popped now.
 \end{enumerate}
 
-\subsection{Attacks and limitations of bpf\_probe\_write\_user()} \label{subsection_bpf_probe_write_apps}
+\subsection{Attacks and limitations of bpf\_probe\_write\_user()} \label{subsection:bpf_probe_write_apps}
 Provided the background into memory architecture and the stack operation, we will now study the offensive capabilities of the bpf\_probe\_write\_user() helper and which restrictions are imposed into its use by eBPF programs.
 
 The bpf\_probe\_write\_user() helper, when used from a tracing eBPF program, can write into any memory address in the user space of the process responsible from calling the hooked function. However, the write operation fails has some restrictions:
@@ -1684,6 +1686,38 @@ Ultimately, the capabilities discussed in this section unlock complete freedom f
 \begin{itemize}
 \item A \textbf{backdoor}, a stealthy program which listens on the network interface and waits for secret instructions from a remote attacker-controlled client program. This backdoor can have \textbf{Command and Control (C2)} capabilities, meaning that it can process commands sent by the attacker and received at the backdoor, executing a series of actions corresponding to the request received, and (when needed) answering the attacker with the result of the command.
 \end{itemize}
+
+%TODO maybe a conclusion for this section?
+
+
+%Maybe not the best title
+\chapter{Design of a malicious eBPF rootkit}
+In the previous chapter, we discussed the functionality of eBPF programs from a security standpoint, detailing which helpers and program types are particularly useful for developing malicious programs, and analysing some techniques (stack scanning, overwriting packets together with TCP retransmissions) which helps us circumvent some of the restrictions of eBPF and find new attack vectors.
+
+Taking as a basis these capabilities, this chapter is now dedicated to a comprehensive description of the advanced techniques and functionalities implemented in our eBPF rootkit, which show how these capabilities can lead to the creation of a real malicious application. As we mentioned during the project objectives, our goals for our rootkit include the following:
+\begin{itemize}
+\item Hijacking the execution of user programs while they are running, injecting libraries and executing malicious code, without impacting their normal execution.
+\item Featuring a command-and-control module powered by a network backdoor, which can be operated from a remote client. This backdoor should be controlled with stealth in mind, featuring similar mechanisms to those present in rootkits found in the wild.
+\item Tampering with user data at system calls, resulting in running malware-like programs and for other malicious purposes.
+\item Achieving stealth, hiding rootkit-related files from the user.
+\item Achieving rootkit persistence, the rootkit should run after a complete system reboot.
+\
+\end{itemize}
+%TODO maybe this is the place to mention that, on top of those, explaining some of the DEFCON techniques will be done too. Im particular interested on the one of hiding the kernel log message of bpf_probe_write_user and on ROP.
+
+We will be exploring each functionality individually, presenting the necessary background on each of them, and offering a final comprehensive view on how each of the systems work.
+
+\section{Library injection via .GOT hijacking}
+In this section, we will discuss how to hijack an user process running in the system so that it executes arbitrary code instructed from an eBPF program. For this, we will be injecting a library which will be executed by taking advantage of the architecture of an executable program (the .GOT section in ELFs) and using the stack scanning technique covered in section \ref{subsection:bpf_probe_write_apps}. This injection will be stealthy(it must not crash the process), and will be able to hijack privileged programs such as systemd, so that the code is executed as root.
+
+We will also research how to circumvent the protections which modern compilers have set in order to prevent similar attacks (when performed without eBPF).
+
+This technique has some advantages and disadvantages to the one described by Jeff Dileo at DEFCON 27, which we will briefly cover before presenting ours. A comparison between them will also be offered.
+
+\subsection{Introduction to attacks in the stack}
+
+
+
 
 
 

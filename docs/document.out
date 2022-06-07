@@ -51,6 +51,9 @@
 \BOOKMARK [2][-]{subsection.3.4.2}{Introduction\040to\040the\040TCP\040protocol}{section.3.4}% 51
 \BOOKMARK [2][-]{subsection.3.4.3}{Attacks\040and\040limitations\040of\040networking\040programs}{section.3.4}% 52
 \BOOKMARK [2][-]{subsection.3.4.4}{Conclusion}{section.3.4}% 53
-\BOOKMARK [0][-]{chapter.4}{Results}{}% 54
-\BOOKMARK [0][-]{chapter.5}{Conclusion\040and\040future\040work}{}% 55
-\BOOKMARK [0][-]{chapter.5}{Bibliography}{}% 56
+\BOOKMARK [0][-]{chapter.4}{Design\040of\040a\040malicious\040eBPF\040rootkit}{}% 54
+\BOOKMARK [1][-]{section.4.1}{Library\040injection\040via\040.GOT\040hijacking}{chapter.4}% 55
+\BOOKMARK [2][-]{subsection.4.1.1}{Introduction\040to\040attacks\040in\040the\040stack}{section.4.1}% 56
+\BOOKMARK [0][-]{chapter.5}{Results}{}% 57
+\BOOKMARK [0][-]{chapter.6}{Conclusion\040and\040future\040work}{}% 58
+\BOOKMARK [0][-]{chapter.6}{Bibliography}{}% 59
