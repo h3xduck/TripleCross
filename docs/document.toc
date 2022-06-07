@@ -99,11 +99,17 @@
 \defcounter {refsection}{0}\relax 
 \contentsline {section}{\numberline {3.4}Abusing networking programs}{46}{section.3.4}%
 \defcounter {refsection}{0}\relax 
-\contentsline {subsection}{\numberline {3.4.1}Attacks and limitations of networking programs}{47}{subsection.3.4.1}%
+\contentsline {subsection}{\numberline {3.4.1}An overview on the network layer}{47}{subsection.3.4.1}%
 \defcounter {refsection}{0}\relax 
-\contentsline {chapter}{\numberline {4}Results}{48}{chapter.4}%
+\contentsline {subsection}{\numberline {3.4.2}Introduction to the TCP protocol}{49}{subsection.3.4.2}%
 \defcounter {refsection}{0}\relax 
-\contentsline {chapter}{\numberline {5}Conclusion and future work}{49}{chapter.5}%
+\contentsline {subsection}{\numberline {3.4.3}Attacks and limitations of networking programs}{51}{subsection.3.4.3}%
 \defcounter {refsection}{0}\relax 
-\contentsline {chapter}{Bibliography}{50}{chapter.5}%
+\contentsline {subsection}{\numberline {3.4.4}Conclusion}{53}{subsection.3.4.4}%
+\defcounter {refsection}{0}\relax 
+\contentsline {chapter}{\numberline {4}Results}{55}{chapter.4}%
+\defcounter {refsection}{0}\relax 
+\contentsline {chapter}{\numberline {5}Conclusion and future work}{56}{chapter.5}%
+\defcounter {refsection}{0}\relax 
+\contentsline {chapter}{Bibliography}{57}{chapter.5}%
 \contentsfinish 

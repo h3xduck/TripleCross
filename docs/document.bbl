@@ -1557,6 +1557,40 @@
       \verb https://elixir.bootlin.com/linux/v5.11/source/fs/read_write.c#L476
       \endverb
     \endentry
+    \entry{evil_ebpf_p6974}{proceedings}{}
+      \name{author}{1}{}{%
+        {{hash=5142e68c748eb70cb619b21160eb7f72}{%
+           family={Dileo},
+           familyi={D\bibinitperiod},
+           given={Jeff},
+           giveni={J\bibinitperiod}}}%
+      }
+      \list{institution}{1}{%
+        {NCC Group}%
+      }
+      \list{organization}{1}{%
+        {DEFCON 27}%
+      }
+      \strng{namehash}{5142e68c748eb70cb619b21160eb7f72}
+      \strng{fullhash}{5142e68c748eb70cb619b21160eb7f72}
+      \strng{bibnamehash}{5142e68c748eb70cb619b21160eb7f72}
+      \strng{authorbibnamehash}{5142e68c748eb70cb619b21160eb7f72}
+      \strng{authornamehash}{5142e68c748eb70cb619b21160eb7f72}
+      \strng{authorfullhash}{5142e68c748eb70cb619b21160eb7f72}
+      \field{extraname}{3}
+      \field{sortinit}{1}
+      \field{sortinithash}{50c6687d7fc80f50136d75228e3c59ba}
+      \field{labelnamesource}{author}
+      \field{eventtitle}{Evil eBPF Practical Abuses of an In-Kernel Bytecode Runtime}
+      \field{pages}{69\bibrangedash 74}
+      \range{pages}{6}
+      \verb{urlraw}
+      \verb https://raw.githubusercontent.com/nccgroup/ebpf/master/talks/Evil_eBPF-DC27-v2.pdf
+      \endverb
+      \verb{url}
+      \verb https://raw.githubusercontent.com/nccgroup/ebpf/master/talks/Evil_eBPF-DC27-v2.pdf
+      \endverb
+    \endentry
     \entry{8664_params_abi_p1922}{manual}{}
       \name{author}{1}{}{%
         {{hash=871f02558cb7234c22cde24811cf53a7}{%
@@ -1590,6 +1624,65 @@
       \endverb
       \verb{url}
       \verb https://raw.githubusercontent.com/wiki/hjl-tools/x86-psABI/x86-64-psABI-1.0.pdf
+      \endverb
+    \endentry
+    \entry{network_layers}{online}{}
+      \name{author}{1}{}{%
+        {{hash=ed79ecb3ff4a83522b186b5e3fa37b0d}{%
+           family={Alienor},
+           familyi={A\bibinitperiod}}}%
+      }
+      \strng{namehash}{ed79ecb3ff4a83522b186b5e3fa37b0d}
+      \strng{fullhash}{ed79ecb3ff4a83522b186b5e3fa37b0d}
+      \strng{bibnamehash}{ed79ecb3ff4a83522b186b5e3fa37b0d}
+      \strng{authorbibnamehash}{ed79ecb3ff4a83522b186b5e3fa37b0d}
+      \strng{authornamehash}{ed79ecb3ff4a83522b186b5e3fa37b0d}
+      \strng{authorfullhash}{ed79ecb3ff4a83522b186b5e3fa37b0d}
+      \field{sortinit}{1}
+      \field{sortinithash}{50c6687d7fc80f50136d75228e3c59ba}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{day}{28}
+      \field{month}{11}
+      \field{title}{The Network Layers Explained [with examples]}
+      \field{year}{2018}
+      \field{dateera}{ce}
+      \verb{urlraw}
+      \verb https://www.plixer.com/blog/network-layers-explained/
+      \endverb
+      \verb{url}
+      \verb https://www.plixer.com/blog/network-layers-explained/
+      \endverb
+    \endentry
+    \entry{tcp_reliable}{online}{}
+      \list{organization}{1}{%
+        {IBM}%
+      }
+      \field{sortinit}{1}
+      \field{sortinithash}{50c6687d7fc80f50136d75228e3c59ba}
+      \field{labeltitlesource}{title}
+      \field{day}{19}
+      \field{month}{4}
+      \field{title}{Transmission Control Protocol}
+      \field{year}{2022}
+      \field{dateera}{ce}
+      \verb{urlraw}
+      \verb https://www.ibm.com/docs/en/aix/7.2?topic=protocols-transmission-control-protocol
+      \endverb
+      \verb{url}
+      \verb https://www.ibm.com/docs/en/aix/7.2?topic=protocols-transmission-control-protocol
+      \endverb
+    \endentry
+    \entry{tcp_handshake}{online}{}
+      \field{sortinit}{1}
+      \field{sortinithash}{50c6687d7fc80f50136d75228e3c59ba}
+      \field{labeltitlesource}{title}
+      \field{title}{Three-Way Handshake}
+      \verb{urlraw}
+      \verb https://www.sciencedirect.com/topics/computer-science/three-way-handshake
+      \endverb
+      \verb{url}
+      \verb https://www.sciencedirect.com/topics/computer-science/three-way-handshake
       \endverb
     \endentry
   \enddatalist

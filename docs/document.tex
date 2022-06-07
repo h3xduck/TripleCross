@@ -311,7 +311,7 @@ hmargin=3cm
 \pagenumbering{arabic}
 
 \chapter{Introduction}
-\section{Motivation}
+\section{Motivation} \label{section:motivation}
 %M-> SA bit long, but it summarizes and presents the ideas and background needed to understand the topic in order:
 % Main idea: Malware keeps evolving -> 
 % -> Relevance of innovating and researching on the new techniques ->
@@ -409,7 +409,7 @@ The rootkit will work in a fresh-install of a Linux system with the following ch
 % I WILL NOT INCLUDE A ROOTKIT BACKGROUND, considering that a deep study of that is not fully relevant for us. I explained what it is, its two main types (should we include bootkits, maybe?) and its relation with eBPF in the introduction, since it is needed to introduce the overall context. Should we do otherwise?
 This chapter is dedicated to an study of the eBPF technology. Firstly, we will analyse its origins, understanding what it is and how it works, and discuss the reasons why it is a necessary component of the Linux kernel today. Afterwards, we will cover the main features of eBPF in detail. Finally, an study of the existing alternatives for developing eBPF applications will be also included.
 
-Although during our discussion of the offensive capabilities of eBPF in section\ref{section:analysis_offensive_capabilities} we will use a library that will provide us with a layer of abstraction over the underlying operations, this background is needed to understand how eBPF is embedded in the kernel and which capabilities and limits we can expect to achieve with it.
+Although during our discussion of the offensive capabilities of eBPF in section\ref{section:TODO} we will use a library that will provide us with a layer of abstraction over the underlying operations, this background is needed to understand how eBPF is embedded in the kernel and which capabilities and limits we can expect to achieve with it.
 
 \section{eBPF history - Classic BPF}
 % Is it ok to have sections / chapters without individual intros?
@@ -1008,7 +1008,7 @@ Note that the BPF skeleton also offers further granularity at the time of dealin
 
 
 
-\chapter{Analysis of offensive capabilities}
+\chapter{Analysis of offensive capabilities} \label{chapter:analysis_offensive_capabilities}
 In the previous chapter, we detailed which functionalities eBPF offers and studied its underlying architecture. As with every technology, a prior deep understanding is fundamental for discussing its security implications. 
 
 Therefore, given the previous background, this chapter is dedicated to an analysis in detail of the security implications of a malicious use of eBPF. For this, we will firstly explore the security features incorporated in the eBPF system. Then, we will identify the fundamental pillars onto which malware can build their functionality. As we mentioned during the project goals, these main topics of research will be the following:
@@ -1492,7 +1492,7 @@ Although we will not be able to modify kernel memory or the instructions of a pr
 ssize_t vfs_read(struct file *file, char __user *buf, size_t count, loff_t *pos)
 \end{lstlisting}
 Then, if we attach a kprobe to vfs\_read, we would be able to modify the value of the buffer.
-\item Modify process memory by taking function parameters as a reference and scanning the stack. This technique, first introduced in section \ref{subsection:out_read_bounds} when we mentioned that tracing programs can read any user memory location with the bpf\_probe\_read\_user() helper, consists of:
+\item Modify process memory by taking function parameters as a reference and scanning the stack. This technique, first introduced in section \ref{subsection:out_read_bounds} when we mentioned that tracing programs can read any user memory location with the bpf\_probe\_read\_user() helper, and which was publicly first used by Jeff Dileo at his talk in DEFCON 27\cite{evil_ebpf_p6974}, consists of:
 \begin{enumerate}
 \item Take an user-passed parameter received on a tracing program. The parameter must be a pointer to a memory location (such as a pointer to a buffer), so that we can use that memory address as the reference point in user space. According to the x86\_64 documentation, this parameter will be stored in the stack\cite{8664_params_abi_p1922}, so we will receive an stack address.
 \item Locate the target data which we aim to write. There are two main methods for this:
@@ -1544,7 +1544,7 @@ Therefore, if on the conclusion of section \ref{subsection:tracing_attacks_concl
 Moreover, in the next sections we will discuss how we can create advanced attacks on the basis of the background and techniques previously discussed. We will research further into which sections of a process memory are writeable and whether they can lead to new attack vectors.
 
 
-\section{Abusing networking programs}
+\section{Abusing networking programs}\label{section:abusing_networking}
 The final main piece of a malicious eBPF program comes from taking advantage of the networking capabilities of TC and XDP programs. As we mentioned during sections \ref{subsection:xdp} and \ref{subsection:tc}, these type of programs have access to network traffic:
 \begin{itemize}
 \item Traffic Control programs can be placed either on egress or ingress traffic, and receive a struct \textit{sk\_buff}, containing the packet bytes and meta data that helps operating on it.
@@ -1553,30 +1553,138 @@ The final main piece of a malicious eBPF program comes from taking advantage of 
 
 Networking eBPF programs not only have read access to the network packets, but also write access:
 \begin{itemize}
-\item XDP programs can directly modify the raw packet via memcpy() operations. They can also increment or reduce the size of the packet by any of its ends (adding bytes before the head or after the packet tail). This is done via the multiple helpers previously presented on table \ref{table:xdp_helpers}.
+\item XDP programs can directly modify the raw packet via memcpy() operations. They can also increment or reduce the size of the packet at any of its ends (adding bytes before the head or after the packet tail). This is done via the multiple helpers previously presented on table \ref{table:xdp_helpers}.
 \item TC programs can also modify the packet via the helpers presented on table \ref{table:tc_helpers}. The packet can be expanded or reduced via these eBPF helpers too.
 \end{itemize} 
 
 Apart from write access to the packet, the other critical feature of networking programs is their ability to drop packets. As we presented in tables \ref{table:xdp_actions_av} and \ref{table:tc_actions}, this can be achieved by returning specific values.
 
+\subsection{An overview on the network layer}
+In order to tackle multiple techniques we will be using in networking programs, we will offer an overview on the relevant aspects of the Ethernet, IP and TCP protocols, on which we will focus during the later development of our rootkit.
+
+Firstly, we will describe the data structure we will be dealing with in networking programs. This will be Ethernet frames containing TCP/IP packets. Figure \ref{fig:frame} shows the frame in its completeness:
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=14cm]{frame.jpg}
+	\caption{Ethernet frame with TCP/IP packet.}
+	\label{fig:frame}
+\end{figure}
+
+As we can observe, we can distinguish five different network layers in the frame. This division is made according to the OSI model\cite{network_layers}:
+\begin{itemize}
+\item Layer 1 corresponds to the physical layer, and it is processed by the NIC hardware, even before it reaches the XDP module (see figure \ref{fig:xdp_diag}). Therefore, this layer is discarded and completely invisible to the kernel. Note that it does not only include a header, but also a trailer (a Frame Check Sequence, a redundancy check included to check frame integrity).
+\item Layer 2 is the data layer, it is in charge of transporting the frame via physical media, in our case an Ethernet connection. Most relevant fields are the MAC destination and source, used for performing physical addressing.
+\item Layer 3 is the network layer, in charge of packet forwarding and routing. In our case, packets will be using the IP protocol. Most relevant fields are the source and destination IP, used to indicate the host that sent the packet and who is the receiver.
+\item Layer 4 is the transport layer, in charge of providing end-to-end connection services to applications in a host. We will be focusing on TCP during our research. Relevant fields include the source and destination port, which indicate the ports involved in the communication on which the application on each host are listening and sending packets.
+\item The last layer is the payload of the TCP packet, which contains, according to the OSI model, all layers belong to application data.
+\end{itemize}
+
+
+\subsection{Introduction to the TCP protocol} \label{subsection:tcp}
+We will now focus our view on the transport layer, specifically on the TCP protocol, since it will be a major concern at the time of designing the network capabilities of our rootkit.
+
+Firstly, since TCP aims to offer a reliable and ordered packet transmission\cite{tcp_reliable}, it includes sequence numbers (see table \ref{fig:frame}) which mark the order in which they are transmitted. However, since the physical medium may corrupt or lose packets during the transmission, TCP must incorporate mechanisms for ensuring the order and delivery of all packets:
+\begin{itemize}
+\item Mechanism for opening and establishing a reliable connection between two parties.
+\item Mechanism for ensuring that packets are retransmitted in case of an error during the connection.
+\end{itemize}
+
+With respect to the establishment of a reliable connection, this is achieved via a 3-way handshake, in which certain TCP flags will be set in a series of interchanged packets (see in figure \ref{fig:frame} the field TCP flags). Most relevant TCP flags are described in table \ref{table:tcp_flags}.
+
+\begin{table}[H]
+\begin{tabular}{|>{\centering\arraybackslash}p{4cm}|>{\centering\arraybackslash}p{10cm}|}
+\hline
+Flag & Purpose\\
+\hline
+\hline
+ACK & Acknowledges that a packet has been successfully received. In the acknowledgment number (see figure \ref{fig:frame}), it is stored the sequence number of the packet being acknowledged + 1. \\
+\hline
+SYN & Used during the 3-way handshake, indicates request for establishing a connection.\\
+\hline
+FIN & Used to request a connection termination.\\
+\hline
+RST & Abruptly terminates the connection, usually sent when a host receives an unexpected or unrecognized packet.\\
+\hline
+\end{tabular}
+\caption{Relevant TCP flags and their purpose.}
+\label{table:tcp_flags}
+\end{table}
+
+Taking the above into account, figure \ref{fig:tcp_conn} shows a depiction of the 3-way handshake\cite{tcp_handshake}:
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=12cm]{tcp_conn.jpg}
+	\caption{TCP 3-way handshake.}
+	\label{fig:tcp_conn}
+\end{figure}
+
+As we can observe in the figure, the hosts interchange a sequence of <SYN>, <SYN+ACK>, <ACK> packets, after which the communication starts. During this communication, the sender transmits packets with data (and no flags set), to which it expects an <ACK> packet acknowledging having received it.
+
+With respect to maintaining the integrity of the connection once it starts, TCP works using timers, as it is illustrated in figure \ref{fig:tcp_retransmission}:
+\begin{enumerate}
+\item A data packet with sequence number X is sent. The timer starts.
+\item The destination host receives the packet and returns an ACK packet with acknowledgment number X+1.
+\item The sender receives the ACK packet and stops the timer. If, for any reason, the ACK packet is not received before the timer ends, then the same packet is retransmitted.
+\end{enumerate}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=12cm]{tcp_retransmission.jpg}
+	\caption{TCP packet retransmission on timeout.}
+	\label{fig:tcp_retransmission}
+\end{figure}
+
+
 
 \subsection{Attacks and limitations of networking programs}
-Multiple restrictions exist on network eBPF programs:
+Based on the previous background, we will now proceed to explore which limitations exist on which actions a network eBPF program can perform:
 \begin{itemize}
-\item Read and write access to the packet is heavily controlled by the eBPF verifier. It is not possible to read or write data out of bounds. Extreme care must also be taken before attempting to read any data inside the packet, since the verifier first requires making lots of checks beforehand. For any access to take place, the program must first classify the packet according to the network protocol it belongs, and later check that every header of every network layer is well defined (e.g: Ethernet, IP and TCP). Only after that, the headers can be modified. 
+\item Read and write access to the packet is heavily controlled by the eBPF verifier. It is not possible to read or write data out of bounds. Extreme care must also be taken before attempting to read any data inside the packet, since the verifier first requires making lots of checks beforehand. For any access to take place, the program must first classify the packet according to the network protocol it belongs, and later check that every header of every layer is well defined (e.g: Ethernet, IP and TCP). Only after that, the headers can be modified. 
 
-If the program also wants to modify the packet payload, then it must be checked to be between the bounds of the packet and well defined according to the packet headers. Also, after using any of the helpers that enlarge or reduce the size of the packet, all check operations must be repeated again before any subsequent operation.
+If the program also wants to modify the packet payload, then it must be checked to be between the bounds of the packet and well defined according to the packet headers(using fields IHL, packet length and data offset, in figure \ref{fig:frame}). Also, after using any of the helpers that enlarge or reduce the size of the packet, all check operations must be repeated again before any subsequent operation.
 
 Finally, note that after any modification in the packet, some network protocols (such as IP and TCP) require to recalculate their checksum fields. 
 
 \item XDP and TC programs are not able to create packets, they can only operate over existing traffic.
+
+\item If an XDP program modifies an incoming packet, the kernel will not know about the original data, but if an egress TC program modifies a packet being sent, the kernel will be able to notice the modification.
 \end{itemize}
 
+Having the previous restrictions in mind, we can find multiple possible malicious uses of an XDP/TC program:
+\begin{itemize}
+\item \textbf{Spy all network connections} in the system. An XDP or TC ingress program can read any packet from any interface, therefore achieving a comprehensive view on which are the running communications and opened ports (even if protocols with encryption are being used) and gathering transmitted data (if the connection is also in plaintext).
+\item \textbf{Hide arbitrary traffic} from the host. If an XDP program drops a packet, the kernel will not be able to know any packet was received in the first place. This can be used to hide malicious incoming traffic. However, as we will mention in section{TODO}, malicious traffic may still be detected by other external devices, such as network-wide firewalls.
+\item \textbf{Modify incoming traffic} with XDP programs. Every packet can be modified (as we mentioned at the beginning of section \ref{section:abusing_networking}), and any modification will be unnoticeable to the kernel, meaning that we will have complete, invisible control over the packets received by the kernel.
+\item \textbf{Modify outgoing traffic} with TC egress programs. Since every packet can be modified at will, we will therefore have complete control over any packet sent by the host. This can be used to enable a malicious program to communicate over the network and exfiltrate data, since even if we cannot create a new connection from eBPF, we can still modify existing packets, writing any payload and headers on it (thus being able to, for instance, change the destination of the packet).
 
+Notice, however, that these modifications are not transparent to the kernel as with XDP, and thus an internal firewall may detect our malicious traffic.
+\end{itemize}
 
-%TODO talk about TCP connection and its repeating packets.
-% Talk about attacks.
-% Conclusion of the section.
+Although we mention the possibility of modifying outgoing traffic as an alternative to the impossibility of sending new packets from eBPF, there exists a major disadvantage by doing this, since the original packet of the application will be lost, and we will thus be disrupting the normal functioning of the system (which in a rootkit is unacceptable, as we mentioned in section \ref{section:motivation}, stealth is a priority).
+
+There exists, however, a simple way of duplicating a packet so that the original packet is not lost but we can still send our overwritten packet. This technique, first presented by Guillaume Fournier and Sylvain Afchainthe in their DEFCON talk, consists of taking advantage of TCP retransmissions we described on section \ref{subsection:tcp}. Figure \ref{fig:tcp_exfiltrate_retrans} shows this process:
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=15cm]{tcp_exfiltrate_retrans.jpg}
+	\caption{Technique to duplicate a packet for exfiltrating data.}
+	\label{fig:tcp_exfiltrate_retrans}
+\end{figure}
+
+In the figure, we can observe a host infected by a malicious TC egress program. An user space application at some point needs to send a packet (in this case a simple ping), and the TC program will overwrite it (in this case, it writes a password which it has been able to find, and substitutes the destination IP address with that of a listening attacker.
+After the timer runs out, the TCP protocol itself will retransmit the same packet as previously and thus the original data is delivered too.
+
+Using this technique, we will be able to send our own packets every time an application sends outgoing traffic. And, unless the network is being monitored, this attack will go unnoticed, provided that the delay of the original packet is similar to that when a single packet lost.
+
+\subsection{Conclusion}
+As a summary, networking eBPF programs offer complete control over incoming and outgoing traffic. If tracing programs and memory corruption techniques served to disrupt the trust in the execution of both any user or kernel program, then a malicious networking program has the potential to do the same with any communication, since any packet is under the control of eBPF.
+
+Ultimately, the capabilities discussed in this section unlock complete freedom for the design of malicious programs. As we will explain in the next chapter, one particularly relevant type of application can be built:
+\begin{itemize}
+\item A \textbf{backdoor}, a stealthy program which listens on the network interface and waits for secret instructions from a remote attacker-controlled client program. This backdoor can have \textbf{Command and Control (C2)} capabilities, meaning that it can process commands sent by the attacker and received at the backdoor, executing a series of actions corresponding to the request received, and (when needed) answering the attacker with the result of the command.
+\end{itemize}
+
 
 
 

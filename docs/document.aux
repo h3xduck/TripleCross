@@ -29,6 +29,7 @@
 \@writefile{lof}{\defcounter {refsection}{0}\relax }\@writefile{lof}{\addvspace {10\p@ }}
 \@writefile{lot}{\defcounter {refsection}{0}\relax }\@writefile{lot}{\addvspace {10\p@ }}
 \@writefile{toc}{\defcounter {refsection}{0}\relax }\@writefile{toc}{\contentsline {section}{\numberline {1.1}Motivation}{1}{section.1.1}\protected@file@percent }
+\newlabel{section:motivation}{{1.1}{1}{Motivation}{section.1.1}{}}
 \abx@aux@cite{rootkit_ptsecurity}
 \abx@aux@segm{0}{0}{rootkit_ptsecurity}
 \abx@aux@cite{ebpf_linux318}
@@ -258,6 +259,7 @@
 \@writefile{toc}{\defcounter {refsection}{0}\relax }\@writefile{toc}{\contentsline {chapter}{\numberline {3}Analysis of offensive capabilities}{27}{chapter.3}\protected@file@percent }
 \@writefile{lof}{\defcounter {refsection}{0}\relax }\@writefile{lof}{\addvspace {10\p@ }}
 \@writefile{lot}{\defcounter {refsection}{0}\relax }\@writefile{lot}{\addvspace {10\p@ }}
+\newlabel{chapter:analysis_offensive_capabilities}{{3}{27}{Analysis of offensive capabilities}{chapter.3}{}}
 \@writefile{toc}{\defcounter {refsection}{0}\relax }\@writefile{toc}{\contentsline {section}{\numberline {3.1}Security features in eBPF}{27}{section.3.1}\protected@file@percent }
 \abx@aux@cite{ubuntu_caps}
 \abx@aux@segm{0}{0}{ubuntu_caps}
@@ -368,6 +370,8 @@
 \abx@aux@segm{0}{0}{code_vfs_read}
 \abx@aux@cite{code_vfs_read}
 \abx@aux@segm{0}{0}{code_vfs_read}
+\abx@aux@cite{evil_ebpf_p6974}
+\abx@aux@segm{0}{0}{evil_ebpf_p6974}
 \abx@aux@cite{8664_params_abi_p1922}
 \abx@aux@segm{0}{0}{8664_params_abi_p1922}
 \newlabel{code:vfs_read}{{3.9}{44}{Definition of kernel function vfs\_read. \cite {code_vfs_read}}{lstlisting.3.9}{}}
@@ -378,16 +382,37 @@
 \@writefile{lol}{\defcounter {refsection}{0}\relax }\@writefile{lol}{\contentsline {lstlisting}{\numberline {3.10}Sample program being executed on figure \ref  {fig:stack_scan_write_tech}.}{45}{lstlisting.3.10}\protected@file@percent }
 \@writefile{toc}{\defcounter {refsection}{0}\relax }\@writefile{toc}{\contentsline {subsection}{\numberline {3.3.5}Conclusion}{46}{subsection.3.3.5}\protected@file@percent }
 \@writefile{toc}{\defcounter {refsection}{0}\relax }\@writefile{toc}{\contentsline {section}{\numberline {3.4}Abusing networking programs}{46}{section.3.4}\protected@file@percent }
-\@writefile{toc}{\defcounter {refsection}{0}\relax }\@writefile{toc}{\contentsline {subsection}{\numberline {3.4.1}Attacks and limitations of networking programs}{47}{subsection.3.4.1}\protected@file@percent }
-\@writefile{toc}{\defcounter {refsection}{0}\relax }\@writefile{toc}{\contentsline {chapter}{\numberline {4}Results}{48}{chapter.4}\protected@file@percent }
+\newlabel{section:abusing_networking}{{3.4}{46}{Abusing networking programs}{section.3.4}{}}
+\@writefile{toc}{\defcounter {refsection}{0}\relax }\@writefile{toc}{\contentsline {subsection}{\numberline {3.4.1}An overview on the network layer}{47}{subsection.3.4.1}\protected@file@percent }
+\abx@aux@cite{network_layers}
+\abx@aux@segm{0}{0}{network_layers}
+\@writefile{lof}{\defcounter {refsection}{0}\relax }\@writefile{lof}{\contentsline {figure}{\numberline {3.10}{\ignorespaces Ethernet frame with TCP/IP packet.\relax }}{48}{figure.caption.44}\protected@file@percent }
+\newlabel{fig:frame}{{3.10}{48}{Ethernet frame with TCP/IP packet.\relax }{figure.caption.44}{}}
+\abx@aux@cite{tcp_reliable}
+\abx@aux@segm{0}{0}{tcp_reliable}
+\abx@aux@cite{tcp_handshake}
+\abx@aux@segm{0}{0}{tcp_handshake}
+\@writefile{toc}{\defcounter {refsection}{0}\relax }\@writefile{toc}{\contentsline {subsection}{\numberline {3.4.2}Introduction to the TCP protocol}{49}{subsection.3.4.2}\protected@file@percent }
+\newlabel{subsection:tcp}{{3.4.2}{49}{Introduction to the TCP protocol}{subsection.3.4.2}{}}
+\@writefile{lot}{\defcounter {refsection}{0}\relax }\@writefile{lot}{\contentsline {table}{\numberline {3.6}{\ignorespaces Relevant TCP flags and their purpose.\relax }}{49}{table.caption.45}\protected@file@percent }
+\newlabel{table:tcp_flags}{{3.6}{49}{Relevant TCP flags and their purpose.\relax }{table.caption.45}{}}
+\@writefile{lof}{\defcounter {refsection}{0}\relax }\@writefile{lof}{\contentsline {figure}{\numberline {3.11}{\ignorespaces TCP 3-way handshake.\relax }}{50}{figure.caption.46}\protected@file@percent }
+\newlabel{fig:tcp_conn}{{3.11}{50}{TCP 3-way handshake.\relax }{figure.caption.46}{}}
+\@writefile{lof}{\defcounter {refsection}{0}\relax }\@writefile{lof}{\contentsline {figure}{\numberline {3.12}{\ignorespaces TCP packet retransmission on timeout.\relax }}{51}{figure.caption.47}\protected@file@percent }
+\newlabel{fig:tcp_retransmission}{{3.12}{51}{TCP packet retransmission on timeout.\relax }{figure.caption.47}{}}
+\@writefile{toc}{\defcounter {refsection}{0}\relax }\@writefile{toc}{\contentsline {subsection}{\numberline {3.4.3}Attacks and limitations of networking programs}{51}{subsection.3.4.3}\protected@file@percent }
+\@writefile{lof}{\defcounter {refsection}{0}\relax }\@writefile{lof}{\contentsline {figure}{\numberline {3.13}{\ignorespaces Technique to duplicate a packet for exfiltrating data.\relax }}{53}{figure.caption.48}\protected@file@percent }
+\newlabel{fig:tcp_exfiltrate_retrans}{{3.13}{53}{Technique to duplicate a packet for exfiltrating data.\relax }{figure.caption.48}{}}
+\@writefile{toc}{\defcounter {refsection}{0}\relax }\@writefile{toc}{\contentsline {subsection}{\numberline {3.4.4}Conclusion}{53}{subsection.3.4.4}\protected@file@percent }
+\@writefile{toc}{\defcounter {refsection}{0}\relax }\@writefile{toc}{\contentsline {chapter}{\numberline {4}Results}{55}{chapter.4}\protected@file@percent }
 \@writefile{lof}{\defcounter {refsection}{0}\relax }\@writefile{lof}{\addvspace {10\p@ }}
 \@writefile{lot}{\defcounter {refsection}{0}\relax }\@writefile{lot}{\addvspace {10\p@ }}
-\@writefile{toc}{\defcounter {refsection}{0}\relax }\@writefile{toc}{\contentsline {chapter}{\numberline {5}Conclusion and future work}{49}{chapter.5}\protected@file@percent }
+\@writefile{toc}{\defcounter {refsection}{0}\relax }\@writefile{toc}{\contentsline {chapter}{\numberline {5}Conclusion and future work}{56}{chapter.5}\protected@file@percent }
 \@writefile{lof}{\defcounter {refsection}{0}\relax }\@writefile{lof}{\addvspace {10\p@ }}
 \@writefile{lot}{\defcounter {refsection}{0}\relax }\@writefile{lot}{\addvspace {10\p@ }}
-\@writefile{toc}{\defcounter {refsection}{0}\relax }\@writefile{toc}{\contentsline {chapter}{Bibliography}{50}{chapter.5}\protected@file@percent }
-\newlabel{annex:bpftool_flags_kernel}{{5}{}{Appendix A - Bpftool commands}{chapter*.45}{}}
-\abx@aux@read@bbl@mdfivesum{070A0F15FB780499B250A471B22B0670}
+\@writefile{toc}{\defcounter {refsection}{0}\relax }\@writefile{toc}{\contentsline {chapter}{Bibliography}{57}{chapter.5}\protected@file@percent }
+\newlabel{annex:bpftool_flags_kernel}{{5}{}{Appendix A - Bpftool commands}{chapter*.50}{}}
+\abx@aux@read@bbl@mdfivesum{77A5019A60516627679C213125A49687}
 \abx@aux@refcontextdefaultsdone
 \abx@aux@defaultrefcontext{0}{ransomware_pwc}{none/global//global/global}
 \abx@aux@defaultrefcontext{0}{rootkit_ptsecurity}{none/global//global/global}
@@ -461,6 +486,10 @@
 \abx@aux@defaultrefcontext{0}{8664_params_abi_p18}{none/global//global/global}
 \abx@aux@defaultrefcontext{0}{write_helper_non_fault}{none/global//global/global}
 \abx@aux@defaultrefcontext{0}{code_vfs_read}{none/global//global/global}
+\abx@aux@defaultrefcontext{0}{evil_ebpf_p6974}{none/global//global/global}
 \abx@aux@defaultrefcontext{0}{8664_params_abi_p1922}{none/global//global/global}
+\abx@aux@defaultrefcontext{0}{network_layers}{none/global//global/global}
+\abx@aux@defaultrefcontext{0}{tcp_reliable}{none/global//global/global}
+\abx@aux@defaultrefcontext{0}{tcp_handshake}{none/global//global/global}
 \ttl@finishall
-\gdef \@abspage@last{73}
+\gdef \@abspage@last{81}

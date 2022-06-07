@@ -2441,7 +2441,11 @@
     <bcf:citekey order="104">write_helper_non_fault</bcf:citekey>
     <bcf:citekey order="105">code_vfs_read</bcf:citekey>
     <bcf:citekey order="106">code_vfs_read</bcf:citekey>
-    <bcf:citekey order="107">8664_params_abi_p1922</bcf:citekey>
+    <bcf:citekey order="107">evil_ebpf_p6974</bcf:citekey>
+    <bcf:citekey order="108">8664_params_abi_p1922</bcf:citekey>
+    <bcf:citekey order="109">network_layers</bcf:citekey>
+    <bcf:citekey order="110">tcp_reliable</bcf:citekey>
+    <bcf:citekey order="111">tcp_handshake</bcf:citekey>
   </bcf:section>
   <!-- SORTING TEMPLATES -->
   <bcf:sortingtemplate name="none">
