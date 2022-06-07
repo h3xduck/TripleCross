@@ -93,29 +93,29 @@
 \defcounter {refsection}{0}\relax 
 \contentsline {subsection}{\numberline {3.3.3}The process stack}{40}{subsection.3.3.3}%
 \defcounter {refsection}{0}\relax 
-\contentsline {subsection}{\numberline {3.3.4}Attacks and limitations of bpf\_probe\_write\_user()}{43}{subsection.3.3.4}%
+\contentsline {subsection}{\numberline {3.3.4}Attacks and limitations of bpf\_probe\_write\_user()}{44}{subsection.3.3.4}%
 \defcounter {refsection}{0}\relax 
-\contentsline {subsection}{\numberline {3.3.5}Conclusion}{46}{subsection.3.3.5}%
+\contentsline {subsection}{\numberline {3.3.5}Conclusion}{47}{subsection.3.3.5}%
 \defcounter {refsection}{0}\relax 
-\contentsline {section}{\numberline {3.4}Abusing networking programs}{46}{section.3.4}%
+\contentsline {section}{\numberline {3.4}Abusing networking programs}{47}{section.3.4}%
 \defcounter {refsection}{0}\relax 
-\contentsline {subsection}{\numberline {3.4.1}An overview on the network layer}{47}{subsection.3.4.1}%
+\contentsline {subsection}{\numberline {3.4.1}An overview on the network layer}{48}{subsection.3.4.1}%
 \defcounter {refsection}{0}\relax 
 \contentsline {subsection}{\numberline {3.4.2}Introduction to the TCP protocol}{49}{subsection.3.4.2}%
 \defcounter {refsection}{0}\relax 
 \contentsline {subsection}{\numberline {3.4.3}Attacks and limitations of networking programs}{51}{subsection.3.4.3}%
 \defcounter {refsection}{0}\relax 
-\contentsline {subsection}{\numberline {3.4.4}Conclusion}{53}{subsection.3.4.4}%
+\contentsline {subsection}{\numberline {3.4.4}Conclusion}{54}{subsection.3.4.4}%
 \defcounter {refsection}{0}\relax 
 \contentsline {chapter}{\numberline {4}Design of a malicious eBPF rootkit}{55}{chapter.4}%
 \defcounter {refsection}{0}\relax 
 \contentsline {section}{\numberline {4.1}Library injection via .GOT hijacking}{55}{section.4.1}%
 \defcounter {refsection}{0}\relax 
-\contentsline {subsection}{\numberline {4.1.1}Introduction to attacks in the stack}{56}{subsection.4.1.1}%
+\contentsline {subsection}{\numberline {4.1.1}Attacks at the stack: buffer overflow}{56}{subsection.4.1.1}%
 \defcounter {refsection}{0}\relax 
-\contentsline {chapter}{\numberline {5}Results}{57}{chapter.5}%
+\contentsline {chapter}{\numberline {5}Results}{60}{chapter.5}%
 \defcounter {refsection}{0}\relax 
-\contentsline {chapter}{\numberline {6}Conclusion and future work}{58}{chapter.6}%
+\contentsline {chapter}{\numberline {6}Conclusion and future work}{61}{chapter.6}%
 \defcounter {refsection}{0}\relax 
-\contentsline {chapter}{Bibliography}{59}{chapter.6}%
+\contentsline {chapter}{Bibliography}{62}{chapter.6}%
 \contentsfinish 

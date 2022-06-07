@@ -385,6 +385,7 @@ The rootkit will work in a fresh-install of a Linux system with the following ch
 
 \subsection{Social and economic environment}
 %M-> Mentioned talking about community outreach and its role under pentesting
+%TODO Talk about the difference between having always on BPF and always on kernel modules, BPF is consider "safe" in production while it's almost as dangerous (I think this might fit here)
 
 %TODO - Leaving this for the end
 
@@ -1385,13 +1386,14 @@ Figure \ref{fig:mem_proc_arch} describes how virtual memory is distributed withi
 \item Lower and upper memory addresses are reserved for the kernel.
 \item A section where shared libraries code is stored.
 \item A .text section, which contains the code of the program being run.
-\item A .bss section, which contains global static variables.
+\item A .data section, containing initialized static and global variables.
+\item A .bss section, which contains global and static variables which are unitialized or initialized to zero.
 \item The heap, a section which grows from lower to higher memory addresses, and which contains memory dynamically allocated by the program.
 \item The stack, a section which grows from higher to lower memory addresses, towards the heap. It is a Last In First Out (LIFO) structure used to store local variables, function parameters and return addresses.
 \item Right at the start of the stack we can find the arguments with which the programs has been executed.
 \end{itemize}
 
-\subsection{The process stack}
+\subsection{The process stack} \label{subsection:stack}
 Between all the sections we identified in a process virtual memory, the stack will be particularly relevant during our research. We will therefore study it now in detail. 
 
 Firstly, we will present how the stack is structured, and which operations can be executed on it. Figure \ref{fig:stack_pres} presents a stack during the execution of a program. Table \ref{table:systemv_abi_other} explains the purpose of the most relevant registers related to the stack and program execution:
@@ -1708,13 +1710,76 @@ Taking as a basis these capabilities, this chapter is now dedicated to a compreh
 We will be exploring each functionality individually, presenting the necessary background on each of them, and offering a final comprehensive view on how each of the systems work.
 
 \section{Library injection via .GOT hijacking}
-In this section, we will discuss how to hijack an user process running in the system so that it executes arbitrary code instructed from an eBPF program. For this, we will be injecting a library which will be executed by taking advantage of the architecture of an executable program (the .GOT section in ELFs) and using the stack scanning technique covered in section \ref{subsection:bpf_probe_write_apps}. This injection will be stealthy(it must not crash the process), and will be able to hijack privileged programs such as systemd, so that the code is executed as root.
+In this section, we will discuss how to hijack an user process running in the system so that it executes arbitrary code instructed from an eBPF program. For this, we will be injecting a library which will be executed by taking advantage of the architecture of an executable program (the .GOT section in ELFs) and using the stack scanning technique covered in section \ref{subsection:bpf_probe_write_apps}. This injection will be stealthy (it must not crash the process), and will be able to hijack privileged programs such as systemd, so that the code is executed as root.
 
 We will also research how to circumvent the protections which modern compilers have set in order to prevent similar attacks (when performed without eBPF).
 
-This technique has some advantages and disadvantages to the one described by Jeff Dileo at DEFCON 27, which we will briefly cover before presenting ours. A comparison between them will also be offered.
+This technique has some advantages and disadvantages to the one described by Jeff Dileo at DEFCON 27\cite{evil_ebpf_p6974}, which we will briefly cover before presenting ours. A comparison between them will also be offered.
 
-\subsection{Introduction to attacks in the stack}
+\subsection{Attacks at the stack: buffer overflow}
+In section \ref{subsection:stack}, we studied how the stack works and which is the process that a program follows in order to call a function. As we saw in figure \ref{fig:stack}, the processor pushes into the stack several data which is used to restore the context of the original function once the called function exits. These pushed arguments included:
+\begin{itemize}
+\item The arguments with which the function is being called (if they need to be passed in the stack, such as byte arrays).
+\item The original value of the rip register (ret), to restore the execution on the original function.
+\item The original value of the rbp register (sfp), to restore the frame pointer of the original stack frame.
+\end{itemize}
+
+Although this process is simple enough, it opens the possibility for an attacker to easily hijack the flow of execution if it can modify the value of ret, as it is shown in figure \ref{fig:stack_ret_hij_simple}:
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=15cm]{stack_ret_hij_simple.jpg}
+	\caption{Execution hijack overwriting saved rip value.}
+	\label{fig:stack_ret_hij_simple}
+\end{figure}
+
+In the figure, we can observe how, during the execution of the called function, the attacker overwrites the value of ret in the stack. Once the function exists, as we explained in section \ref{subsection:stack}, during the function epilogue the value of ret will be popped and moved into rip, so that the execution is directed to the original next instruction. However, because the value was modified, the attacker controls which instructions are executed next.
+
+Attackers have historically used multiple techniques to overwrite the ret value in the stack, being the stack buffer overflow one of the most popular. In this technique, an attacker takes advantage of a program receiving an user value stored in a buffer whose capacity is smaller of that of the supplied value. Code snippet \ref{code:vuln_overflow} shows an example of a vulnerable program:
+
+\begin{lstlisting}[language=C, caption={Program vulnerable to buffer overflow.}, label={code:vuln_overflow}]
+#include <string.h>
+void foo(char *bar){ // bar may be larger than 12 characters
+   char buffer[12];
+   strcpy(buffer, bar); //no bounds checking 
+}
+
+int main(int argc, char *argv[]){
+   foo(argv[1]);
+   return 0;
+}
+\end{lstlisting}
+
+During the execution of the above program, since the char array \textit{buffer} is a buffer of length 12 stored in the stack, then if the value of \textit{bar} is larger than 12 bytes it will overflow the allocated space in the stack. This is usually the case of using unsafe functions for processing user input such as strcpy(), which does not check whether the array fits in the buffer. Figure \ref{fig:buffer_overflow} shows how the overflow happens in the stack.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=15cm]{buffer_overflow.jpg}
+	\caption{Stack buffer overflow overwriting ret value.}
+	\label{fig:buffer_overflow}
+\end{figure}
+
+As we can observe in the figure, the new data written into the buffer has also overwritten other fields which were pushed into the stack, such as sfp and ret, resulting in changing the flow of execution once the function exists.
+
+Usually, an attacker exploiting a program vulnerable to stack buffer overflow is interested in running arbitrary (malicious) code. For this, the attacker follows the process shown in figure \ref{fig:buffer_overflow_shellcode}:
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=15cm]{buffer_overflow_shellcode.jpg}
+	\caption{Executing arbitrary code exploiting a buffer overflow vulnerability.}
+	\label{fig:buffer_overflow_shellcode}
+\end{figure}
+
+As we can observe in the figure, the attacker will take advantage of the buffer overflow to overwrite not only ret, but also the rest of the current stack frame and sfp with malicious code. This code is known as shellcode, consisting on instruction opcodes (machine assembly instructions translated to their representation in hexadecimal values) which the processor will execute. We will briefly explain how to write shellcode in section \ref{TODO probably an Annex}. Therefore, in this technique the attacker will:
+\begin{itemize}
+\item Introduce a byte array that overflows the buffer, consisting on SHELLCODE + the address of the buffer.
+\begin{itemize}
+	\item The shellcode overwrites the buffer and all data until ret.
+	\item ret is overwritten by the value of the address where the buffer starts.
+\end{itemize}
+\item When the function exits and ret is popped from the stack, the register rip will now point to the address of the buffer at the stack, processing the stack data as instructions part of a program. The malicious code will be executed.
+\end{itemize}
+
+By using eBPF, we should in principle be able to overwrite the stack, inject shellcode, overwrite ret and then execute our malicious code. However, the classic buffer overflow is one of the oldest techniques in binary exploitation, and thus numerous protections have historically been incorporated and thus the attack presented here does not work work in modern systems any more. One of the protections is  the prohibition of executing code from the stack. By marking the stack as non-executable, in the case of rip pointing to an address in the stack any malicious code will not be ran, even if an application was vulnerable to a buffer overflow. We will explain more in detail the main protections that nowadays are incorporated in modern systems in section \ref{TODO}.
 
 
 
@@ -1727,7 +1792,7 @@ This technique has some advantages and disadvantages to the one described by Jef
 
 
 
-%TODO Talk about the difference between having always on BPF and always on kernel modules (maybe this is better in the introduction)
+
 
 
 

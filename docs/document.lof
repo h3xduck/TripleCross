@@ -35,13 +35,13 @@
 \defcounter {refsection}{0}\relax 
 \contentsline {figure}{\numberline {3.5}{\ignorespaces Simplified stack representation showing only stack frames.\relax }}{40}{figure.caption.38}%
 \defcounter {refsection}{0}\relax 
-\contentsline {figure}{\numberline {3.6}{\ignorespaces Representation of push and pop operations in the stack.\relax }}{41}{figure.caption.40}%
+\contentsline {figure}{\numberline {3.6}{\ignorespaces Representation of push and pop operations in the stack.\relax }}{42}{figure.caption.40}%
 \defcounter {refsection}{0}\relax 
 \contentsline {figure}{\numberline {3.7}{\ignorespaces Stack representation right before starting the function call process.\relax }}{42}{figure.caption.41}%
 \defcounter {refsection}{0}\relax 
-\contentsline {figure}{\numberline {3.8}{\ignorespaces Stack representation right after the function preamble.\relax }}{42}{figure.caption.42}%
+\contentsline {figure}{\numberline {3.8}{\ignorespaces Stack representation right after the function preamble.\relax }}{43}{figure.caption.42}%
 \defcounter {refsection}{0}\relax 
-\contentsline {figure}{\numberline {3.9}{\ignorespaces Overview of stack scanning and writing technique.\relax }}{45}{figure.caption.43}%
+\contentsline {figure}{\numberline {3.9}{\ignorespaces Overview of stack scanning and writing technique.\relax }}{46}{figure.caption.43}%
 \defcounter {refsection}{0}\relax 
 \contentsline {figure}{\numberline {3.10}{\ignorespaces Ethernet frame with TCP/IP packet.\relax }}{48}{figure.caption.44}%
 \defcounter {refsection}{0}\relax 
@@ -52,6 +52,12 @@
 \contentsline {figure}{\numberline {3.13}{\ignorespaces Technique to duplicate a packet for exfiltrating data.\relax }}{53}{figure.caption.48}%
 \defcounter {refsection}{0}\relax 
 \addvspace {10\p@ }
+\defcounter {refsection}{0}\relax 
+\contentsline {figure}{\numberline {4.1}{\ignorespaces Execution hijack overwriting saved rip value.\relax }}{57}{figure.caption.49}%
+\defcounter {refsection}{0}\relax 
+\contentsline {figure}{\numberline {4.2}{\ignorespaces Stack buffer overflow overwriting ret value.\relax }}{58}{figure.caption.50}%
+\defcounter {refsection}{0}\relax 
+\contentsline {figure}{\numberline {4.3}{\ignorespaces Executing arbitrary code exploiting a buffer overflow vulnerability.\relax }}{59}{figure.caption.51}%
 \defcounter {refsection}{0}\relax 
 \addvspace {10\p@ }
 \defcounter {refsection}{0}\relax 
