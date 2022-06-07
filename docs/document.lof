@@ -59,6 +59,8 @@
 \defcounter {refsection}{0}\relax 
 \contentsline {figure}{\numberline {4.3}{\ignorespaces Executing arbitrary code exploiting a buffer overflow vulnerability.\relax }}{59}{figure.caption.51}%
 \defcounter {refsection}{0}\relax 
+\contentsline {figure}{\numberline {4.4}{\ignorespaces Steps for executing code sample using ROP.\relax }}{61}{figure.caption.52}%
+\defcounter {refsection}{0}\relax 
 \addvspace {10\p@ }
 \defcounter {refsection}{0}\relax 
 \addvspace {10\p@ }

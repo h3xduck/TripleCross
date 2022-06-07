@@ -1509,7 +1509,7 @@ Then, if we attach a kprobe to vfs\_read, we would be able to modify the value o
 \end{itemize}
 
 Figure \ref{fig:stack_scan_write_tech} illustrates a high-level overview of the stack scanning technique previously described:
-
+%TODO i just noticed I included SFP outside the current stack frame, correct it here and everywhere
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=16cm]{stack_scan_write_tech.jpg}
@@ -1737,7 +1737,6 @@ In the figure, we can observe how, during the execution of the called function, 
 Attackers have historically used multiple techniques to overwrite the ret value in the stack, being the stack buffer overflow one of the most popular. In this technique, an attacker takes advantage of a program receiving an user value stored in a buffer whose capacity is smaller of that of the supplied value. Code snippet \ref{code:vuln_overflow} shows an example of a vulnerable program:
 
 \begin{lstlisting}[language=C, caption={Program vulnerable to buffer overflow.}, label={code:vuln_overflow}]
-#include <string.h>
 void foo(char *bar){ // bar may be larger than 12 characters
    char buffer[12];
    strcpy(buffer, bar); //no bounds checking 
@@ -1780,6 +1779,42 @@ As we can observe in the figure, the attacker will take advantage of the buffer 
 \end{itemize}
 
 By using eBPF, we should in principle be able to overwrite the stack, inject shellcode, overwrite ret and then execute our malicious code. However, the classic buffer overflow is one of the oldest techniques in binary exploitation, and thus numerous protections have historically been incorporated and thus the attack presented here does not work work in modern systems any more. One of the protections is  the prohibition of executing code from the stack. By marking the stack as non-executable, in the case of rip pointing to an address in the stack any malicious code will not be ran, even if an application was vulnerable to a buffer overflow. We will explain more in detail the main protections that nowadays are incorporated in modern systems in section \ref{TODO}.
+
+\subsection{Return oriented programming with eBPF}
+After the stack was marked non-executable, a new refined technique was invented to circumvent this restriction and adapt the classic buffer overflow to modern systems. In the end, attackers still maintained the ability to overflow the buffer in the stack of vulnerable applications, writing shellcode and overwriting ret, the only issue was that the shellcode could not be executed.
+
+Return Oriented Programming (ROP) is an exploitation technique that takes advantage of the fact that, even if malicious code in the stack cannot be executed, the attacker can still redirect the flow of execution by modifying ret to any other piece of executable code. The challenge for the attacker is executing malicious code, since any available executable instructions are either at the .text section (which will correspond to the normal functioning of the program) or at shared libraries, but none are useful for malware. 
+
+ROP tackles this challenge by designing a method of reconstructing malicious code from parts of already-existing code, as in a 'collage'. Assembly instructions are selected from multiple places, so that, when put together and executed sequentially, they recreate the shellcode which the attacker wants to execute. These pieces of code are called ROP gadgets, and consist of a set of arbitrary instructions followed by a final \textit{ret} instruction, which triggers the function exit and pops the value of ret. These gadgets may belong to any code in the process memory, usually selected between the code of the shared libraries (see figure \ref{fig:stack}) to which the process is linked.
+
+Finding ROP gadgets and writing ROP-compatible payloads manually is hard, thus multiple programs exist that automatically scan the system libraries and construct provide the gadgets given the shellcode to execute\cite{rop_prog_finder}.
+
+However, we will now illustrate how ROP works with an example. Suppose that an attacker has discovered a buffer overflow vulnerability, but the stack is marked as not executable. The attacker wants to execute the assembly code shown in snippet \ref{code:rop_ex}:
+
+\begin{lstlisting}[language=C, caption={Sample program to run using ROP.}, label={code:rop_ex}]
+mov rdx, 10
+mov rax, [rsp]
+\end{lstlisting}
+
+After finding the address of the ROP gadgets manually or using an automated tool, the attacker takes advantage of a buffer overflow (or, in our case, a direct write using eBPF's bpf\_probe\_write\_user()) to overwrite the vale of ret with the address of the first ROP gadget, and also additional data in the stack. Figure \ref{fig:rop_compund} shows how we can execute the original program using ROP:
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=16cm]{ROPcompound.jpg}
+	\caption{Steps for executing code sample using ROP.}
+	\label{fig:rop_compund}
+\end{figure}
+
+The steps described in the figure are the following:
+\begin{enumerate}
+\item First step shows the two gadgets located and their addresses, and the overwritten data in the stack. The function has already exited and, because ret was overwritten with the address of the first gadget, register rip now points to that location, and thus it is the next instruction to execute. Register rsp, in turn, now points to the bottom address of the current stack frame, which is right next to the old ret (see section \ref{subsection:stack} for stack frames functioning).
+\item The first instruction of the gadget is executed, popping the value from the stack (which also moves register rsp, see stack push and pop operations in section \ref{subsection:stack}). As we can observe, the value "10" was specifically put in that position by the attacker, so that, according to the instruction to execute \lstinline{mov rdx, 10} \lstinline{}, we now have loaded that data into register rdx.
+\item The return instruction is executed, which pops from the stack what is supposed to be the value of the saved rip, but in turn the attacker has placed the address of the next gadget there. Now, rip has jumped to the address of the second gadget. By continuing with this process, we can chain an infinite number of gadgets.
+\item Finally, we repeated the same process as before, using a pop instruction to load a value from the stack. This illustrates that push and pop instructions, commonly used on most programs, are also possible to be using ROP.
+
+After this step, the return instruction will be executed. Note that, at this point, if the attacker wants to be stealthy and avoid crashing the program (since we overwrote the original data in the stack), the original stack must be restored, together with the value of the registers before the malicious code execution. We will see an example of a technique for reconstructing the original state during our explanation of the library injection in section \ref{TODO}.
+\end{enumerate}
+
 
 
 

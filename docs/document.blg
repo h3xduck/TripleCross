@@ -1,96 +1,96 @@
 [0] Config.pm:311> INFO - This is Biber 2.16
 [0] Config.pm:314> INFO - Logfile is 'document.blg'
-[57] biber:340> INFO - === Mon Jun  6, 2022, 21:52:43
-[70] Biber.pm:415> INFO - Reading 'document.bcf'
-[145] Biber.pm:952> INFO - Found 77 citekeys in bib section 0
-[159] Biber.pm:4340> INFO - Processing section 0
-[168] Biber.pm:4531> INFO - Looking for bibtex format file 'bibliography/bibliography.bib' for section 0
-[171] bibtex.pm:1689> INFO - LaTeX decoding ...
-[200] bibtex.pm:1494> INFO - Found BibTeX data source 'bibliography/bibliography.bib'
-[376] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_frH7/f4d088b3f9f145b5c3058da33afd57d4_272885.utf8, line 9, warning: 1 characters of junk seen at toplevel
-[376] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_frH7/f4d088b3f9f145b5c3058da33afd57d4_272885.utf8, line 15, warning: 1 characters of junk seen at toplevel
-[376] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_frH7/f4d088b3f9f145b5c3058da33afd57d4_272885.utf8, line 22, warning: 1 characters of junk seen at toplevel
-[376] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_frH7/f4d088b3f9f145b5c3058da33afd57d4_272885.utf8, line 28, warning: 1 characters of junk seen at toplevel
-[377] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_frH7/f4d088b3f9f145b5c3058da33afd57d4_272885.utf8, line 35, warning: 1 characters of junk seen at toplevel
-[377] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_frH7/f4d088b3f9f145b5c3058da33afd57d4_272885.utf8, line 42, warning: 1 characters of junk seen at toplevel
-[377] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_frH7/f4d088b3f9f145b5c3058da33afd57d4_272885.utf8, line 50, warning: 1 characters of junk seen at toplevel
-[377] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_frH7/f4d088b3f9f145b5c3058da33afd57d4_272885.utf8, line 58, warning: 1 characters of junk seen at toplevel
-[377] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_frH7/f4d088b3f9f145b5c3058da33afd57d4_272885.utf8, line 65, warning: 1 characters of junk seen at toplevel
-[377] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_frH7/f4d088b3f9f145b5c3058da33afd57d4_272885.utf8, line 70, warning: 1 characters of junk seen at toplevel
-[377] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_frH7/f4d088b3f9f145b5c3058da33afd57d4_272885.utf8, line 77, warning: 1 characters of junk seen at toplevel
-[377] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_frH7/f4d088b3f9f145b5c3058da33afd57d4_272885.utf8, line 85, warning: 1 characters of junk seen at toplevel
-[377] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_frH7/f4d088b3f9f145b5c3058da33afd57d4_272885.utf8, line 94, warning: 1 characters of junk seen at toplevel
-[377] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_frH7/f4d088b3f9f145b5c3058da33afd57d4_272885.utf8, line 103, warning: 1 characters of junk seen at toplevel
-[377] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_frH7/f4d088b3f9f145b5c3058da33afd57d4_272885.utf8, line 112, warning: 1 characters of junk seen at toplevel
-[377] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_frH7/f4d088b3f9f145b5c3058da33afd57d4_272885.utf8, line 121, warning: 1 characters of junk seen at toplevel
-[377] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_frH7/f4d088b3f9f145b5c3058da33afd57d4_272885.utf8, line 127, warning: 1 characters of junk seen at toplevel
-[377] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_frH7/f4d088b3f9f145b5c3058da33afd57d4_272885.utf8, line 132, warning: 1 characters of junk seen at toplevel
-[377] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_frH7/f4d088b3f9f145b5c3058da33afd57d4_272885.utf8, line 137, warning: 1 characters of junk seen at toplevel
-[377] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_frH7/f4d088b3f9f145b5c3058da33afd57d4_272885.utf8, line 142, warning: 1 characters of junk seen at toplevel
-[377] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_frH7/f4d088b3f9f145b5c3058da33afd57d4_272885.utf8, line 153, warning: 1 characters of junk seen at toplevel
-[377] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_frH7/f4d088b3f9f145b5c3058da33afd57d4_272885.utf8, line 158, warning: 1 characters of junk seen at toplevel
-[377] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_frH7/f4d088b3f9f145b5c3058da33afd57d4_272885.utf8, line 164, warning: 1 characters of junk seen at toplevel
-[377] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_frH7/f4d088b3f9f145b5c3058da33afd57d4_272885.utf8, line 170, warning: 1 characters of junk seen at toplevel
-[378] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_frH7/f4d088b3f9f145b5c3058da33afd57d4_272885.utf8, line 175, warning: 1 characters of junk seen at toplevel
-[378] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_frH7/f4d088b3f9f145b5c3058da33afd57d4_272885.utf8, line 184, warning: 1 characters of junk seen at toplevel
-[378] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_frH7/f4d088b3f9f145b5c3058da33afd57d4_272885.utf8, line 191, warning: 1 characters of junk seen at toplevel
-[378] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_frH7/f4d088b3f9f145b5c3058da33afd57d4_272885.utf8, line 199, warning: 1 characters of junk seen at toplevel
-[378] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_frH7/f4d088b3f9f145b5c3058da33afd57d4_272885.utf8, line 206, warning: 1 characters of junk seen at toplevel
-[378] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_frH7/f4d088b3f9f145b5c3058da33afd57d4_272885.utf8, line 215, warning: 1 characters of junk seen at toplevel
-[378] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_frH7/f4d088b3f9f145b5c3058da33afd57d4_272885.utf8, line 224, warning: 1 characters of junk seen at toplevel
-[378] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_frH7/f4d088b3f9f145b5c3058da33afd57d4_272885.utf8, line 233, warning: 1 characters of junk seen at toplevel
-[378] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_frH7/f4d088b3f9f145b5c3058da33afd57d4_272885.utf8, line 239, warning: 1 characters of junk seen at toplevel
-[378] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_frH7/f4d088b3f9f145b5c3058da33afd57d4_272885.utf8, line 244, warning: 1 characters of junk seen at toplevel
-[378] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_frH7/f4d088b3f9f145b5c3058da33afd57d4_272885.utf8, line 249, warning: 1 characters of junk seen at toplevel
-[378] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_frH7/f4d088b3f9f145b5c3058da33afd57d4_272885.utf8, line 256, warning: 1 characters of junk seen at toplevel
-[378] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_frH7/f4d088b3f9f145b5c3058da33afd57d4_272885.utf8, line 261, warning: 1 characters of junk seen at toplevel
-[378] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_frH7/f4d088b3f9f145b5c3058da33afd57d4_272885.utf8, line 266, warning: 1 characters of junk seen at toplevel
-[378] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_frH7/f4d088b3f9f145b5c3058da33afd57d4_272885.utf8, line 271, warning: 1 characters of junk seen at toplevel
-[378] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_frH7/f4d088b3f9f145b5c3058da33afd57d4_272885.utf8, line 276, warning: 1 characters of junk seen at toplevel
-[378] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_frH7/f4d088b3f9f145b5c3058da33afd57d4_272885.utf8, line 283, warning: 1 characters of junk seen at toplevel
-[378] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_frH7/f4d088b3f9f145b5c3058da33afd57d4_272885.utf8, line 288, warning: 1 characters of junk seen at toplevel
-[378] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_frH7/f4d088b3f9f145b5c3058da33afd57d4_272885.utf8, line 295, warning: 1 characters of junk seen at toplevel
-[378] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_frH7/f4d088b3f9f145b5c3058da33afd57d4_272885.utf8, line 302, warning: 1 characters of junk seen at toplevel
-[379] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_frH7/f4d088b3f9f145b5c3058da33afd57d4_272885.utf8, line 309, warning: 1 characters of junk seen at toplevel
-[379] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_frH7/f4d088b3f9f145b5c3058da33afd57d4_272885.utf8, line 315, warning: 1 characters of junk seen at toplevel
-[379] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_frH7/f4d088b3f9f145b5c3058da33afd57d4_272885.utf8, line 321, warning: 1 characters of junk seen at toplevel
-[379] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_frH7/f4d088b3f9f145b5c3058da33afd57d4_272885.utf8, line 327, warning: 1 characters of junk seen at toplevel
-[379] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_frH7/f4d088b3f9f145b5c3058da33afd57d4_272885.utf8, line 334, warning: 1 characters of junk seen at toplevel
-[379] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_frH7/f4d088b3f9f145b5c3058da33afd57d4_272885.utf8, line 339, warning: 1 characters of junk seen at toplevel
-[379] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_frH7/f4d088b3f9f145b5c3058da33afd57d4_272885.utf8, line 344, warning: 1 characters of junk seen at toplevel
-[379] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_frH7/f4d088b3f9f145b5c3058da33afd57d4_272885.utf8, line 349, warning: 1 characters of junk seen at toplevel
-[379] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_frH7/f4d088b3f9f145b5c3058da33afd57d4_272885.utf8, line 356, warning: 1 characters of junk seen at toplevel
-[379] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_frH7/f4d088b3f9f145b5c3058da33afd57d4_272885.utf8, line 361, warning: 1 characters of junk seen at toplevel
-[379] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_frH7/f4d088b3f9f145b5c3058da33afd57d4_272885.utf8, line 366, warning: 1 characters of junk seen at toplevel
-[379] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_frH7/f4d088b3f9f145b5c3058da33afd57d4_272885.utf8, line 375, warning: 1 characters of junk seen at toplevel
-[379] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_frH7/f4d088b3f9f145b5c3058da33afd57d4_272885.utf8, line 380, warning: 1 characters of junk seen at toplevel
-[379] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_frH7/f4d088b3f9f145b5c3058da33afd57d4_272885.utf8, line 385, warning: 1 characters of junk seen at toplevel
-[379] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_frH7/f4d088b3f9f145b5c3058da33afd57d4_272885.utf8, line 390, warning: 1 characters of junk seen at toplevel
-[379] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_frH7/f4d088b3f9f145b5c3058da33afd57d4_272885.utf8, line 395, warning: 1 characters of junk seen at toplevel
-[379] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_frH7/f4d088b3f9f145b5c3058da33afd57d4_272885.utf8, line 400, warning: 1 characters of junk seen at toplevel
-[379] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_frH7/f4d088b3f9f145b5c3058da33afd57d4_272885.utf8, line 405, warning: 1 characters of junk seen at toplevel
-[379] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_frH7/f4d088b3f9f145b5c3058da33afd57d4_272885.utf8, line 410, warning: 1 characters of junk seen at toplevel
-[379] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_frH7/f4d088b3f9f145b5c3058da33afd57d4_272885.utf8, line 419, warning: 1 characters of junk seen at toplevel
-[379] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_frH7/f4d088b3f9f145b5c3058da33afd57d4_272885.utf8, line 428, warning: 1 characters of junk seen at toplevel
-[379] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_frH7/f4d088b3f9f145b5c3058da33afd57d4_272885.utf8, line 433, warning: 1 characters of junk seen at toplevel
-[380] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_frH7/f4d088b3f9f145b5c3058da33afd57d4_272885.utf8, line 438, warning: 1 characters of junk seen at toplevel
-[380] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_frH7/f4d088b3f9f145b5c3058da33afd57d4_272885.utf8, line 443, warning: 1 characters of junk seen at toplevel
-[380] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_frH7/f4d088b3f9f145b5c3058da33afd57d4_272885.utf8, line 449, warning: 1 characters of junk seen at toplevel
-[380] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_frH7/f4d088b3f9f145b5c3058da33afd57d4_272885.utf8, line 459, warning: 1 characters of junk seen at toplevel
-[380] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_frH7/f4d088b3f9f145b5c3058da33afd57d4_272885.utf8, line 466, warning: 1 characters of junk seen at toplevel
-[380] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_frH7/f4d088b3f9f145b5c3058da33afd57d4_272885.utf8, line 473, warning: 1 characters of junk seen at toplevel
-[380] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_frH7/f4d088b3f9f145b5c3058da33afd57d4_272885.utf8, line 482, warning: 1 characters of junk seen at toplevel
-[380] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_frH7/f4d088b3f9f145b5c3058da33afd57d4_272885.utf8, line 487, warning: 1 characters of junk seen at toplevel
-[380] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_frH7/f4d088b3f9f145b5c3058da33afd57d4_272885.utf8, line 492, warning: 1 characters of junk seen at toplevel
-[380] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_frH7/f4d088b3f9f145b5c3058da33afd57d4_272885.utf8, line 501, warning: 1 characters of junk seen at toplevel
-[380] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_frH7/f4d088b3f9f145b5c3058da33afd57d4_272885.utf8, line 508, warning: 1 characters of junk seen at toplevel
-[380] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_frH7/f4d088b3f9f145b5c3058da33afd57d4_272885.utf8, line 515, warning: 1 characters of junk seen at toplevel
-[380] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_frH7/f4d088b3f9f145b5c3058da33afd57d4_272885.utf8, line 520, warning: 1 characters of junk seen at toplevel
-[380] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_frH7/f4d088b3f9f145b5c3058da33afd57d4_272885.utf8, line 529, warning: 1 characters of junk seen at toplevel
-[427] UCollate.pm:68> INFO - Overriding locale 'en-US' defaults 'variable = shifted' with 'variable = non-ignorable'
-[427] UCollate.pm:68> INFO - Overriding locale 'en-US' defaults 'normalization = NFD' with 'normalization = prenormalized'
-[427] Biber.pm:4168> INFO - Sorting list 'none/global//global/global' of type 'entry' with template 'none' and locale 'en-US'
-[427] Biber.pm:4174> INFO - No sort tailoring available for locale 'en-US'
-[467] bbl.pm:654> INFO - Writing 'document.bbl' with encoding 'UTF-8'
-[485] bbl.pm:757> INFO - Output to document.bbl
-[485] Biber.pm:128> INFO - WARNINGS: 80
+[60] biber:340> INFO - === Tue Jun  7, 2022, 14:31:23
+[76] Biber.pm:415> INFO - Reading 'document.bcf'
+[153] Biber.pm:952> INFO - Found 77 citekeys in bib section 0
+[168] Biber.pm:4340> INFO - Processing section 0
+[179] Biber.pm:4531> INFO - Looking for bibtex format file 'bibliography/bibliography.bib' for section 0
+[182] bibtex.pm:1689> INFO - LaTeX decoding ...
+[211] bibtex.pm:1494> INFO - Found BibTeX data source 'bibliography/bibliography.bib'
+[406] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_Iaax/f4d088b3f9f145b5c3058da33afd57d4_281978.utf8, line 9, warning: 1 characters of junk seen at toplevel
+[406] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_Iaax/f4d088b3f9f145b5c3058da33afd57d4_281978.utf8, line 15, warning: 1 characters of junk seen at toplevel
+[406] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_Iaax/f4d088b3f9f145b5c3058da33afd57d4_281978.utf8, line 22, warning: 1 characters of junk seen at toplevel
+[406] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_Iaax/f4d088b3f9f145b5c3058da33afd57d4_281978.utf8, line 28, warning: 1 characters of junk seen at toplevel
+[406] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_Iaax/f4d088b3f9f145b5c3058da33afd57d4_281978.utf8, line 35, warning: 1 characters of junk seen at toplevel
+[406] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_Iaax/f4d088b3f9f145b5c3058da33afd57d4_281978.utf8, line 42, warning: 1 characters of junk seen at toplevel
+[406] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_Iaax/f4d088b3f9f145b5c3058da33afd57d4_281978.utf8, line 50, warning: 1 characters of junk seen at toplevel
+[406] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_Iaax/f4d088b3f9f145b5c3058da33afd57d4_281978.utf8, line 58, warning: 1 characters of junk seen at toplevel
+[406] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_Iaax/f4d088b3f9f145b5c3058da33afd57d4_281978.utf8, line 65, warning: 1 characters of junk seen at toplevel
+[406] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_Iaax/f4d088b3f9f145b5c3058da33afd57d4_281978.utf8, line 70, warning: 1 characters of junk seen at toplevel
+[406] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_Iaax/f4d088b3f9f145b5c3058da33afd57d4_281978.utf8, line 77, warning: 1 characters of junk seen at toplevel
+[406] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_Iaax/f4d088b3f9f145b5c3058da33afd57d4_281978.utf8, line 85, warning: 1 characters of junk seen at toplevel
+[406] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_Iaax/f4d088b3f9f145b5c3058da33afd57d4_281978.utf8, line 94, warning: 1 characters of junk seen at toplevel
+[406] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_Iaax/f4d088b3f9f145b5c3058da33afd57d4_281978.utf8, line 103, warning: 1 characters of junk seen at toplevel
+[406] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_Iaax/f4d088b3f9f145b5c3058da33afd57d4_281978.utf8, line 112, warning: 1 characters of junk seen at toplevel
+[406] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_Iaax/f4d088b3f9f145b5c3058da33afd57d4_281978.utf8, line 121, warning: 1 characters of junk seen at toplevel
+[406] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_Iaax/f4d088b3f9f145b5c3058da33afd57d4_281978.utf8, line 127, warning: 1 characters of junk seen at toplevel
+[406] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_Iaax/f4d088b3f9f145b5c3058da33afd57d4_281978.utf8, line 132, warning: 1 characters of junk seen at toplevel
+[407] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_Iaax/f4d088b3f9f145b5c3058da33afd57d4_281978.utf8, line 137, warning: 1 characters of junk seen at toplevel
+[407] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_Iaax/f4d088b3f9f145b5c3058da33afd57d4_281978.utf8, line 142, warning: 1 characters of junk seen at toplevel
+[407] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_Iaax/f4d088b3f9f145b5c3058da33afd57d4_281978.utf8, line 153, warning: 1 characters of junk seen at toplevel
+[407] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_Iaax/f4d088b3f9f145b5c3058da33afd57d4_281978.utf8, line 158, warning: 1 characters of junk seen at toplevel
+[407] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_Iaax/f4d088b3f9f145b5c3058da33afd57d4_281978.utf8, line 164, warning: 1 characters of junk seen at toplevel
+[407] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_Iaax/f4d088b3f9f145b5c3058da33afd57d4_281978.utf8, line 170, warning: 1 characters of junk seen at toplevel
+[407] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_Iaax/f4d088b3f9f145b5c3058da33afd57d4_281978.utf8, line 175, warning: 1 characters of junk seen at toplevel
+[407] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_Iaax/f4d088b3f9f145b5c3058da33afd57d4_281978.utf8, line 184, warning: 1 characters of junk seen at toplevel
+[407] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_Iaax/f4d088b3f9f145b5c3058da33afd57d4_281978.utf8, line 191, warning: 1 characters of junk seen at toplevel
+[407] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_Iaax/f4d088b3f9f145b5c3058da33afd57d4_281978.utf8, line 199, warning: 1 characters of junk seen at toplevel
+[407] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_Iaax/f4d088b3f9f145b5c3058da33afd57d4_281978.utf8, line 206, warning: 1 characters of junk seen at toplevel
+[407] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_Iaax/f4d088b3f9f145b5c3058da33afd57d4_281978.utf8, line 215, warning: 1 characters of junk seen at toplevel
+[407] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_Iaax/f4d088b3f9f145b5c3058da33afd57d4_281978.utf8, line 224, warning: 1 characters of junk seen at toplevel
+[407] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_Iaax/f4d088b3f9f145b5c3058da33afd57d4_281978.utf8, line 233, warning: 1 characters of junk seen at toplevel
+[407] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_Iaax/f4d088b3f9f145b5c3058da33afd57d4_281978.utf8, line 239, warning: 1 characters of junk seen at toplevel
+[407] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_Iaax/f4d088b3f9f145b5c3058da33afd57d4_281978.utf8, line 244, warning: 1 characters of junk seen at toplevel
+[407] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_Iaax/f4d088b3f9f145b5c3058da33afd57d4_281978.utf8, line 249, warning: 1 characters of junk seen at toplevel
+[407] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_Iaax/f4d088b3f9f145b5c3058da33afd57d4_281978.utf8, line 256, warning: 1 characters of junk seen at toplevel
+[407] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_Iaax/f4d088b3f9f145b5c3058da33afd57d4_281978.utf8, line 261, warning: 1 characters of junk seen at toplevel
+[407] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_Iaax/f4d088b3f9f145b5c3058da33afd57d4_281978.utf8, line 266, warning: 1 characters of junk seen at toplevel
+[407] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_Iaax/f4d088b3f9f145b5c3058da33afd57d4_281978.utf8, line 271, warning: 1 characters of junk seen at toplevel
+[408] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_Iaax/f4d088b3f9f145b5c3058da33afd57d4_281978.utf8, line 276, warning: 1 characters of junk seen at toplevel
+[408] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_Iaax/f4d088b3f9f145b5c3058da33afd57d4_281978.utf8, line 283, warning: 1 characters of junk seen at toplevel
+[408] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_Iaax/f4d088b3f9f145b5c3058da33afd57d4_281978.utf8, line 288, warning: 1 characters of junk seen at toplevel
+[408] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_Iaax/f4d088b3f9f145b5c3058da33afd57d4_281978.utf8, line 295, warning: 1 characters of junk seen at toplevel
+[408] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_Iaax/f4d088b3f9f145b5c3058da33afd57d4_281978.utf8, line 302, warning: 1 characters of junk seen at toplevel
+[408] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_Iaax/f4d088b3f9f145b5c3058da33afd57d4_281978.utf8, line 309, warning: 1 characters of junk seen at toplevel
+[408] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_Iaax/f4d088b3f9f145b5c3058da33afd57d4_281978.utf8, line 315, warning: 1 characters of junk seen at toplevel
+[408] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_Iaax/f4d088b3f9f145b5c3058da33afd57d4_281978.utf8, line 321, warning: 1 characters of junk seen at toplevel
+[408] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_Iaax/f4d088b3f9f145b5c3058da33afd57d4_281978.utf8, line 327, warning: 1 characters of junk seen at toplevel
+[408] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_Iaax/f4d088b3f9f145b5c3058da33afd57d4_281978.utf8, line 334, warning: 1 characters of junk seen at toplevel
+[408] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_Iaax/f4d088b3f9f145b5c3058da33afd57d4_281978.utf8, line 339, warning: 1 characters of junk seen at toplevel
+[408] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_Iaax/f4d088b3f9f145b5c3058da33afd57d4_281978.utf8, line 344, warning: 1 characters of junk seen at toplevel
+[408] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_Iaax/f4d088b3f9f145b5c3058da33afd57d4_281978.utf8, line 349, warning: 1 characters of junk seen at toplevel
+[408] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_Iaax/f4d088b3f9f145b5c3058da33afd57d4_281978.utf8, line 356, warning: 1 characters of junk seen at toplevel
+[408] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_Iaax/f4d088b3f9f145b5c3058da33afd57d4_281978.utf8, line 361, warning: 1 characters of junk seen at toplevel
+[408] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_Iaax/f4d088b3f9f145b5c3058da33afd57d4_281978.utf8, line 366, warning: 1 characters of junk seen at toplevel
+[408] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_Iaax/f4d088b3f9f145b5c3058da33afd57d4_281978.utf8, line 375, warning: 1 characters of junk seen at toplevel
+[408] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_Iaax/f4d088b3f9f145b5c3058da33afd57d4_281978.utf8, line 380, warning: 1 characters of junk seen at toplevel
+[408] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_Iaax/f4d088b3f9f145b5c3058da33afd57d4_281978.utf8, line 385, warning: 1 characters of junk seen at toplevel
+[408] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_Iaax/f4d088b3f9f145b5c3058da33afd57d4_281978.utf8, line 390, warning: 1 characters of junk seen at toplevel
+[409] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_Iaax/f4d088b3f9f145b5c3058da33afd57d4_281978.utf8, line 395, warning: 1 characters of junk seen at toplevel
+[409] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_Iaax/f4d088b3f9f145b5c3058da33afd57d4_281978.utf8, line 400, warning: 1 characters of junk seen at toplevel
+[409] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_Iaax/f4d088b3f9f145b5c3058da33afd57d4_281978.utf8, line 405, warning: 1 characters of junk seen at toplevel
+[409] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_Iaax/f4d088b3f9f145b5c3058da33afd57d4_281978.utf8, line 410, warning: 1 characters of junk seen at toplevel
+[409] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_Iaax/f4d088b3f9f145b5c3058da33afd57d4_281978.utf8, line 419, warning: 1 characters of junk seen at toplevel
+[409] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_Iaax/f4d088b3f9f145b5c3058da33afd57d4_281978.utf8, line 428, warning: 1 characters of junk seen at toplevel
+[409] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_Iaax/f4d088b3f9f145b5c3058da33afd57d4_281978.utf8, line 433, warning: 1 characters of junk seen at toplevel
+[409] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_Iaax/f4d088b3f9f145b5c3058da33afd57d4_281978.utf8, line 438, warning: 1 characters of junk seen at toplevel
+[409] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_Iaax/f4d088b3f9f145b5c3058da33afd57d4_281978.utf8, line 443, warning: 1 characters of junk seen at toplevel
+[409] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_Iaax/f4d088b3f9f145b5c3058da33afd57d4_281978.utf8, line 449, warning: 1 characters of junk seen at toplevel
+[409] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_Iaax/f4d088b3f9f145b5c3058da33afd57d4_281978.utf8, line 459, warning: 1 characters of junk seen at toplevel
+[409] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_Iaax/f4d088b3f9f145b5c3058da33afd57d4_281978.utf8, line 466, warning: 1 characters of junk seen at toplevel
+[409] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_Iaax/f4d088b3f9f145b5c3058da33afd57d4_281978.utf8, line 473, warning: 1 characters of junk seen at toplevel
+[409] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_Iaax/f4d088b3f9f145b5c3058da33afd57d4_281978.utf8, line 482, warning: 1 characters of junk seen at toplevel
+[410] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_Iaax/f4d088b3f9f145b5c3058da33afd57d4_281978.utf8, line 487, warning: 1 characters of junk seen at toplevel
+[410] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_Iaax/f4d088b3f9f145b5c3058da33afd57d4_281978.utf8, line 492, warning: 1 characters of junk seen at toplevel
+[410] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_Iaax/f4d088b3f9f145b5c3058da33afd57d4_281978.utf8, line 501, warning: 1 characters of junk seen at toplevel
+[410] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_Iaax/f4d088b3f9f145b5c3058da33afd57d4_281978.utf8, line 508, warning: 1 characters of junk seen at toplevel
+[410] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_Iaax/f4d088b3f9f145b5c3058da33afd57d4_281978.utf8, line 515, warning: 1 characters of junk seen at toplevel
+[410] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_Iaax/f4d088b3f9f145b5c3058da33afd57d4_281978.utf8, line 520, warning: 1 characters of junk seen at toplevel
+[410] Utils.pm:384> WARN - BibTeX subsystem: /tmp/biber_tmp_Iaax/f4d088b3f9f145b5c3058da33afd57d4_281978.utf8, line 529, warning: 1 characters of junk seen at toplevel
+[458] UCollate.pm:68> INFO - Overriding locale 'en-US' defaults 'variable = shifted' with 'variable = non-ignorable'
+[458] UCollate.pm:68> INFO - Overriding locale 'en-US' defaults 'normalization = NFD' with 'normalization = prenormalized'
+[458] Biber.pm:4168> INFO - Sorting list 'none/global//global/global' of type 'entry' with template 'none' and locale 'en-US'
+[458] Biber.pm:4174> INFO - No sort tailoring available for locale 'en-US'
+[500] bbl.pm:654> INFO - Writing 'document.bbl' with encoding 'UTF-8'
+[518] bbl.pm:757> INFO - Output to document.bbl
+[518] Biber.pm:128> INFO - WARNINGS: 80

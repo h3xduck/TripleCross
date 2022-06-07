@@ -2447,6 +2447,7 @@
     <bcf:citekey order="110">tcp_reliable</bcf:citekey>
     <bcf:citekey order="111">tcp_handshake</bcf:citekey>
     <bcf:citekey order="112">evil_ebpf_p6974</bcf:citekey>
+    <bcf:citekey order="113">rop_prog_finder</bcf:citekey>
   </bcf:section>
   <!-- SORTING TEMPLATES -->
   <bcf:sortingtemplate name="none">

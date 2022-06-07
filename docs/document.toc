@@ -113,9 +113,11 @@
 \defcounter {refsection}{0}\relax 
 \contentsline {subsection}{\numberline {4.1.1}Attacks at the stack: buffer overflow}{56}{subsection.4.1.1}%
 \defcounter {refsection}{0}\relax 
-\contentsline {chapter}{\numberline {5}Results}{60}{chapter.5}%
+\contentsline {subsection}{\numberline {4.1.2}Return oriented programming with eBPF}{60}{subsection.4.1.2}%
 \defcounter {refsection}{0}\relax 
-\contentsline {chapter}{\numberline {6}Conclusion and future work}{61}{chapter.6}%
+\contentsline {chapter}{\numberline {5}Results}{63}{chapter.5}%
 \defcounter {refsection}{0}\relax 
-\contentsline {chapter}{Bibliography}{62}{chapter.6}%
+\contentsline {chapter}{\numberline {6}Conclusion and future work}{64}{chapter.6}%
+\defcounter {refsection}{0}\relax 
+\contentsline {chapter}{Bibliography}{65}{chapter.6}%
 \contentsfinish 
