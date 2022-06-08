@@ -1780,7 +1780,7 @@ As we can observe in the figure, the attacker will take advantage of the buffer 
 
 By using eBPF, we should in principle be able to overwrite the stack, inject shellcode, overwrite ret and then execute our malicious code. However, the classic buffer overflow is one of the oldest techniques in binary exploitation, and thus numerous protections have historically been incorporated and thus the attack presented here does not work work in modern systems any more. One of the protections is  the prohibition of executing code from the stack. By marking the stack as non-executable, in the case of rip pointing to an address in the stack any malicious code will not be ran, even if an application was vulnerable to a buffer overflow. We will explain more in detail the main protections that nowadays are incorporated in modern systems in section \ref{TODO}.
 
-\subsection{Return oriented programming with eBPF}
+\subsection{Return oriented programming attacks} \label{subsection:rop}
 After the stack was marked non-executable, a new refined technique was invented to circumvent this restriction and adapt the classic buffer overflow to modern systems. In the end, attackers still maintained the ability to overflow the buffer in the stack of vulnerable applications, writing shellcode and overwriting ret, the only issue was that the shellcode could not be executed.
 
 Return Oriented Programming (ROP) is an exploitation technique that takes advantage of the fact that, even if malicious code in the stack cannot be executed, the attacker can still redirect the flow of execution by modifying ret to any other piece of executable code. The challenge for the attacker is executing malicious code, since any available executable instructions are either at the .text section (which will correspond to the normal functioning of the program) or at shared libraries, but none are useful for malware. 
@@ -1814,6 +1814,52 @@ The steps described in the figure are the following:
 
 After this step, the return instruction will be executed. Note that, at this point, if the attacker wants to be stealthy and avoid crashing the program (since we overwrote the original data in the stack), the original stack must be restored, together with the value of the registers before the malicious code execution. We will see an example of a technique for reconstructing the original state during our explanation of the library injection in section \ref{TODO}.
 \end{enumerate}
+
+
+\subsection{ROP with eBPF}
+In 2019, Jeff Dileo presented in DEFCON 27 the first technique to achieve arbitrary code execution using eBPF\cite{evil_ebpf_p6974}. For this, he used the ROP technique we have described previously to inject malicious code into a process. We will present an overview on his technique, in order to later compare it to ours and find advantages and disadvantages. Note that this is a summary and some aspects have been simplified, however we will present the whole process during the explanation of our own technique.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=15cm]{rop_evil_ebpf_1.jpg}
+	\caption{Initial setup for the ROP with eBPF technique.}
+	\label{fig:rop_evil_ebpf_1}
+\end{figure}
+
+Figure \ref{fig:rop_evil_ebpf_1} shows an overview on the process memory and the eBPF programs loaded. For this injection, we will use the stack scanning technique (section \ref{subsection:bpf_probe_write_apps}) using the arguments of a system call whose arguments are passed using the stack (sys\_timerfd\_settime, which receives two structs utmr and otmr). Therefore, a kprobe is attached to the system call, so that it can start to scan for the return address of the system call, which we know is the original value of register rip which was pushed into the stack (ret).
+
+An additional aspect must be introduced now (we will cover it more in detail in section \ref{TODO}): system calls are not directly called by the instructions in the .text section, but rather user programs in C make use of the C Standard Library to delegate the actual syscall, which in this case is the GNU Standard Library (glibc)\cite{glibc}. Therefore, a program calls a function in glibc (in this case timerfd\_settime) in which the syscall is performed, and the kernel executes it.
+
+This means that, during the stack scanning technique, if we start from struct utmr and scan forward in the stack, what we will find in ret is the return address of the function of glibc, and not directly that of the syscall to the kernel. Therefore, our goal is, for every data in the stack while scanning forward, check whether it is the real return address of glibc. For an address to be the real return address, we will follow the next steps:
+\begin{enumerate}
+\item Take an address from the stack. If that is the return address (the old rip), then the instruction that called the function in glibc must be the previous instruction (rip - 1).
+\item We now have a \textit{call} instruction, that directs us to the function at glibc. We check in the instruction to which address it moves the flow of execution, that is the address of timerfd\_settime in glibc.
+\item We scan forward, inside timerfd\_settime of glibc, until we find a \textit{syscall} instruction. That is the point where the flow of execution moves to the kernel, so we have checked that the return address we found in the stack truly is the one we are looking for.
+\end{enumerate}
+
+Now that we have found the return address, we save a backup of the stack (to recover the original data later) and we proceed to overwrite the stack using bpf\_probe\_write\_user(), setting it for the ROP technique. For this, some gadgets (G0, G1 ... GN) have been previously discovered in the glibc library. Figure \ref{fig:rop_evil_ebpf_2} shows process memory after this overwrite:
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=15cm]{rop_evil_ebpf_2.jpg}
+	\caption{Process memory after syscall exits and ROP code overwrites the stack.}
+	\label{fig:rop_evil_ebpf_2}
+\end{figure}
+
+As we can see in the figure, the function has already exited, and ret has been popped into register rip. As we explained in section \ref{subsection:rop}, the attacker places in that position the address of the first ROP gadget. After that, the attacker can execute arbitrary code. Jeff Dileo, for instance, loads a malicious library into the process (we will do the same and explain this process in the next sections).
+
+Once the attacker has finished executing the injected code, the stack must be restored to the original position so that the program can continue without crashing. A simplified view of this procedure consists of attaching a kprobe to a random system call (in this case, sys\_close()) so that, from the ROP code, we can alert the eBPF program when it is time to remove the ROP code and restore the original stack. Figure \ref{fig:rop_evil_ebpf_3} shows this final step:
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=15cm]{rop_evil_ebpf_3.jpg}
+	\caption{Stack data is restored and program continues its execution.}
+	\label{fig:rop_evil_ebpf_3}
+\end{figure}
+
+As we can see, eBPF writes back the original stack and thus the execution can continue. Note that, in practice, some final gadgets must also be executed in order to restore the state of rip and rsp, the stack data for this is written in the free memory zone, so that it does not need to be removed.
+
+
 
 
 

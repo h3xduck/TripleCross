@@ -54,7 +54,8 @@
 \BOOKMARK [0][-]{chapter.4}{Design\040of\040a\040malicious\040eBPF\040rootkit}{}% 54
 \BOOKMARK [1][-]{section.4.1}{Library\040injection\040via\040.GOT\040hijacking}{chapter.4}% 55
 \BOOKMARK [2][-]{subsection.4.1.1}{Attacks\040at\040the\040stack:\040buffer\040overflow}{section.4.1}% 56
-\BOOKMARK [2][-]{subsection.4.1.2}{Return\040oriented\040programming\040with\040eBPF}{section.4.1}% 57
-\BOOKMARK [0][-]{chapter.5}{Results}{}% 58
-\BOOKMARK [0][-]{chapter.6}{Conclusion\040and\040future\040work}{}% 59
-\BOOKMARK [0][-]{chapter.6}{Bibliography}{}% 60
+\BOOKMARK [2][-]{subsection.4.1.2}{Return\040oriented\040programming\040attacks}{section.4.1}% 57
+\BOOKMARK [2][-]{subsection.4.1.3}{ROP\040with\040eBPF}{section.4.1}% 58
+\BOOKMARK [0][-]{chapter.5}{Results}{}% 59
+\BOOKMARK [0][-]{chapter.6}{Conclusion\040and\040future\040work}{}% 60
+\BOOKMARK [0][-]{chapter.6}{Bibliography}{}% 61

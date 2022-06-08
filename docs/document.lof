@@ -61,6 +61,12 @@
 \defcounter {refsection}{0}\relax 
 \contentsline {figure}{\numberline {4.4}{\ignorespaces Steps for executing code sample using ROP.\relax }}{61}{figure.caption.52}%
 \defcounter {refsection}{0}\relax 
+\contentsline {figure}{\numberline {4.5}{\ignorespaces Initial setup for the ROP with eBPF technique.\relax }}{62}{figure.caption.53}%
+\defcounter {refsection}{0}\relax 
+\contentsline {figure}{\numberline {4.6}{\ignorespaces Process memory after syscall exits and ROP code overwrites the stack.\relax }}{63}{figure.caption.54}%
+\defcounter {refsection}{0}\relax 
+\contentsline {figure}{\numberline {4.7}{\ignorespaces Stack data is restored and program continues its execution.\relax }}{64}{figure.caption.55}%
+\defcounter {refsection}{0}\relax 
 \addvspace {10\p@ }
 \defcounter {refsection}{0}\relax 
 \addvspace {10\p@ }

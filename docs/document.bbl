@@ -1685,6 +1685,18 @@
       \verb https://www.sciencedirect.com/topics/computer-science/three-way-handshake
       \endverb
     \endentry
+    \entry{rop_prog_finder}{online}{}
+      \field{sortinit}{1}
+      \field{sortinithash}{50c6687d7fc80f50136d75228e3c59ba}
+      \field{labeltitlesource}{title}
+      \field{title}{ROPgadget Tool}
+      \verb{urlraw}
+      \verb https://github.com/JonathanSalwan/ROPgadget
+      \endverb
+      \verb{url}
+      \verb https://github.com/JonathanSalwan/ROPgadget
+      \endverb
+    \endentry
   \enddatalist
 \endrefsection
 \endinput
