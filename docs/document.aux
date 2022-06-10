@@ -411,8 +411,9 @@
 \@writefile{toc}{\defcounter {refsection}{0}\relax }\@writefile{toc}{\contentsline {chapter}{\numberline {4}Design of a malicious eBPF rootkit}{55}{chapter.4}\protected@file@percent }
 \@writefile{lof}{\defcounter {refsection}{0}\relax }\@writefile{lof}{\addvspace {10\p@ }}
 \@writefile{lot}{\defcounter {refsection}{0}\relax }\@writefile{lot}{\addvspace {10\p@ }}
-\@writefile{toc}{\defcounter {refsection}{0}\relax }\@writefile{toc}{\contentsline {section}{\numberline {4.1}Library injection via .GOT hijacking}{55}{section.4.1}\protected@file@percent }
+\@writefile{toc}{\defcounter {refsection}{0}\relax }\@writefile{toc}{\contentsline {section}{\numberline {4.1}Library injection via GOT hijacking}{55}{section.4.1}\protected@file@percent }
 \@writefile{toc}{\defcounter {refsection}{0}\relax }\@writefile{toc}{\contentsline {subsection}{\numberline {4.1.1}Attacks at the stack: buffer overflow}{56}{subsection.4.1.1}\protected@file@percent }
+\newlabel{subsection: buf_overflow}{{4.1.1}{56}{Attacks at the stack: buffer overflow}{subsection.4.1.1}{}}
 \@writefile{lof}{\defcounter {refsection}{0}\relax }\@writefile{lof}{\contentsline {figure}{\numberline {4.1}{\ignorespaces Execution hijack overwriting saved rip value.\relax }}{57}{figure.caption.49}\protected@file@percent }
 \newlabel{fig:stack_ret_hij_simple}{{4.1}{57}{Execution hijack overwriting saved rip value.\relax }{figure.caption.49}{}}
 \newlabel{code:vuln_overflow}{{4.1}{57}{Program vulnerable to buffer overflow}{lstlisting.4.1}{}}
@@ -434,21 +435,69 @@
 \abx@aux@cite{glibc}
 \abx@aux@segm{0}{0}{glibc}
 \@writefile{toc}{\defcounter {refsection}{0}\relax }\@writefile{toc}{\contentsline {subsection}{\numberline {4.1.3}ROP with eBPF}{62}{subsection.4.1.3}\protected@file@percent }
+\newlabel{subsection:rop_ebpf}{{4.1.3}{62}{ROP with eBPF}{subsection.4.1.3}{}}
 \@writefile{lof}{\defcounter {refsection}{0}\relax }\@writefile{lof}{\contentsline {figure}{\numberline {4.5}{\ignorespaces Initial setup for the ROP with eBPF technique.\relax }}{62}{figure.caption.53}\protected@file@percent }
 \newlabel{fig:rop_evil_ebpf_1}{{4.5}{62}{Initial setup for the ROP with eBPF technique.\relax }{figure.caption.53}{}}
 \@writefile{lof}{\defcounter {refsection}{0}\relax }\@writefile{lof}{\contentsline {figure}{\numberline {4.6}{\ignorespaces Process memory after syscall exits and ROP code overwrites the stack.\relax }}{63}{figure.caption.54}\protected@file@percent }
 \newlabel{fig:rop_evil_ebpf_2}{{4.6}{63}{Process memory after syscall exits and ROP code overwrites the stack.\relax }{figure.caption.54}{}}
+\abx@aux@cite{elf}
+\abx@aux@segm{0}{0}{elf}
 \@writefile{lof}{\defcounter {refsection}{0}\relax }\@writefile{lof}{\contentsline {figure}{\numberline {4.7}{\ignorespaces Stack data is restored and program continues its execution.\relax }}{64}{figure.caption.55}\protected@file@percent }
 \newlabel{fig:rop_evil_ebpf_3}{{4.7}{64}{Stack data is restored and program continues its execution.\relax }{figure.caption.55}{}}
-\@writefile{toc}{\defcounter {refsection}{0}\relax }\@writefile{toc}{\contentsline {chapter}{\numberline {5}Results}{65}{chapter.5}\protected@file@percent }
+\@writefile{toc}{\defcounter {refsection}{0}\relax }\@writefile{toc}{\contentsline {subsection}{\numberline {4.1.4}The ELF format and Lazy Binding}{64}{subsection.4.1.4}\protected@file@percent }
+\newlabel{subsection:elf_lazy_binding}{{4.1.4}{64}{The ELF format and Lazy Binding}{subsection.4.1.4}{}}
+\@writefile{lot}{\defcounter {refsection}{0}\relax }\@writefile{lot}{\contentsline {table}{\numberline {4.1}{\ignorespaces Tools used for analysis of ELF programs.\relax }}{65}{table.caption.56}\protected@file@percent }
+\newlabel{table:elf_tools}{{4.1}{65}{Tools used for analysis of ELF programs.\relax }{table.caption.56}{}}
+\@writefile{lot}{\defcounter {refsection}{0}\relax }\@writefile{lot}{\contentsline {table}{\numberline {4.2}{\ignorespaces Tools used for analysis of ELF programs.\relax }}{65}{table.caption.57}\protected@file@percent }
+\newlabel{table:elf_sec_headers}{{4.2}{65}{Tools used for analysis of ELF programs.\relax }{table.caption.57}{}}
+\abx@aux@cite{plt_got_overlord}
+\abx@aux@segm{0}{0}{plt_got_overlord}
+\abx@aux@cite{plt_got_technovelty}
+\abx@aux@segm{0}{0}{plt_got_technovelty}
+\newlabel{code:lazy_bind_1}{{4.3}{66}{Call to PLT stub seen from objdump}{lstlisting.4.3}{}}
+\@writefile{lol}{\defcounter {refsection}{0}\relax }\@writefile{lol}{\contentsline {lstlisting}{\numberline {4.3}Call to PLT stub seen from objdump.}{66}{lstlisting.4.3}\protected@file@percent }
+\@writefile{lof}{\defcounter {refsection}{0}\relax }\@writefile{lof}{\contentsline {figure}{\numberline {4.8}{\ignorespaces PLT stub for timerfd\_settime, seen from gdb-peda.\relax }}{66}{figure.caption.58}\protected@file@percent }
+\newlabel{fig:lazy_bind_2}{{4.8}{66}{PLT stub for timerfd\_settime, seen from gdb-peda.\relax }{figure.caption.58}{}}
+\@writefile{lof}{\defcounter {refsection}{0}\relax }\@writefile{lof}{\contentsline {figure}{\numberline {4.9}{\ignorespaces Inspecting address stored in GOT section before dynamic linking, seen from gdb-peda.\relax }}{66}{figure.caption.59}\protected@file@percent }
+\newlabel{fig:lazy_bind_3}{{4.9}{66}{Inspecting address stored in GOT section before dynamic linking, seen from gdb-peda.\relax }{figure.caption.59}{}}
+\@writefile{lof}{\defcounter {refsection}{0}\relax }\@writefile{lof}{\contentsline {figure}{\numberline {4.10}{\ignorespaces Inspecting address stored in GOT section after dynamic linking, seen from gdb-peda.\relax }}{67}{figure.caption.60}\protected@file@percent }
+\newlabel{fig:lazy_bind_4}{{4.10}{67}{Inspecting address stored in GOT section after dynamic linking, seen from gdb-peda.\relax }{figure.caption.60}{}}
+\@writefile{lof}{\defcounter {refsection}{0}\relax }\@writefile{lof}{\contentsline {figure}{\numberline {4.11}{\ignorespaces Glibc function to which PLT jumps using address stored at GOT, seen from gdb-peda.\relax }}{67}{figure.caption.61}\protected@file@percent }
+\newlabel{fig:lazy_bind_5}{{4.11}{67}{Glibc function to which PLT jumps using address stored at GOT, seen from gdb-peda.\relax }{figure.caption.61}{}}
+\@writefile{toc}{\defcounter {refsection}{0}\relax }\@writefile{toc}{\contentsline {subsection}{\numberline {4.1.5}Hardening ELF binaries and possible bypasses}{67}{subsection.4.1.5}\protected@file@percent }
+\abx@aux@cite{aslr_pie_intro}
+\abx@aux@segm{0}{0}{aslr_pie_intro}
+\@writefile{lot}{\defcounter {refsection}{0}\relax }\@writefile{lot}{\contentsline {table}{\numberline {4.3}{\ignorespaces Security features in C compilers used in the study.\relax }}{68}{table.caption.62}\protected@file@percent }
+\newlabel{table:compilers}{{4.3}{68}{Security features in C compilers used in the study.\relax }{table.caption.62}{}}
+\abx@aux@cite{aslr_pie_intro}
+\abx@aux@segm{0}{0}{aslr_pie_intro}
+\abx@aux@cite{pie_exploit}
+\abx@aux@segm{0}{0}{pie_exploit}
+\abx@aux@cite{relro_redhat}
+\abx@aux@segm{0}{0}{relro_redhat}
+\abx@aux@cite{cet_windows}
+\abx@aux@segm{0}{0}{cet_windows}
+\abx@aux@cite{cet_linux}
+\abx@aux@segm{0}{0}{cet_linux}
+\@writefile{lof}{\defcounter {refsection}{0}\relax }\@writefile{lof}{\contentsline {figure}{\numberline {4.12}{\ignorespaces Two runs of the same executable using ASLR, showing a library and two symbols.\relax }}{69}{figure.caption.63}\protected@file@percent }
+\newlabel{fig:alsr_offset}{{4.12}{69}{Two runs of the same executable using ASLR, showing a library and two symbols.\relax }{figure.caption.63}{}}
+\@writefile{toc}{\defcounter {refsection}{0}\relax }\@writefile{toc}{\contentsline {subsection}{\numberline {4.1.6}Design of our attack}{70}{subsection.4.1.6}\protected@file@percent }
+\newlabel{subsection:got_attack}{{4.1.6}{70}{Design of our attack}{subsection.4.1.6}{}}
+\@writefile{lof}{\defcounter {refsection}{0}\relax }\@writefile{lof}{\contentsline {figure}{\numberline {4.13}{\ignorespaces Call to the glibc function, using objdump\relax }}{71}{figure.caption.64}\protected@file@percent }
+\newlabel{fig:firstcall}{{4.13}{71}{Call to the glibc function, using objdump\relax }{figure.caption.64}{}}
+\@writefile{toc}{\defcounter {refsection}{0}\relax }\@writefile{toc}{\contentsline {chapter}{\numberline {5}Results}{72}{chapter.5}\protected@file@percent }
 \@writefile{lof}{\defcounter {refsection}{0}\relax }\@writefile{lof}{\addvspace {10\p@ }}
 \@writefile{lot}{\defcounter {refsection}{0}\relax }\@writefile{lot}{\addvspace {10\p@ }}
-\@writefile{toc}{\defcounter {refsection}{0}\relax }\@writefile{toc}{\contentsline {chapter}{\numberline {6}Conclusion and future work}{66}{chapter.6}\protected@file@percent }
+\@writefile{toc}{\defcounter {refsection}{0}\relax }\@writefile{toc}{\contentsline {chapter}{\numberline {6}Conclusion and future work}{73}{chapter.6}\protected@file@percent }
 \@writefile{lof}{\defcounter {refsection}{0}\relax }\@writefile{lof}{\addvspace {10\p@ }}
 \@writefile{lot}{\defcounter {refsection}{0}\relax }\@writefile{lot}{\addvspace {10\p@ }}
-\@writefile{toc}{\defcounter {refsection}{0}\relax }\@writefile{toc}{\contentsline {chapter}{Bibliography}{67}{chapter.6}\protected@file@percent }
-\newlabel{annex:bpftool_flags_kernel}{{6}{}{Appendix A - Bpftool commands}{chapter*.57}{}}
-\abx@aux@read@bbl@mdfivesum{ED0DCDE6F36062F4590E740430BED62B}
+\@writefile{toc}{\defcounter {refsection}{0}\relax }\@writefile{toc}{\contentsline {chapter}{Bibliography}{74}{chapter.6}\protected@file@percent }
+\newlabel{annex:bpftool_flags_kernel}{{6}{}{Appendix A - Bpftool commands}{chapter*.66}{}}
+\newlabel{annex:readelf_commands}{{6}{}{Appendix B - Readelf commands}{chapter*.67}{}}
+\newlabel{annexsec:readelf_sec_headers}{{6}{}{}{chapter*.67}{}}
+\newlabel{code:elf_sections}{{6.1}{}{List of ELF section headers with readelf tool of a program compiled with GCC}{lstlisting.6.1}{}}
+\@writefile{lol}{\defcounter {refsection}{0}\relax }\@writefile{lol}{\contentsline {lstlisting}{\numberline {6.1}List of ELF section headers with readelf tool of a program compiled with GCC.}{}{lstlisting.6.1}\protected@file@percent }
+\abx@aux@read@bbl@mdfivesum{DAEC68472698FE766A5D65F3ABD46C28}
 \abx@aux@read@bblrerun
 \abx@aux@refcontextdefaultsdone
 \abx@aux@defaultrefcontext{0}{ransomware_pwc}{none/global//global/global}
@@ -529,5 +578,11 @@
 \abx@aux@defaultrefcontext{0}{tcp_reliable}{none/global//global/global}
 \abx@aux@defaultrefcontext{0}{tcp_handshake}{none/global//global/global}
 \abx@aux@defaultrefcontext{0}{rop_prog_finder}{none/global//global/global}
+\abx@aux@defaultrefcontext{0}{glibc}{none/global//global/global}
+\abx@aux@defaultrefcontext{0}{elf}{none/global//global/global}
+\abx@aux@defaultrefcontext{0}{plt_got_overlord}{none/global//global/global}
+\abx@aux@defaultrefcontext{0}{plt_got_technovelty}{none/global//global/global}
+\abx@aux@defaultrefcontext{0}{aslr_pie_intro}{none/global//global/global}
+\abx@aux@defaultrefcontext{0}{pie_exploit}{none/global//global/global}
 \ttl@finishall
-\gdef \@abspage@last{92}
+\gdef \@abspage@last{100}

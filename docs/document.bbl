@@ -1697,6 +1697,114 @@
       \verb https://github.com/JonathanSalwan/ROPgadget
       \endverb
     \endentry
+    \entry{glibc}{online}{}
+      \field{sortinit}{1}
+      \field{sortinithash}{50c6687d7fc80f50136d75228e3c59ba}
+      \field{labeltitlesource}{title}
+      \field{title}{The GNU C library}
+      \verb{urlraw}
+      \verb https://www.gnu.org/software/libc/
+      \endverb
+      \verb{url}
+      \verb https://www.gnu.org/software/libc/
+      \endverb
+    \endentry
+    \entry{elf}{manual}{}
+      \field{sortinit}{1}
+      \field{sortinithash}{50c6687d7fc80f50136d75228e3c59ba}
+      \field{labeltitlesource}{title}
+      \field{title}{ELF}
+      \verb{urlraw}
+      \verb https://wiki.osdev.org/ELF
+      \endverb
+      \verb{url}
+      \verb https://wiki.osdev.org/ELF
+      \endverb
+    \endentry
+    \entry{plt_got_overlord}{online}{}
+      \name{author}{1}{}{%
+        {{hash=9724da855997a02e74ee77d11b4d64e2}{%
+           family={Tomaschik},
+           familyi={T\bibinitperiod},
+           given={David},
+           giveni={D\bibinitperiod}}}%
+      }
+      \strng{namehash}{9724da855997a02e74ee77d11b4d64e2}
+      \strng{fullhash}{9724da855997a02e74ee77d11b4d64e2}
+      \strng{bibnamehash}{9724da855997a02e74ee77d11b4d64e2}
+      \strng{authorbibnamehash}{9724da855997a02e74ee77d11b4d64e2}
+      \strng{authornamehash}{9724da855997a02e74ee77d11b4d64e2}
+      \strng{authorfullhash}{9724da855997a02e74ee77d11b4d64e2}
+      \field{sortinit}{1}
+      \field{sortinithash}{50c6687d7fc80f50136d75228e3c59ba}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{day}{19}
+      \field{month}{3}
+      \field{title}{GOT and PLT for pwning.}
+      \field{year}{2017}
+      \field{dateera}{ce}
+      \verb{urlraw}
+      \verb https://systemoverlord.com/2017/03/19/got-and-plt-for-pwning.html
+      \endverb
+      \verb{url}
+      \verb https://systemoverlord.com/2017/03/19/got-and-plt-for-pwning.html
+      \endverb
+    \endentry
+    \entry{plt_got_technovelty}{online}{}
+      \name{author}{1}{}{%
+        {{hash=4e4902d108d0796e7e54d06a47cfe1ee}{%
+           family={Wienand},
+           familyi={W\bibinitperiod},
+           given={Ian},
+           giveni={I\bibinitperiod}}}%
+      }
+      \strng{namehash}{4e4902d108d0796e7e54d06a47cfe1ee}
+      \strng{fullhash}{4e4902d108d0796e7e54d06a47cfe1ee}
+      \strng{bibnamehash}{4e4902d108d0796e7e54d06a47cfe1ee}
+      \strng{authorbibnamehash}{4e4902d108d0796e7e54d06a47cfe1ee}
+      \strng{authornamehash}{4e4902d108d0796e7e54d06a47cfe1ee}
+      \strng{authorfullhash}{4e4902d108d0796e7e54d06a47cfe1ee}
+      \field{sortinit}{1}
+      \field{sortinithash}{50c6687d7fc80f50136d75228e3c59ba}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{day}{11}
+      \field{month}{5}
+      \field{title}{PLT and GOT - the key to code sharing and dynamic libraries}
+      \field{year}{2011}
+      \field{dateera}{ce}
+      \verb{urlraw}
+      \verb https://www.technovelty.org/linux/plt-and-got-the-key-to-code-sharing-and-dynamic-libraries.html
+      \endverb
+      \verb{url}
+      \verb https://www.technovelty.org/linux/plt-and-got-the-key-to-code-sharing-and-dynamic-libraries.html
+      \endverb
+    \endentry
+    \entry{aslr_pie_intro}{online}{}
+      \field{sortinit}{1}
+      \field{sortinithash}{50c6687d7fc80f50136d75228e3c59ba}
+      \field{labeltitlesource}{title}
+      \field{title}{aslr/pie intro}
+      \verb{urlraw}
+      \verb https://guyinatuxedo.github.io/5.1-mitigation_aslr_pie/index.html#aslrpie-intro
+      \endverb
+      \verb{url}
+      \verb https://guyinatuxedo.github.io/5.1-mitigation_aslr_pie/index.html#aslrpie-intro
+      \endverb
+    \endentry
+    \entry{pie_exploit}{online}{}
+      \field{sortinit}{1}
+      \field{sortinithash}{50c6687d7fc80f50136d75228e3c59ba}
+      \field{labeltitlesource}{title}
+      \field{title}{Position Independent Code}
+      \verb{urlraw}
+      \verb https://ir0nstone.gitbook.io/notes/types/stack/pie
+      \endverb
+      \verb{url}
+      \verb https://ir0nstone.gitbook.io/notes/types/stack/pie
+      \endverb
+    \endentry
   \enddatalist
 \endrefsection
 \endinput

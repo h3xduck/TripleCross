@@ -2450,6 +2450,15 @@
     <bcf:citekey order="113">rop_prog_finder</bcf:citekey>
     <bcf:citekey order="114">evil_ebpf_p6974</bcf:citekey>
     <bcf:citekey order="115">glibc</bcf:citekey>
+    <bcf:citekey order="116">elf</bcf:citekey>
+    <bcf:citekey order="117">plt_got_overlord</bcf:citekey>
+    <bcf:citekey order="118">plt_got_technovelty</bcf:citekey>
+    <bcf:citekey order="119">aslr_pie_intro</bcf:citekey>
+    <bcf:citekey order="120">aslr_pie_intro</bcf:citekey>
+    <bcf:citekey order="121">pie_exploit</bcf:citekey>
+    <bcf:citekey order="122">relro_redhat</bcf:citekey>
+    <bcf:citekey order="123">cet_windows</bcf:citekey>
+    <bcf:citekey order="124">cet_linux</bcf:citekey>
   </bcf:section>
   <!-- SORTING TEMPLATES -->
   <bcf:sortingtemplate name="none">

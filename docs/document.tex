@@ -1692,7 +1692,7 @@ Ultimately, the capabilities discussed in this section unlock complete freedom f
 %TODO maybe a conclusion for this section?
 
 
-%Maybe not the best title
+%Maybe not the best title. "Design of malicious eBPF applications" may be better fitted?
 \chapter{Design of a malicious eBPF rootkit}
 In the previous chapter, we discussed the functionality of eBPF programs from a security standpoint, detailing which helpers and program types are particularly useful for developing malicious programs, and analysing some techniques (stack scanning, overwriting packets together with TCP retransmissions) which helps us circumvent some of the restrictions of eBPF and find new attack vectors.
 
@@ -1703,20 +1703,20 @@ Taking as a basis these capabilities, this chapter is now dedicated to a compreh
 \item Tampering with user data at system calls, resulting in running malware-like programs and for other malicious purposes.
 \item Achieving stealth, hiding rootkit-related files from the user.
 \item Achieving rootkit persistence, the rootkit should run after a complete system reboot.
-\
+
 \end{itemize}
 %TODO maybe this is the place to mention that, on top of those, explaining some of the DEFCON techniques will be done too. Im particular interested on the one of hiding the kernel log message of bpf_probe_write_user and on ROP.
 
 We will be exploring each functionality individually, presenting the necessary background on each of them, and offering a final comprehensive view on how each of the systems work.
 
-\section{Library injection via .GOT hijacking}
-In this section, we will discuss how to hijack an user process running in the system so that it executes arbitrary code instructed from an eBPF program. For this, we will be injecting a library which will be executed by taking advantage of the architecture of an executable program (the .GOT section in ELFs) and using the stack scanning technique covered in section \ref{subsection:bpf_probe_write_apps}. This injection will be stealthy (it must not crash the process), and will be able to hijack privileged programs such as systemd, so that the code is executed as root.
+\section{Library injection via GOT hijacking}
+In this section, we will discuss how to hijack an user process running in the system so that it executes arbitrary code instructed from an eBPF program. For this, we will be injecting a library which will be executed by taking advantage of the architecture of an executable program (the GOT section in ELFs) and using the stack scanning technique covered in section \ref{subsection:bpf_probe_write_apps}. This injection will be stealthy (it must not crash the process), and will be able to hijack privileged programs such as systemd, so that the code is executed as root.
 
 We will also research how to circumvent the protections which modern compilers have set in order to prevent similar attacks (when performed without eBPF).
 
 This technique has some advantages and disadvantages to the one described by Jeff Dileo at DEFCON 27\cite{evil_ebpf_p6974}, which we will briefly cover before presenting ours. A comparison between them will also be offered.
 
-\subsection{Attacks at the stack: buffer overflow}
+\subsection{Attacks at the stack: buffer overflow} \label{subsection: buf_overflow}
 In section \ref{subsection:stack}, we studied how the stack works and which is the process that a program follows in order to call a function. As we saw in figure \ref{fig:stack}, the processor pushes into the stack several data which is used to restore the context of the original function once the called function exits. These pushed arguments included:
 \begin{itemize}
 \item The arguments with which the function is being called (if they need to be passed in the stack, such as byte arrays).
@@ -1816,8 +1816,8 @@ After this step, the return instruction will be executed. Note that, at this poi
 \end{enumerate}
 
 
-\subsection{ROP with eBPF}
-In 2019, Jeff Dileo presented in DEFCON 27 the first technique to achieve arbitrary code execution using eBPF\cite{evil_ebpf_p6974}. For this, he used the ROP technique we have described previously to inject malicious code into a process. We will present an overview on his technique, in order to later compare it to ours and find advantages and disadvantages. Note that this is a summary and some aspects have been simplified, however we will present the whole process during the explanation of our own technique.
+\subsection{ROP with eBPF} \label{subsection:rop_ebpf}
+In 2019, Jeff Dileo presented in DEFCON 27 the first technique to achieve arbitrary code execution using eBPF\cite{evil_ebpf_p6974}. For this, he used the ROP technique we have described previously to inject malicious code into a process. We will present an overview on his technique, in order to later compare it to the one we will develop for our rootkit, and find advantages and disadvantages. Note that this is a summary and some aspects have been simplified, however we will present the whole process during the explanation of our own technique.
 
 \begin{figure}[H]
 	\centering
@@ -1858,6 +1858,210 @@ Once the attacker has finished executing the injected code, the stack must be re
 \end{figure}
 
 As we can see, eBPF writes back the original stack and thus the execution can continue. Note that, in practice, some final gadgets must also be executed in order to restore the state of rip and rsp, the stack data for this is written in the free memory zone, so that it does not need to be removed.
+
+
+%ALL OR PARTS OF THIS SECTION MAY GO TO AN ANNEX, I'm leaving it here just for now
+\subsection{The ELF format and Lazy Binding} \label{subsection:elf_lazy_binding}
+This section details the Executable and Linkable Format (ELF)\cite{elf}, the format in which we find executable files in Linux systems (between other types). We will perform an analysis from a security standpoint, that is, mainly oriented to describe the most relevant sections and the permissions incorporated into them. We will also focus on several of these sections which will be relevant for designing our attack.
+
+Note that, during all examples shown in this section, we will be using a sample program that has been compiled using Clang/LLVM: TODO %TODO How do I explain which progrm it is? It is an example I developed, src/helpers/simple_timer.c. Shoud I write the code somewhere? Seems excesive
+
+Table \ref{table:elf_tools} shows the main tools we will use during this analysis:
+
+\begin{table}[H]
+\begin{tabular}{|>{\centering\arraybackslash}p{3cm}|>{\centering\arraybackslash}p{10cm}|}
+\hline
+Tool & Purposes\\
+\hline
+\hline
+Readelf & Display information about ELF files\\
+\hline
+Objdump & Display information about object files, mainly used for decompiling programs\\
+\hline
+GDB & The GNU Project Debugger, allows for debugging programs during runtime\\
+\hline
+GDB-peda & The Python Exploit Development Assistance for GDB, allows for multiple advanced operations that ease exploit development, such as showing register values, the stack state or memory information. It works as a plugin for GDB.\\
+\hline
+\end{tabular}
+\caption{Tools used for analysis of ELF programs.}
+\label{table:elf_tools}
+\end{table}
+
+Firstly, we will analyse the main sections we can find in an executable. The command and complete list of headers can be found in Annex \ref{annexsec:readelf_sec_headers}. The most relevant sections are described in table \ref{table:elf_sec_headers}:
+
+\begin{table}[H]
+\begin{tabular}{|>{\centering\arraybackslash}p{1cm}|>{\centering\arraybackslash}p{9cm}|>{\centering\arraybackslash}p{2cm}|}
+\hline
+Tool & Purpose & Permissions\\
+\hline
+\hline
+.init & Contains instructions executed before the \textit{main} function of the program & Alloc, Executable\\
+\hline
+.plt & Procedure Linkage Table (PLT), contains code stubs that use the addresses at .got.plt for jumping to position-independent code & Alloc, Executable\\
+\hline
+.got & Global Offset Table (GOT), it contains addresses of global variables and functions once the linker resolves them at runtime & Alloc, Writable\\
+\hline
+.got.plt & A subset of .got section separated from .got with some compilers, it contains only the target addresses of position-independent code once the linker loads them at runtime, used by .plt section. & Alloc, Writable\\
+\hline
+.plt.got & Generated depending on compiler options, it is a PLT section which does not use lazy binding. & Alloc, Executable\\
+\hline
+.text & Stores executable instructions. & Alloc, Executable\\
+\hline
+.data & Contains initialized static and global variables. & Alloc, Writable\\
+\hline
+.bss & Contains global and static variables which are unitialized or initialized to zero. & Alloc, Writable\\
+\hline 
+\end{tabular}
+\caption{Tools used for analysis of ELF programs.}
+\label{table:elf_sec_headers}
+\end{table}
+
+As it can be observed in table \ref{table:elf_sec_headers}, we can find that all sections have the Alloc flag, meaning they will be loaded into process memory during runtime (see table \ref{TODO}, they have not been shown in previous diagrams for simpleness). 
+
+Apart from those we already discussed, we can find the GOT and PLT sections, whose purpose is to support Position Independent Code (PIC), that is, instructions whose address in virtual memory is not hardcoded by the compiler into the executable, but rather they are not known until resolved at runtime. This is usually the case of shared libraries (such as glibc, which as we described in \ref{subsection:rop_ebpf}, it offers an standatd API for calling system calls), which can be loaded into virtual memory starting at any address\cite{plt_got_overlord}.
+
+Therefore, in order to call a function of a shared library, the dynamic linker follows a process called 'Lazy binding'\cite{plt_got_technovelty}:
+\begin{enumerate}
+\item From the .text section, instead of calling a direct absolute address as usual, a PLT stub (in the .plt section) is called. Snippet \ref{code:lazy_bind_1} shows a call to the function timerfd\_settime, implemented by the shared library glibc and thus using a PLT:
+\begin{lstlisting}[language=C, caption={Call to PLT stub seen from objdump.}, label={code:lazy_bind_1}]
+$ objdump -d simple_timer
+4014cb:	b9 00 00 00 00       	mov    $0x0,%ecx
+4014d0:	be 01 00 00 00       	mov    $0x1,%esi
+4014d5:	89 c7                	mov    %eax,%edi
+4014d7:	e8 44 fc ff ff       	call   401120 <timerfd_settime@plt>
+\end{lstlisting}
+
+\item In the PLT stub, the flow of execution jumps to an address which is stored in the GOT section, which is the absolute address of the function at glibc. This address must be written there by the dynamic linker but, according to lazy binding, the first time to call this function the linker has not calculated that address yet. 
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=15.5cm]{sch_gdb_plt.png}
+	\caption{PLT stub for timerfd\_settime, seen from gdb-peda.}
+	\label{fig:lazy_bind_2}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=15.5cm]{sch_gdb_got_prev.png}
+	\caption{Inspecting address stored in GOT section before dynamic linking, seen from gdb-peda.}
+	\label{fig:lazy_bind_3}
+\end{figure}
+
+\item As we can see in figures \ref{fig:lazy_bind_2} and \ref{fig:lazy_bind_3}, the PLT stub calls address 0x4010a0, which leads to a dynamic linking routine, which proceeds to write the address into the GOT section and jump back to the start of the PLT stub. This time, the memory address at GOT to which the PLT jumps is already loaded with the address to the function at the shared library, as shown by figure \ref{fig:lazy_bind_4}.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=15.5cm]{sch_gdb_got_after.png}
+	\caption{Inspecting address stored in GOT section after dynamic linking, seen from gdb-peda.}
+	\label{fig:lazy_bind_4}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=15.5cm]{sch_glibc_func.png}
+	\caption{Glibc function to which PLT jumps using address stored at GOT, seen from gdb-peda.}
+	\label{fig:lazy_bind_5}
+\end{figure}
+
+\end{enumerate}
+
+
+Therefore, in essence, when using lazy binding the dynamic linker will individually load into GOT the addresses of the functions at the shared libraries, during the first time they are called in the program. After that, the address will remain in the GOT section and will be used by the PLT for all subsequent calls.
+
+The reason lazy binding matters to us is because, as we will explain section \ref{subsection:got_attack}, the GOT section is actually writable from an eBPF program using bpf\_probe\_write\_user(). This is because this section specifically must be writeable at runtime for the dynamic linker to store the address once they are resolved. Therefore, even if we cannot write into the .text section from this helper, we still can modify the GOT section from eBPF, redirecting the address at which the PLT jumps, and thus controlling the flow of execution in the program. 
+
+\subsection{Hardening ELF binaries and possible bypasses}
+During the previous section, we have discussed how lazy binding works and how introduced how it could be exploited, and presented multiple of the classic attacks at the stack such as buffer overflow and ROP. However, during the years multiple hardening measures have been introduced into modern compilers, which attempt to mitigate these and other techniques. We will now present them so that, during the design of our rootkit, we can adapt to all of these.
+
+Table \ref{table:compilers} shows the compilers that we will be considering during this study. We will be exclusively looking at those security features that are included by default.
+
+\begin{table}[H]
+\begin{tabular}{|>{\centering\arraybackslash}p{5cm}|>{\centering\arraybackslash}p{8cm}|}
+\hline
+Compiler & Security features by default\\
+\hline
+\hline
+Clang/LLVM 12.0.0 (2021) & Stack canaries, DEP/NX\\
+\hline
+GCC 10.3.0 (2021) & Stack canaries, DEP/NX, PIE, Full RELRO\\
+\hline 
+\end{tabular}
+\caption{Security features in C compilers used in the study.}
+\label{table:compilers}
+\end{table}
+
+\textbf{Stack canaries}
+Stack canaries are random data that is pushed into the stack before calling potentially dangerous functions (such as strcpy()) that attempts to prevent attacks at the stack by ensuring that their value is the same before and after the execution of the called function. 
+
+If a stack canary is present and a buffer overflow happened, it would overwrite the value of the canary, therefore alerting of the attack, in which case the processor halts the execution of the program.
+
+In order to bypass a canary, an attacker must ensure that it is not overwritten, or that the value of the canary remains in the same position and with the same value once the function that was called returns.
+
+\textbf{DEP/NX}\\
+Data Execution Prevention, also known as No Execute, is the option of marking the stack as non executable. This prevents, as we explained in section \ref{subsection: buf_overflow}, the possibility of executing injected shellcode in the stack after modifying the value of the saved rip.
+
+The creation of advanced techniques like ROP is one reaction to this mitigation, that circumvents this protection.
+
+\textbf{ASLR}\\
+Address Space Layout Randomization is a technique that randomizes the addresses on the heap, stack and libraries, so that an attacker cannot rely on known addresses during exploitation (e.g: libraries are loaded at a different memory address each time the program is run, so ROP gadgets change their position)\cite{aslr_pie_intro}.
+
+In order to bypass ASLR, attackers must take into account that, although the address at which, for instance, a library is loaded is random, the internal structure of the library remains unchanged, with all symbols in the same relative position, as figure \ref{table:aslr_offset} shows.
+
+%TODO Add the .data section here
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=13cm]{aslr_offset.jpg}
+	\caption{Two runs of the same executable using ASLR, showing a library and two symbols.}
+	\label{fig:alsr_offset}
+\end{figure}
+
+As we can observe in the figure, although glibc is loaded at a different base address each run, the offset between the functions it implements, malloc() and free(), remains constant. Therefore, a method for bypassing ASLR is to achieve information about the absolute address of any symbol, which can then easily lead to knowing any other if an attacker decompiles the executable and calculates the offset between a pair of addresses where one is known.
+
+\textbf{PIE}\\
+Position Independent Executable is a mitigation introduced to reduce the ability of an attacker to locate symbols in virtual memory by randomizing the base address at which the program itself (including the .text section) is loaded. This base address determines an offset which is added to all memory addresses in the code, so that each instruction is located at an address + this offset. Therefore, all jumps are made using relative addresses.\cite{aslr_pie_intro}\cite{pie_exploit}.
+
+Similarly to ASLR, the internal structure of each section is maintained, therefore if an attacker is able to leak the meaning of some section, it is possible to calculate the rest.
+
+\textbf{RELRO}\\
+Relocation Read-Only is a hardening technique that mitigates the possibility of an attacker overwriting the GOT section, as we explained at section \ref{subsection:elf_lazy_binding}. In order to achieve the lazy binding process is substituted by the linker resolving all entries in the GOT section right after the beginning of the execution, and then marking the .got section as read-only. Two settings for RELRO are the most widespread, either Partial RELRO (which only marks sections of the .got section not related to the PLT as read-only, leaving .got.plt writeable) or Full RELRO (which marks the .got section as read-only completely). Binaries with only Partial RELRO are still non-secure, as the address at which the PLT section jumps can still be overwriten (including from eBPF)\cite{relro_redhat}.
+
+Bypassing Full RELRO, however, stops any attempt of GOT hijacking, unless an attacker finds an alternative method for writting into the virtual memory of a process that bypassed the read-only flag. We will use one of these methods for our rootkit.
+
+
+\textbf{Intel CET}\\
+Intel Control-flow Enforcement Technology is a hardening feature fully incorporated in Windows 10 systems \cite{cet_windows} and a work in progress in Linux\cite{cet_linux}. Its purpose is to defeat ROP attacks and other derivates (e.g: Jump-oriented programming, JOP), by adding a strict kernel-supported control of the return addresses and strong restrictions over jump and call instructions.
+
+In Linux, the kernel will support a hidden 'shadow stack' that will save the return addresses for each call. This prevents modifying the saved value of rip in the stack, since the kernel would realise that the flow of execution has been modified. We can also find that modern compilers (such as GCC 10.3.0) already generate Intel CET-related instructions such as \textit{endbr64}, whose purpose is to be placed at the start of functions, marking that as the only address to which an indirect jump can land (otherwise, jumps will be rejected if not landing at \textit{endbr64}).
+
+As mentioned, we will not consider this feature since it is not active in the Linux kernel.
+
+%TODO Not the best title
+\subsection{Design of our attack} \label{subsection:got_attack}
+Taking all the previous background into stack attacks, ELF's lazy binding and hardening features for binaries, we will now present the exploitation technique that our rootkit will use to inject a malicious library into a running process, using the GOT hijacking technique that we analysed. The rootkit will inject the library only after the second time that an specific syscall is called by a process (since the first time we will wait for GOT addresses to be loaded by the dynamic linker).
+
+This technique works both in compilers with low hardening fetaures by default (Clang) and also on a compiler with all of them active (GCC), see table \ref{table:compilers}. We will present it by steps and, on each one, detail the different existing methods depending on the compiler features.
+
+For this research work, we will be performing this attack on processes that make use either the system call sys\_openat or sys\_timerfd\_settime, which are called by the standard library glibc.
+
+\textbf{Stage 1: eBPF tracing and scan the stack}\\
+We load and attach a tracepoint eBPF program at the \textit{enter} position of syscall sys\_timerfd\_settime. Firstly we must ensure that the process calling the tracepoint is one of the processes to hijack.
+
+We will then proceed with the stack scanning technique, as we explained in section \ref{subsection:bpf_probe_write_apps}. In this case, the algorithm will go as follows:
+\begin{enumerate}
+\item Take one of the syscall parameters and scan forward in the scan. For each iteration, we must check if the data at the stack corresponds to the saved rip:
+\begin{enumerate}
+\item Check that the previous instruction is a call instruction, by checking the instruction length and opcodes (call instructions always start with e8, and the length is 5 bytes, see figure \ref{fig:firstcall}).
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=13cm]{sch_firstcall.png}
+	\caption{Call to the glibc function, using objdump}
+	\label{fig:firstcall}
+\end{figure}
+\item Now that we know we localized a call instruction, we take the address at which it jumps. That should be an address in a PLT stub.
+\item We analyze the instruction at the PLT stub. If the program was compiled with GCC, it will be an \textit{endbr64} instruction followed by the PLT jump instruction using the address at GOT (since it generates Intel CET-compatible programs, see table \ref{table:compilers}). Otherwise, if using Clang, the first instruction is the PLT jump.
+%TODO Continue
+\end{enumerate}
+\end{enumerate}
 
 
 
@@ -1952,7 +2156,97 @@ CONFIG_HZ is set to 250
 \end{verbatim}
 
 
-\chapter* {Appendix B}
+\chapter* {Appendix B - Readelf commands} \label{annex:readelf_commands}
+\pagenumbering{gobble} % Las páginas de los anexos no se numeran
+\section*{Section headers in ELF file} \label{annexsec:readelf_sec_headers}
+\begin{lstlisting}[language=bash, caption={List of ELF section headers with readelf tool of a program compiled with GCC.}, label={code:elf_sections}]
+$ readelf -S simple_timer
+There are 36 section headers, starting at offset 0x4120:
+
+Section Headers:
+  [Nr] Name              Type             Address           Offset
+       Size              EntSize          Flags  Link  Info  Align
+  [ 0]                   NULL             0000000000000000  00000000
+       0000000000000000  0000000000000000           0     0     0
+  [ 1] .interp           PROGBITS         0000000000400318  00000318
+       000000000000001c  0000000000000000   A       0     0     1
+  [ 2] .note.gnu.pr[...] NOTE             0000000000400338  00000338
+       0000000000000030  0000000000000000   A       0     0     8
+  [ 3] .note.gnu.bu[...] NOTE             0000000000400368  00000368
+       0000000000000024  0000000000000000   A       0     0     4
+  [ 4] .note.ABI-tag     NOTE             000000000040038c  0000038c
+       0000000000000020  0000000000000000   A       0     0     4
+  [ 5] .gnu.hash         GNU_HASH         00000000004003b0  000003b0
+       000000000000001c  0000000000000000   A       6     0     8
+  [ 6] .dynsym           DYNSYM           00000000004003d0  000003d0
+       0000000000000108  0000000000000018   A       7     1     8
+  [ 7] .dynstr           STRTAB           00000000004004d8  000004d8
+       00000000000000ad  0000000000000000   A       0     0     1
+  [ 8] .gnu.version      VERSYM           0000000000400586  00000586
+       0000000000000016  0000000000000002   A       6     0     2
+  [ 9] .gnu.version_r    VERNEED          00000000004005a0  000005a0
+       0000000000000050  0000000000000000   A       7     1     8
+  [10] .rela.dyn         RELA             00000000004005f0  000005f0
+       0000000000000030  0000000000000018   A       6     0     8
+  [11] .rela.plt         RELA             0000000000400620  00000620
+       00000000000000c0  0000000000000018  AI       6    24     8
+  [12] .init             PROGBITS         0000000000401000  00001000
+       000000000000001b  0000000000000000  AX       0     0     4
+  [13] .plt              PROGBITS         0000000000401020  00001020
+       0000000000000090  0000000000000010  AX       0     0     16
+  [14] .plt.sec          PROGBITS         00000000004010b0  000010b0
+       0000000000000080  0000000000000010  AX       0     0     16
+  [15] .text             PROGBITS         0000000000401130  00001130
+       00000000000004c5  0000000000000000  AX       0     0     16
+  [16] .fini             PROGBITS         00000000004015f8  000015f8
+       000000000000000d  0000000000000000  AX       0     0     4
+  [17] .rodata           PROGBITS         0000000000402000  00002000
+       00000000000000a5  0000000000000000   A       0     0     8
+  [18] .eh_frame_hdr     PROGBITS         00000000004020a8  000020a8
+       000000000000004c  0000000000000000   A       0     0     4
+  [19] .eh_frame         PROGBITS         00000000004020f8  000020f8
+       0000000000000120  0000000000000000   A       0     0     8
+  [20] .init_array       INIT_ARRAY       0000000000403e10  00002e10
+       0000000000000008  0000000000000008  WA       0     0     8
+  [21] .fini_array       FINI_ARRAY       0000000000403e18  00002e18
+       0000000000000008  0000000000000008  WA       0     0     8
+  [22] .dynamic          DYNAMIC          0000000000403e20  00002e20
+       00000000000001d0  0000000000000010  WA       7     0     8
+  [23] .got              PROGBITS         0000000000403ff0  00002ff0
+       0000000000000010  0000000000000008  WA       0     0     8
+  [24] .got.plt          PROGBITS         0000000000404000  00003000
+       0000000000000058  0000000000000008  WA       0     0     8
+  [25] .data             PROGBITS         0000000000404058  00003058
+       0000000000000014  0000000000000000  WA       0     0     8
+  [26] .bss              NOBITS           0000000000404070  0000306c
+       0000000000000020  0000000000000000  WA       0     0     16
+  [27] .comment          PROGBITS         0000000000000000  0000306c
+       0000000000000025  0000000000000001  MS       0     0     1
+  [28] .debug_aranges    PROGBITS         0000000000000000  00003091
+       0000000000000030  0000000000000000           0     0     1
+  [29] .debug_info       PROGBITS         0000000000000000  000030c1
+       0000000000000295  0000000000000000           0     0     1
+  [30] .debug_abbrev     PROGBITS         0000000000000000  00003356
+       00000000000000fd  0000000000000000           0     0     1
+  [31] .debug_line       PROGBITS         0000000000000000  00003453
+       000000000000024d  0000000000000000           0     0     1
+  [32] .debug_str        PROGBITS         0000000000000000  000036a0
+       00000000000001f5  0000000000000001  MS       0     0     1
+  [33] .symtab           SYMTAB           0000000000000000  00003898
+       0000000000000480  0000000000000018          34    22     8
+  [34] .strtab           STRTAB           0000000000000000  00003d18
+       00000000000002a2  0000000000000000           0     0     1
+  [35] .shstrtab         STRTAB           0000000000000000  00003fba
+       000000000000015f  0000000000000000           0     0     1
+Key to Flags:
+  W (write), A (alloc), X (execute), M (merge), S (strings), I (info),
+  L (link order), O (extra OS processing required), G (group), T (TLS),
+  C (compressed), x (unknown), o (OS specific), E (exclude),
+  l (large), p (processor specific)
+\end{lstlisting}
+
+
+
 
 
 \end{document}
