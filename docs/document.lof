@@ -23,61 +23,61 @@
 \defcounter {refsection}{0}\relax 
 \contentsline {figure}{\numberline {2.9}{\ignorespaces Sketch of the compilation and loading process of a program developed with libbpf.\relax }}{25}{figure.caption.28}%
 \defcounter {refsection}{0}\relax 
+\contentsline {figure}{\numberline {2.10}{\ignorespaces Memory translation of virtual pages to physical pages.\relax }}{28}{figure.caption.33}%
+\defcounter {refsection}{0}\relax 
+\contentsline {figure}{\numberline {2.11}{\ignorespaces Major page fault after a page was removed from RAM.\relax }}{29}{figure.caption.34}%
+\defcounter {refsection}{0}\relax 
+\contentsline {figure}{\numberline {2.12}{\ignorespaces Minor page fault after a fork() in which the page table was not copied completely.\relax }}{30}{figure.caption.35}%
+\defcounter {refsection}{0}\relax 
+\contentsline {figure}{\numberline {2.13}{\ignorespaces Virtual memory architecture of a process\cite {mem_arch_proc}.\relax }}{31}{figure.caption.36}%
+\defcounter {refsection}{0}\relax 
+\contentsline {figure}{\numberline {2.14}{\ignorespaces Simplified stack representation showing only stack frames.\relax }}{32}{figure.caption.37}%
+\defcounter {refsection}{0}\relax 
+\contentsline {figure}{\numberline {2.15}{\ignorespaces Representation of push and pop operations in the stack.\relax }}{33}{figure.caption.39}%
+\defcounter {refsection}{0}\relax 
+\contentsline {figure}{\numberline {2.16}{\ignorespaces Stack representation right before starting the function call process.\relax }}{34}{figure.caption.40}%
+\defcounter {refsection}{0}\relax 
+\contentsline {figure}{\numberline {2.17}{\ignorespaces Stack representation right after the function preamble.\relax }}{34}{figure.caption.41}%
+\defcounter {refsection}{0}\relax 
+\contentsline {figure}{\numberline {2.18}{\ignorespaces Execution hijack overwriting saved rip value.\relax }}{36}{figure.caption.42}%
+\defcounter {refsection}{0}\relax 
+\contentsline {figure}{\numberline {2.19}{\ignorespaces Stack buffer overflow overwriting ret value.\relax }}{37}{figure.caption.43}%
+\defcounter {refsection}{0}\relax 
+\contentsline {figure}{\numberline {2.20}{\ignorespaces Executing arbitrary code exploiting a buffer overflow vulnerability.\relax }}{38}{figure.caption.44}%
+\defcounter {refsection}{0}\relax 
+\contentsline {figure}{\numberline {2.21}{\ignorespaces Steps for executing code sample using ROP.\relax }}{40}{figure.caption.45}%
+\defcounter {refsection}{0}\relax 
+\contentsline {figure}{\numberline {2.22}{\ignorespaces Ethernet frame with TCP/IP packet.\relax }}{42}{figure.caption.46}%
+\defcounter {refsection}{0}\relax 
+\contentsline {figure}{\numberline {2.23}{\ignorespaces TCP 3-way handshake.\relax }}{44}{figure.caption.48}%
+\defcounter {refsection}{0}\relax 
+\contentsline {figure}{\numberline {2.24}{\ignorespaces TCP packet retransmission on timeout.\relax }}{45}{figure.caption.49}%
+\defcounter {refsection}{0}\relax 
+\contentsline {figure}{\numberline {2.25}{\ignorespaces PLT stub for timerfd\_settime, seen from gdb-peda.\relax }}{48}{figure.caption.52}%
+\defcounter {refsection}{0}\relax 
+\contentsline {figure}{\numberline {2.26}{\ignorespaces Inspecting address stored in GOT section before dynamic linking, seen from gdb-peda.\relax }}{48}{figure.caption.53}%
+\defcounter {refsection}{0}\relax 
+\contentsline {figure}{\numberline {2.27}{\ignorespaces Inspecting address stored in GOT section after dynamic linking, seen from gdb-peda.\relax }}{48}{figure.caption.54}%
+\defcounter {refsection}{0}\relax 
+\contentsline {figure}{\numberline {2.28}{\ignorespaces Glibc function to which PLT jumps using address stored at GOT, seen from gdb-peda.\relax }}{48}{figure.caption.55}%
+\defcounter {refsection}{0}\relax 
 \addvspace {10\p@ }
 \defcounter {refsection}{0}\relax 
-\contentsline {figure}{\numberline {3.1}{\ignorespaces Memory translation of virtual pages to physical pages.\relax }}{37}{figure.caption.34}%
+\contentsline {figure}{\numberline {3.1}{\ignorespaces Overview of stack scanning and writing technique.\relax }}{60}{figure.caption.58}%
 \defcounter {refsection}{0}\relax 
-\contentsline {figure}{\numberline {3.2}{\ignorespaces Major page fault after a page was removed from RAM.\relax }}{38}{figure.caption.35}%
-\defcounter {refsection}{0}\relax 
-\contentsline {figure}{\numberline {3.3}{\ignorespaces Minor page fault after a fork() in which the page table was not copied completely.\relax }}{38}{figure.caption.36}%
-\defcounter {refsection}{0}\relax 
-\contentsline {figure}{\numberline {3.4}{\ignorespaces Virtual memory architecture of a process\cite {mem_arch_proc}.\relax }}{39}{figure.caption.37}%
-\defcounter {refsection}{0}\relax 
-\contentsline {figure}{\numberline {3.5}{\ignorespaces Simplified stack representation showing only stack frames.\relax }}{40}{figure.caption.38}%
-\defcounter {refsection}{0}\relax 
-\contentsline {figure}{\numberline {3.6}{\ignorespaces Representation of push and pop operations in the stack.\relax }}{42}{figure.caption.40}%
-\defcounter {refsection}{0}\relax 
-\contentsline {figure}{\numberline {3.7}{\ignorespaces Stack representation right before starting the function call process.\relax }}{42}{figure.caption.41}%
-\defcounter {refsection}{0}\relax 
-\contentsline {figure}{\numberline {3.8}{\ignorespaces Stack representation right after the function preamble.\relax }}{43}{figure.caption.42}%
-\defcounter {refsection}{0}\relax 
-\contentsline {figure}{\numberline {3.9}{\ignorespaces Overview of stack scanning and writing technique.\relax }}{46}{figure.caption.43}%
-\defcounter {refsection}{0}\relax 
-\contentsline {figure}{\numberline {3.10}{\ignorespaces Ethernet frame with TCP/IP packet.\relax }}{48}{figure.caption.44}%
-\defcounter {refsection}{0}\relax 
-\contentsline {figure}{\numberline {3.11}{\ignorespaces TCP 3-way handshake.\relax }}{50}{figure.caption.46}%
-\defcounter {refsection}{0}\relax 
-\contentsline {figure}{\numberline {3.12}{\ignorespaces TCP packet retransmission on timeout.\relax }}{51}{figure.caption.47}%
-\defcounter {refsection}{0}\relax 
-\contentsline {figure}{\numberline {3.13}{\ignorespaces Technique to duplicate a packet for exfiltrating data.\relax }}{53}{figure.caption.48}%
+\contentsline {figure}{\numberline {3.2}{\ignorespaces Technique to duplicate a packet for exfiltrating data.\relax }}{64}{figure.caption.59}%
 \defcounter {refsection}{0}\relax 
 \addvspace {10\p@ }
 \defcounter {refsection}{0}\relax 
-\contentsline {figure}{\numberline {4.1}{\ignorespaces Execution hijack overwriting saved rip value.\relax }}{57}{figure.caption.49}%
+\contentsline {figure}{\numberline {4.1}{\ignorespaces Initial setup for the ROP with eBPF technique.\relax }}{67}{figure.caption.60}%
 \defcounter {refsection}{0}\relax 
-\contentsline {figure}{\numberline {4.2}{\ignorespaces Stack buffer overflow overwriting ret value.\relax }}{58}{figure.caption.50}%
+\contentsline {figure}{\numberline {4.2}{\ignorespaces Process memory after syscall exits and ROP code overwrites the stack.\relax }}{68}{figure.caption.61}%
 \defcounter {refsection}{0}\relax 
-\contentsline {figure}{\numberline {4.3}{\ignorespaces Executing arbitrary code exploiting a buffer overflow vulnerability.\relax }}{59}{figure.caption.51}%
+\contentsline {figure}{\numberline {4.3}{\ignorespaces Stack data is restored and program continues its execution.\relax }}{69}{figure.caption.62}%
 \defcounter {refsection}{0}\relax 
-\contentsline {figure}{\numberline {4.4}{\ignorespaces Steps for executing code sample using ROP.\relax }}{61}{figure.caption.52}%
+\contentsline {figure}{\numberline {4.4}{\ignorespaces Two runs of the same executable using ASLR, showing a library and two symbols.\relax }}{70}{figure.caption.63}%
 \defcounter {refsection}{0}\relax 
-\contentsline {figure}{\numberline {4.5}{\ignorespaces Initial setup for the ROP with eBPF technique.\relax }}{62}{figure.caption.53}%
-\defcounter {refsection}{0}\relax 
-\contentsline {figure}{\numberline {4.6}{\ignorespaces Process memory after syscall exits and ROP code overwrites the stack.\relax }}{63}{figure.caption.54}%
-\defcounter {refsection}{0}\relax 
-\contentsline {figure}{\numberline {4.7}{\ignorespaces Stack data is restored and program continues its execution.\relax }}{64}{figure.caption.55}%
-\defcounter {refsection}{0}\relax 
-\contentsline {figure}{\numberline {4.8}{\ignorespaces PLT stub for timerfd\_settime, seen from gdb-peda.\relax }}{66}{figure.caption.58}%
-\defcounter {refsection}{0}\relax 
-\contentsline {figure}{\numberline {4.9}{\ignorespaces Inspecting address stored in GOT section before dynamic linking, seen from gdb-peda.\relax }}{66}{figure.caption.59}%
-\defcounter {refsection}{0}\relax 
-\contentsline {figure}{\numberline {4.10}{\ignorespaces Inspecting address stored in GOT section after dynamic linking, seen from gdb-peda.\relax }}{67}{figure.caption.60}%
-\defcounter {refsection}{0}\relax 
-\contentsline {figure}{\numberline {4.11}{\ignorespaces Glibc function to which PLT jumps using address stored at GOT, seen from gdb-peda.\relax }}{67}{figure.caption.61}%
-\defcounter {refsection}{0}\relax 
-\contentsline {figure}{\numberline {4.12}{\ignorespaces Two runs of the same executable using ASLR, showing a library and two symbols.\relax }}{69}{figure.caption.63}%
-\defcounter {refsection}{0}\relax 
-\contentsline {figure}{\numberline {4.13}{\ignorespaces Call to the glibc function, using objdump\relax }}{71}{figure.caption.64}%
+\contentsline {figure}{\numberline {4.5}{\ignorespaces Call to the glibc function, using objdump\relax }}{72}{figure.caption.64}%
 \defcounter {refsection}{0}\relax 
 \addvspace {10\p@ }
 \defcounter {refsection}{0}\relax 

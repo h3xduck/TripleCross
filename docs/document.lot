@@ -33,27 +33,27 @@
 \defcounter {refsection}{0}\relax 
 \contentsline {table}{\numberline {2.14}{\ignorespaces Table showing BPF skeleton functions.\relax }}{25}{table.caption.29}%
 \defcounter {refsection}{0}\relax 
+\contentsline {table}{\numberline {2.15}{\ignorespaces Kernel compilation flags for eBPF.\relax }}{26}{table.caption.30}%
+\defcounter {refsection}{0}\relax 
+\contentsline {table}{\numberline {2.16}{\ignorespaces Capabilities needed for eBPF.\relax }}{27}{table.caption.31}%
+\defcounter {refsection}{0}\relax 
+\contentsline {table}{\numberline {2.17}{\ignorespaces Values for unprivileged eBPF kernel parameter.\relax }}{27}{table.caption.32}%
+\defcounter {refsection}{0}\relax 
+\contentsline {table}{\numberline {2.18}{\ignorespaces Relevant registers in x86\_64 for the stack and control flow and their purpose.\relax }}{32}{table.caption.38}%
+\defcounter {refsection}{0}\relax 
+\contentsline {table}{\numberline {2.19}{\ignorespaces Relevant TCP flags and their purpose.\relax }}{43}{table.caption.47}%
+\defcounter {refsection}{0}\relax 
+\contentsline {table}{\numberline {2.20}{\ignorespaces Tools used for analysis of ELF programs.\relax }}{46}{table.caption.50}%
+\defcounter {refsection}{0}\relax 
+\contentsline {table}{\numberline {2.21}{\ignorespaces Tools used for analysis of ELF programs.\relax }}{47}{table.caption.51}%
+\defcounter {refsection}{0}\relax 
+\contentsline {table}{\numberline {2.22}{\ignorespaces Security features in C compilers used in the study.\relax }}{49}{table.caption.56}%
+\defcounter {refsection}{0}\relax 
 \addvspace {10\p@ }
 \defcounter {refsection}{0}\relax 
-\contentsline {table}{\numberline {3.1}{\ignorespaces Kernel compilation flags for eBPF.\relax }}{28}{table.caption.30}%
-\defcounter {refsection}{0}\relax 
-\contentsline {table}{\numberline {3.2}{\ignorespaces Capabilities needed for eBPF.\relax }}{29}{table.caption.31}%
-\defcounter {refsection}{0}\relax 
-\contentsline {table}{\numberline {3.3}{\ignorespaces Values for unprivileged eBPF kernel parameter.\relax }}{29}{table.caption.32}%
-\defcounter {refsection}{0}\relax 
-\contentsline {table}{\numberline {3.4}{\ignorespaces Argument passing convention of registers for function calls in user and kernel space respectively.\relax }}{32}{table.caption.33}%
-\defcounter {refsection}{0}\relax 
-\contentsline {table}{\numberline {3.5}{\ignorespaces Relevant registers in x86\_64 for the stack and control flow and their purpose.\relax }}{40}{table.caption.39}%
-\defcounter {refsection}{0}\relax 
-\contentsline {table}{\numberline {3.6}{\ignorespaces Relevant TCP flags and their purpose.\relax }}{50}{table.caption.45}%
+\contentsline {table}{\numberline {3.1}{\ignorespaces Argument passing convention of registers for function calls in user and kernel space respectively.\relax }}{54}{table.caption.57}%
 \defcounter {refsection}{0}\relax 
 \addvspace {10\p@ }
-\defcounter {refsection}{0}\relax 
-\contentsline {table}{\numberline {4.1}{\ignorespaces Tools used for analysis of ELF programs.\relax }}{65}{table.caption.56}%
-\defcounter {refsection}{0}\relax 
-\contentsline {table}{\numberline {4.2}{\ignorespaces Tools used for analysis of ELF programs.\relax }}{65}{table.caption.57}%
-\defcounter {refsection}{0}\relax 
-\contentsline {table}{\numberline {4.3}{\ignorespaces Security features in C compilers used in the study.\relax }}{68}{table.caption.62}%
 \defcounter {refsection}{0}\relax 
 \addvspace {10\p@ }
 \defcounter {refsection}{0}\relax 
