@@ -15,8 +15,9 @@ int main(int argc, char *argv[]) {
     int fd;
     char* path = "/home/osboxes/TFG/src/helpers/Makefile";
     openat(fd, path, O_RDONLY);
+    sleep(1);
     //Second call
     openat(fd, path, O_RDONLY);
-
+    sleep(1);
    return 0;
 }

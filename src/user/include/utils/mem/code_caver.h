@@ -10,7 +10,7 @@
 
 #include "../common/constants.h"
 
-#define CODE_CAVE_LENGTH_BYTES 0x40
+#define CODE_CAVE_LENGTH_BYTES 0xA0
 #define NULL_BYTE 0x00
 
 __u64 cave_find(int mem_fd, int cave_length, __u64 from, __u64 to){

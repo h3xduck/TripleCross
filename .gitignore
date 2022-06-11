@@ -1,6 +1,6 @@
 src/log
 *.aux
-*bcf
+*/document.bcf
 *.blg
 *.fdb_latexmk
 *.fls
