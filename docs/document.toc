@@ -25,37 +25,37 @@
 \defcounter {refsection}{0}\relax 
 \contentsline {subsection}{\numberline {2.1.2}The BPF virtual machine}{6}{subsection.2.1.2}%
 \defcounter {refsection}{0}\relax 
-\contentsline {subsection}{\numberline {2.1.3}Analysis of a BPF filter program}{7}{subsection.2.1.3}%
+\contentsline {subsection}{\numberline {2.1.3}Analysis of a BPF filter program}{6}{subsection.2.1.3}%
 \defcounter {refsection}{0}\relax 
-\contentsline {subsection}{\numberline {2.1.4}BPF bytecode instruction format}{8}{subsection.2.1.4}%
+\contentsline {subsection}{\numberline {2.1.4}BPF bytecode instruction format}{7}{subsection.2.1.4}%
 \defcounter {refsection}{0}\relax 
-\contentsline {subsection}{\numberline {2.1.5}An example of BPF filter with tcpdump}{10}{subsection.2.1.5}%
+\contentsline {subsection}{\numberline {2.1.5}An example of BPF filter with tcpdump}{8}{subsection.2.1.5}%
 \defcounter {refsection}{0}\relax 
-\contentsline {section}{\numberline {2.2}Modern eBPF}{11}{section.2.2}%
+\contentsline {section}{\numberline {2.2}Modern eBPF}{10}{section.2.2}%
 \defcounter {refsection}{0}\relax 
-\contentsline {subsection}{\numberline {2.2.1}eBPF instruction set}{13}{subsection.2.2.1}%
+\contentsline {subsection}{\numberline {2.2.1}eBPF instruction set}{12}{subsection.2.2.1}%
 \defcounter {refsection}{0}\relax 
 \contentsline {subsection}{\numberline {2.2.2}JIT compilation}{13}{subsection.2.2.2}%
 \defcounter {refsection}{0}\relax 
-\contentsline {subsection}{\numberline {2.2.3}The eBPF verifier}{14}{subsection.2.2.3}%
+\contentsline {subsection}{\numberline {2.2.3}The eBPF verifier}{13}{subsection.2.2.3}%
 \defcounter {refsection}{0}\relax 
-\contentsline {subsection}{\numberline {2.2.4}eBPF maps}{15}{subsection.2.2.4}%
+\contentsline {subsection}{\numberline {2.2.4}eBPF maps}{14}{subsection.2.2.4}%
 \defcounter {refsection}{0}\relax 
-\contentsline {subsection}{\numberline {2.2.5}The eBPF ring buffer}{16}{subsection.2.2.5}%
+\contentsline {subsection}{\numberline {2.2.5}The eBPF ring buffer}{15}{subsection.2.2.5}%
 \defcounter {refsection}{0}\relax 
-\contentsline {subsection}{\numberline {2.2.6}The bpf() syscall}{16}{subsection.2.2.6}%
+\contentsline {subsection}{\numberline {2.2.6}The bpf() syscall}{15}{subsection.2.2.6}%
 \defcounter {refsection}{0}\relax 
-\contentsline {subsection}{\numberline {2.2.7}eBPF helpers}{17}{subsection.2.2.7}%
+\contentsline {subsection}{\numberline {2.2.7}eBPF helpers}{15}{subsection.2.2.7}%
 \defcounter {refsection}{0}\relax 
 \contentsline {section}{\numberline {2.3}eBPF program types}{18}{section.2.3}%
 \defcounter {refsection}{0}\relax 
 \contentsline {subsection}{\numberline {2.3.1}XDP}{18}{subsection.2.3.1}%
 \defcounter {refsection}{0}\relax 
-\contentsline {subsection}{\numberline {2.3.2}Traffic Control}{20}{subsection.2.3.2}%
+\contentsline {subsection}{\numberline {2.3.2}Traffic Control}{18}{subsection.2.3.2}%
 \defcounter {refsection}{0}\relax 
-\contentsline {subsection}{\numberline {2.3.3}Tracepoints}{21}{subsection.2.3.3}%
+\contentsline {subsection}{\numberline {2.3.3}Tracepoints}{20}{subsection.2.3.3}%
 \defcounter {refsection}{0}\relax 
-\contentsline {subsection}{\numberline {2.3.4}Kprobes}{22}{subsection.2.3.4}%
+\contentsline {subsection}{\numberline {2.3.4}Kprobes}{21}{subsection.2.3.4}%
 \defcounter {refsection}{0}\relax 
 \contentsline {subsection}{\numberline {2.3.5}Uprobes}{22}{subsection.2.3.5}%
 \defcounter {refsection}{0}\relax 
@@ -63,7 +63,7 @@
 \defcounter {refsection}{0}\relax 
 \contentsline {subsection}{\numberline {2.4.1}BCC}{23}{subsection.2.4.1}%
 \defcounter {refsection}{0}\relax 
-\contentsline {subsection}{\numberline {2.4.2}Bpftool}{24}{subsection.2.4.2}%
+\contentsline {subsection}{\numberline {2.4.2}Bpftool}{23}{subsection.2.4.2}%
 \defcounter {refsection}{0}\relax 
 \contentsline {subsection}{\numberline {2.4.3}Libbpf}{24}{subsection.2.4.3}%
 \defcounter {refsection}{0}\relax 
@@ -75,69 +75,73 @@
 \defcounter {refsection}{0}\relax 
 \contentsline {subsection}{\numberline {2.6.1}Memory pages and faults}{28}{subsection.2.6.1}%
 \defcounter {refsection}{0}\relax 
-\contentsline {subsection}{\numberline {2.6.2}Process virtual memory}{30}{subsection.2.6.2}%
+\contentsline {subsection}{\numberline {2.6.2}Process virtual memory}{29}{subsection.2.6.2}%
 \defcounter {refsection}{0}\relax 
-\contentsline {subsection}{\numberline {2.6.3}The process stack}{32}{subsection.2.6.3}%
+\contentsline {subsection}{\numberline {2.6.3}The process stack}{31}{subsection.2.6.3}%
 \defcounter {refsection}{0}\relax 
 \contentsline {section}{\numberline {2.7}Attacks at the stack}{35}{section.2.7}%
 \defcounter {refsection}{0}\relax 
-\contentsline {subsection}{\numberline {2.7.1}Buffer overflow}{36}{subsection.2.7.1}%
+\contentsline {subsection}{\numberline {2.7.1}Buffer overflow}{35}{subsection.2.7.1}%
 \defcounter {refsection}{0}\relax 
-\contentsline {subsection}{\numberline {2.7.2}Return oriented programming attacks}{39}{subsection.2.7.2}%
+\contentsline {subsection}{\numberline {2.7.2}Return oriented programming attacks}{38}{subsection.2.7.2}%
 \defcounter {refsection}{0}\relax 
-\contentsline {section}{\numberline {2.8}Networking fundamentals in Linux}{41}{section.2.8}%
+\contentsline {section}{\numberline {2.8}Networking fundamentals in Linux}{40}{section.2.8}%
 \defcounter {refsection}{0}\relax 
 \contentsline {subsection}{\numberline {2.8.1}An overview on the network layer}{41}{subsection.2.8.1}%
 \defcounter {refsection}{0}\relax 
-\contentsline {subsection}{\numberline {2.8.2}Introduction to the TCP protocol}{43}{subsection.2.8.2}%
+\contentsline {subsection}{\numberline {2.8.2}Introduction to the TCP protocol}{42}{subsection.2.8.2}%
 \defcounter {refsection}{0}\relax 
-\contentsline {section}{\numberline {2.9}ELF binaries}{45}{section.2.9}%
+\contentsline {section}{\numberline {2.9}ELF binaries}{44}{section.2.9}%
 \defcounter {refsection}{0}\relax 
 \contentsline {subsection}{\numberline {2.9.1}The ELF format and Lazy Binding}{45}{subsection.2.9.1}%
 \defcounter {refsection}{0}\relax 
-\contentsline {subsection}{\numberline {2.9.2}Hardening ELF binaries}{49}{subsection.2.9.2}%
+\contentsline {subsection}{\numberline {2.9.2}Hardening ELF binaries}{48}{subsection.2.9.2}%
 \defcounter {refsection}{0}\relax 
-\contentsline {chapter}{\numberline {3}Analysis of offensive capabilities}{52}{chapter.3}%
+\contentsline {chapter}{\numberline {3}Analysis of offensive capabilities}{50}{chapter.3}%
 \defcounter {refsection}{0}\relax 
-\contentsline {section}{\numberline {3.1}eBPF maps security}{52}{section.3.1}%
+\contentsline {section}{\numberline {3.1}eBPF maps security}{50}{section.3.1}%
 \defcounter {refsection}{0}\relax 
-\contentsline {section}{\numberline {3.2}Abusing tracing programs}{53}{section.3.2}%
+\contentsline {section}{\numberline {3.2}Abusing tracing programs}{51}{section.3.2}%
 \defcounter {refsection}{0}\relax 
-\contentsline {subsection}{\numberline {3.2.1}Access to function arguments}{53}{subsection.3.2.1}%
+\contentsline {subsection}{\numberline {3.2.1}Access to function arguments}{51}{subsection.3.2.1}%
 \defcounter {refsection}{0}\relax 
-\contentsline {subsection}{\numberline {3.2.2}Reading memory out of bounds}{56}{subsection.3.2.2}%
+\contentsline {subsection}{\numberline {3.2.2}Reading memory out of bounds}{54}{subsection.3.2.2}%
 \defcounter {refsection}{0}\relax 
-\contentsline {subsection}{\numberline {3.2.3}Overriding function return values}{57}{subsection.3.2.3}%
+\contentsline {subsection}{\numberline {3.2.3}Overriding function return values}{54}{subsection.3.2.3}%
 \defcounter {refsection}{0}\relax 
-\contentsline {subsection}{\numberline {3.2.4}Sending signals to user programs}{58}{subsection.3.2.4}%
+\contentsline {subsection}{\numberline {3.2.4}Sending signals to user programs}{56}{subsection.3.2.4}%
 \defcounter {refsection}{0}\relax 
-\contentsline {subsection}{\numberline {3.2.5}Conclusion}{58}{subsection.3.2.5}%
+\contentsline {subsection}{\numberline {3.2.5}Takeaways}{56}{subsection.3.2.5}%
 \defcounter {refsection}{0}\relax 
-\contentsline {section}{\numberline {3.3}Memory corruption}{58}{section.3.3}%
+\contentsline {section}{\numberline {3.3}Memory corruption}{56}{section.3.3}%
 \defcounter {refsection}{0}\relax 
-\contentsline {subsection}{\numberline {3.3.1}Attacks and limitations of bpf\_probe\_write\_user()}{59}{subsection.3.3.1}%
+\contentsline {subsection}{\numberline {3.3.1}Attacks and limitations of bpf\_probe\_write\_user()}{56}{subsection.3.3.1}%
 \defcounter {refsection}{0}\relax 
-\contentsline {subsection}{\numberline {3.3.2}Conclusion}{61}{subsection.3.3.2}%
+\contentsline {subsection}{\numberline {3.3.2}Takeaways}{59}{subsection.3.3.2}%
 \defcounter {refsection}{0}\relax 
-\contentsline {section}{\numberline {3.4}Abusing networking programs}{62}{section.3.4}%
+\contentsline {section}{\numberline {3.4}Abusing networking programs}{60}{section.3.4}%
 \defcounter {refsection}{0}\relax 
-\contentsline {subsection}{\numberline {3.4.1}Attacks and limitations of networking programs}{62}{subsection.3.4.1}%
+\contentsline {subsection}{\numberline {3.4.1}Attacks and limitations of networking programs}{60}{subsection.3.4.1}%
 \defcounter {refsection}{0}\relax 
-\contentsline {subsection}{\numberline {3.4.2}Conclusion}{65}{subsection.3.4.2}%
+\contentsline {subsection}{\numberline {3.4.2}Takeaways}{63}{subsection.3.4.2}%
 \defcounter {refsection}{0}\relax 
-\contentsline {chapter}{\numberline {4}Design of a malicious eBPF rootkit}{66}{chapter.4}%
+\contentsline {chapter}{\numberline {4}Design of a malicious eBPF rootkit}{64}{chapter.4}%
 \defcounter {refsection}{0}\relax 
-\contentsline {section}{\numberline {4.1}Library injection attacks}{66}{section.4.1}%
+\contentsline {section}{\numberline {4.1}Library injection attacks}{64}{section.4.1}%
 \defcounter {refsection}{0}\relax 
-\contentsline {subsection}{\numberline {4.1.1}ROP with eBPF}{67}{subsection.4.1.1}%
+\contentsline {subsection}{\numberline {4.1.1}ROP with eBPF}{65}{subsection.4.1.1}%
 \defcounter {refsection}{0}\relax 
-\contentsline {subsection}{\numberline {4.1.2}Bypassing hardening features in ELFs}{69}{subsection.4.1.2}%
+\contentsline {subsection}{\numberline {4.1.2}Bypassing hardening features in ELFs}{67}{subsection.4.1.2}%
 \defcounter {refsection}{0}\relax 
-\contentsline {subsection}{\numberline {4.1.3}Library injection via GOT hijacking}{71}{subsection.4.1.3}%
+\contentsline {subsection}{\numberline {4.1.3}Library injection via GOT hijacking}{69}{subsection.4.1.3}%
 \defcounter {refsection}{0}\relax 
-\contentsline {chapter}{\numberline {5}Evaluation}{73}{chapter.5}%
+\contentsline {chapter}{\numberline {5}Evaluation}{71}{chapter.5}%
 \defcounter {refsection}{0}\relax 
-\contentsline {chapter}{\numberline {6}Related work}{74}{chapter.6}%
+\contentsline {section}{\numberline {5.1}Developed capabilities}{71}{section.5.1}%
 \defcounter {refsection}{0}\relax 
-\contentsline {chapter}{Bibliography}{75}{chapter.6}%
+\contentsline {section}{\numberline {5.2}Rootkit use cases}{71}{section.5.2}%
+\defcounter {refsection}{0}\relax 
+\contentsline {chapter}{\numberline {6}Related work}{72}{chapter.6}%
+\defcounter {refsection}{0}\relax 
+\contentsline {chapter}{Bibliography}{73}{chapter.6}%
 \contentsfinish 

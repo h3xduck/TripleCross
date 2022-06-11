@@ -105,8 +105,8 @@
       \endverb
     \endentry
     \entry{ebpf_windows}{online}{}
-      \field{sortinit}{1}
-      \field{sortinithash}{50c6687d7fc80f50136d75228e3c59ba}
+      \field{sortinit}{2}
+      \field{sortinithash}{ed39bb39cf854d5250e95b1c1f94f4ed}
       \field{labeltitlesource}{title}
       \field{day}{7}
       \field{month}{12}
@@ -286,7 +286,7 @@
       \verb https://opensource.com/article/17/9/intro-ebpf
       \endverb
     \endentry
-    \entry{bpf_bsd_origin_bpf_page1}{article}{}
+    \entry{bpf_bsd_origin_bpf_page2}{article}{}
       \name{author}{1}{}{%
         {{hash=b74c2671072cf5a1a1400dc035240dfd}{%
            family={Steven\bibnamedelima McCanne},
@@ -322,9 +322,45 @@
       \verb https://www.tcpdump.org/papers/bpf-usenix93.pdf
       \endverb
     \endentry
-    \entry{index_register}{manual}{}
+    \entry{bpf_bsd_origin_bpf_page1}{article}{}
+      \name{author}{1}{}{%
+        {{hash=b74c2671072cf5a1a1400dc035240dfd}{%
+           family={Steven\bibnamedelima McCanne},
+           familyi={S\bibinitperiod\bibinitdelim M\bibinitperiod},
+           given={Van\bibnamedelima Jacobson},
+           giveni={V\bibinitperiod\bibinitdelim J\bibinitperiod}}}%
+      }
+      \list{institution}{1}{%
+        {Lawrence Berkeley Laboratory}%
+      }
+      \strng{namehash}{b74c2671072cf5a1a1400dc035240dfd}
+      \strng{fullhash}{b74c2671072cf5a1a1400dc035240dfd}
+      \strng{bibnamehash}{b74c2671072cf5a1a1400dc035240dfd}
+      \strng{authorbibnamehash}{b74c2671072cf5a1a1400dc035240dfd}
+      \strng{authornamehash}{b74c2671072cf5a1a1400dc035240dfd}
+      \strng{authorfullhash}{b74c2671072cf5a1a1400dc035240dfd}
+      \field{extraname}{3}
       \field{sortinit}{2}
       \field{sortinithash}{ed39bb39cf854d5250e95b1c1f94f4ed}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{day}{19}
+      \field{month}{12}
+      \field{title}{The BSD Packet Filter: A New Architecture for User-level Packet Capture}
+      \field{year}{1992}
+      \field{dateera}{ce}
+      \field{pages}{1}
+      \range{pages}{1}
+      \verb{urlraw}
+      \verb https://www.tcpdump.org/papers/bpf-usenix93.pdf
+      \endverb
+      \verb{url}
+      \verb https://www.tcpdump.org/papers/bpf-usenix93.pdf
+      \endverb
+    \endentry
+    \entry{index_register}{manual}{}
+      \field{sortinit}{3}
+      \field{sortinithash}{a37a8ef248a93c322189792c34fc68c9}
       \field{labeltitlesource}{title}
       \field{title}{Index register}
       \verb{urlraw}
@@ -351,9 +387,9 @@
       \strng{authorbibnamehash}{b74c2671072cf5a1a1400dc035240dfd}
       \strng{authornamehash}{b74c2671072cf5a1a1400dc035240dfd}
       \strng{authorfullhash}{b74c2671072cf5a1a1400dc035240dfd}
-      \field{extraname}{3}
-      \field{sortinit}{2}
-      \field{sortinithash}{ed39bb39cf854d5250e95b1c1f94f4ed}
+      \field{extraname}{4}
+      \field{sortinit}{3}
+      \field{sortinithash}{a37a8ef248a93c322189792c34fc68c9}
       \field{labelnamesource}{author}
       \field{labeltitlesource}{title}
       \field{day}{19}
@@ -386,42 +422,6 @@
       \verb https://organicprogrammer.com/2022/03/28/how-to-implement-libpcap-on-linux-with-raw-socket-part2/
       \endverb
     \endentry
-    \entry{bpf_bsd_origin_bpf_page7}{article}{}
-      \name{author}{1}{}{%
-        {{hash=b74c2671072cf5a1a1400dc035240dfd}{%
-           family={Steven\bibnamedelima McCanne},
-           familyi={S\bibinitperiod\bibinitdelim M\bibinitperiod},
-           given={Van\bibnamedelima Jacobson},
-           giveni={V\bibinitperiod\bibinitdelim J\bibinitperiod}}}%
-      }
-      \list{institution}{1}{%
-        {Lawrence Berkeley Laboratory}%
-      }
-      \strng{namehash}{b74c2671072cf5a1a1400dc035240dfd}
-      \strng{fullhash}{b74c2671072cf5a1a1400dc035240dfd}
-      \strng{bibnamehash}{b74c2671072cf5a1a1400dc035240dfd}
-      \strng{authorbibnamehash}{b74c2671072cf5a1a1400dc035240dfd}
-      \strng{authornamehash}{b74c2671072cf5a1a1400dc035240dfd}
-      \strng{authorfullhash}{b74c2671072cf5a1a1400dc035240dfd}
-      \field{extraname}{4}
-      \field{sortinit}{3}
-      \field{sortinithash}{a37a8ef248a93c322189792c34fc68c9}
-      \field{labelnamesource}{author}
-      \field{labeltitlesource}{title}
-      \field{day}{19}
-      \field{month}{12}
-      \field{title}{The BSD Packet Filter: A New Architecture for User-level Packet Capture}
-      \field{year}{1992}
-      \field{dateera}{ce}
-      \field{pages}{7}
-      \range{pages}{1}
-      \verb{urlraw}
-      \verb https://www.tcpdump.org/papers/bpf-usenix93.pdf
-      \endverb
-      \verb{url}
-      \verb https://www.tcpdump.org/papers/bpf-usenix93.pdf
-      \endverb
-    \endentry
     \entry{bpf_bsd_origin_bpf_page8}{article}{}
       \name{author}{1}{}{%
         {{hash=b74c2671072cf5a1a1400dc035240dfd}{%
@@ -450,6 +450,42 @@
       \field{year}{1992}
       \field{dateera}{ce}
       \field{pages}{8}
+      \range{pages}{1}
+      \verb{urlraw}
+      \verb https://www.tcpdump.org/papers/bpf-usenix93.pdf
+      \endverb
+      \verb{url}
+      \verb https://www.tcpdump.org/papers/bpf-usenix93.pdf
+      \endverb
+    \endentry
+    \entry{bpf_bsd_origin_bpf_page7}{article}{}
+      \name{author}{1}{}{%
+        {{hash=b74c2671072cf5a1a1400dc035240dfd}{%
+           family={Steven\bibnamedelima McCanne},
+           familyi={S\bibinitperiod\bibinitdelim M\bibinitperiod},
+           given={Van\bibnamedelima Jacobson},
+           giveni={V\bibinitperiod\bibinitdelim J\bibinitperiod}}}%
+      }
+      \list{institution}{1}{%
+        {Lawrence Berkeley Laboratory}%
+      }
+      \strng{namehash}{b74c2671072cf5a1a1400dc035240dfd}
+      \strng{fullhash}{b74c2671072cf5a1a1400dc035240dfd}
+      \strng{bibnamehash}{b74c2671072cf5a1a1400dc035240dfd}
+      \strng{authorbibnamehash}{b74c2671072cf5a1a1400dc035240dfd}
+      \strng{authornamehash}{b74c2671072cf5a1a1400dc035240dfd}
+      \strng{authorfullhash}{b74c2671072cf5a1a1400dc035240dfd}
+      \field{extraname}{6}
+      \field{sortinit}{3}
+      \field{sortinithash}{a37a8ef248a93c322189792c34fc68c9}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{day}{19}
+      \field{month}{12}
+      \field{title}{The BSD Packet Filter: A New Architecture for User-level Packet Capture}
+      \field{year}{1992}
+      \field{dateera}{ce}
+      \field{pages}{7}
       \range{pages}{1}
       \verb{urlraw}
       \verb https://www.tcpdump.org/papers/bpf-usenix93.pdf
@@ -500,8 +536,8 @@
       \strng{authornamehash}{b45aef384111d7e9dd71b74ba427b5f1}
       \strng{authorfullhash}{b45aef384111d7e9dd71b74ba427b5f1}
       \field{extraname}{1}
-      \field{sortinit}{3}
-      \field{sortinithash}{a37a8ef248a93c322189792c34fc68c9}
+      \field{sortinit}{4}
+      \field{sortinithash}{e071e0bcb44634fab398d68ad04e69f4}
       \field{labelnamesource}{author}
       \field{labeltitlesource}{title}
       \field{title}{BPF performance tools}
@@ -600,8 +636,8 @@
       \strng{authorbibnamehash}{729670cd9d39b9b575390147a29d51d7}
       \strng{authornamehash}{729670cd9d39b9b575390147a29d51d7}
       \strng{authorfullhash}{729670cd9d39b9b575390147a29d51d7}
-      \field{sortinit}{4}
-      \field{sortinithash}{e071e0bcb44634fab398d68ad04e69f4}
+      \field{sortinit}{5}
+      \field{sortinithash}{5dd416adbafacc8226114bc0202d5fdd}
       \field{labelnamesource}{author}
       \field{labeltitlesource}{title}
       \field{day}{12}
@@ -634,8 +670,8 @@
       \strng{authornamehash}{0fcaa32b080db12cbc8b11b27d05ad61}
       \strng{authorfullhash}{0fcaa32b080db12cbc8b11b27d05ad61}
       \field{extraname}{1}
-      \field{sortinit}{4}
-      \field{sortinithash}{e071e0bcb44634fab398d68ad04e69f4}
+      \field{sortinit}{5}
+      \field{sortinithash}{5dd416adbafacc8226114bc0202d5fdd}
       \field{labelnamesource}{author}
       \field{labeltitlesource}{title}
       \field{day}{11}
@@ -839,8 +875,8 @@
       \endverb
     \endentry
     \entry{bpf_syscall}{manual}{}
-      \field{sortinit}{5}
-      \field{sortinithash}{5dd416adbafacc8226114bc0202d5fdd}
+      \field{sortinit}{6}
+      \field{sortinithash}{7851c86048328b027313775d8fbd2131}
       \field{labeltitlesource}{title}
       \field{title}{bpf(2)- Linux manual page}
       \verb{urlraw}
@@ -876,8 +912,8 @@
       \strng{authorbibnamehash}{78dcb92591468323e355b4f87108649d}
       \strng{authornamehash}{78dcb92591468323e355b4f87108649d}
       \strng{authorfullhash}{78dcb92591468323e355b4f87108649d}
-      \field{sortinit}{6}
-      \field{sortinithash}{7851c86048328b027313775d8fbd2131}
+      \field{sortinit}{7}
+      \field{sortinithash}{f615fb9c6fba11c6f962fb3fd599810e}
       \field{labelnamesource}{author}
       \field{labeltitlesource}{title}
       \field{day}{3}
@@ -893,8 +929,8 @@
       \endverb
     \endentry
     \entry{xdp_manual}{manual}{}
-      \field{sortinit}{6}
-      \field{sortinithash}{7851c86048328b027313775d8fbd2131}
+      \field{sortinit}{7}
+      \field{sortinithash}{f615fb9c6fba11c6f962fb3fd599810e}
       \field{labeltitlesource}{title}
       \field{title}{XDP actions}
       \verb{urlraw}
@@ -1090,8 +1126,8 @@
       \endverb
     \endentry
     \entry{bcc_github}{online}{}
-      \field{sortinit}{7}
-      \field{sortinithash}{f615fb9c6fba11c6f962fb3fd599810e}
+      \field{sortinit}{8}
+      \field{sortinithash}{1b24cab5087933ef0826a7cd3b99e994}
       \field{labeltitlesource}{title}
       \field{title}{BPF Compiler Collection (BCC)}
       \verb{urlraw}
@@ -1102,8 +1138,8 @@
       \endverb
     \endentry
     \entry{libbpf_github}{online}{}
-      \field{sortinit}{7}
-      \field{sortinithash}{f615fb9c6fba11c6f962fb3fd599810e}
+      \field{sortinit}{8}
+      \field{sortinithash}{1b24cab5087933ef0826a7cd3b99e994}
       \field{indextitle}{libbpf GitHub}
       \verb{urlraw}
       \verb https://github.com/libbpf/libbpf
@@ -1154,6 +1190,136 @@
       \verb https://facebookmicrosites.github.io/bpf/blog/2020/02/19/bpf-portability-and-co-re.html
       \endverb
     \endentry
+    \entry{ubuntu_caps}{manual}{}
+      \field{sortinit}{8}
+      \field{sortinithash}{1b24cab5087933ef0826a7cd3b99e994}
+      \field{labeltitlesource}{title}
+      \field{title}{capabilities - overview of Linux capabilities}
+      \verb{urlraw}
+      \verb http://manpages.ubuntu.com/manpages/trusty/man7/capabilities.7.html
+      \endverb
+      \verb{url}
+      \verb http://manpages.ubuntu.com/manpages/trusty/man7/capabilities.7.html
+      \endverb
+    \endentry
+    \entry{evil_ebpf_p9}{proceedings}{}
+      \name{author}{1}{}{%
+        {{hash=5142e68c748eb70cb619b21160eb7f72}{%
+           family={Dileo},
+           familyi={D\bibinitperiod},
+           given={Jeff},
+           giveni={J\bibinitperiod}}}%
+      }
+      \list{institution}{1}{%
+        {NCC Group}%
+      }
+      \list{organization}{1}{%
+        {DEFCON 27}%
+      }
+      \strng{namehash}{5142e68c748eb70cb619b21160eb7f72}
+      \strng{fullhash}{5142e68c748eb70cb619b21160eb7f72}
+      \strng{bibnamehash}{5142e68c748eb70cb619b21160eb7f72}
+      \strng{authorbibnamehash}{5142e68c748eb70cb619b21160eb7f72}
+      \strng{authornamehash}{5142e68c748eb70cb619b21160eb7f72}
+      \strng{authorfullhash}{5142e68c748eb70cb619b21160eb7f72}
+      \field{extraname}{2}
+      \field{sortinit}{8}
+      \field{sortinithash}{1b24cab5087933ef0826a7cd3b99e994}
+      \field{labelnamesource}{author}
+      \field{eventtitle}{Evil eBPF Practical Abuses of an In-Kernel Bytecode Runtime}
+      \field{pages}{9}
+      \range{pages}{1}
+      \verb{urlraw}
+      \verb https://raw.githubusercontent.com/nccgroup/ebpf/master/talks/Evil_eBPF-DC27-v2.pdf
+      \endverb
+      \verb{url}
+      \verb https://raw.githubusercontent.com/nccgroup/ebpf/master/talks/Evil_eBPF-DC27-v2.pdf
+      \endverb
+    \endentry
+    \entry{ebpf_caps_intro}{online}{}
+      \field{sortinit}{8}
+      \field{sortinithash}{1b24cab5087933ef0826a7cd3b99e994}
+      \field{labeltitlesource}{title}
+      \field{title}{[PATCH v7 bpf-next 1/3] bpf, capability: Introduce CAP\_BPF}
+      \verb{urlraw}
+      \verb https://lore.kernel.org/bpf/20200513230355.7858-2-alexei.starovoitov@gmail.com/
+      \endverb
+      \verb{url}
+      \verb https://lore.kernel.org/bpf/20200513230355.7858-2-alexei.starovoitov@gmail.com/
+      \endverb
+    \endentry
+    \entry{ebpf_caps_lwn}{online}{}
+      \field{sortinit}{8}
+      \field{sortinithash}{1b24cab5087933ef0826a7cd3b99e994}
+      \field{labeltitlesource}{title}
+      \field{title}{capability: introduce CAP\_BPF and CAP\_TRACING}
+      \verb{urlraw}
+      \verb https://lwn.net/Articles/797807/
+      \endverb
+      \verb{url}
+      \verb https://lwn.net/Articles/797807/
+      \endverb
+    \endentry
+    \entry{unprivileged_ebpf}{online}{}
+      \field{sortinit}{8}
+      \field{sortinithash}{1b24cab5087933ef0826a7cd3b99e994}
+      \field{labeltitlesource}{title}
+      \field{title}{Reconsidering unprivileged BPF}
+      \verb{urlraw}
+      \verb https://lwn.net/Articles/796328/
+      \endverb
+      \verb{url}
+      \verb https://lwn.net/Articles/796328/
+      \endverb
+    \endentry
+    \entry{cve_unpriv_ebpf}{online}{}
+      \field{sortinit}{8}
+      \field{sortinithash}{1b24cab5087933ef0826a7cd3b99e994}
+      \field{labeltitlesource}{title}
+      \field{title}{CVE-2021-4204: Linux Kernel eBPF Improper Input Validation Vulnerability}
+      \verb{urlraw}
+      \verb https://www.openwall.com/lists/oss-security/2022/01/11/4
+      \endverb
+      \verb{url}
+      \verb https://www.openwall.com/lists/oss-security/2022/01/11/4
+      \endverb
+    \endentry
+    \entry{unpriv_ebpf_ubuntu}{online}{}
+      \field{sortinit}{9}
+      \field{sortinithash}{54047ffb55bdefa0694bbd554c1b11a0}
+      \field{labeltitlesource}{title}
+      \field{title}{Unprivileged eBPF disabled by default for Ubuntu 20.04 LTS, 18.04 LTS, 16.04 ESM}
+      \verb{urlraw}
+      \verb https://discourse.ubuntu.com/t/unprivileged-ebpf-disabled-by-default-for-ubuntu-20-04-lts-18-04-lts-16-04-esm/27047
+      \endverb
+      \verb{url}
+      \verb https://discourse.ubuntu.com/t/unprivileged-ebpf-disabled-by-default-for-ubuntu-20-04-lts-18-04-lts-16-04-esm/27047
+      \endverb
+    \endentry
+    \entry{unpriv_ebpf_suse}{online}{}
+      \field{sortinit}{9}
+      \field{sortinithash}{54047ffb55bdefa0694bbd554c1b11a0}
+      \field{labeltitlesource}{title}
+      \field{title}{Security Hardening: Use of eBPF by unprivileged users has been disabled by default}
+      \verb{urlraw}
+      \verb https://www.suse.com/support/kb/doc/?id=000020545
+      \endverb
+      \verb{url}
+      \verb https://www.suse.com/support/kb/doc/?id=000020545
+      \endverb
+    \endentry
+    \entry{unpriv_ebpf_redhat}{online}{}
+      \field{sortinit}{9}
+      \field{sortinithash}{54047ffb55bdefa0694bbd554c1b11a0}
+      \field{labeltitlesource}{title}
+      \field{title}{CVE-2022-0002}
+      \verb{urlraw}
+      \verb https://access.redhat.com/security/cve/cve-2021-4001
+      \endverb
+      \verb{url}
+      \verb https://access.redhat.com/security/cve/cve-2021-4001
+      \endverb
+    \endentry
     \entry{mem_page_arch}{online}{}
       \name{author}{1}{}{%
         {{hash=47635127541392c1419dbc4a4d3153c6}{%
@@ -1174,8 +1340,8 @@
       \strng{authorbibnamehash}{47635127541392c1419dbc4a4d3153c6}
       \strng{authornamehash}{47635127541392c1419dbc4a4d3153c6}
       \strng{authorfullhash}{47635127541392c1419dbc4a4d3153c6}
-      \field{sortinit}{8}
-      \field{sortinithash}{1b24cab5087933ef0826a7cd3b99e994}
+      \field{sortinit}{9}
+      \field{sortinithash}{54047ffb55bdefa0694bbd554c1b11a0}
       \field{labelnamesource}{author}
       \field{labeltitlesource}{title}
       \field{day}{1}
@@ -1204,8 +1370,8 @@
       \strng{authorbibnamehash}{28efc25c8eae7f3d05fad64c4679158f}
       \strng{authornamehash}{28efc25c8eae7f3d05fad64c4679158f}
       \strng{authorfullhash}{28efc25c8eae7f3d05fad64c4679158f}
-      \field{sortinit}{8}
-      \field{sortinithash}{1b24cab5087933ef0826a7cd3b99e994}
+      \field{sortinit}{9}
+      \field{sortinithash}{54047ffb55bdefa0694bbd554c1b11a0}
       \field{labelnamesource}{author}
       \field{labeltitlesource}{title}
       \field{day}{19}
@@ -1234,8 +1400,8 @@
       \strng{authorbibnamehash}{c6b49e9e6fbe96fdd89720e842dc0b03}
       \strng{authornamehash}{c6b49e9e6fbe96fdd89720e842dc0b03}
       \strng{authorfullhash}{c6b49e9e6fbe96fdd89720e842dc0b03}
-      \field{sortinit}{8}
-      \field{sortinithash}{1b24cab5087933ef0826a7cd3b99e994}
+      \field{sortinit}{9}
+      \field{sortinithash}{54047ffb55bdefa0694bbd554c1b11a0}
       \field{labelnamesource}{author}
       \field{labeltitlesource}{title}
       \field{day}{23}
@@ -1267,8 +1433,8 @@
       \strng{authornamehash}{871f02558cb7234c22cde24811cf53a7}
       \strng{authorfullhash}{871f02558cb7234c22cde24811cf53a7}
       \field{extraname}{1}
-      \field{sortinit}{8}
-      \field{sortinithash}{1b24cab5087933ef0826a7cd3b99e994}
+      \field{sortinit}{9}
+      \field{sortinithash}{54047ffb55bdefa0694bbd554c1b11a0}
       \field{labelnamesource}{author}
       \field{labeltitlesource}{title}
       \field{day}{28}
@@ -1286,8 +1452,8 @@
       \endverb
     \endentry
     \entry{rop_prog_finder}{online}{}
-      \field{sortinit}{8}
-      \field{sortinithash}{1b24cab5087933ef0826a7cd3b99e994}
+      \field{sortinit}{9}
+      \field{sortinithash}{54047ffb55bdefa0694bbd554c1b11a0}
       \field{labeltitlesource}{title}
       \field{title}{ROPgadget Tool}
       \verb{urlraw}
@@ -1309,8 +1475,8 @@
       \strng{authorbibnamehash}{ed79ecb3ff4a83522b186b5e3fa37b0d}
       \strng{authornamehash}{ed79ecb3ff4a83522b186b5e3fa37b0d}
       \strng{authorfullhash}{ed79ecb3ff4a83522b186b5e3fa37b0d}
-      \field{sortinit}{8}
-      \field{sortinithash}{1b24cab5087933ef0826a7cd3b99e994}
+      \field{sortinit}{9}
+      \field{sortinithash}{54047ffb55bdefa0694bbd554c1b11a0}
       \field{labelnamesource}{author}
       \field{labeltitlesource}{title}
       \field{day}{28}
@@ -1329,8 +1495,8 @@
       \list{organization}{1}{%
         {IBM}%
       }
-      \field{sortinit}{8}
-      \field{sortinithash}{1b24cab5087933ef0826a7cd3b99e994}
+      \field{sortinit}{9}
+      \field{sortinithash}{54047ffb55bdefa0694bbd554c1b11a0}
       \field{labeltitlesource}{title}
       \field{day}{19}
       \field{month}{4}
@@ -1345,8 +1511,8 @@
       \endverb
     \endentry
     \entry{tcp_handshake}{online}{}
-      \field{sortinit}{8}
-      \field{sortinithash}{1b24cab5087933ef0826a7cd3b99e994}
+      \field{sortinit}{1}
+      \field{sortinithash}{50c6687d7fc80f50136d75228e3c59ba}
       \field{labeltitlesource}{title}
       \field{title}{Three-Way Handshake}
       \verb{urlraw}
@@ -1357,8 +1523,8 @@
       \endverb
     \endentry
     \entry{elf}{manual}{}
-      \field{sortinit}{9}
-      \field{sortinithash}{54047ffb55bdefa0694bbd554c1b11a0}
+      \field{sortinit}{1}
+      \field{sortinithash}{50c6687d7fc80f50136d75228e3c59ba}
       \field{labeltitlesource}{title}
       \field{title}{ELF}
       \verb{urlraw}
@@ -1382,8 +1548,8 @@
       \strng{authorbibnamehash}{9724da855997a02e74ee77d11b4d64e2}
       \strng{authornamehash}{9724da855997a02e74ee77d11b4d64e2}
       \strng{authorfullhash}{9724da855997a02e74ee77d11b4d64e2}
-      \field{sortinit}{9}
-      \field{sortinithash}{54047ffb55bdefa0694bbd554c1b11a0}
+      \field{sortinit}{1}
+      \field{sortinithash}{50c6687d7fc80f50136d75228e3c59ba}
       \field{labelnamesource}{author}
       \field{labeltitlesource}{title}
       \field{day}{19}
@@ -1412,8 +1578,8 @@
       \strng{authorbibnamehash}{4e4902d108d0796e7e54d06a47cfe1ee}
       \strng{authornamehash}{4e4902d108d0796e7e54d06a47cfe1ee}
       \strng{authorfullhash}{4e4902d108d0796e7e54d06a47cfe1ee}
-      \field{sortinit}{9}
-      \field{sortinithash}{54047ffb55bdefa0694bbd554c1b11a0}
+      \field{sortinit}{1}
+      \field{sortinithash}{50c6687d7fc80f50136d75228e3c59ba}
       \field{labelnamesource}{author}
       \field{labeltitlesource}{title}
       \field{day}{11}
@@ -1429,8 +1595,8 @@
       \endverb
     \endentry
     \entry{aslr_pie_intro}{online}{}
-      \field{sortinit}{9}
-      \field{sortinithash}{54047ffb55bdefa0694bbd554c1b11a0}
+      \field{sortinit}{1}
+      \field{sortinithash}{50c6687d7fc80f50136d75228e3c59ba}
       \field{labeltitlesource}{title}
       \field{title}{aslr/pie intro}
       \verb{urlraw}
@@ -1454,8 +1620,8 @@
       \strng{authorbibnamehash}{b77619d1671f5a819a9a13e8e0f51723}
       \strng{authornamehash}{b77619d1671f5a819a9a13e8e0f51723}
       \strng{authorfullhash}{b77619d1671f5a819a9a13e8e0f51723}
-      \field{sortinit}{9}
-      \field{sortinithash}{54047ffb55bdefa0694bbd554c1b11a0}
+      \field{sortinit}{1}
+      \field{sortinithash}{50c6687d7fc80f50136d75228e3c59ba}
       \field{labelnamesource}{author}
       \field{labeltitlesource}{title}
       \field{day}{28}
@@ -1484,8 +1650,8 @@
       \strng{authorbibnamehash}{3de76fe0797950a06f4be8a7bf380d22}
       \strng{authornamehash}{3de76fe0797950a06f4be8a7bf380d22}
       \strng{authorfullhash}{3de76fe0797950a06f4be8a7bf380d22}
-      \field{sortinit}{9}
-      \field{sortinithash}{54047ffb55bdefa0694bbd554c1b11a0}
+      \field{sortinit}{1}
+      \field{sortinithash}{50c6687d7fc80f50136d75228e3c59ba}
       \field{labelnamesource}{author}
       \field{labeltitlesource}{title}
       \field{day}{1}
@@ -1514,8 +1680,8 @@
       \strng{authorbibnamehash}{b51b9464b5589cf5380e3b897d0a43b6}
       \strng{authornamehash}{b51b9464b5589cf5380e3b897d0a43b6}
       \strng{authorfullhash}{b51b9464b5589cf5380e3b897d0a43b6}
-      \field{sortinit}{9}
-      \field{sortinithash}{54047ffb55bdefa0694bbd554c1b11a0}
+      \field{sortinit}{1}
+      \field{sortinithash}{50c6687d7fc80f50136d75228e3c59ba}
       \field{labelnamesource}{author}
       \field{labeltitlesource}{title}
       \field{day}{21}
@@ -1528,136 +1694,6 @@
       \endverb
       \verb{url}
       \verb https://www.phoronix.com/scan.php?page=news_item&px=Intel-CET-v29
-      \endverb
-    \endentry
-    \entry{ubuntu_caps}{manual}{}
-      \field{sortinit}{9}
-      \field{sortinithash}{54047ffb55bdefa0694bbd554c1b11a0}
-      \field{labeltitlesource}{title}
-      \field{title}{capabilities - overview of Linux capabilities}
-      \verb{urlraw}
-      \verb http://manpages.ubuntu.com/manpages/trusty/man7/capabilities.7.html
-      \endverb
-      \verb{url}
-      \verb http://manpages.ubuntu.com/manpages/trusty/man7/capabilities.7.html
-      \endverb
-    \endentry
-    \entry{evil_ebpf_p9}{proceedings}{}
-      \name{author}{1}{}{%
-        {{hash=5142e68c748eb70cb619b21160eb7f72}{%
-           family={Dileo},
-           familyi={D\bibinitperiod},
-           given={Jeff},
-           giveni={J\bibinitperiod}}}%
-      }
-      \list{institution}{1}{%
-        {NCC Group}%
-      }
-      \list{organization}{1}{%
-        {DEFCON 27}%
-      }
-      \strng{namehash}{5142e68c748eb70cb619b21160eb7f72}
-      \strng{fullhash}{5142e68c748eb70cb619b21160eb7f72}
-      \strng{bibnamehash}{5142e68c748eb70cb619b21160eb7f72}
-      \strng{authorbibnamehash}{5142e68c748eb70cb619b21160eb7f72}
-      \strng{authornamehash}{5142e68c748eb70cb619b21160eb7f72}
-      \strng{authorfullhash}{5142e68c748eb70cb619b21160eb7f72}
-      \field{extraname}{2}
-      \field{sortinit}{9}
-      \field{sortinithash}{54047ffb55bdefa0694bbd554c1b11a0}
-      \field{labelnamesource}{author}
-      \field{eventtitle}{Evil eBPF Practical Abuses of an In-Kernel Bytecode Runtime}
-      \field{pages}{9}
-      \range{pages}{1}
-      \verb{urlraw}
-      \verb https://raw.githubusercontent.com/nccgroup/ebpf/master/talks/Evil_eBPF-DC27-v2.pdf
-      \endverb
-      \verb{url}
-      \verb https://raw.githubusercontent.com/nccgroup/ebpf/master/talks/Evil_eBPF-DC27-v2.pdf
-      \endverb
-    \endentry
-    \entry{ebpf_caps_intro}{online}{}
-      \field{sortinit}{1}
-      \field{sortinithash}{50c6687d7fc80f50136d75228e3c59ba}
-      \field{labeltitlesource}{title}
-      \field{title}{[PATCH v7 bpf-next 1/3] bpf, capability: Introduce CAP\_BPF}
-      \verb{urlraw}
-      \verb https://lore.kernel.org/bpf/20200513230355.7858-2-alexei.starovoitov@gmail.com/
-      \endverb
-      \verb{url}
-      \verb https://lore.kernel.org/bpf/20200513230355.7858-2-alexei.starovoitov@gmail.com/
-      \endverb
-    \endentry
-    \entry{ebpf_caps_lwn}{online}{}
-      \field{sortinit}{1}
-      \field{sortinithash}{50c6687d7fc80f50136d75228e3c59ba}
-      \field{labeltitlesource}{title}
-      \field{title}{capability: introduce CAP\_BPF and CAP\_TRACING}
-      \verb{urlraw}
-      \verb https://lwn.net/Articles/797807/
-      \endverb
-      \verb{url}
-      \verb https://lwn.net/Articles/797807/
-      \endverb
-    \endentry
-    \entry{unprivileged_ebpf}{online}{}
-      \field{sortinit}{1}
-      \field{sortinithash}{50c6687d7fc80f50136d75228e3c59ba}
-      \field{labeltitlesource}{title}
-      \field{title}{Reconsidering unprivileged BPF}
-      \verb{urlraw}
-      \verb https://lwn.net/Articles/796328/
-      \endverb
-      \verb{url}
-      \verb https://lwn.net/Articles/796328/
-      \endverb
-    \endentry
-    \entry{cve_unpriv_ebpf}{online}{}
-      \field{sortinit}{1}
-      \field{sortinithash}{50c6687d7fc80f50136d75228e3c59ba}
-      \field{labeltitlesource}{title}
-      \field{title}{CVE-2021-4204: Linux Kernel eBPF Improper Input Validation Vulnerability}
-      \verb{urlraw}
-      \verb https://www.openwall.com/lists/oss-security/2022/01/11/4
-      \endverb
-      \verb{url}
-      \verb https://www.openwall.com/lists/oss-security/2022/01/11/4
-      \endverb
-    \endentry
-    \entry{unpriv_ebpf_ubuntu}{online}{}
-      \field{sortinit}{1}
-      \field{sortinithash}{50c6687d7fc80f50136d75228e3c59ba}
-      \field{labeltitlesource}{title}
-      \field{title}{Unprivileged eBPF disabled by default for Ubuntu 20.04 LTS, 18.04 LTS, 16.04 ESM}
-      \verb{urlraw}
-      \verb https://discourse.ubuntu.com/t/unprivileged-ebpf-disabled-by-default-for-ubuntu-20-04-lts-18-04-lts-16-04-esm/27047
-      \endverb
-      \verb{url}
-      \verb https://discourse.ubuntu.com/t/unprivileged-ebpf-disabled-by-default-for-ubuntu-20-04-lts-18-04-lts-16-04-esm/27047
-      \endverb
-    \endentry
-    \entry{unpriv_ebpf_suse}{online}{}
-      \field{sortinit}{1}
-      \field{sortinithash}{50c6687d7fc80f50136d75228e3c59ba}
-      \field{labeltitlesource}{title}
-      \field{title}{Security Hardening: Use of eBPF by unprivileged users has been disabled by default}
-      \verb{urlraw}
-      \verb https://www.suse.com/support/kb/doc/?id=000020545
-      \endverb
-      \verb{url}
-      \verb https://www.suse.com/support/kb/doc/?id=000020545
-      \endverb
-    \endentry
-    \entry{unpriv_ebpf_redhat}{online}{}
-      \field{sortinit}{1}
-      \field{sortinithash}{50c6687d7fc80f50136d75228e3c59ba}
-      \field{labeltitlesource}{title}
-      \field{title}{CVE-2022-0002}
-      \verb{urlraw}
-      \verb https://access.redhat.com/security/cve/cve-2021-4001
-      \endverb
-      \verb{url}
-      \verb https://access.redhat.com/security/cve/cve-2021-4001
       \endverb
     \endentry
     \entry{8664_params_abi}{manual}{}

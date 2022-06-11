@@ -9,14 +9,10 @@ Therefore, given the previous background, this chapter is dedicated to an analys
 \end{itemize}
 
 
-%TODO if this is finally not included, change the intro
-Finally, we will study in detail some of the malicious applications that previous researchers have proposed to take advantage of these capabilities of eBPF. In the next chapter, we will proceed to elaborate on these ideas, find new purposes and design our own rootkit.
-
-
 \section{eBPF maps security}
-In table \ref{table:ebpf_caps_current}, we observed that only programs with CAP\_SYS\_ADMIN are allowed to iterate over eBPF maps. The reason why this is restricted to privileged programs is because it is functionality that is a potential security vulnerability, which we will now proceed to analyse.
+In section \ref{subsection:access_control}, we explained that only programs with CAP\_SYS\_ADMIN are allowed to iterate over eBPF maps. The reason why this is restricted to privileged programs is because it is functionality that is a potential security vulnerability, which we will now proceed to analyse.
 
-In subsection \ref{subsection:ebpf_maps} we mentioned that eBPF maps are opened by specifying an ID (which works similarly to the typical file descriptors), while in table \ref{table:ebpf_map_types} we showed that, for performing operations over eBPF maps using the bpf() syscall, the map ID must be specified too. 
+Also, in section \ref{subsection:ebpf_maps}, we mentioned that eBPF maps are opened by specifying an ID (which works similarly to the typical file descriptors), while in table \ref{table:ebpf_map_types} we showed that, for performing operations over eBPF maps using the bpf() syscall, the map ID must be specified too. 
 
 Map IDs are known by a program after creating the eBPF map, however, a program can also explore all the available maps in the system by using the BPF\_MAP\_GET\_NEXT\_ID operation in the bpf() syscall, which allows for iterating through a complete hidden list of all the maps created. This means that privileged programs can find and have read and write access to any eBPF map used by any program in the system.
 
@@ -32,7 +28,6 @@ eBPF tracing programs (kprobes, uprobes and tracepoints) are hooked to specific 
 
 \subsection{Access to function arguments}
 As we saw in section \ref{section:ebpf_prog_types}, tracing programs receive as a parameter those arguments with which the hooked function originally was called. These parameters are read-only and thus, in principle, they cannot be modified inside the tracing program (we will show this is not entirely true in section \ref{section:mem_corruption}). The next code snippets show the format in which parameters are received when using libbpf (Note that libbpf also includes  some macros that offer an alternative format, but the parameters are the same).
-
 
 \begin{lstlisting}[language=C, caption={Probe function for a kprobe on the kernel function vfs\_write.}, label={code:format_kprobe}]
 SEC("kprobe/vfs_write")
@@ -266,7 +261,7 @@ Then, if we attach a kprobe to vfs\_read, we would be able to modify the value o
 \end{enumerate}
 \end{itemize}
 
-Figure \ref{fig:stack_scan_write_tech} illustrates a high-level overview of the stack scanning technique previously described:
+Figure \ref{fig:stack_scan_write_tech} illustrates a high-level overview of the stack scanning technique previously described.
 %TODO i just noticed I included SFP outside the current stack frame, correct it here and everywhere
 \begin{figure}[H]
 	\centering
@@ -275,7 +270,7 @@ Figure \ref{fig:stack_scan_write_tech} illustrates a high-level overview of the 
 	\label{fig:stack_scan_write_tech}
 \end{figure}
 
-The above figure shows process memory executing a program similar to the following:
+The figure shows process memory executing a program similar to the following:
 \begin{lstlisting}[language=C, caption={Sample program being executed on figure \ref{fig:stack_scan_write_tech}.}, label={code:stack_scan_write_tech}]
 void func(char* a, char* b, char* c){
 	int fd = open("FILE", 0);
@@ -370,4 +365,4 @@ Ultimately, the capabilities discussed in this section unlock complete freedom f
 \item A \textbf{backdoor}, a stealthy program which listens on the network interface and waits for secret instructions from a remote attacker-controlled client program. This backdoor can have \textbf{Command and Control (C2)} capabilities, meaning that it can process commands sent by the attacker and received at the backdoor, executing a series of actions corresponding to the request received, and (when needed) answering the attacker with the result of the command.
 \end{itemize}
 
-%TODO maybe a conclusion for this section?
+%TODO maybe a conclusion for this chapter?
