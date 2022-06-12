@@ -127,21 +127,23 @@
 \defcounter {refsection}{0}\relax 
 \contentsline {chapter}{\numberline {4}Design of a malicious eBPF rootkit}{64}{chapter.4}%
 \defcounter {refsection}{0}\relax 
-\contentsline {section}{\numberline {4.1}Library injection attacks}{64}{section.4.1}%
+\contentsline {section}{\numberline {4.1}Rootkit architecture}{64}{section.4.1}%
 \defcounter {refsection}{0}\relax 
-\contentsline {subsection}{\numberline {4.1.1}ROP with eBPF}{65}{subsection.4.1.1}%
+\contentsline {section}{\numberline {4.2}Library injection attacks}{64}{section.4.2}%
 \defcounter {refsection}{0}\relax 
-\contentsline {subsection}{\numberline {4.1.2}Bypassing hardening features in ELFs}{67}{subsection.4.1.2}%
+\contentsline {subsection}{\numberline {4.2.1}ROP with eBPF}{65}{subsection.4.2.1}%
 \defcounter {refsection}{0}\relax 
-\contentsline {subsection}{\numberline {4.1.3}Library injection via GOT hijacking}{69}{subsection.4.1.3}%
+\contentsline {subsection}{\numberline {4.2.2}Bypassing hardening features in ELFs}{68}{subsection.4.2.2}%
 \defcounter {refsection}{0}\relax 
-\contentsline {chapter}{\numberline {5}Evaluation}{71}{chapter.5}%
+\contentsline {subsection}{\numberline {4.2.3}Library injection via GOT hijacking}{70}{subsection.4.2.3}%
 \defcounter {refsection}{0}\relax 
-\contentsline {section}{\numberline {5.1}Developed capabilities}{71}{section.5.1}%
+\contentsline {chapter}{\numberline {5}Evaluation}{72}{chapter.5}%
 \defcounter {refsection}{0}\relax 
-\contentsline {section}{\numberline {5.2}Rootkit use cases}{71}{section.5.2}%
+\contentsline {section}{\numberline {5.1}Developed capabilities}{72}{section.5.1}%
 \defcounter {refsection}{0}\relax 
-\contentsline {chapter}{\numberline {6}Related work}{72}{chapter.6}%
+\contentsline {section}{\numberline {5.2}Rootkit use cases}{72}{section.5.2}%
 \defcounter {refsection}{0}\relax 
-\contentsline {chapter}{Bibliography}{73}{chapter.6}%
+\contentsline {chapter}{\numberline {6}Related work}{73}{chapter.6}%
+\defcounter {refsection}{0}\relax 
+\contentsline {chapter}{Bibliography}{74}{chapter.6}%
 \contentsfinish 

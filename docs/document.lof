@@ -69,15 +69,17 @@
 \defcounter {refsection}{0}\relax 
 \addvspace {10\p@ }
 \defcounter {refsection}{0}\relax 
-\contentsline {figure}{\numberline {4.1}{\ignorespaces Initial setup for the ROP with eBPF technique.\relax }}{65}{figure.caption.60}%
+\contentsline {figure}{\numberline {4.1}{\ignorespaces Overview of the rootkit subsystems and components.\relax }}{65}{figure.caption.60}%
 \defcounter {refsection}{0}\relax 
-\contentsline {figure}{\numberline {4.2}{\ignorespaces Process memory after syscall exits and ROP code overwrites the stack.\relax }}{66}{figure.caption.61}%
+\contentsline {figure}{\numberline {4.2}{\ignorespaces Initial setup for the ROP with eBPF technique.\relax }}{66}{figure.caption.61}%
 \defcounter {refsection}{0}\relax 
-\contentsline {figure}{\numberline {4.3}{\ignorespaces Stack data is restored and program continues its execution.\relax }}{67}{figure.caption.62}%
+\contentsline {figure}{\numberline {4.3}{\ignorespaces Process memory after syscall exits and ROP code overwrites the stack.\relax }}{67}{figure.caption.62}%
 \defcounter {refsection}{0}\relax 
-\contentsline {figure}{\numberline {4.4}{\ignorespaces Two runs of the same executable using ASLR, showing a library and two symbols.\relax }}{68}{figure.caption.63}%
+\contentsline {figure}{\numberline {4.4}{\ignorespaces Stack data is restored and program continues its execution.\relax }}{68}{figure.caption.63}%
 \defcounter {refsection}{0}\relax 
-\contentsline {figure}{\numberline {4.5}{\ignorespaces Call to the glibc function, using objdump\relax }}{70}{figure.caption.64}%
+\contentsline {figure}{\numberline {4.5}{\ignorespaces Two runs of the same executable using ASLR, showing a library and two symbols.\relax }}{69}{figure.caption.64}%
+\defcounter {refsection}{0}\relax 
+\contentsline {figure}{\numberline {4.6}{\ignorespaces Call to the glibc function, using objdump\relax }}{71}{figure.caption.65}%
 \defcounter {refsection}{0}\relax 
 \addvspace {10\p@ }
 \defcounter {refsection}{0}\relax 

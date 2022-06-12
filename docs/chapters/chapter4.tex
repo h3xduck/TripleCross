@@ -1,18 +1,26 @@
 \chapter{Design of a malicious eBPF rootkit}
-In the previous chapter, we discussed the functionality of eBPF programs from a security standpoint, detailing which helpers and program types are particularly useful for developing malicious programs, and analysing some techniques (stack scanning, overwriting packets together with TCP retransmissions) which helps us circumvent some of the restrictions of eBPF and find new attack vectors.
+In the previous chapter, we discussed the capabilities of eBPF programs from a security standpoint, detailing which helpers and program types are particularly useful for developing malicious programs, and analysing some techniques (stack scanning, overwriting packets together with TCP retransmissions) which helps us circumvent some of the limitations of eBPF.
 
-Taking as a basis these capabilities, this chapter is now dedicated to a comprehensive description of the advanced techniques and functionalities implemented in our eBPF rootkit, which show how these capabilities can lead to the creation of a real malicious application. As we mentioned during the project objectives, our goals for our rootkit include the following:
+Taking as a basis these capabilities, this chapter is now dedicated to a comprehensive description of our rootkit, including the techniques and functionalities implemented, thus showing how these capabilities can lead to the creation of a real malicious application. As we mentioned during the project objectives, our goals for our rootkit include the following:
 \begin{itemize}
 \item Hijacking the execution of user programs while they are running, injecting libraries and executing malicious code, without impacting their normal execution.
 \item Featuring a command-and-control module powered by a network backdoor, which can be operated from a remote client. This backdoor should be controlled with stealth in mind, featuring similar mechanisms to those present in rootkits found in the wild.
 \item Tampering with user data at system calls, resulting in running malware-like programs and for other malicious purposes.
 \item Achieving stealth, hiding rootkit-related files from the user.
 \item Achieving rootkit persistence, the rootkit should run after a complete system reboot.
-
 \end{itemize}
-%TODO maybe this is the place to mention that, on top of those, explaining some of the DEFCON techniques will be done too. Im particular interested on the one of hiding the kernel log message of bpf_probe_write_user and on ROP.
 
-We will be exploring each functionality individually, presenting the necessary background on each of them, and offering a final comprehensive view on how each of the systems work.
+We will firstly present an overview on the rootkit architecture and design. Afterwards, we will be exploring each functionality individually, offering a comprehensive view on how each of the systems work.
+
+\section{Rootkit architecture}
+%TODO
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=15.5cm]{rootkit.jpg}
+	\caption{Overview of the rootkit subsystems and components.}
+	\label{fig:rootkit}
+\end{figure}
+
 
 \section{Library injection attacks}
 In this section, we will discuss how to hijack an user process running in the system so that it executes arbitrary code instructed from an eBPF program. For this, we will be injecting a library which will be executed by taking advantage of the fact that the GOT section in ELFs is flagged as writable (as we introduced in section \ref{subsection:elf_lazy_binding} and using the stack scanning technique covered in section \ref{subsection:bpf_probe_write_apps}. This injection will be stealthy (it must not crash the process), and will be able to hijack privileged programs such as systemd, so that the code is executed as root.
