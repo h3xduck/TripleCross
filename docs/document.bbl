@@ -1400,6 +1400,7 @@
       \strng{authorbibnamehash}{c6b49e9e6fbe96fdd89720e842dc0b03}
       \strng{authornamehash}{c6b49e9e6fbe96fdd89720e842dc0b03}
       \strng{authorfullhash}{c6b49e9e6fbe96fdd89720e842dc0b03}
+      \field{extraname}{1}
       \field{sortinit}{9}
       \field{sortinithash}{54047ffb55bdefa0694bbd554c1b11a0}
       \field{labelnamesource}{author}
@@ -1905,6 +1906,33 @@
       \endverb
       \verb{url}
       \verb https://raw.githubusercontent.com/wiki/hjl-tools/x86-psABI/x86-64-psABI-1.0.pdf
+      \endverb
+    \endentry
+    \entry{rawtcp_lib}{online}{}
+      \name{author}{1}{}{%
+        {{hash=c6b49e9e6fbe96fdd89720e842dc0b03}{%
+           family={Bajo},
+           familyi={B\bibinitperiod},
+           given={Marcos\bibnamedelima Sánchez},
+           giveni={M\bibinitperiod\bibinitdelim S\bibinitperiod}}}%
+      }
+      \strng{namehash}{c6b49e9e6fbe96fdd89720e842dc0b03}
+      \strng{fullhash}{c6b49e9e6fbe96fdd89720e842dc0b03}
+      \strng{bibnamehash}{c6b49e9e6fbe96fdd89720e842dc0b03}
+      \strng{authorbibnamehash}{c6b49e9e6fbe96fdd89720e842dc0b03}
+      \strng{authornamehash}{c6b49e9e6fbe96fdd89720e842dc0b03}
+      \strng{authorfullhash}{c6b49e9e6fbe96fdd89720e842dc0b03}
+      \field{extraname}{2}
+      \field{sortinit}{1}
+      \field{sortinithash}{50c6687d7fc80f50136d75228e3c59ba}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{RawTCP\_Lib}
+      \verb{urlraw}
+      \verb https://github.com/h3xduck/RawTCP_Lib
+      \endverb
+      \verb{url}
+      \verb https://github.com/h3xduck/RawTCP_Lib
       \endverb
     \endentry
     \entry{glibc}{online}{}

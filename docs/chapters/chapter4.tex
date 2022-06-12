@@ -12,14 +12,68 @@ Taking as a basis these capabilities, this chapter is now dedicated to a compreh
 
 We will firstly present an overview on the rootkit architecture and design. Afterwards, we will be exploring each functionality individually, offering a comprehensive view on how each of the systems work.
 
+
 \section{Rootkit architecture}
-%TODO
+Figure \ref{fig:rootkit} shows an overview of the rootkit modules and components which have been built for this research work.
+
 \begin{figure}[htbp]
 	\centering
 	\includegraphics[width=15.5cm]{rootkit.jpg}
 	\caption{Overview of the rootkit subsystems and components.}
 	\label{fig:rootkit}
 \end{figure}
+
+As we can observe in the figure, we can distinguish 6 different rootkit modules, along with a rootkit client which provides remote control of the rootkit over the network from the attacker machine. Also, there exists a rootkit user space process, which is listening for commands issued from the kernel-side, transmitted through a ring buffer.
+\begin{itemize}
+\item The \textbf{user space process} of the rootkit is in charge of loading and attaching the eBPF rootkit in the kernel, and creating the eBPF maps needed for their operations. For this, it uses the eBPF programs configurator, an internal structure that manages the eBPF modules at runtime, being able to attach or deattach them after a command to do so is received.
+
+The user space process also listens to any data received at the ring buffer, an special map which the eBPF program at the kernel will use to communicate with the user-side, issuing commands and triggering actions from it. Between others actions, the rootkit user space process can spawn TLS clients, execute malicious programs or use the eBPF program configurator for managing the eBPF programs.
+
+\item The \textbf{library injection} module is in charge of hijacking the execution of target processes by injecting a malicious library. For this, it uses a set of eBPF tracepoints in the kernel side, and a code caver module in the user side in charge of scanning user processes and injecting shellcode, apart from the malicious library itself, which is prepared to communicate with the attacker's remote client.
+
+\item The \textbf{execution hijacking} module is in charge of hijacking the execution of programs right before the process is even created, modifying the kernel function arguments in such a way that the a new malicious program is called, but the original information is not lost so that the malicious program can still create the original process. Therefore, it hijacks the creation of processes by transparently injecting the creation of one additional malicious process on top of the intended one.
+
+\item The \textbf{privilege escalation} module is in charge of ensuring that any user process spawned by the rootkit will maintain full privilege in the system. Therefore, it hijacks any call to the sudoers file (on which privileged users are listed) so that the user on which the rootkit is loaded is always treated as root. Note that we have not listed this module as one of the main project objetives mainly because it acts as a helper to other modules, such as the execution hijacking one.
+
+\item The \textbf{backdoor} is one of the most critical modules in the rootkit. It has full control over incoming traffic with an XDP program, and outgoing traffic with a TC egress program. As we will see, both the XDP and TC programs are loaded in different eBPF programs, so they use a shared eBPF map to communicate between them.
+
+The backdoor maintains a Command and Control (C2) system that is prepared to listen for specially-crafted network triggers which intend to be stealthy and go unnoticed by network firewalls. These triggers transmit information and commands to the XDP program at the network border, which the backdoor is in charge of interpreting and issuing the corresponding actions, either by writing data at an eBPF map in which other eBPF programs are reading, or issuing an action request via the ring buffer. On top of that, the TC program interprets the data parsed by the XDP program and shapes the outgoint traffic, being able to inject secret messages into packets. 
+
+\item The \textbf{rootkit stealth} module is in charge of implementing measures to hide the rootkit from the infected host. For this, it hijacks certain system calls so that rootkit-related files and directories are hidden from the system.
+
+\item The \textbf{rootkit persistence} module is in charge of ensuring that the rootkit will stay loaded even after a complete reboot of the infected system. For this, it injects secret files at the \textit{cron} system (which will launch the rootkit after a reboot) and at the sudo system (which maintains the privileged permissions of the rootkit after the reboot).
+
+\item The \textbf{rootkit client} is a command-line interface (CLI) program that enables the attacker to remotely control the rootkit at the infected machine. For this, it incorporates multiple operation modes that launch different commands and network triggers. These network triggers, and any other packet sent to the backdoor, are customly designed TCP packets sent over a raw socket, enabling to avoid the noisy TCP 3-way handshake and to control every detail of the packet fields. Each of the messages generated by the client (and sent by the backdoor) follow a custom rootkit protocol, that defines the format of the messages and allows both the client and the backdoor to identify those packets belonging to this malicious traffic. In order to craft these packets, the rootkit client uses a raw sockets library (RawTCP\_Lib) that we have developed for this purpose \cite{rawtcp_lib}.
+
+The RawTCP\_Lib library incorporates packets building, raw socket packet transmissions, and a sniffer for incoming packets. This sniffer is particularly relevant since the client will need to listen for responses by the rootkit backdoor and quickly detect those that follow the rootkit protocol format.
+
+Apart from the network triggers, upon receiving a response by the backdoor the rootkit client can start pseudo-shells connections (commands can be sent to the backdoor and the backdoor executes them, but no shell process is spawned in the client), or spawn TLS servers that establish an encrypted connection with the backdoor. This connection, internally, still uses the custom rootkit protocol to act as a pseudo-shell, enabling to execute commands remotey.
+\end{itemize}
+
+
+With respect to how the rootkit implementation is distributed into multiple programs, we can find that, overall, there exist 4 main components, as shown in figure \ref{fig:rootkit_files}.
+
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=15cm]{rootkit_files.jpg}
+	\caption{Rootkit programs and scripts.}
+	\label{fig:rootkit_files}
+\end{figure}
+
+As we can observe in the figure, the rootkit modules we have overviewed previously are distributed into different files:
+\begin{itemize}
+\item The program \textit{\textbf{injector}} comprises the rootkit client and the shared library RawTCP\_Lib. This program is to be launched from the attacker machine after a successful infection of a host.
+\item The program \textit{\textbf{tc}} contains the TC program needed for managing the egress network traffic. The reason why it is loaded separately is because the libbpf library does not currently incorporate support for integrating TC programs easily as with XDP or tracepoints.
+
+This program is also responsible of creating the shared map which the backdoor will use, and therefore it must be the first part of the rootkit loaded.
+\item The program \textit{\textbf{kit}} contains most of the rootkit functionality, spawning the user process and the kernel-side eBPF programs and maps.
+\item The \textit{\textbf{packager.sh}} and \textit{\textbf{deployer.sh}} files are scripts which an attacker, upon gaining access to a machine, can use to quickly set up the rootkit and infect the machine:
+\begin{itemize}
+	\item \textit{packager.sh} compiles the rootkit and prepares the \textit{injector}, \textit{kit} and \textit{tc} files in an output directory to be used (this directory is hidden by the rootkit once it is loaded).
+	\item \textit{deployer.sh} uses the output directory to launch the rootkit files in order (first \textit{tc}, then \textit{kit}). It also injects the necessary files into the sudoers.d and cron.d directories (which will be later hidden by the rootkit) to maintain persistence.
+\end{itemize}
+\end{itemize}
+
 
 
 \section{Library injection attacks}
