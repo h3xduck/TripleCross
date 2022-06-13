@@ -18,7 +18,7 @@ Figure \ref{fig:rootkit} shows an overview of the rootkit modules and components
 
 \begin{figure}[htbp]
 	\centering
-	\includegraphics[width=15.5cm]{rootkit.jpg}
+	\includegraphics[width=15.5cm]{rootkit.png}
 	\caption{Overview of the rootkit subsystems and components.}
 	\label{fig:rootkit}
 \end{figure}
@@ -76,33 +76,33 @@ This program is also responsible of creating the shared map which the backdoor w
 
 
 
-\section{Library injection attacks}
+\section{Library injection module}
 In this section, we will discuss how to hijack an user process running in the system so that it executes arbitrary code instructed from an eBPF program. For this, we will be injecting a library which will be executed by taking advantage of the fact that the GOT section in ELFs is flagged as writable (as we introduced in section \ref{subsection:elf_lazy_binding} and using the stack scanning technique covered in section \ref{subsection:bpf_probe_write_apps}. This injection will be stealthy (it must not crash the process), and will be able to hijack privileged programs such as systemd, so that the code is executed as root.
 
-We will also research how to circumvent the protections which modern compilers have set in order to prevent similar attacks (when performed without eBPF).
+We will also research how to circumvent the protections which modern compilers have set in order to prevent similar attacks (when performed without eBPF), as we overview in section \ref{subsection:hardening_elf}.
 
-This technique has some advantages and disadvantages to the one described by Jeff Dileo at DEFCON 27\cite{evil_ebpf_p6974}, which we will briefly cover before presenting ours. Both techniques will be later compared in section \ref{TODO EVALUATION}.
+This technique has some advantages and disadvantages to the one described by Jeff Dileo at DEFCON 27 \cite{evil_ebpf_p6974}, which we will briefly cover before presenting ours. Both techniques will be later compared in chapter \ref{chapter:related_work}.
 
 
 \subsection{ROP with eBPF} \label{subsection:rop_ebpf}
-In 2019, Jeff Dileo presented in DEFCON 27 the first technique to achieve arbitrary code execution using eBPF\cite{evil_ebpf_p6974}. For this, he used the ROP technique we described in section \ref{subsection:rop} to inject malicious code into a process. We will present an overview on his technique, in order to later compare it to the one we will develop for our rootkit, and find advantages and disadvantages. Note that this is a summary and some aspects have been simplified, however we will go in full detail during the explanation of our own technique.
+In 2019, Jeff Dileo presented in DEFCON 27 the first technique to achieve arbitrary code execution using eBPF \cite{evil_ebpf_p6974}. For this, he used the ROP technique we described in section \ref{subsection:rop} to inject malicious code into a process. We will present an overview on his technique, in order to later compare it to the one we will develop for our rootkit, and find advantages and disadvantages. Note that this is a summary and some aspects have been simplified, however we will go in full detail during the explanation of our own technique.
 
-\begin{figure}[H]
+Figure \ref{fig:rop_evil_ebpf_1} shows an overview on the process memory and the eBPF programs loaded. For this injection, we will use the stack scanning technique (section \ref{subsection:bpf_probe_write_apps}) using the arguments of a system call whose arguments are passed using the stack (sys\_timerfd\_settime, which receives two structs utmr and otmr). Therefore, a kprobe is attached to the system call, so that it can start to scan for the return address of the system call, which we know is the original value of register rip which was pushed into the stack (ret).
+
+\begin{figure}[htbp]
 	\centering
 	\includegraphics[width=15cm]{rop_evil_ebpf_1.jpg}
 	\caption{Initial setup for the ROP with eBPF technique.}
 	\label{fig:rop_evil_ebpf_1}
 \end{figure}
 
-Figure \ref{fig:rop_evil_ebpf_1} shows an overview on the process memory and the eBPF programs loaded. For this injection, we will use the stack scanning technique (section \ref{subsection:bpf_probe_write_apps}) using the arguments of a system call whose arguments are passed using the stack (sys\_timerfd\_settime, which receives two structs utmr and otmr). Therefore, a kprobe is attached to the system call, so that it can start to scan for the return address of the system call, which we know is the original value of register rip which was pushed into the stack (ret).
+%TODO I don't quite like this. Maybe the glibc bit, because of its importance, is better somewhere else
+An additional aspect must be introduced now (we will cover it more in detail in section \ref{TODO}): system calls are not directly called by the instructions in the .text section, but rather user programs in C make use of the C Standard Library to delegate the actual syscall, which in this case is the GNU Standard Library (glibc) \cite{glibc}. Therefore, a program calls a function in glibc (in this case timerfd\_settime) in which the syscall is performed, and the kernel executes it.
 
-%TODO Maybe the glibc bit, because of its importance, is better somewhere else
-An additional aspect must be introduced now (we will cover it more in detail in section \ref{TODO}): system calls are not directly called by the instructions in the .text section, but rather user programs in C make use of the C Standard Library to delegate the actual syscall, which in this case is the GNU Standard Library (glibc)\cite{glibc}. Therefore, a program calls a function in glibc (in this case timerfd\_settime) in which the syscall is performed, and the kernel executes it.
-
-This means that, during the stack scanning technique, if we start from struct utmr and scan forward in the stack, what we will find in ret is the return address of the function of glibc, and not directly that of the syscall to the kernel. Therefore, our goal is, for every data in the stack while scanning forward, check whether it is the real return address of glibc. For an address to be the real return address, we will follow the next steps:
+This means that, during the stack scanning technique, if we start from struct utmr and scan forward in the stack, what we will find in ret is the return address of the PLT stub that calls the function at glibc, and not directly that of the syscall to the kernel. Therefore, our goal is, for every data in the stack while scanning forward, check whether it is the real return address of the PLT stub we are looking for. For an address to be the real return address, we will follow the next steps:
 \begin{enumerate}
-\item Take an address from the stack. If that is the return address (the old rip), then the instruction that called the function in glibc must be the previous instruction (rip - 1).
-\item We now have a \textit{call} instruction, that directs us to the function at glibc. We check in the instruction to which address it moves the flow of execution, that is the address of timerfd\_settime in glibc.
+\item Take an address from the stack. If that is the return address (the saved rip), then the instruction that called the PLT stub that jumps to the function in glibc must be the previous instruction (rip - 1).
+\item We now have a \textit{call} instruction, that directs us to the PLT stub. We take the address stored at the GOT section and jump to the function at glibc.
 \item We scan forward, inside timerfd\_settime of glibc, until we find a \textit{syscall} instruction. That is the point where the flow of execution moves to the kernel, so we have checked that the return address we found in the stack truly is the one we are looking for.
 \end{enumerate}
 
@@ -130,11 +130,11 @@ As we can see, eBPF writes back the original stack and thus the execution can co
 
 
 %TODO Eligible to writing more. This was merged with the explanation of each feature before, so it was more extense, but now it might need some more info??
-\subsection{Bypassing hardening features in ELFs}
-During section \ref{subsection:hardening_elf}, we presented multiple  security hardening measures that have been introduced to prevent common exploitation techniques (such as stack buffer overflows) and that nowadays can be incorporated, usually by default, in ELF binaries generated using modern compilers. We will now explore how to bypass these features, so that we can later design an injection technique that can target any process in the system, independently on whether it was compiled using these mitigations.
+\subsection{Bypassing hardening features in ELFs} \label{subsection:hardening_bypass}
+During section \ref{subsection:hardening_elf}, we presented multiple  security hardening measures that have been introduced to prevent common exploitation techniques (such as stack buffer overflows) and that nowadays can be incorporated, usually by default, in ELF binaries generated using modern compilers. We will now explore how to bypass these features, so that we can design an injection technique that can target any process in the system, independently on whether it was compiled using these mitigations.
 
 \textbf{Stack canaries}\\
-Since stack canaries will be checked after the vulnerable function returns, an attacker seeking to overwrite the stack must ensure that the value of the canary remains constant. In the context of a buffer overflow attack, this can be achieved by leaking the value of the canary and incorporating it into the overflowing data at the stack, so that the same value is written on the same address\cite{canary_exploit}.
+Since stack canaries will be checked after the vulnerable function returns, an attacker seeking to overwrite the stack must ensure that the value of the canary remains constant. In the context of a buffer overflow attack, this can be achieved by leaking the value of the canary and incorporating it into the overflowing data at the stack, so that the same value is written on the same address \cite{canary_exploit}.
 
 In our rootkit, unlike in the ROP technique presented in section \ref{subsection:rop_ebpf}, we will avoid overwriting the value of the saved rip in the stack completely. Therefore, as long as our eBPF program leaves all registers and stack data in the same state as before calling the function, we will not trigger any alerts.
 
@@ -147,7 +147,7 @@ In our rootkit, we will choose the first option, scanning the process virtual me
 In order to bypass ASLR, attackers must take into account that, although the address at which, for instance, a library is loaded is random, the internal structure of the library remains unchanged, with all symbols in the same relative position, as figure \ref{table:aslr_offset} shows.
 
 %TODO Add the .data section here
-\begin{figure}[H]
+\begin{figure}[htbp]
 	\centering
 	\includegraphics[width=13cm]{aslr_offset.jpg}
 	\caption{Two runs of the same executable using ASLR, showing a library and two symbols.}
@@ -157,7 +157,7 @@ In order to bypass ASLR, attackers must take into account that, although the add
 As we can observe in the figure, although glibc is loaded at a different base address each run, the offset between the functions it implements, malloc() and free(), remains constant. Therefore, a method for bypassing ASLR is to gather information about the absolute address of any symbol, which can then easily lead to knowing the address of any other if the attacker decompiles the executable and calculates the offset between a pair of addresses where one is known. This is the chosen method for our technique.
 
 \textbf{PIE}\\
-Similarly to ASLR, although the starting base address of each memory section is random, the internal structure of each section remains the same. Therefore, if an attacker is able to leak the address of some symbol in a section, and by knowing the offset at which it is located with respect to the base address of the section, then the address of any other symbol in the same section can be calculated\cite{pie_exploit}. This is the technique we will incorporate in our rootkit.
+Similarly to ASLR, although the starting base address of each memory section is random, the internal structure of each section remains the same. Therefore, if an attacker is able to leak the address of some symbol in a section, and by knowing the offset at which it is located with respect to the base address of the section, then the address of any other symbol in the same section can be calculated \cite{pie_exploit}. This is the technique we will incorporate in our rootkit.
 
 \textbf{RELRO}\\
 If an executable was compiled using Partial RELRO, then the value of GOT can still be overwritten. If in turn it was compiled using Full RELRO, this stops any attempt of GOT hijacking, unless an attacker finds an alternative method for writing into the virtual memory of a process that bypasses the read-only flag. 
@@ -166,32 +166,173 @@ In our rootkit, we will directly write using eBPF the value of GOT if it was com
 
 
 \subsection{Library injection via GOT hijacking} \label{subsection:got_attack}
-Taking into account the background about stack attacks, ELF's lazy binding and hardening features for binaries we presented in section \ref{section:elf}, we will now present the exploitation technique incorporated in our rootkit to inject a malicious library into a running process. 
+Taking into account the previous background and that about stack attacks, ELF's lazy binding and hardening features for binaries we presented in section \ref{section:elf}, we will now present the exploitation technique incorporated in our rootkit to inject a malicious library into a running process. 
 
 This attack is based on the possibility of overwriting the data at the GOT section. As we have mentioned previously, this section is marked as writeable if the program was compiled using Partial RELRO, meaning that we will be able to overwrite its value from an eBPF program using the helper bpf\_probe\_write\_user(). After modifying the value of GOT, a PLT stub will take the new value as the jump address (as we explained in section \ref{subsection:elf_lazy_binding}), effectively hijacking the flow of execution of the program. In the case that a program was compiled with Full RELRO (which will be the case of many programs running by default in a Linux system such as systemd), we will make use of the /proc filesystem for overwriting this value.
 
-The rootkit will inject the library only after the second time that an specific syscall is called by a process, since the first time we will wait for the GOT address to be loaded by the dynamic linker. This is a necessary step because eBPF will need to validate that it really is the GOT section to overwrite.
+The rootkit will inject the library once an specific syscall is called by a process, but the library injection will only happen after the second syscall, since we need to wait for the GOT address to be loaded by the dynamic linker. This is a necessary step because eBPF will need to validate that it really is the GOT section to overwrite.
 
 This technique works both in compilers with low hardening fetaures by default (Clang) and also on a compiler with all of them active (GCC), see table \ref{table:compilers}. On each of the steps, we will detail the different existing methods depending on the compiler features.
 
 For this research work, the rootkit is prepared to perform this attack on any process that makes use of either the system call sys\_openat or sys\_timerfd\_settime, which are called by the standard library glibc.
 
 \textbf{Stage 1: eBPF tracing and scan the stack}\\
-We load and attach a tracepoint eBPF program at the \textit{enter} position of syscall sys\_timerfd\_settime. Firstly we must ensure that the process calling the tracepoint is one of the processes to hijack.
+We load and attach a tracepoint eBPF program at the \textit{enter} position of syscall sys\_timerfd\_settime. Firstly, we must ensure that the process calling the tracepoint is one of the processes to hijack.
 
-We will then proceed with the stack scanning technique, as we explained in section \ref{subsection:bpf_probe_write_apps}. In this case, the algorithm will go as follows:
-\begin{enumerate}
-\item Take one of the syscall parameters and scan forward in the scan. For each iteration, we must check if the data at the stack corresponds to the saved rip:
+We will then proceed with the stack scanning technique, as we explained in section \ref{subsection:bpf_probe_write_apps}. In this case, we will take one of the syscall parameters and scan forward in the stack. For each iteration, we must check if the data at the stack corresponds to the saved return address of the PLT stub that jumps to glibc where the syscall sys\_timerfd\_settime is called. Figure \ref{fig:lib_stage1} shows an overview of how these call instructions relate each memory section. 
+
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=13cm]{plt_got_glibc_flow.jpg}
+	\caption{Overview of jump and return instructions from the program instructions to the syscall at the kernel.}
+	\label{fig:lib_stage1}
+\end{figure}
+
+The following are the steps we will follow to perform check some data at the stack is the saved return address:
 \begin{enumerate}
 \item Check that the previous instruction is a call instruction, by checking the instruction length and opcodes (call instructions always start with e8, and the length is 5 bytes, see figure \ref{fig:firstcall}).
-\begin{figure}[H]
+\begin{figure}[htbp]
 	\centering
 	\includegraphics[width=13cm]{sch_firstcall.png}
-	\caption{Call to the glibc function, using objdump}
+	\caption{Call to the glibc function, using objdump.}
 	\label{fig:firstcall}
 \end{figure}
 \item Now that we know we localized a call instruction, we take the address at which it jumps. That should be an address in a PLT stub.
-\item We analyze the instruction at the PLT stub. If the program was compiled with GCC, it will be an \textit{endbr64} instruction followed by the PLT jump instruction using the address at GOT (since it generates Intel CET-compatible programs, see table \ref{table:compilers}). Otherwise, if using Clang, the first instruction is the PLT jump.
-%TODO Continue
+\item We analyse the instructions at the PLT stub. If the program was compiled with GCC, the first instruction will be an \textit{endbr64} instruction followed by the PLT jump instruction using the address at GOT (see figure \ref{fig:plt_gcc}), since it generates Intel CET-compatible programs. Otherwise, if using Clang, which does not generate Intel CET instructions, the first instruction is the PLT jump (see figure \ref{fig:plt_clang}).
+
+We analyse the jump instruction and, again, take the address at which it jumps. This time, it should be the address of the function at glibc.
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=14cm]{sch_plt_gcc.png}
+	\caption{PLT stub generated with gcc compiler, using objdump.}
+	\label{fig:plt_gcc}
+\end{figure}
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=14cm]{sch_plt_clang.png}
+	\caption{PLT stub generated with clang compiler, using objdump.}
+	\label{fig:plt_clang}
+\end{figure}
+
+\item We now have the address of timerfd\_settime at glibc, from where the syscall will be called. From eBPF, we continue to scan the first opcodes and compare them to those we expect to find at glibc. Specifically, the function would have to contain the instruction opcodes shown in figure \ref{fig:settime_glibc}. Note that, in our version of Ubuntu, we will find Glibc compiled with GCC.
+
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=14cm]{sch_settime_glibc.png}
+	\caption{Timerfd\_settime function at glibc, using objdump.}
+	\label{fig:settime_glibc}
+\end{figure}
+
 \end{enumerate}
+
+Once we ensured we reached the correct glibc function, we are now sure that the data we found at the stack is the return address of the PLT stub that jumped to glibc and called the syscall sys\_timerfd\_settime. Most importantly, we know the address of the GOT section which we want to overwrite.
+
+\textbf{Stage 2: Programming shellcode}\\
+Once that we have the address of the GOT section, we need to prepare our shellcode to be injected into the process memory. We will overwrite the value at GOT and redirect the flow of execution to the address at which our shellcode is stored in memory. 
+
+Since we want our shellcode to be able to load a library, it will need to call the function \_\_libc\_dlopen\_mode, which can be found in glibc. This function expects to receive as an argument a string with the file path of the malicious library, and therefore the shellcode will also need to call \_\_libc\_malloc to allocate space for the argument. Tables \ref{table:libc_malloc} and \ref{table:libc_dlopen_mode} explain the expected arguments and return value of each function in detail.
+
+\begin{table}[htbp]
+\begin{tabular}{|>{\centering\arraybackslash}p{4cm}|>{\centering\arraybackslash}p{10cm}|}
+\hline
+Register & Value\\
+\hline
+\hline
+edi & Number of bytes to allocate. \\
+\hline
+rax & Return value, contains the address at which the requested bytes were allocated\\
+\hline
+\end{tabular}
+\caption{Arguments and return value of function \_\_libc\_malloc.}
+\label{table:libc_malloc}
+\end{table}
+
+\begin{table}[htbp]
+\begin{tabular}{|>{\centering\arraybackslash}p{4cm}|>{\centering\arraybackslash}p{10cm}|}
+\hline
+Register & Value\\
+\hline
+\hline
+rsi & 0x1, indicating flag RTLD\_LAZY\\
+\hline
+rdi & Address where to read path of library to load\\
+\hline
+\end{tabular}
+\caption{Arguments of function \_\_libc\_dlopen\_mode.}
+\label{table:libc_dlopen_mode}
+\end{table}
+
+The programs were compiled having ASLR active, and therefore we cannot know the virtual address at which these functions are loaded into the process memory. However, since we have leaked the address of timerfd\_settime at glibc with the previous eBPF scan, we can calculate the address of the other functions, as we introduced in section \ref{subsection:hardening_bypass}. Figure \ref{fig:aslr_bypass_example} shows an example of this process.
+
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=10cm]{aslr_bypass_example.png}
+	\caption{Functions at glibc with ASLR active.}
+	\label{fig:aslr_bypass_example}
+\end{figure}
+
+We will use the example of the figure to illustrate how to calculate the address of the functions:
+\begin{enumerate}
+\item Decompile using objdump the glibc diagram and calculate the constant offset between the timerfd\_settime function (whose address we will know at runtime) and a reference function usually found in the first addresses of glibc, in this case \_\_libc\_start\_main (this step can be avoided, but it is recommended when searching for many functions and to avoid working with negative offsets). In the example, this offset is 0x30000.
+\item Calculate the offset from the reference function \_\_libc\_start\_main to \_\_libc\_dlopen\_mode and \_\_libc\_malloc. In the example, this is 0x20000 and 0x5000 respectively by looking at  decompiled glibc.
+\item During runtime, although the ASLR offset will be applied, it will skew all functions inside glibc by the same amount, and therefore the offsets previously calculated will be maintained. By using the previously, calculated offsets, we get that:
+\begin{itemize}
+	\item \_\_libc\_start\_main = timerfd\_settime - 0x30000
+	\item \_\_libc\_dlopen\_mode = \_\_libc\_start\_main + 0x50000
+	\item \_\_libc\_malloc = \_\_libc\_start\_main + 0x20000
+\end{itemize}
 \end{enumerate}
+
+Once we know the address of the functions we want our shellcode to call, we can start to develop it. We will program an x86\_64 assembly program, from which we will extract its opcodes. The shellcode will follow the next algorithm:
+\begin{enumerate}
+\item Backup the value of all registers, including rbp and rsp. We must ensure that the stack frame is not modified after the shellcode ends, otherwise we may trigger a stack canary alert.
+\item Allocate memory for the pathname of the library at the heap using \_\_libc\_malloc.
+\item Write into the allocated memory the pathname of our library to load.
+\item Call \_\_libc\_dlopen\_mode indicating the allocated memory with the library pathname. Before doing this, we found that reserving an additional stack frame reduces the chances of the process crashing, since apparently the function modifies the stack. By moving rbp and rsp, we prevent the function from modifying any pre-existing data.
+\item Restore the original value of the registers, and jump back to the original system call which the glibc function intended to call.
+\end{enumerate}
+
+The complete developed shellcode and its opcodes can be found in Appendix \ref{annex:shellcode}.
+
+
+\textbf{Stage 3: Injecting shellcode in a code cave}\\
+Once we have developed our shellcode, and before overwriting the value of GOT, we need to find a memory section where to write our shellcode, so that we can executing the necessary instructions to inject our malicious library. This area must be large enough to fit our shellcode, and it must be marked as executable. 
+
+Because of DEP/NX, we cannot use the stack for executing code. On top of that, as we can observe in the section header dump at Appendix \ref{annexsec:readelf_sec_headers}, for security reasons all sections are nowadays marked either writeable or executable, but never both simultaneously.
+
+Therefore, we will use the proc filesystem which we introduced in section \ref{section:proc_filesystem}. By using the file under \textit{/proc/<pid>/maps}, we will easily identify the address range of those memory sections marked as executable, and by using the file \textit{/proc/<pid>/mem}, we will write our shellcode into that memory section, bypassing the absence of a write flag.
+
+Although we may write freely into any virtual address using this technique, as we saw in section \ref{subsection:proc_maps} executable memory usually corresponds to the .text section. Therefore, we are at risk of overwriting critical instructions of the program. This is the reason why we must search for empty memory spaces inside the virtual memory, called code caves.
+
+We will consider an appropiate code cave as a continuous memory space inside the .text section that consists of a series of NULL bytes (opcode 0x00). Although in principle this may seem like a rare occurence, it is a common find in most processes due to how memory access control is implemented.
+
+In figure \ref{fig:proc_maps_sample}, we can observe how virtual memory sections have a length of 0x1000, or are a multiple of it. This is not an arbitrary number, but rather it is because memory sections must always be of length multiple of the system page length (4 KB = 0x1000 bytes). Therefore, the minimum granularity of a set of permissions over a memory section is of 0x1000 bytes.
+
+Since sections must occupy a multiple of 1000 bytes, this leads to multiple sections which leave lots of empty, NULL bytes, unocuppied without any instructions. This is the reason why we will, quite probably, find a code cave in most processes.
+
+Therefore the steps to find a code cave and inject our shellcode are the following:
+\begin{itemize}
+\item Send a command from eBPF to the rootkit user space program, indicating that we want to find a code cave in process with an specific PID.
+\item Iterate over each entry of \textit{/proc/<pid>/maps}, looking for a sufficiently large code cave in an executable memory section.
+\item Inject the shellcode into the code cave using \textit{/proc/<pid>/mem}.
+\end{itemize}
+
+Note that, although we used the \textit{/proc/<pid>/maps} file for finding a code cave, this can still be done using the helper bpf\_probe\_read (by taking the return address at the stack and scanning forward in the .text section) or, in the case of programs compiled without PIE, finding an static code cave at the .text section by decompiling the program (since the .text section will be loaded at the same position on every program execution). Still, we would have needed to use \textit{/proc/<pid>/mem} for bypassing the write access prevention.
+
+\textbf{Stage 4: Overwriting GOT}\\
+Once the shellcode is loaded at the code cave, eBPF can proceed to overwrite the GOT value with the address of the code cave. As we mentioned, this address is writable using the helper bpf\_probe\_write\_user() if the program was compiled using Partial RELRO, but it cannot be modified if Full RELRO was used. 
+
+Therefore, our rootkit will modify GOT using bpf\_probe\_write\_user() with the address of an static code cave for those programs compiled with Clang (Partial RELRO, no PIE), and use \textit{/proc/<pid>/mem} for modifying GOT with the value of code cave found using \textit{/proc/<pid>/maps} for those programs compiled using GCC (Full RELRO, PIE active).
+
+\textbf{Second syscall, execution of the library}\\
+Once we have overwriten GOT with the address of our code cave, the next time the same syscall is called, the PLT stub will jump to our code cave and execute our shellcode. As instructed by it, the malicious library will be loaded and afterwards the flow of execution jumps back to the original glibc function.
+
+%Explain reverse shell?
+With respect to the malicious library, it forks the process (to keep the malicious execution in the background) and spawns a simple reverse shell which the attacker can use to execute remote commands.
+
+
+%TODO INCLUDE A DIAGRAM OF OVERALL ATTACK
+%TODO EXPLAIN ALTERNATIVE SCANNING TECHNIQUE USING PT_REGS STRUCT
+
+
+

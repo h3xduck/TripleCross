@@ -61,27 +61,39 @@
 \defcounter {refsection}{0}\relax 
 \contentsline {figure}{\numberline {2.28}{\ignorespaces Glibc function to which PLT jumps using address stored at GOT, seen from gdb-peda.\relax }}{48}{figure.caption.55}%
 \defcounter {refsection}{0}\relax 
-\addvspace {10\p@ }
-\defcounter {refsection}{0}\relax 
-\contentsline {figure}{\numberline {3.1}{\ignorespaces Overview of stack scanning and writing technique.\relax }}{58}{figure.caption.58}%
-\defcounter {refsection}{0}\relax 
-\contentsline {figure}{\numberline {3.2}{\ignorespaces Technique to duplicate a packet for exfiltrating data.\relax }}{62}{figure.caption.59}%
+\contentsline {figure}{\numberline {2.29}{\ignorespaces File /proc/<pid>/maps of a sample program.\relax }}{51}{figure.caption.58}%
 \defcounter {refsection}{0}\relax 
 \addvspace {10\p@ }
 \defcounter {refsection}{0}\relax 
-\contentsline {figure}{\numberline {4.1}{\ignorespaces Overview of the rootkit subsystems and components.\relax }}{65}{figure.caption.60}%
+\contentsline {figure}{\numberline {3.1}{\ignorespaces Overview of stack scanning and writing technique.\relax }}{60}{figure.caption.60}%
 \defcounter {refsection}{0}\relax 
-\contentsline {figure}{\numberline {4.2}{\ignorespaces Rootkit programs and scripts.\relax }}{67}{figure.caption.61}%
+\contentsline {figure}{\numberline {3.2}{\ignorespaces Technique to duplicate a packet for exfiltrating data.\relax }}{64}{figure.caption.61}%
 \defcounter {refsection}{0}\relax 
-\contentsline {figure}{\numberline {4.3}{\ignorespaces Initial setup for the ROP with eBPF technique.\relax }}{69}{figure.caption.62}%
+\addvspace {10\p@ }
 \defcounter {refsection}{0}\relax 
-\contentsline {figure}{\numberline {4.4}{\ignorespaces Process memory after syscall exits and ROP code overwrites the stack.\relax }}{70}{figure.caption.63}%
+\contentsline {figure}{\numberline {4.1}{\ignorespaces Overview of the rootkit subsystems and components.\relax }}{67}{figure.caption.62}%
 \defcounter {refsection}{0}\relax 
-\contentsline {figure}{\numberline {4.5}{\ignorespaces Stack data is restored and program continues its execution.\relax }}{71}{figure.caption.64}%
+\contentsline {figure}{\numberline {4.2}{\ignorespaces Rootkit programs and scripts.\relax }}{69}{figure.caption.63}%
 \defcounter {refsection}{0}\relax 
-\contentsline {figure}{\numberline {4.6}{\ignorespaces Two runs of the same executable using ASLR, showing a library and two symbols.\relax }}{72}{figure.caption.65}%
+\contentsline {figure}{\numberline {4.3}{\ignorespaces Initial setup for the ROP with eBPF technique.\relax }}{71}{figure.caption.64}%
 \defcounter {refsection}{0}\relax 
-\contentsline {figure}{\numberline {4.7}{\ignorespaces Call to the glibc function, using objdump\relax }}{74}{figure.caption.66}%
+\contentsline {figure}{\numberline {4.4}{\ignorespaces Process memory after syscall exits and ROP code overwrites the stack.\relax }}{72}{figure.caption.65}%
+\defcounter {refsection}{0}\relax 
+\contentsline {figure}{\numberline {4.5}{\ignorespaces Stack data is restored and program continues its execution.\relax }}{73}{figure.caption.66}%
+\defcounter {refsection}{0}\relax 
+\contentsline {figure}{\numberline {4.6}{\ignorespaces Two runs of the same executable using ASLR, showing a library and two symbols.\relax }}{74}{figure.caption.67}%
+\defcounter {refsection}{0}\relax 
+\contentsline {figure}{\numberline {4.7}{\ignorespaces Overview of jump and return instructions from the program instructions to the syscall at the kernel.\relax }}{76}{figure.caption.68}%
+\defcounter {refsection}{0}\relax 
+\contentsline {figure}{\numberline {4.8}{\ignorespaces Call to the glibc function, using objdump.\relax }}{76}{figure.caption.69}%
+\defcounter {refsection}{0}\relax 
+\contentsline {figure}{\numberline {4.9}{\ignorespaces PLT stub generated with gcc compiler, using objdump.\relax }}{76}{figure.caption.70}%
+\defcounter {refsection}{0}\relax 
+\contentsline {figure}{\numberline {4.10}{\ignorespaces PLT stub generated with clang compiler, using objdump.\relax }}{77}{figure.caption.71}%
+\defcounter {refsection}{0}\relax 
+\contentsline {figure}{\numberline {4.11}{\ignorespaces Timerfd\_settime function at glibc, using objdump.\relax }}{77}{figure.caption.72}%
+\defcounter {refsection}{0}\relax 
+\contentsline {figure}{\numberline {4.12}{\ignorespaces Functions at glibc with ASLR active.\relax }}{78}{figure.caption.75}%
 \defcounter {refsection}{0}\relax 
 \addvspace {10\p@ }
 \defcounter {refsection}{0}\relax 

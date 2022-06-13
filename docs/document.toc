@@ -97,53 +97,59 @@
 \defcounter {refsection}{0}\relax 
 \contentsline {subsection}{\numberline {2.9.2}Hardening ELF binaries}{48}{subsection.2.9.2}%
 \defcounter {refsection}{0}\relax 
-\contentsline {chapter}{\numberline {3}Analysis of offensive capabilities}{50}{chapter.3}%
+\contentsline {section}{\numberline {2.10}The proc filesystem}{50}{section.2.10}%
 \defcounter {refsection}{0}\relax 
-\contentsline {section}{\numberline {3.1}eBPF maps security}{50}{section.3.1}%
+\contentsline {subsection}{\numberline {2.10.1}/proc/<pid>/maps}{50}{subsection.2.10.1}%
 \defcounter {refsection}{0}\relax 
-\contentsline {section}{\numberline {3.2}Abusing tracing programs}{51}{section.3.2}%
+\contentsline {subsection}{\numberline {2.10.2}/proc/<pid>/mem}{51}{subsection.2.10.2}%
 \defcounter {refsection}{0}\relax 
-\contentsline {subsection}{\numberline {3.2.1}Access to function arguments}{51}{subsection.3.2.1}%
+\contentsline {chapter}{\numberline {3}Analysis of offensive capabilities}{52}{chapter.3}%
 \defcounter {refsection}{0}\relax 
-\contentsline {subsection}{\numberline {3.2.2}Reading memory out of bounds}{54}{subsection.3.2.2}%
+\contentsline {section}{\numberline {3.1}eBPF maps security}{52}{section.3.1}%
 \defcounter {refsection}{0}\relax 
-\contentsline {subsection}{\numberline {3.2.3}Overriding function return values}{54}{subsection.3.2.3}%
+\contentsline {section}{\numberline {3.2}Abusing tracing programs}{53}{section.3.2}%
 \defcounter {refsection}{0}\relax 
-\contentsline {subsection}{\numberline {3.2.4}Sending signals to user programs}{56}{subsection.3.2.4}%
+\contentsline {subsection}{\numberline {3.2.1}Access to function arguments}{53}{subsection.3.2.1}%
 \defcounter {refsection}{0}\relax 
-\contentsline {subsection}{\numberline {3.2.5}Takeaways}{56}{subsection.3.2.5}%
+\contentsline {subsection}{\numberline {3.2.2}Reading memory out of bounds}{56}{subsection.3.2.2}%
 \defcounter {refsection}{0}\relax 
-\contentsline {section}{\numberline {3.3}Memory corruption}{56}{section.3.3}%
+\contentsline {subsection}{\numberline {3.2.3}Overriding function return values}{56}{subsection.3.2.3}%
 \defcounter {refsection}{0}\relax 
-\contentsline {subsection}{\numberline {3.3.1}Attacks and limitations of bpf\_probe\_write\_user()}{56}{subsection.3.3.1}%
+\contentsline {subsection}{\numberline {3.2.4}Sending signals to user programs}{58}{subsection.3.2.4}%
 \defcounter {refsection}{0}\relax 
-\contentsline {subsection}{\numberline {3.3.2}Takeaways}{59}{subsection.3.3.2}%
+\contentsline {subsection}{\numberline {3.2.5}Takeaways}{58}{subsection.3.2.5}%
 \defcounter {refsection}{0}\relax 
-\contentsline {section}{\numberline {3.4}Abusing networking programs}{60}{section.3.4}%
+\contentsline {section}{\numberline {3.3}Memory corruption}{58}{section.3.3}%
 \defcounter {refsection}{0}\relax 
-\contentsline {subsection}{\numberline {3.4.1}Attacks and limitations of networking programs}{60}{subsection.3.4.1}%
+\contentsline {subsection}{\numberline {3.3.1}Attacks and limitations of bpf\_probe\_write\_user()}{58}{subsection.3.3.1}%
 \defcounter {refsection}{0}\relax 
-\contentsline {subsection}{\numberline {3.4.2}Takeaways}{63}{subsection.3.4.2}%
+\contentsline {subsection}{\numberline {3.3.2}Takeaways}{61}{subsection.3.3.2}%
 \defcounter {refsection}{0}\relax 
-\contentsline {chapter}{\numberline {4}Design of a malicious eBPF rootkit}{64}{chapter.4}%
+\contentsline {section}{\numberline {3.4}Abusing networking programs}{62}{section.3.4}%
 \defcounter {refsection}{0}\relax 
-\contentsline {section}{\numberline {4.1}Rootkit architecture}{64}{section.4.1}%
+\contentsline {subsection}{\numberline {3.4.1}Attacks and limitations of networking programs}{62}{subsection.3.4.1}%
 \defcounter {refsection}{0}\relax 
-\contentsline {section}{\numberline {4.2}Library injection attacks}{68}{section.4.2}%
+\contentsline {subsection}{\numberline {3.4.2}Takeaways}{65}{subsection.3.4.2}%
 \defcounter {refsection}{0}\relax 
-\contentsline {subsection}{\numberline {4.2.1}ROP with eBPF}{68}{subsection.4.2.1}%
+\contentsline {chapter}{\numberline {4}Design of a malicious eBPF rootkit}{66}{chapter.4}%
 \defcounter {refsection}{0}\relax 
-\contentsline {subsection}{\numberline {4.2.2}Bypassing hardening features in ELFs}{71}{subsection.4.2.2}%
+\contentsline {section}{\numberline {4.1}Rootkit architecture}{66}{section.4.1}%
 \defcounter {refsection}{0}\relax 
-\contentsline {subsection}{\numberline {4.2.3}Library injection via GOT hijacking}{73}{subsection.4.2.3}%
+\contentsline {section}{\numberline {4.2}Library injection module}{70}{section.4.2}%
 \defcounter {refsection}{0}\relax 
-\contentsline {chapter}{\numberline {5}Evaluation}{75}{chapter.5}%
+\contentsline {subsection}{\numberline {4.2.1}ROP with eBPF}{70}{subsection.4.2.1}%
 \defcounter {refsection}{0}\relax 
-\contentsline {section}{\numberline {5.1}Developed capabilities}{75}{section.5.1}%
+\contentsline {subsection}{\numberline {4.2.2}Bypassing hardening features in ELFs}{73}{subsection.4.2.2}%
 \defcounter {refsection}{0}\relax 
-\contentsline {section}{\numberline {5.2}Rootkit use cases}{75}{section.5.2}%
+\contentsline {subsection}{\numberline {4.2.3}Library injection via GOT hijacking}{75}{subsection.4.2.3}%
 \defcounter {refsection}{0}\relax 
-\contentsline {chapter}{\numberline {6}Related work}{76}{chapter.6}%
+\contentsline {chapter}{\numberline {5}Evaluation}{81}{chapter.5}%
 \defcounter {refsection}{0}\relax 
-\contentsline {chapter}{Bibliography}{77}{chapter.6}%
+\contentsline {section}{\numberline {5.1}Developed capabilities}{81}{section.5.1}%
+\defcounter {refsection}{0}\relax 
+\contentsline {section}{\numberline {5.2}Rootkit use cases}{81}{section.5.2}%
+\defcounter {refsection}{0}\relax 
+\contentsline {chapter}{\numberline {6}Related work}{82}{chapter.6}%
+\defcounter {refsection}{0}\relax 
+\contentsline {chapter}{Bibliography}{83}{chapter.6}%
 \contentsfinish 

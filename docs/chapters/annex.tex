@@ -140,3 +140,61 @@ Key to Flags:
   C (compressed), x (unknown), o (OS specific), E (exclude),
   l (large), p (processor specific)
 \end{lstlisting}
+
+
+\chapter* {Appendix C - Library injection shellcode} \label{annex:shellcode}
+\pagenumbering{gobble} % Las páginas de los anexos no se numeran
+\begin{lstlisting}[language={[x86masm]Assembler}, caption={Shellcode for library injection and its opcodes.}, label={code:shellcode}]
+# Saving state of registers
+push rbp  # 55
+push rax  # 50
+push rcx  # 51
+push rdx  # 52
+push rbx  # 53
+push rdi  # 57
+push rsi  # 56
+
+# Call malloc. Get address in the heap
+mov edi,0x2000 # BF00200000
+mov rbx, <malloc address libc>  # 48BB<address little endian 64bit>               
+call rbx  # FFD3
+mov rbx, rax  # 4889C3
+
+# Write the string of the library path into reserved memory
+mov dword [rax],0x6d6f682f  # C7002F686F6D 
+mov dword [rax+0x4],0x736f2f65  # C74004652F6F73
+mov dword [rax+0x8],0x65786f62  # C74008626F7865
+mov dword [rax+0xc],0x46542f73  # C7400C732F5446
+mov dword [rax+0x10],0x72732f47  # C74010472F7372
+mov dword [rax+0x14],0x65682f63  # C74014632F6865
+mov dword [rax+0x18],0x7265706c  # C740186C706572
+mov dword [rax+0x1c],0x6e692f73  # C7401C732F696E
+mov dword [rax+0x20],0x7463656a  # C740206A656374
+mov dword [rax+0x24],0x5f6e6f69  # C74024696F6E5F
+mov dword [rax+0x28],0x2e62696c  # C740286C69622E
+mov dword [rax+0x2c],0x6f73  # C7402C736F0000
+
+# Call dlopen.
+mov rax, <dlopen address libc>  # 48B8<address little endian 64bit>
+mov rsi, 0x1  # BE01000000
+mov rdi, rbx  # 4889DF
+sub rsp,0x1000  # 4881EC00100000
+call rax  # FFD0
+
+# Restoring state of registers and execution flow
+add rsp,0x1000  # 4881C400100000
+pop rsi  # 5E
+pop rdi  # 5F
+pop rbx  # 5B
+pop rdx  # 5A
+pop rcx  # 59
+pop rax  # 58
+pop rbp  # 5D
+
+# Jump to the original syscall
+jmp qword ptr [rip+0x0]  # FF2500000000
+<address original syscall glibc 64bit>
+
+
+
+\end{lstlisting}

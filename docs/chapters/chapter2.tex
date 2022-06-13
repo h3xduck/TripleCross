@@ -10,9 +10,9 @@ Finally, we will offer an overview into multiple aspects of the Linux system (me
 In this section we will detail the origins of eBPF in the Linux kernel. By offering us background into the earlier versions of the system, the goal is to acquire insight on the design decisions included in modern versions of eBPF.
 
 \subsection{Introduction to the BPF system}
-Nowadays eBPF is not officially considered to be an acronym anymore\cite{ebpf_io}, but it remains largely known as "extended Berkeley Packet Filters", given its roots in the Berkeley Packet Filter (BPF) technology, now known as classic BPF.
+Nowadays eBPF is not officially considered to be an acronym any more \cite{ebpf_io}, but it remains largely known as "extended Berkeley Packet Filters", given its roots in the Berkeley Packet Filter (BPF) technology, now known as classic BPF.
 
-BPF was introduced in 1992 by Steven McCanne and Van Jacobson in the paper "The BSD Packet Filter: A New Architecture for User-level Packet Capture"\cite{bpf_bsd_origin}, as a new filtering technology for network packets in the BSD platform. It was first integrated in the Linux kernel on version 2.1.75 \cite{ebpf_history_opensource}.
+BPF was introduced in 1992 by Steven McCanne and Van Jacobson in the paper "The BSD Packet Filter: A New Architecture for User-level Packet Capture" \cite{bpf_bsd_origin}, as a new filtering technology for network packets in the BSD platform. It was first integrated in the Linux kernel on version 2.1.75 \cite{ebpf_history_opensource}.
 
 
 \begin{figure}[htbp]
@@ -42,7 +42,7 @@ As we mentioned in section \ref{subsection:bpf_vm}, the components of the BPF VM
 \item If it returns \textit{false}, the packet is not accepted by the filter (and thus the network stack will be the next to operate it).
 \end{itemize}
 
-Figure \ref{fig:cbpf_prog} shows an example of a BPF filter upon receiving a packet. In the figure, green lines indicate that the condition is true and red lines that it is evaluated as false. Therefore, the execution works as a control flow graph (CFG) which ends on a boolean value\cite{bpf_bsd_origin_bpf_page5}. The figure presents an example BPF program which accepts the following frames:
+Figure \ref{fig:cbpf_prog} shows an example of a BPF filter upon receiving a packet. In the figure, green lines indicate that the condition is true and red lines that it is evaluated as false. Therefore, the execution works as a control flow graph (CFG) which ends on a boolean value \cite{bpf_bsd_origin_bpf_page5}. The figure presents an example BPF program which accepts the following frames:
 \begin{itemize}
 \item Frames with an IP packet as a payload directed from IP address X.
 \item Frames with an IP packet as a payload directed towards IP address Y.
@@ -1137,14 +1137,14 @@ During section \ref{section:attacks_stack}, we presented multiple of the classic
 Table \ref{table:compilers} shows the compilers that we will be considering during this study. We will be exclusively looking at those security features that are included by default.
 
 \begin{table}[htbp]
-\begin{tabular}{|>{\centering\arraybackslash}p{5cm}|>{\centering\arraybackslash}p{8cm}|}
+\begin{tabular}{|>{\centering\arraybackslash}p{5cm}|>{\centering\arraybackslash}p{9cm}|}
 \hline
 Compiler & Security features by default\\
 \hline
 \hline
-Clang/LLVM 12.0.0 (2021) & Stack canaries, DEP/NX\\
+Clang/LLVM 12.0.0 (2021) & Stack canaries, DEP/NX, ASLR\\
 \hline
-GCC 10.3.0 (2021) & Stack canaries, DEP/NX, PIE, Full RELRO\\
+GCC 10.3.0 (2021) & Stack canaries, DEP/NX, ASLR, PIE, Full RELRO\\
 \hline 
 \end{tabular}
 \caption{Security features in C compilers used in the study.}
@@ -1180,4 +1180,60 @@ Intel Control-flow Enforcement Technology is a hardening feature fully incorpora
 In Linux, the kernel will support a hidden 'shadow stack' that will save the return addresses for each call. This prevents modifying the saved value of rip in the stack, since the kernel would realise that the flow of execution has been modified. We can also find that modern compilers (such as GCC 10.3.0) already generate Intel CET-related instructions such as \textit{endbr64}, whose purpose is to be placed at the start of functions, marking that as the only address to which an indirect jump can land (otherwise, jumps will be rejected if not landing at \textit{endbr64}).
 
 As mentioned, we will not consider this feature since it is not active in the Linux kernel.
+
+\section{The proc filesystem} \label{section:proc_filesystem}
+The proc filesystem is a virtual filesystem which provides an interface to kernel data structures \cite{proc_fs}. It can be found mounted automatically at \textit{/proc}.
+
+This filesystem offers a great range of capabilities to interact with the kernel internal structures, however, in this section, we will focus on the most relevant files and directories for our research.
+
+Specifically, we will be studying the files under the \textit{/proc/<pid>/} directory, whose purpose is to expose information about the process with the corresponding process ID.
+
+Note that the access control for the \textit{/proc/<pid>/} is governed by the value set at \textit{/proc/sys/kernel/yama/ptrace\_scope}. Table \ref{table:yama_values} show its possible values.
+
+\begin{table}[htbp]
+\begin{tabular}{|>{\centering\arraybackslash}p{3cm}|>{\centering\arraybackslash}p{11cm}|}
+\hline
+Value & Description\\
+\hline
+\hline
+0 & Unprivileged processes may access any file or subdirectory\\
+\hline
+1 & Only privileged processes or those belonging to that PID may access the any file. Unprivileged process can still list the directories at \textit{/proc}, finding the complete list of running processes.\\
+\hline
+2 & Only privileged processes or those belonging to that PID may access the any file. Unlike with setting '1', unprivileged users cannot list the directores at \textit{/proc} any more.\\ 
+\hline
+\end{tabular}
+\caption{Values for \textit{/proc/sys/kernel/yama/ptrace\_scope}.}
+\label{table:yama_values}
+\end{table}
+
+In Ubuntu 21.04, the value of this setting is of '1', therefore the access is limited to users with root privileges or to unprivileged users accessing only their own or their children process information.
+
+\subsection{/proc/<pid>/maps} \label{subsection:proc_maps}
+This file provides, for the process with process ID <pid>, its mapped memory regions and their access permissions, that is, those virtual memory pages actively connected to a physical memory page (as shown in figure \ref{fig:mem_arch_pages}).
+
+Figure \ref{fig:proc_maps_sample} shows the maps file of a simple program. As we can observe, by reading this file we can get information such as:
+\begin{itemize}
+\item The virtual addresses that limit each memory section.
+\item The permissions over each memory section.
+\item In the case of memory from a file, the offset from which the data was loaded.
+\item A pathname, in the case that memory section was loaded from a file.
+
+The ability to easily find memory sections on the virtual address space of a process with a specific set of permissions is particularly relevant for this research. Also, apart from disclosing the address of the stack (and sometimes the heap too), we can infer the address of other memory sections such as the .text section, which must be the only one marked as executable (in figure \ref{fig:proc_maps_sample}, the second entry that appears).
+
+\end{itemize}
+
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=15.5cm]{sch_proc_maps_sample.png}
+	\caption{File /proc/<pid>/maps of a sample program.}
+	\label{fig:proc_maps_sample}
+\end{figure}
+
+\subsection{/proc/<pid>/mem}
+This file enables a process to access the virtual memory of the process with process id <pid>. According to the documentation, "this file can be used to access the pages of a process's memory through open(2), read(2), and lseek(2)" \cite{proc_fs}, meaning that we can read any memory address from the virtual memory space of the process.
+
+However, we found the documentation not to be complete. In our experience, not only we can read virtual memory, but also freely write into it. There existed some discussions in the Linux community and it was considered safe enough to be set as writeable by privileged programs \cite{proc_mem_write}, although the changes were never reflected in the official documentation.
+
+Apart from being able to write into virtual memory, this write accesses are performed without regard of the permission flags set on each memory section. Therefore, we can modify non-writeable virtual memory by writing into the \textit{/proc/<pid>/mem} file.
 

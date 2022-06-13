@@ -1697,6 +1697,30 @@
       \verb https://www.phoronix.com/scan.php?page=news_item&px=Intel-CET-v29
       \endverb
     \endentry
+    \entry{proc_fs}{manual}{}
+      \field{sortinit}{1}
+      \field{sortinithash}{50c6687d7fc80f50136d75228e3c59ba}
+      \field{labeltitlesource}{title}
+      \field{title}{proc(5) — Linux manual page}
+      \verb{urlraw}
+      \verb https://man7.org/linux/man-pages/man5/proc.5.html
+      \endverb
+      \verb{url}
+      \verb https://man7.org/linux/man-pages/man5/proc.5.html
+      \endverb
+    \endentry
+    \entry{proc_mem_write}{online}{}
+      \field{sortinit}{1}
+      \field{sortinithash}{50c6687d7fc80f50136d75228e3c59ba}
+      \field{labeltitlesource}{title}
+      \field{title}{enable writing to /proc/pid/mem}
+      \verb{urlraw}
+      \verb https://lwn.net/Articles/433326/
+      \endverb
+      \verb{url}
+      \verb https://lwn.net/Articles/433326/
+      \endverb
+    \endentry
     \entry{8664_params_abi}{manual}{}
       \name{author}{1}{}{%
         {{hash=871f02558cb7234c22cde24811cf53a7}{%

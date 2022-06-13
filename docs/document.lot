@@ -49,11 +49,17 @@
 \defcounter {refsection}{0}\relax 
 \contentsline {table}{\numberline {2.22}{\ignorespaces Security features in C compilers used in the study.\relax }}{48}{table.caption.56}%
 \defcounter {refsection}{0}\relax 
-\addvspace {10\p@ }
-\defcounter {refsection}{0}\relax 
-\contentsline {table}{\numberline {3.1}{\ignorespaces Argument passing convention of registers for function calls in user and kernel space respectively.\relax }}{52}{table.caption.57}%
+\contentsline {table}{\numberline {2.23}{\ignorespaces Values for \textit {/proc/sys/kernel/yama/ptrace\_scope}.\relax }}{50}{table.caption.57}%
 \defcounter {refsection}{0}\relax 
 \addvspace {10\p@ }
+\defcounter {refsection}{0}\relax 
+\contentsline {table}{\numberline {3.1}{\ignorespaces Argument passing convention of registers for function calls in user and kernel space respectively.\relax }}{54}{table.caption.59}%
+\defcounter {refsection}{0}\relax 
+\addvspace {10\p@ }
+\defcounter {refsection}{0}\relax 
+\contentsline {table}{\numberline {4.1}{\ignorespaces Arguments and return value of function \_\_libc\_malloc.\relax }}{77}{table.caption.73}%
+\defcounter {refsection}{0}\relax 
+\contentsline {table}{\numberline {4.2}{\ignorespaces Arguments of function \_\_libc\_dlopen\_mode.\relax }}{78}{table.caption.74}%
 \defcounter {refsection}{0}\relax 
 \addvspace {10\p@ }
 \defcounter {refsection}{0}\relax 
