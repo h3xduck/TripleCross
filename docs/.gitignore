@@ -1,0 +1,10 @@
+/*
+bibliography/texput.log
+!.gitignore
+!document.pdf
+!document.tex
+!Makefile
+!original_template/
+!images/
+!chapters/
+!bibliography/bibliography.bib
