@@ -15,10 +15,10 @@ simple_timer: simple_timer.o
 	gcc -g -o simple_timer simple_timer.o
 
 simple_open.o: simple_open.c $(HEADERS)
-	gcc -g -c simple_open.c
+	clang -g -c simple_open.c
 
 simple_open: simple_open.o
-	gcc -g -o simple_open simple_open.o	
+	clang -g -o simple_open simple_open.o	
 
 execve_hijack.o: execve_hijack.c $(HEADERS)
 	gcc -g -c execve_hijack.c

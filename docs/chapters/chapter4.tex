@@ -89,6 +89,9 @@ In 2019, Jeff Dileo presented in DEFCON 27 the first technique to achieve arbitr
 
 Figure \ref{fig:rop_evil_ebpf_1} shows an overview on the process memory and the eBPF programs loaded. For this injection, we will use the stack scanning technique (section \ref{subsection:bpf_probe_write_apps}) using the arguments of a system call whose arguments are passed using the stack (sys\_timerfd\_settime, which receives two structs utmr and otmr). Therefore, a kprobe is attached to the system call, so that it can start to scan for the return address of the system call, which we know is the original value of register rip which was pushed into the stack (ret).
 
+%TODO This figure needs a remodel. I tried to keep it simple to explain the main concepts on the technique described afterwards, but after writing the next section I realised it gets some things wrong:
+% - It does not show .got and .plt sections.
+% - It shows the RBP register in an incorrect place.
 \begin{figure}[htbp]
 	\centering
 	\includegraphics[width=15cm]{rop_evil_ebpf_1.jpg}
@@ -176,10 +179,14 @@ This technique works both in compilers with low hardening fetaures by default (C
 
 For this research work, the rootkit is prepared to perform this attack on any process that makes use of either the system call sys\_openat or sys\_timerfd\_settime, which are called by the standard library glibc.
 
+We will now describe the multiple exploitation stages for our technique. Appendix \ref{annexsec:lib_injection} shows a flow diagram with the complete process.
+
+
 \textbf{Stage 1: eBPF tracing and scan the stack}\\
 We load and attach a tracepoint eBPF program at the \textit{enter} position of syscall sys\_timerfd\_settime. Firstly, we must ensure that the process calling the tracepoint is one of the processes to hijack.
 
 We will then proceed with the stack scanning technique, as we explained in section \ref{subsection:bpf_probe_write_apps}. In this case, we will take one of the syscall parameters and scan forward in the stack. For each iteration, we must check if the data at the stack corresponds to the saved return address of the PLT stub that jumps to glibc where the syscall sys\_timerfd\_settime is called. Figure \ref{fig:lib_stage1} shows an overview of how these call instructions relate each memory section. 
+
 
 \begin{figure}[htbp]
 	\centering
@@ -226,6 +233,10 @@ We analyse the jump instruction and, again, take the address at which it jumps. 
 \end{enumerate}
 
 Once we ensured we reached the correct glibc function, we are now sure that the data we found at the stack is the return address of the PLT stub that jumped to glibc and called the syscall sys\_timerfd\_settime. Most importantly, we know the address of the GOT section which we want to overwrite.
+
+Our rootkit also incorporates an alternative scanning technique for processes calling the syscall sys\_openat(). This technique enables to scan the stack even when the system call does not incorporate any arguments from the userspace (and thus we cannot take them from our eBPF tracing program to use them as a foothold in the stack).
+
+As we explained in section \ref{subsection:tracing_arguments}, tracepoint programs receive an struct pt\_regs pointer as an argument. We can take this struct and use the value of register rbp as our starting point for scanning the stack. As we can see on figures \ref{fig:plt_clang}, \ref{fig:plt_gcc} and \ref{fig:settime_glibc}, the  PLT does not contain any function prologue (it does not modify the value of rsp) and the function at glibc does not change this value either. Therefore, in our eBPF program, since we are hooking the syscall at the beginning of its execution, the value of rbp will be the original frame pointer before calling the PLT, and therefore we can use it as our starting address for stack scan, proceeding to scan forward until we find the saved return address.
 
 \textbf{Stage 2: Programming shellcode}\\
 Once that we have the address of the GOT section, we need to prepare our shellcode to be injected into the process memory. We will overwrite the value at GOT and redirect the flow of execution to the address at which our shellcode is stored in memory. 
@@ -324,15 +335,12 @@ Once the shellcode is loaded at the code cave, eBPF can proceed to overwrite the
 
 Therefore, our rootkit will modify GOT using bpf\_probe\_write\_user() with the address of an static code cave for those programs compiled with Clang (Partial RELRO, no PIE), and use \textit{/proc/<pid>/mem} for modifying GOT with the value of code cave found using \textit{/proc/<pid>/maps} for those programs compiled using GCC (Full RELRO, PIE active).
 
-\textbf{Second syscall, execution of the library}\\
+\textbf{Stage 5: Second syscall, execution of the library}\\
 Once we have overwriten GOT with the address of our code cave, the next time the same syscall is called, the PLT stub will jump to our code cave and execute our shellcode. As instructed by it, the malicious library will be loaded and afterwards the flow of execution jumps back to the original glibc function.
 
 %Explain reverse shell?
 With respect to the malicious library, it forks the process (to keep the malicious execution in the background) and spawns a simple reverse shell which the attacker can use to execute remote commands.
 
-
-%TODO INCLUDE A DIAGRAM OF OVERALL ATTACK
-%TODO EXPLAIN ALTERNATIVE SCANNING TECHNIQUE USING PT_REGS STRUCT
 
 
 

@@ -1,7 +1,7 @@
 /*
 bibliography/texput.log
 !.gitignore
-!document.pdf
+document.pdf
 !document.tex
 !Makefile
 !original_template/
