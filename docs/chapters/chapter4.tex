@@ -342,5 +342,156 @@ Once we have overwriten GOT with the address of our code cave, the next time the
 With respect to the malicious library, it forks the process (to keep the malicious execution in the background) and spawns a simple reverse shell which the attacker can use to execute remote commands.
 
 
+\section{Privilege escalation module}
+In this section we will discuss how the rootkit tampers with the access control permissions in the system, so that unprivileged programs gain root access. Although it is based on a simple technique, it will be used to support other modules launching malicious programs with full privilege (such as the execution hijacking module).
+
+Therefore, the purpose of this section is that, without having to introduce any password, programs executed by an unprivileged user can enjoy privileged access in a infected system.
+
+\subsection{Sudoers file}
+Sometimes, unprivileged users need to run a program requiring privileged access. For this, Linux systems incorporate the sudo security policy module, which sets a 'sudo' privilege on users and user groups, allowing them to run a program as root. 
+
+The most widespread and default sudo security policy module is the 'sudoers' policy module, which sets the available sudo permissions of users and groups in the \textit{/etc/sudoers} file \cite{sudoers_man}. In this file, the system administrator can determine the specific permissions of each entity and set different options, including whether they need to introduce the user password when using the 'sudo' command, which is particularly relevant for us. Figure \ref{fig:sudoers} shows the \textit{/etc/sudoers} file of the host we will infect with our rootkit.
+
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=10cm]{sch_sudoers.png}
+	\caption{/etc/sudoers file of infected host.}
+	\label{fig:sudoers}
+\end{figure}
+
+As we can observe in the figure, members of the sudo group are allowed to execute any command as root. Figure \ref{fig:groupfile} shows the users which belong to this group.
+
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=10cm]{sch_groupfile.png}
+	\caption{/etc/group file in the infected host.}
+	\label{fig:groupfile}
+\end{figure}
+
+As we can appreciate, the user osboxes (the default user in the host) is included in this group, and therefore this user is allowed to use sudo and run commands as root.
+
+Any user can check its current sudo privileges by running the command \lstinline{sudo -l} \lstinline{}. Figure \ref{fig:sudol} shows this for the osboxes user.
+
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=10cm]{sch_sudol.png}
+	\caption{Sudo privileges of user osboxes, with sudo -l.}
+	\label{fig:sudol}
+\end{figure}
+
+The value of these entries is taken from the parameters set in figure \ref{fig:sudoers}, where each of the ALL values mean:
+\begin{itemize}
+\item First ALL: Any user of the group
+\item Second ALL: Any host
+\item Third ALL: As any user
+\item Fourth ALL: Any command
+\end{itemize}
+
+Therefore, user osboxes, as part of the sudo group, may run any command as any user in any host as sudo. The host part is not relevant for our us, since it is used when a single sudoers file is distributed betweem multiple machines, but we still have to follow the appropiate format when writing an entry in the \textit{/etc/sudoers} file.
+
+Each time we execute a command with sudo, a process named 'sudo' will open and read the \textit{/etc/sudoers} file, interpreting the contents and allowing or rejecting the action. Note that, although once an user introduces the sudo password it may not be asked again for a period of time, the sudo process will still open and read the \textit{/etc/sudoers} file for each time sudo is used. This aspect is particularly relevant for our technique.
+
+
+\subsection{Hijacking sudoers read accesses}
+We will now discuss how our rootkit tampers with the sudoers policy module. The technique we will present is based on modifying the content that the sudo process reads from the \textit{/etc/sudoers} file, so that what the user process receives is different than that contained in the file. By crafting some special entries in the file, we can grant automatic password-less access to any process we want.
+
+In order to read the contents from the \textit{/etc/sudoers} file, the sudo process will need to perform the following actions:
+\begin{itemize}
+\item Open the file, using the syscall sys\_openat.
+\item Read the file, using the syscall sys\_read.
+\end{itemize}
+
+Note that some intermediate or additional syscalls such as sys\_newfstatat, sys\_lseek or sys\_close are also called, but we are not considering them for simplicity.
+
+Table \ref{table:sudoers_syscall} shows the parameters expected by these system calls, based on \cite{syscall_reference}.
+
+\begin{table}[htbp]
+\begin{tabular}{|c|>{\centering\arraybackslash}p{8cm}|}
+\hline
+System call & Arguments\\
+\hline
+\hline
+\multirow{4}{*}{sys\_openat} & \multicolumn{1}{c|}{int dfd}\\
+\cline{2-2}
+& \multicolumn{1}{c|}{const char \_\_user *filename}\\
+\cline{2-2}
+& \multicolumn{1}{c|}{inf flags} \\
+\cline{2-2}
+& \multicolumn{1}{c|}{umode\_t umode} \\
+\hline
+\multirow{3}{*}{sys\_read} & \multicolumn{1}{c|}{unsigned int fd}\\
+\cline{2-2}
+& \multicolumn{1}{c|}{char \_\_user *buf} \\
+\cline{2-2}
+& \multicolumn{1}{c|}{size\_t count} \\
+\hline
+\end{tabular}
+\caption{Arguments of syscalls used by sudo process.}
+\label{table:sudoers_syscall}
+\end{table}
+
+The table shows that there exist two arguments marked as \textit{\_\_user}, which, as we explained in section \ref{subsection:bpf_probe_write_apps}, can be overwritten from an eBPF tracing program using the helper bpf\_probe\_write\_user(). Therefore, there exist two different attack vectors:
+\begin{itemize}
+\item Modify the argument \textit{filename}, so that the sudo process opens a fake, crafted sudoers file. In this file we would write the entries needed for our user to have sudo privilege without a password. Since the sys\_open syscall returns a file descriptor, which is later used by sys\_read, that is the only argument needed to be modified.
+\item Modify the buffer \textit{buf} in the sys\_read syscall so that it returns specially crafted data to the sudo program.
+\end{itemize}
+
+Although the first option is easier, the second technique can not only apply to reading files, but also to any system calls that loads data into an user buffer. Therefore, the privilege escalation module will incorporate the second technique to show the potential of eBPF in this area.
+
+Figure \ref{fig:privilege_esc_module} shows the complete process of the technique we will use.
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=15cm]{privilege_esc_module.png}
+	\caption{Buffer overwrite technique for the privilege escalation module.}
+	\label{fig:privilege_esc_module}
+\end{figure}
+
+As we can observe in the figure, we will use three eBPF tracepoints. The reason for this is that, although we are able to write into the user buffer at any tracepoint attached to sys\_read, we would lack information with only one tracepoint:
+\begin{itemize}
+\item An \textit{enter} tracepoint at sys\_openat knows the file being opened, but it does not have access to the user buffer.
+\item An \textit{enter} tracepoint at sys\_read has access to the user buffer, but does not know the name of the file (it only has a file descriptor). Also, if it writes into the buffer now, it will be overwritten later when the kernel reads the \textit{/etc/sudoers} file.
+\item An \textit{exit} tracepoint at sys\_read only receives the return value as a parameter (as we explained in section \ref{subsection:tracing_arguments}), but it can freely write to the user buffer if it had access to it, since the kernel already finished writing on it.
+\end{itemize}
+
+Taking the above into account, we designed the privilege escalation technique as follows:
+\begin{enumerate}
+\item We load and attach three eBPF tracepoint programs, and an eBPF map:
+\begin{itemize}
+	\item An \textit{enter} tracepoint attached to sys\_openat (sys\_enter\_openat).
+	\item An \textit{enter} tracepoint attached to sys\_read (sys\_enter\_read).
+	\item An \textit{exit} tracepoint attached to sys\_read (sys\_exit\_read).
+	\item An eBPF map (fs\_open) that stores fs\_open\_data structs, composed of:
+	\begin{itemize}
+	\item A process name.
+	\item A filename.
+	\end{itemize}
+	The key of the map fs\_open is the PID of the user process from which the call to an eBPF program originated, this can be obtained using the bpf\_get\_current\_pid\_tgid() helper (see section \ref{subsection:ebpf_helpers}).
+\end{itemize}
+\item A malicious program we executed from user "osboxes" requests sudo privileges. Our goal is to let it run with privileged permissions without having to introduce a password. Note that, although in the system we are using osboxes is an user in the \textit{/etc/sudoers} file already (although requiring a password for running as sudo), this process also works if we used an user not included on it in the first place.
+
+The sudo process opens the \textit{/etc/sudoers} file. The syscall is called and the sys\_enter\_openat tracepoint is called before the syscall is executed. We check that the syscall was called by the sudo process using the helper bpf\_get\_current\_comm() (see section \ref{subsection:ebpf_helpers}) and, if it is, write the filename into the fs\_open map. After that, the tracepoint exists and the syscall is executed.
+
+\item The sudo process now reads from the file descriptor of the file \textit{/etc/sudoers}. The sys\_enter\_read tracepoint is executed right before the syscall is called. In the tracepoint, we check if we can find an entry with a filename in the fs\_open map using the process PID as key (which is the same for all tracepoints, since they originated from the same sudo process). We now write address of the buffer supplied by the sudo process into the map.
+
+\item The sys\_read syscall is executed and, when it is about to exit, our tracepoint sys\_exit\_read is executed. We take the filename and the address of the user buffer from the fs\_open map, and overwrite the data at the user buffer which contained the bytes read from \textit{/etc/sudoers} using bpf\_probe\_write\_user(). The data we will write resembles a real entry of the \textit{/etc/sudoers} file:
+\begin{verbatim}
+osboxes ALL=(ALL:ALL) NOPASSWD:ALL #
+\end{verbatim}
+
+Injecting that string into the read file will grant us with password-less sudo privileges. There are two particularly relevant details on it:
+\begin{itemize}
+\item The NOPASSWD option instructs sudo not to request a password.
+\item A \# symbol is included at the end so that any data not overwritten at that line is considered a comment (see figure \ref{fig:sudoers}).
+\end{itemize}
+
+Although the previous is sufficient for tricking the sudo process into believing we have sudo privileges, it can happen that an user (in this case, osboxes) already has an entry in the \textit{/etc/sudoers} file. When this happens, the sudo process usually chooses the last entry that appears on the file or fails. 
+
+Although not the most elegant solution, the solution for this issue incorporated in our rootkit is that tracepoint will continue writing \# symbols until an error happens (thus indicating we reached the end of the file).
+
+%TODO INCORPORATE FINAL FIGURE OF OVERWRITEN SUDOERS
+
+\end{enumerate}
+
+
 
 
