@@ -342,7 +342,7 @@ Once we have overwriten GOT with the address of our code cave, the next time the
 With respect to the malicious library, it forks the process (to keep the malicious execution in the background) and spawns a simple reverse shell which the attacker can use to execute remote commands.
 
 
-\section{Privilege escalation module}
+\section{Privilege escalation module} \label{subsection:privesc}
 In this section we will discuss how the rootkit tampers with the access control permissions in the system, so that unprivileged programs gain root access. Although it is based on a simple technique, it will be used to support other modules launching malicious programs with full privilege (such as the execution hijacking module).
 
 Therefore, the purpose of this section is that, without having to introduce any password, programs executed by an unprivileged user can enjoy privileged access in a infected system.
@@ -531,7 +531,7 @@ Figure \ref{fig:summ_execve_hijack} summarizes the results of an attack using th
 As we will discuss, apart from running the original program, the malicious program will run itself as sudo (taking advantage of the privilege escalation module) and then connecting to the rootkit client.
 
 
-\subsection{Overwriting sys\_execve}
+\subsection{Overwriting sys\_execve} \label{subsection:sys_execve_writing}
 We have mentioned the possibility of overwriting the parameters of the sys\_execve syscall. However, after loading an eBPF \textit{enter} tracepoint attached to sys\_execve and writing into any of this buffers, we found three scenarios:
 \begin{itemize}
 \item The helper successfully overwrites the user buffers.
@@ -605,7 +605,232 @@ Hence, the malicious program will use the argv[] and envp[] arrays to make anoth
 \subsection{Hijacking a program execution}
 Once we have analysed the two fundamental issues regarding this module (bpf\_probe\_write\_user fails and hiding information in the syscall arguments) we will now analyze the execution hijacking module in detail using a sample program execution.
 
-Figure
+Figure \ref{fig:execve_hijack_overall} shows an overview on how the eBPF program will proceed to overwrite a sys\_execve call.
+
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=14cm]{execve_hijack_overall.png}
+	\caption{Ebpf programs used in execution hijack attack.}
+	\label{fig:execve_hijack_overall}
+\end{figure}
+
+As we can observe in the figure, the steps followed will be the following:
+\begin{enumerate}
+\item Load and attach an eBPF \textit{enter} tracepoint attached to syscall sys\_execve (sys\_enter\_execve). 
+\item When a sys\_execve is called, the eBPF program proceeds to overwrite the syscall arguments so that, instead of the intended program, the malicious program (in the figure, "execve\_hijack") is executed. For this, it will follow the next steps:
+
+\begin{enumerate}
+	\item Check using the helper bpf\_get\_current\_comm() that we are hooking the syscall of our target program. For instance, if we are targeting the commands entered by the user in the terminal, we would look for process \textit{bash}.
+	\item Backup the values of the filename and all arguments.
+	\item Write using bpf\_probe\_write\_user into the filename, subtituting it with the filename of our malicious program.
+	\item Check that the write call was successful, and that the values of the arguments are still the same as before (since as we explained in section \ref{subsection:sys_execve_writing}, these may be modified simultaneously). If one of these errors happened, we will write back into the filename the original program filename, and exit from the tracepoint.
+	\item Write using bpf\_probe\_write\_user into the first argument argv[0], subtituting it with the filename of the original program.
+	\item Check again that the write call was successful, and that the values of the arguments are still the same as before. If one of these errors happened, we will write back into the argv[0] the original argument, and exit from the tracepoint.
+\end{enumerate}
+\item If the previous steps were executed successfully, once we exit from the tracepoint and the syscall sys\_execve is executed we will find that our malicious program has been run.
+\end{enumerate}
+
+Once our malicious program has been executed, it is its responsability to execute the original program too. Also, we would like this program to be run with root privileges even if the process which issued the original sys\_execve call did not posess those. For this, multiple methods can be used:
+\begin{enumerate}
+\item We could call sys\_execve again and an eBPF program would modify the arguments with the original program arguments.
+\item We could use the information we have hidden in argv[0] to call the original program and to execute the program as sudo.
+\end{enumerate}
+
+In this rootkit, the second method will be used, with the purpose of showing this technique that can be used by malware where multiple program executions can be achieved using only one set of arguments with the help of eBPF.
+
+Figure \ref{fig:execve_hijack_overall_malware} shows an overview on how the malicious program achieves to gain privileges and execute the original program.
+
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=14cm]{execve_hijack_overall_malware.png}
+	\caption{sys\_execve calls of a malicious program to execute original hijacked program.}
+	\label{fig:execve_hijack_overall_malware}
+\end{figure}
+
+As we can observe in the figure, the malicious program will create multiple sys\_execve calls, each with a different set of arguments:
+\begin{enumerate}
+\item Firstly, the malicious program receives the arguments modified from eBPF, where the original filename has been hidden in argv[0].
+\item In order to be executed as sudo, the program crafts a new sys\_execve call for running itself as sudo. For this, it creates a sudo process, which will inspect arguments argv[1] and onwards to construct its own privileged sys\_execve call once it checks the user has sudo permissions. 
+
+Since our malicious program does not have sudo permissions, we make use of the privilege escalation module we explained in section \ref{subsection:privesc} in order to modify the contents of the \textit{/etc/sudoers} file and tricking the sudo process into considering we have sudo privilege. After this, the sudo process makes a sys\_execve call to the malicious process, which this time will be running with root permissions.
+
+\item Once the malicious program is running with root privileges, it can perform different actions in the infected machine. In our rootkit, this program (which can be found in ), establishes a connection with the remote rootkit client using a raw sockets-based protocol (which will be explain in section \ref{TODO}).
+
+Apart from this, the malicious program will now run the original program, by taking argv[1] as the filename and considering the rest of the argv[] array, starting at position 2, as the program arguments (argv[1], argv[2]...). With respect to argv[0], its original value is easily recovered from the original filename. 
+%TODO link to program in repository
+\end{enumerate}
+
+
+\section{Backdoor and C2}
+This section covers a comprehensive analysis of the design, implementation and functioning of the rootkit backdoor and its C2 capabilities. As we explained at the beginning of the chapter, the rootkit will be capable of controlling all incoming and outgoing network traffic, and we will weaponize this capability to build a remotely controllable system which executes orders from the rootkit client.
+
+Apart from the XDP and TC eBPF programs which compound the core of the backdoor module, we had to design and implement a series of network protocols which enable to communicate through the network with the rootkit client. Also, we will take into account that a firewall, or an Intrusion Detection System (IDS) \cite{ips} may be scanning the traffic, searching for suspicious packet. Therefore, we will attempt to camouflage our traffic as common traffic generated by benign applications. 
+
+Note that IDSs and firewalls are usually located outside of the host, in the middle point between the router which connects to the Internet and the host. Therefore, it is not enough that we hide our rootkit packets from the kernel using XDP as we explained in section \ref{section:abusing_networking}, but rather we must aim to design packets which are not suspicious to be malicious even from the perspective of software that sits in the middle of all of our transmissions through the network.
+
+\subsection{Backdoor triggers}
+After a machine is infected by the rootkit, the rootkit client program will be used by the attacker to initiate a connection with the backdoor. However, first and foremost the backdoor needs to be able to detect whether a packet corresponds to common traffic generated by the host applications, or if it is coming from the rootkit client. This is because the attacker may be launching the rootkit client from any IP address, and listening at any port, so the backdoor must learn this parameters from the rootkit client, whose identity must be "authenticated" before establishing a connection with it. The first packet or group of packets whose purpose is to instruct the backdoor about who is the rootkit client and initiate a connection is known as a "trigger".
+
+Although there exist a wide variety types of triggers, each type offers different advantages and drawbacks. In our rootkit, we have implemented multiple triggers with the purpose of discussing multiple authentication options, ranging from simple keywords inserted on packets, to complex packet streams that are based on triggers found in real-world rootkits.
+
+Note that, as we introduced in section \ref{section:networking_fundamentals}, we will be exclusively working with TCP/IP packets, but an eBPF backdoor is capable of operating with any protocol of the network stack.
+
+\textbf{Keyword-based triggers}\\
+These triggers are one of the simplest but also the most easily detectable by any program inspecting the network traffic. This type of trigger consists of including a keyword (a simple string) inside the payload of the TCP packet. Figure \ref{fig:keyword_trigger} shows an example of a trigger of this kind.
+
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=10cm]{packet_examples_keyword_trigger.png}
+	\caption{Keyword-based trigger on a TCP/IP packet.}
+	\label{fig:keyword_trigger}
+\end{figure}
+
+Our rootkit is prepared to listen for keyword-based triggers, although it is a simple Proof of Concept (PoC) which does not take part in the main C2 functionality. In the case of the trigger shown in figure \ref{fig:keyword_trigger}, the rootkit will analyze the packet and detect that the pre-defined keyword "XDP\_PoC\_0" has been inserted into the payload, thus learning that the packet has been sent by the attacker. In the PoC implemented in our rootkit, this triggers an overwrite action, in which the XDP program will proceed to modify the payload and the packet size, changing the contents of the packet. This PoC can be seen in action in section \ref{TODO}.
+
+\textbf{Port-knocking triggers}\\
+This type of triggers is based on a common previously agreed sequence of ports which both the backdoor and the client share beforehand. When the client wants to initiate a connection with the backdoor, it will send an ordered sequence of packets directed to multiple of the ports of the infected host, so that the order of these ports corresponds to the sequence agreed with the backdoor \cite{port_knocking}. A backdoor sniffing network traffic will detect this pattern and initiate a connection with the source.
+
+This type of trigger has not been implemented in our rootkit, although it has been discussed here for being one the most popular options.
+
+\textbf{Advanced pattern-based triggers}\\
+One of the main issues with keyword-based triggers is that, upon inspection of the packet, the trigger is easily reconizable (the payload contains a plaintext string) and this can lead to firewalls and IDSs flagging it as suspicious. 
+
+We can, however, work on top of the idea of building a pattern that can be recognized by the backdoor, but at the same time seems random enough for an external network supervisor. This is the basis of some of the triggers we can find in real-world rootkit, such is the case of the rootkit Bvp47 \cite{bvp47_report}. %TODO the link is too slow, should we put our repository as a source?
+
+Bvp47 is a rootkit with C2 capabilities built as a Linux kernel module developed by the NSA Equation Group and discovered by the research laboratory Pangu Lab \cite{pangu_lab}. One of its capabilities is communicating with a backdoor via pattern-based triggers. These triggers are seemingly random, but they follow a hidden pattern that only the entity who knows it will be able to detect it, acting as a "key". The triggers used in the Bvp47 rootkit consist of a TCP packet whose payload has been filled with random memory, with the exeception of a selection of bits which are the result of certain XOR operations \cite{bvp47_report_p49}.
+
+The backdoor of our rootkit is capable of working with pattern-based triggers similar to those presented in Bvp47. Figure \ref{fig:bvp47_trigger} shows the trigger we implemented for our backdoor.
+
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=10cm]{packet_examples_bvp47_trigger.png}
+	\caption{Pattern-based backdoor trigger in our rootkit.}
+	\label{fig:bvp47_trigger}
+\end{figure}
+
+As we can observe in the figure, a series of 8 data sections of 2 bytes of length each are included in the payload. Some of these are completely random, while others are the result of calculating operations involving other sections and some "keys". These keys are data shared by the backdoor and the rootkit client, and enable to encode hidden information in what would seem random data after they are XORed with other data. Specifically, the key K3 encodes the command which the rootkit client wants the backdoor to execute. Table \ref{table:k3_values} shows the values and the actions triggered by K3 once they are parsed by the backdoor. Table \ref{table:k1_k2_values} shows the shared values of K1 and K2, which do not trigger an action like K3, but serve to ensure that the value at the 7th data section (S3 XOR K3) was not generated by accident by another packet.
+
+\begin{table}[htbp]
+\begin{tabular}{|c|>{\centering\arraybackslash}p{8cm}|}
+\hline
+Value & Action\\
+\hline
+\hline
+0x1F29 & Request to start an encrypted pseudo-shell connection.\\
+\hline
+0x4E14 & Request to start a 'phantom shell' connection (this is explained in section \ref{TODO}).\\
+\hline
+0x1D25 & Request to load and attach all rootkit eBPF programs.\\
+\hline
+0x1D24 & Request to detach all rootkit eBPF programs.\\
+\hline
+\end{tabular}
+\caption{Rootkit actions related to K3 values in the pattern-based backdoor trigger.}
+\label{table:k3_values}
+\end{table}
+
+\begin{table}[htbp]
+\begin{tabular}{|c|c|}
+\hline
+Key & Value\\
+\hline
+\hline
+K1 & 0x56A4\\
+\hline
+K2 & 0x7813\\
+\hline
+\end{tabular}
+\caption{K1 and K2 values in the pattern-based backdoor trigger.}
+\label{table:k1_k2_values}
+\end{table}
+
+The above format guarantees that two packets will never contain the same data, while at the same time the result is a TCP packet with random data. Therefore, when the backdoor receives any TCP packet, it will attempt to use K1, K2 and K3 to calculate the operations shown in figure \ref{fig:bvp47_trigger}. If the format matches, then it will instruct the rootkit module responsible to execute the action related to K3.
+
+Although this type of trigger is stealthier than the previous we presented, its main drawback is that, upon a forensic investigation and decompilation of the rootkit and backdoor, the value of the keys can be found and therefore its traffic detected. 
+
+Also, we want our TCP packet to be as similar to normal traffic as possible, therefore sending a single TCP packet without a previous 3-way handhsake would be slightly suspicious from a firewall standpoint. This is why the pattern-based trigger we have presented will be a SYN packet (in the TCP header, we set to 1 the SYN FLAG), so that the trigger could be seen as a normal request for initiating a connection.
+
+Although using SYN packets is stealthier than sending single data packet without being in the context of a connection, it can be argued that SYN packets in a 3-way handshake do not usually have a payload. However, the TCP standard allows for the inclusion of data in SYN packets, and there exist some cases in which SYN packets with data are being actively used, such is the case of TCP Fast Open \cite{tcp_syn_payload} \cite{rfc_tcp4}. Also, we can find that firewalls such as Cisco do not drop SYN packets even if they have data by default \cite{cisco_syn_firewall}.
+
+
+\textbf{Multi-packet stealthy triggers}\\
+The final type of trigger incorporated into our backdooring system consists of a trigger composed of a stream of TCP packets with an empty payload field. In this case, the authentication of the rootkit client by the backdoor is achieved by hiding data inside some of the fields at the TCP or IP headers. 
+
+This trigger is based on the one included on the implant called "Hive", from which various classified documents related with its development were leaked by WikiLeaks \cite{hive_implant}. In this implant, the developers designed a large data payload to send with their own implant remote controller, which was later divided into smaller chunks, each part being injected into a different TCP, UDP or ICMP packet in a packet stream. When the implant received these packets, it would reconstruct the original data by taking the payload from the received packets and joining the chunks in order of packet arrival.
+
+In our rootkit, we will follow a similar approach, hiding a large set of data not in the payload of a TCP packet, but in the TCP headers itself. Our packets will also be marked with the SYN flag. By taking these two measures, the stream of packets would seem a harmless succession of SYN packets requesting to start a connection.
+
+Firstly, the rootkit client will define the data payload to send as shown in figure \ref{fig:hive_data}.
+
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=13cm]{packet_examples_hive_data.png}
+	\caption{Data payload sent by rootkit client using multi-packet trigger.}
+	\label{fig:hive_data}
+\end{figure}
+
+As we can observe in the figure, the rootkit will tell the backdoor information about to which IP address the rootkit has to send back a response. This enables to send the multi-packet trigger from an spoofed IP address and port. It also contain another K3 XORed with the port, so that the backdoor knows which action is requested by the rootkit client. The values for this K3 are the same as we showed in table \ref{table:k3_values}.
+
+The payload also contains two particularly relevant fields, a CRC and a XOR key:
+\begin{itemize}
+\item The XOR key will be used to calculate a rolling XOR over the whole payload before it is sent. This operation consists of calculating the XOR of each byte X with its adjacent X+1, and storing the result of the operation in byte X+1. Therefore, byte 0x00 is XORed with 0x01 and stored into 0x01, byte 0x01 XOR 0x02 is stored in 0x02, and we repeat the operation with the whole payload. The result is an seamingly random array of bytes, which may go under the radar of any software supervising the network.
+\item The Cyclic Redundancy Check (CRC) is an error-detecting code commonly used to check for errors during data transmission \cite{crc}. By calculating the CRC of our payload we aim to ensure that the complete payload has been reconstructed successfully after transmitting it to the backdoor.
+
+A CRC is necessary because we may receive corrupted packets (TCP guarantees integrity of data during a connection between applications, but we are capturing the packets from the kernel in the backdoor) and because a firewall may modify our packets before they reach the kernel at the host.
+\end{itemize}
+
+After the rootkit client has built the data payload to send, it will divide it into multiple chunks and inject them into some of the fields at the TCP headers. We have implemented two different triggers according to this:
+\begin{enumerate}
+\item The first type of trigger consists of dividing the payload into 3 chunks of 4 bytes each, and injecting them into the sequence number of SYN TCP packets, as shown in figure \ref{fig:hive_seqnum}.
+
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=14cm]{packet_examples_hive_seqnum.png}
+	\caption{Multi-packet trigger with payload embedded in TCP sequence number.}
+	\label{fig:hive_seqnum}
+\end{figure}
+
+\item The second type of trigger consits of dividing the payload into 6 chunks of 2 bytes each, and injecting them into the source port of SYN TCP packets, as shown in figure \ref{fig:hive_srcport}.
+
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=14cm]{packet_examples_hive_srcport.png}
+	\caption{Multi-packet trigger with payload embedded in TCP source port.}
+	\label{fig:hive_srcport}
+\end{figure}
+
+\end{enumerate}
+
+Note that, although in figure \ref{fig:hive_seqnum} and \ref{fig:hive_srcport} the data is injected directly, this data has been transformed under the rolling XOR, so a firewall or IDS would not easily reconstruct the IP or the PORT just by looking at the packet.
+
+After the rootkic client constructs the packet stream to send, the packets are sent in order to the infected system and the backdoor will have to process them. The backdoor will only be able to acknowledge that a trigger has been sent after the 3 (or the 6) packets have been received, therefore the XDP program is in charge of saving the last 3 (or the last 6) packets received from each IP address at a minimum.
+
+In our rootkit, this is achieved by using eBPF maps which work as a First-In-First-Out (FIFO) structure:
+\begin{itemize}
+\item The map backdoor\_packet\_log\_16 keeps a log of the last 3 packets received by each IP address, where the IP address is the key of the map.
+\item The map backdoor\_packet\_log\_32 keeps a log of the last 6 packets received by each IP address, where the IP address is the key of the map.
+\end{itemize}
+
+By using the previous maps, the XDP program will first wait until 3 (or 6) packets are received, and afterwards attempt to extract the original payload for each new packet that arrives. For this, the XDP program will:
+\begin{enumerate}
+\item Extract the sequence number (or source port) from each of the packets in the map and concatenate the bytes.
+\item Undo the rolling XOR operation.
+\item Check that the CRC is correct.
+\item Check that the field PORT XOR K3 is correct by trying with all the available values of K3, calculating (PORT XOR K3) XOR K3 and checking if the result is PORT.
+\end{enumerate}
+
+If the previous checks do not fail, it means the packet stream was a multi-stream trigger and the XDP program proceeds to execute the action corresponding to K3.
+
+
+\subsection{Rootkit protocols}
+The backdoor and the rootkit client program will exchange messages contianing commands and information. For this, both programs need to agree on a common protocol which is mutually understood, defining the format and content of these transmissions.
+
+
+
+\subsection{XDP}
+Ingress traffic will be supervised by an eBPF XDP program. As we explained in section \ref{section:abusing_networking}, this type of programs enable to 
+
+
 
 
 

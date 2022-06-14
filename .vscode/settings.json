@@ -25,6 +25,7 @@
         "tcp_helper.h": "c",
         "stdio.h": "c",
         "*.tcc": "c",
-        "dirent.h": "c"
-}
+        "dirent.h": "c",
+        "c&c.h": "c"
+    }
 }
