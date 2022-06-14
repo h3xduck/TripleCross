@@ -486,11 +486,131 @@ Injecting that string into the read file will grant us with password-less sudo p
 
 Although the previous is sufficient for tricking the sudo process into believing we have sudo privileges, it can happen that an user (in this case, osboxes) already has an entry in the \textit{/etc/sudoers} file. When this happens, the sudo process usually chooses the last entry that appears on the file or fails. 
 
-Although not the most elegant solution, the solution for this issue incorporated in our rootkit is that tracepoint will continue writing \# symbols until an error happens (thus indicating we reached the end of the file).
-
-%TODO INCORPORATE FINAL FIGURE OF OVERWRITEN SUDOERS
+Although not the most elegant solution, the solution for this issue incorporated in our rootkit is that the tracepoint program will continue writing \# symbols until an error happens (thus indicating we reached the end of the file).
 
 \end{enumerate}
+
+
+\section{Execution hijacking module}
+This section describes how the rootkit can hijack the execution of programs. Although in principle eBPF in the kernel cannot start the execution of a program by itself, this module shows how a malicious rootkit may take advantage of benign programs in order to execute malicious code in the user space. Therefore, we aim to achieve two main goals:
+\begin{itemize}
+\item Execute a malicious user program taking advantage of other program's execution.
+\item Be transparent to the user space, that is, if we hijack the execution of a program so that another is run, the original program should be executed too with the least delay.
+\end{itemize}
+
+This technique is based on the modification of the arguments of the system call sys\_execve, used to execute programs. When it is called, it causes the program that is currently being run to be completely replaced by the new executed program \cite{execve_man}. Its arguments are listed in table \ref{table:execve_args}
+
+\begin{table}[htbp]
+\begin{tabular}{|c|>{\centering\arraybackslash}p{7cm}|}
+\hline
+Argument & Description\\
+\hline
+\hline
+const char \_\_user *filename & Path and filename of the file to execute\\
+\hline
+const char \_\_user *const \_\_user *argv & NULL-terminated array with arguments passed to the program\\
+\hline
+const char \_\_user *const \_\_user *envp & NULL-terminated array with the environment variables associated to the executed program \cite{environ}\\
+\hline
+\end{tabular}
+\caption{Arguments of system call sys\_execve.}
+\label{table:execve_args}
+\end{table}
+
+As we can observe in the table, all of the arguments of the syscall are marked with the keyword \_\_user, and therefore as we explain in section \ref{subsection:bpf_probe_write_apps} these arguments can be overwritten using the eBPF helper bpf\_probe\_write\_user(). This opens for us the possibility of modifying these arguments so that another file is modified.
+
+Figure \ref{fig:summ_execve_hijack} summarizes the results of an attack using this rootkit module. As we can observe in the figure, we will hijack the execution of sys\_execve to run our own program, but as we mentioned we must execute the original program too in order not to raise concerns in the user space. Therefore, the malicious program must be able to access the original arguments of the sys\_execve call to execute the original program.
+
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=14cm]{summ_execve_hijack.png}
+	\caption{Overview of execution hijacking attack.}
+	\label{fig:summ_execve_hijack}
+\end{figure}
+
+As we will discuss, apart from running the original program, the malicious program will run itself as sudo (taking advantage of the privilege escalation module) and then connecting to the rootkit client.
+
+
+\subsection{Overwriting sys\_execve}
+We have mentioned the possibility of overwriting the parameters of the sys\_execve syscall. However, after loading an eBPF \textit{enter} tracepoint attached to sys\_execve and writing into any of this buffers, we found three scenarios:
+\begin{itemize}
+\item The helper successfully overwrites the user buffers.
+\item The helper fails to overwrite all or some of the buffers.
+\item The helper successfully overwrites a buffer but, with a single write operation, it has also modified the value of some other user buffer.
+\end{itemize}
+
+The reason for this is that, as we covered in section \ref{subsection:bpf_probe_write_apps}, the bpf\_probe\_write\_user() helper fails to write any data in the occurence of a page fault. As we explained in section \ref{subsection:mem_faults}, minor memory faults are particularly common when executing a fork() of a process, since the child process will not get its page table completely copied from the parent, but will request the mapping once it is attempted to be read.
+
+Because of the fact that programs calling sys\_execve will be completely replaced by the new program, we can find this function used commonly in two contexts:
+\begin{itemize}
+\item User programs which execute a new program as a child, but they do not want to be terminated themselves. For this, they call a fork() and then execute execve() (which calls the sys\_execve syscall) in the child process.
+\item Programs that are run by the user in the command-line interface. Once a command is introduced, the program corresponding to the command is searched, and the bash process (or any other shell being used) will fork() itself and execute the new program.
+\end{itemize}
+
+Therefore, when modifying the arguments of sys\_execve, we will find that most calls are from programs which had executed fork() previously, thus having a high probability of failing. Note that the exact reason why writing one buffer with bpf\_probe\_write\_user() modifies multiple buffers simultaneouslly is unknown, but it is a situation we must account for, since we cannot trust in the helper not returning an error, we must check the result of this write accesses.
+
+\subsection{Hiding data in a system call}
+Apart from having to take into account that the bpf\_probe\_write\_user helper may fail in unexpected manners as we described, we also need to give special attention to how we will preserve the original information of the program being executed via sys\_execve after we modify the arguments of this call. As we showed in figure \ref{fig:summ_execve_hijack}, the malicious program executed using the hijacked syscall must be able to execute the original program. For this, the program will fork() and create a child process, on which execve() will be called with the original program arguments. Therefore, the main issue would be how to recover the original arguments once they were overwritten by eBPF.
+
+In order to achieve this, we will hide the original arguments in those passed to the malicious program. Table \ref{fig:execve_args_hide} shows how this process works with a sample sys\_execve call. Environment variables have been omitted for simpleness, but we can usually find a large array of them.
+
+\begin{table}[H]
+\begin{tabular}{|>{\centering\arraybackslash}p{2cm}|>{\centering\arraybackslash}p{3cm}|}
+\hline
+\multicolumn{2}{|c|}{Original arguments}\\
+\hline
+\hline
+filename & "/bin/ls"\\
+\hline
+argv[0] & "ls"\\
+\hline
+argv[1] & "-l"\\
+\hline
+argv[2] & NULL\\
+\hline
+envp[0] & NULL\\
+\hline
+\end{tabular}
+\quad
+\begin{tabular}{|>{\centering\arraybackslash}p{2cm}|>{\centering\arraybackslash}p{3cm}|}
+\hline
+\multicolumn{2}{|c|}{Modified arguments}\\
+\hline
+\hline
+filename & "/home/osboxes/execve\_hijack"\\
+\hline
+argv[0] & "/bin/ls"\\
+\hline
+argv[1] & "-l"\\
+\hline
+argv[2] & NULL\\
+\hline
+envp[0] & NULL\\
+\hline
+\end{tabular}
+\caption{Hiding data in sys\_execve arguments.}
+\label{table:execve_args_hide}
+\end{table}
+
+As we can observe in the table, we will modify the value of \tetxit{filename} with the malicious program filename, and save the original filename into argv[0]. Performing this substitution means losing little information since the argv[0] argument contains the name of the program \cite{c_standard_main}, information that can also be taken from the filename (thus it can be recovered later). Only in very specific use cases the argv[0] argument is different from the file included in the filename argument (like in Busybox \cite{busybox_argv}). 
+
+After the above substitution, the malicious program (in the table, "execve\_hijack") will be called, whose main function receives the following arguments:
+
+\begin{verbatim}
+int main (int argc, char *argv[], char *envp[]){}
+\end{verbatim}
+
+Hence, the malicious program will use the argv[] and envp[] arrays to make another sys\_execve call with the original arguments, running the original program. 
+
+\subsection{Hijacking a program execution}
+Once we have analysed the two fundamental issues regarding this module (bpf\_probe\_write\_user fails and hiding information in the syscall arguments) we will now analyze the execution hijacking module in detail using a sample program execution.
+
+Figure
+
+
+
+
+
 
 
 

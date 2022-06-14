@@ -699,7 +699,7 @@ Nowadays, most Linux distributions have set value 1 to this parameter, therefore
 \section{Memory management in Linux}
 Multiple of the techniques incorporated in our rootkit require a deep understanding into how memory is managed in a Linux process. Therefore, in this section we will present all the background about memory management needed for our later discussion of the offensive capabilities of eBPF in this context.
 
-\subsection{Memory pages and faults}
+\subsection{Memory pages and faults} \label{subsection:mem_faults}
 Linux systems divide the available random access memory (RAM) into 'pages', subsections of an specific length, usually 4 KB. The collection of all pages is called physical memory.
 
 Likewise, individual memory sections need to be assigned to each running process in the system, but instead of assigning a set of pages from physical memory, a new address space is defined, named virtual memory, which is divided into pages as well. These virtual memory pages are related to physical memory pages via a page table, so that each virtual memory address of a process can be translated into a real, physical memory address in RAM \cite{mem_page_arch}. Figure \ref{fig:mem_arch_pages} shows a diagram of the described architecture.
