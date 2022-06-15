@@ -1058,6 +1058,19 @@ After the requested modifications are made, the TC program passes the packet to 
 The rootkit client is a CLI program which the attacker can use from its own machine to communicate with the rootkit remotely over the network and execute commands using the C2 infraestructure. This section details its functionality and presents how it can be used to connect to the rootkit.
 
 \subsection{Client manual}
+The rootkit client is compiled to a single executable named \textit{injector}. This file must be run indicating which operation the attacker wants to issue to the attacker. Figure \ref{fig:client_help} shows the options which the client has available.
+
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=15cm]{sch_client_help.png}
+	\caption{Program options for rootkit client.}
+	\label{fig:client_help}
+\end{figure}
+
+
+The rootkit client needs to be executed as root, since the library RawTCP_Lib it uses requires privileges for some of its functionalities.
+
+
 
 
 
