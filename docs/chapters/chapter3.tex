@@ -1,4 +1,4 @@
-\chapter{Analysis of offensive capabilities of eBPF} \label{chapter:analysis_offensive_capabilities}
+\chapter{Analysis of offensive capabilities} \label{chapter:analysis_offensive_capabilities}
 In the previous chapter, we detailed which functionalities eBPF offers and studied its underlying architecture. As with every technology, a prior deep understanding is fundamental for discussing its security implications. 
 
 Therefore, given the previous background, this chapter is dedicated to an analysis in detail of the security implications of a malicious use of eBPF. For this, we will firstly explore the security features incorporated in the eBPF system. Then, we will identify the fundamental pillars onto which malware can build their functionality. As we mentioned during the project goals, these main topics of research will be the following:
@@ -317,7 +317,7 @@ Networking eBPF programs not only have read access to the network packets, but a
 Apart from write access to the packet, the other critical feature of networking programs is their ability to drop packets. As we presented in tables \ref{table:xdp_actions_av} and \ref{table:tc_actions}, this can be achieved by returning specific values.
 
 
-\subsection{Attacks and limitations of networking programs}
+\subsection{Attacks and limitations of networking programs} \label{subsection:network_attacks}
 Based on the previous background, we will now proceed to explore which limitations exist on which actions a network eBPF program can perform:
 \begin{itemize}
 \item Read and write access to the packet is heavily controlled by the eBPF verifier. It is not possible to read or write data out of bounds. Extreme care must also be taken before attempting to read any data inside the packet, since the verifier first requires making lots of checks beforehand. For any access to take place, the program must first classify the packet according to the network protocol it belongs, and later check that every header of every layer is well defined (e.g: Ethernet, IP and TCP). Only after that, the headers can be modified. 

@@ -194,14 +194,3 @@ jmp qword ptr [rip+0x0]  # FF2500000000
 <address original syscall glibc 64bit>
 
 \end{lstlisting}
-
-
-\chapter* {Appendix D - Rootkit flow diagrams} \label{annex:flow_diagrams}
-\pagenumbering{gobble} % Las páginas de los anexos no se numeran
-\section*{Library injection via GOT hijacking} \label{annexsec:lib_injection}
-\begin{figure}[htbp]
-	\centering
-	\includegraphics[width=15cm]{flow_lib_injection_compact.png}
-	\caption{Flow diagram of execution of a successful library injection.}
-	\label{fig:flow_lib_injection_compact}
-\end{figure}

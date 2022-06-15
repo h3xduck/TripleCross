@@ -179,8 +179,14 @@ This technique works both in compilers with low hardening fetaures by default (C
 
 For this research work, the rootkit is prepared to perform this attack on any process that makes use of either the system call sys\_openat or sys\_timerfd\_settime, which are called by the standard library glibc.
 
-We will now describe the multiple exploitation stages for our technique. Appendix \ref{annexsec:lib_injection} shows a flow diagram with the complete process.
+We will now describe the multiple exploitation stages for our technique. Figure \ref{fig:flow_lib_injection_compact} shows a flow diagram with the complete process.
 
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=15cm]{flow_lib_injection_compact.png}
+	\caption{Flow diagram of execution of a successful library injection.}
+	\label{fig:flow_lib_injection_compact}
+\end{figure}
 
 \textbf{Stage 1: eBPF tracing and scan the stack}\\
 We load and attach a tracepoint eBPF program at the \textit{enter} position of syscall sys\_timerfd\_settime. Firstly, we must ensure that the process calling the tracepoint is one of the processes to hijack.
@@ -491,7 +497,7 @@ Although not the most elegant solution, the solution for this issue incorporated
 \end{enumerate}
 
 
-\section{Execution hijacking module}
+\section{Execution hijacking module} \label{section:execution_hijack}
 This section describes how the rootkit can hijack the execution of programs. Although in principle eBPF in the kernel cannot start the execution of a program by itself, this module shows how a malicious rootkit may take advantage of benign programs in order to execute malicious code in the user space. Therefore, we aim to achieve two main goals:
 \begin{itemize}
 \item Execute a malicious user program taking advantage of other program's execution.
@@ -825,21 +831,30 @@ If the previous checks do not fail, it means the packet stream was a multi-strea
 
 %TODO INTRODUCE IMAGES OF SHELLS
 \subsection{Command and Control} \label{subsection:c2}
-%TODO REFORMAT ALL THIS SECTION. I WAS NOT SATISFIED WITH THE STRUCTURE, SO A REMODEL MUST BE MADE.
-The backdoor and the rootkit client will exchange messages containing commands and information. For this, both programs need to agree on a common protocol which is mutually understood, defining the format and content of these transmissions.
+This section details the C2 capabilities incorporated in our rootkit, that is, mechanisms that enable the attacker to introduce rootkit commands (not to be confused with Linux commands in a shell) from the remote rootkit client and to be executed in the infected machine, returning the output of the command (if any) back to the client. These rootkit commands can be instructed by sending a backdoor trigger, which as we mentioned depending on the value of K3 in the trigger a different rootkit action will be executed by the backdoor (available values are displayed in table \ref{table:k3_values}).
 
-The first and most important message in the protocol is the trigger, which has been explained in section \ref{subsection:triggers}. As we mentioned, depending on the value of K3 in the trigger, a different rootkit action will be executed. Some of these actions, as we saw in table \ref{table:k3_values}, involve the creation of shell-like connections, which may involve the execution of a real shell program (bash, sh), or a user space program on the infected machine (requesting its creation from the backdoor to the rootkit user space program via the ring buffer). 
+Some of the actions triggered by the backdoor involve modifying the behaviour of the rootkit (such as attaching/detaching eBPF programs reotely), while others enable the attacker to spawn rootkit 'pseudo-shells'. These pseudo-shells are a special rootkit - rootkit client connection which simulate a shell program, enabling the attacker to execute Linux commands remotely and get the results as if it was executing them directly in the infected machine. During this connection, the rootkit and the rootkit client will exchange messages containing commands and information. For this, both programs need to agree on a common protocol which is mutually understood, defining the format and content of these transmissions.
 
-In this section, we will explore 
+Apart from being able to spawn pseudo-shells by sending such action request to the backdoor using a backdoor trigger, some other shells can also be spawned as a result of a successful exploitation of either the library injection module or the execution hijacking module. In particular, the malicious library we injected in section \ref{section:lib_injection} and the malicious user program of section \ref{section:execution_hijack} spawn one of these shells once they are executed.
 
-the different shell-like connections that we can find in our rootkit, from the simplest to the most complex. In the end, all of them have a common purpose: enabling the attacker to introduce commands from the remote rootkit client and to be executed in the infected machine, returning the output of the command back to the client. 
+As a summary, figure \ref{fig:c2_summ} shows an overview of C2 infraestructure.
 
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=14cm]{c2_summ_infra.png}
+	\caption{Command and Control infraestructure of the rootkit.}
+	\label{fig:c2_summ_infra}
+\end{figure}
+
+As we can observe in the figure, the rootkit client offers a command launcher, which sends backdoor triggers to the backdoor. The backdoor scans the traffic and executes the according action corresponding to K3. After that, the backdoor can use the ring buffer to instruct the rootkit user process to launch actions from the user space. One of this actions is starting an encrypted pseudo-shell connection, enabling the rootkit client to remotely execute commands in the infected machine. As we mentioned, other types of shells can be spawned, including a simple reverse shell by the malicious library of the library injection module, a plaintext pseudo-shell connection by the execution hijacking module, and a pseudo-shell based on packets hijacked by the backdoor called the 'phantom shell'. 
+
+We will now proceed to analyse each of these connections and shell-like mechanisms which compound the C2 functionality.
 
 
 \textbf{Reverse shell}\\
-This is the simplest and most automated shell we can obtain from an infected machine. This is the shell that is spawned when we inject the malicious library of the library injection module (section \ref{section:lib_injection}), therefore the parties involved in the transmission are the rootkit client and the malicious library.
+This is the simplest and most automated shell we can obtain from an infected machine. This shell is spawned when we inject the malicious library of the library injection module (section \ref{section:lib_injection}), therefore the parties involved in the transmission are the rootkit client and the malicious library.
 
-A reverse shell is initiated from the infected machine to the attacker, that is, the infected machine initiates the connection. It is usually created in three steps:
+A reverse shell is initiated from the infected machine to the attacker, that is, the malicious library actively initiates the connection, and the rootkit client must listen for this request using a netcat listener (or a similar program). A reverse shell is usually created in three steps:
 \begin{enumerate}
 \item Open a socket and setting a TCP connection with the attacker IP and listening port (other protocols may be used too).
 \item Readjusting the three standard POSIX file descriptors in the infected machine (stdin, stdout, stderr) \cite{file_descriptors} so that they refer to the same file descriptor of the socket.
@@ -855,9 +870,9 @@ The attacker, for its part, can accept the TCP connection requested by the infec
 \textbf{Plaintext pseudo-shell}\\
 This shell-like connection enables the attacker to send commands, execute them in the infected machine and receive back the output without the execution of any shell program, and with all transmissions being sent in plaintext over the network.
 
-As we will cover more extensively in section \ref{}, this is the type of shell that is obtained by running the malicious program of the execution hijacking module of the rootkit. The rootkit currently does not incorporate a backdoor trigger that launches this module, but rather it is started automatically (see table \ref{table:k3_values}, we have not included a K3 for running an unencrypted pseudo-shell).
+This type of shell is obtained by running the malicious program of the execution hijacking module of the rootkit. The rootkit currently does not incorporate a backdoor trigger that launches this module, but rather it is started automatically once the malicious program is executed (see table \ref{table:k3_values}, we have not included a K3 for running an unencrypted pseudo-shell).
 
-For starting a plaintext pseudo-shell, the rootkit client and the malicious program from the execution hijacking module (hereafter called the rootkit, since it is part of it) will make use of a master/slave protocol where the rootkit client acts as the master (sending commands) and the rootkit acts as the slave (it only sends data in response of a client message). On each transmission, the rootkit client will send a single TCP packet (without a preceeding 3-way handshake) in which the command is embedded as the payload. The rootkit will execute this command and answer back with the output in another single TCP packet.
+While running a plaintext pseudo-shell, the rootkit client and the malicious program from the execution hijacking module (hereafter called the rootkit, since it is part of it) will make use of a master/slave protocol where the rootkit client acts as the master (sending commands) and the rootkit acts as the slave (it only sends data in response of a client message). On each transmission, the rootkit client will send a single TCP packet (without a preceeding 3-way handshake) in which the command is embedded as the payload. The rootkit will execute this command and answer back with the output in another single TCP packet.
 
 Apart from the data being transmitted (the command and the output of that command), we will find a protocol header embedded in the packet payload too. This header will be positioned starting at the first byte of the packet payload, preceeding any other data, which is written in the next byte right after the header ends. Figure \ref{fig:ups_packet_struct} shows the overall structure of one of the TCP packets being used in the protocol. Table \ref{table:ups_headers} shows the different headers and their meaning in the protocol.
 
@@ -900,18 +915,110 @@ Figure \ref{fig:ups_transmission} illustrates a common transmission following th
 
 As we can observe in figure \ref{fig:ups_transmission}, packets containing CC\_SYN and CC\_ACK act as a custom 2-way handshake. This step could be considered redundant and has been included only to share a resemblance with the TCP protocol.
 
-Also, note that after a successful CC\_SYN-CC\_ACK exchange there is no need to repeat it after a CC\_MSG, the transmission will consist on consecutive CC\_MSG packets until the pseudo-shell is closed from the rootkit client.
+Also, note that after a successful CC\_SYN-CC\_ACK exchange there is no need to repeat it after a CC\_MSG, the transmission will consist on consecutive CC\_MSG packets until the pseudo-shell is closed from the rootkit client with a CC\_FIN.
 
 
-\textbf{Encrypted pseudo-shell}
+\textbf{Encrypted pseudo-shell}\\
 Similarly to plaintext pseudo-shells, encrypted pseudo-shells enable the attacker to send commands, execute them in the infected machine and receive back the output, but all transmissions will be contained in the context of a secure encrypted connection using TLS.
 
-In our rootkit, this type of shells are spawned after the rootkit client requests such an action to the network backdoor by setting the appropiate value of K3 (see table \ref{table:k3_values}) on either a pattern-based backdoor trigger or a multi-packet trigger.
+In our rootkit, this type of shells are spawned after the rootkit client requests such an action to the network backdoor by setting the appropiate value of K3 (see table \ref{table:k3_values}) on either a pattern-based backdoor trigger or a multi-packet trigger. Once such a trigger is received in the backdoor, it will request to the rootkti user process to execute a TLS client that connects to the TLS server run at the rootkit client. 
+
+Once both parties are connected using TLS, they exchange data using a custom protocol, similar to the one used for plaintext pseudo-shells, but this time using TLS-contained messages. This message exchange works as master/slave protocol too, where the rootkit client will send a command to the rootkit, and the rootkit will execute the command and answer back with the output. Similarly to plaintext pseudo-shells, these messages are composed of a header and the data being transmitted. Table \ref{table:eps_headers} show the headers according to the protocol.
+
+\begin{table}[htbp]
+\begin{tabular}{|c|>{\centering\arraybackslash}p{8cm}|}
+\hline
+\textbf{Header} & \textbf{Description}\\
+\hline
+\hline
+CC\_COMM\_RQ\# & Sent by the rootkit client to the rootkit, sends a command to be executed.\\
+\hline
+CC\_COMM\_RS\# & Sent by the rootkit to the rootkit client, sends the result of an executed command.\\
+\hline
+CC\_FIN & Sent by the rootkit client. Requests to terminate the pseudo-shell connection.\\
+\hline
+CC\_ERR & Sent by the rootkit. Indicates that the rootkit failed to parse the message that the rootkit client sent.\\
+\hline
+\end{tabular}
+\caption{Protocol headers in the encrypted rootkit pseudo-shell.}
+\label{table:eps_headers}
+\end{table}
+
+As we can observe, this protocol works similarly to the one in pseudo-shells, with the only absence of the CC\_SYN and CC\_ACK messages. The reason for this is that, since the messages are contained in the context of a TLS connection, accepting the connection is considered as assurance enough that both parties are already synchronized.
 
 
 
-\subsection{XDP}
-Ingress traffic will be supervised by an eBPF XDP program. As we explained in section \ref{section:abusing_networking}, this type of programs enable to 
+\textbf{Phantom shell}\\
+This shell-like connection works with the coordination of both the XDP and TC modules at the backdoor. It does not involve sending any packets from the user space, but rather the backdoor will reuse packets being sent by other applications in the infected machine, modifying them so that they are directed to the rootkit client. Afterwards, the original packet will be transmitted without modifications to its original destinatary due to the TCP retransmissions. This technique has been explained in detail in section \ref{subsection:network_attacks}.
+
+A phantom shell can be obtained from the rootkit client by sending a backdoor trigger (only pattern-based triggers are supported for this shell) with the corresponding value of K3 (see table \ref{table:k3_values}). The XDP program at the backdoor receives the trigger and communicates to the TC program that the backdoor has been instructed to start a phantom shell. TC will modify a single packet and send it to the rootkit client, indicating that the backdoor is ready to start the phantom shell. After that, the client and the backdoor exchange TCP packets using a shared protocol (similar to that of plaintext pseudo-shells) in the following manner:
+\begin{enumerate}
+\item The rootkit client sends a TCP packet with the command to execute.
+\item The XDP program at the backdoor scans the traffic and detects that a TCP packet belonging to a phantom shell has been received (recognizing it by its header at the TCP payload).
+\item The XDP program tells the rootkit user space process to execute the command and obtain the output.
+\item The rootkit user space program communicates the TC program the output of the command.
+\item The TC program overwrite a packet and redirects it to the rootkit client.
+\end{enumerate}
+
+Both XDP and the user space rootkit program will communicate with the TC program using a shared map called backdoor\_phantom\_shell. This map only stores one single entry at a time, containing the following data:
+\begin{itemize}
+\item IP address indicated in the backdoor trigger to which the backdoor must write back to.
+\item Port indicated in the backdoor trigger.
+\item The command requested by the rootkit client (this is empty when XDP communicates having received the backdoor trigger in the first step).
+\end{itemize}
+
+With respect to the protocol being used, the TCP packets exchanged between the rootkit client and the TC program is the same as that shown in figure \ref{fig:ups_packet_struct}. The only difference is in the headers being used, which are described in table \ref{table:phantom_headers}.
+
+\begin{table}[htbp]
+\begin{tabular}{|c|>{\centering\arraybackslash}p{8cm}|}
+\hline
+\textbf{Header} & \textbf{Description}\\
+\hline
+\hline
+CC\_PHANTOM\_INIT & Sent by the TC program to the rootkit client after receiving the pattern-based backdoor trigger indicating request to initiate a phantom shell.\\
+\hline
+CC\_PHAN\_RQ\# & Sent by the rootkit client to the backdoor, sends a command to be executed.\\
+\hline
+CC\_PHAN\_RS\# & Sent by the backdoor to the rootkit client, sends the result of an executed command.\\
+\hline
+CC\_ERR & Sent by the backdoor. Indicates that the rootkit user space program failed to parse the command that the rootkit client sent.\\
+\hline
+\end{tabular}
+\caption{Protocol headers in the phantom shell.}
+\label{table:phantom_headers}
+\end{table}
+
+As we can appreciate in the table, in contrast to the other pseudo-shells we have presented, there are not any headers indicating to close the phantom shell in this protocol. This is because there is no program listening to the messages such as in the previous cases (the encrypted pseudo shell used a TLS client, the other where run from the malicious library and malicious program from rootkit modules). In this case, however, the backdoor listens for each message and executes the commands individually, as in a stateless protocol (although it requires the starting backdoor trigger to authentica the rootkit client).
+
+Figure \ref{fig:c2_summ_example} illustrates this expalantion by showing how the rootkit client executes a command using a phantom shell.
+
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=15.5cm]{c2_summ_example.png}
+	\caption{Execution of a command using the phantom shell.}
+	\label{fig:c2_summ_example}
+\end{figure}
+
+As we can observe in the figure, the XDP program at the backdoor is responsible of sniffing the network for a backdoor trigger to authenticate an attacker and start the phantom shell or, afterwards, a phantom shell header. Once the XDP program or the rootkt user program write into the shared eBPF map that a phantom shell packet is needed to be sent, the TC egress program hijacks the first TCP packet that an user application requests to send through the network. TCP retransmissions ensure that this packet is eventually delivered.
+
+
+\textbf{Backdoor commands}
+Apart from supporting the remote execution of commands via the shell-like connections we have covered in this section, the backdoor also enables two other backdoor commands which modify the behaviour of the rootkit. As we can observe in table \ref{table:k3_values}, these commands consist on enabling or disabling eBPF programs remotely.
+
+These commands are launched from the rootkit client, and get sent to the backdoor in the form of either a pattern-based trigger or any of the two forms of multi-packet trigger. As with any other backdoor trigger, the XDP program checks the value of K3 contained in the trigger and issues the corresponding action.
+
+In the case of these commands, the order needs to be transmitted to the rootkit user space program, from where the eBPF programs will be attached or detached using the eBPF program configurator. We will cover the eBPF program configurator extensively in section \ref{TODO}.
+
+
+\subsection{Backdoor internals}
+This section offers detailed insight into the functioning of the XDP and TC programs composing our backdoor. In particular, we will analyse their life cycle and operation, from when they are loaded and attached until they 
+
+
+
+
+
+\section{Rootkit client}
+The rootkit client is a CLI program which an attacker can use to communicate with the rootkit remotely and execute commands remotely using the C2 infraestructure. 
 
 
 
