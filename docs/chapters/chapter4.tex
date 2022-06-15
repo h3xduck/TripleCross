@@ -831,11 +831,11 @@ If the previous checks do not fail, it means the packet stream was a multi-strea
 
 %TODO INTRODUCE IMAGES OF SHELLS
 \subsection{Command and Control} \label{subsection:c2}
-This section details the C2 capabilities incorporated in our rootkit, that is, mechanisms that enable the attacker to introduce rootkit commands (not to be confused with Linux commands in a shell) from the remote rootkit client and to be executed in the infected machine, returning the output of the command (if any) back to the client. These rootkit commands can be instructed by sending a backdoor trigger, which as we mentioned depending on the value of K3 in the trigger a different rootkit action will be executed by the backdoor (available values are displayed in table \ref{table:k3_values}).
+This section details the C2 capabilities incorporated in our rootkit, that is, mechanisms that enable the attacker to introduce rootkit commands (not to be confused with Linux commands in a shell) from the remote rootkit client and to be executed in the infected machine, returning the output of the command (if any) back to the client. These rootkit commands can be instructed by sending a backdoor trigger, which as we mentioned, depending on the value of K3 in the trigger, a different rootkit action will be executed by the backdoor (available values are displayed in table \ref{table:k3_values}).
 
-Some of the actions triggered by the backdoor involve modifying the behaviour of the rootkit (such as attaching/detaching eBPF programs reotely), while others enable the attacker to spawn rootkit 'pseudo-shells'. These pseudo-shells are a special rootkit - rootkit client connection which simulate a shell program, enabling the attacker to execute Linux commands remotely and get the results as if it was executing them directly in the infected machine. During this connection, the rootkit and the rootkit client will exchange messages containing commands and information. For this, both programs need to agree on a common protocol which is mutually understood, defining the format and content of these transmissions.
+Some of the actions triggered by the backdoor involve modifying the behaviour of the rootkit (such as attaching/detaching eBPF programs reotely), while others enable the attacker to spawn rootkit 'pseudo-shells'. These pseudo-shells are a special rootkit-to-´rootkit client connections which simulate a shell program, enabling the attacker to execute Linux commands remotely and get the results as if it was executing them directly in the infected machine. During this connection, the rootkit and the rootkit client will exchange messages containing commands and information. For this, both programs need to agree on a common protocol which is mutually understood, defining the format and content of these transmissions.
 
-Apart from being able to spawn pseudo-shells by sending such action request to the backdoor using a backdoor trigger, some other shells can also be spawned as a result of a successful exploitation of either the library injection module or the execution hijacking module. In particular, the malicious library we injected in section \ref{section:lib_injection} and the malicious user program of section \ref{section:execution_hijack} spawn one of these shells once they are executed.
+Apart from being able to spawn pseudo-shells by sending such action requests to the backdoor using a backdoor trigger, some other shells can also be spawned as a result of a successful exploitation of either the library injection module or the execution hijacking module. In particular, the malicious library we injected in section \ref{section:lib_injection} and the malicious user program of section \ref{section:execution_hijack} spawn one of these shells once they are executed.
 
 As a summary, figure \ref{fig:c2_summ} shows an overview of C2 infraestructure.
 
@@ -1055,8 +1055,9 @@ After the requested modifications are made, the TC program passes the packet to 
 
 
 \section{Rootkit client}
-The rootkit client is a CLI program which an attacker can use to communicate with the rootkit remotely and execute commands remotely using the C2 infraestructure. 
+The rootkit client is a CLI program which the attacker can use from its own machine to communicate with the rootkit remotely over the network and execute commands using the C2 infraestructure. This section details its functionality and presents how it can be used to connect to the rootkit.
 
+\subsection{Client manual}
 
 
 

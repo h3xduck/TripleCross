@@ -45,13 +45,13 @@ void print_help_dialog(const char* arg){
     desc = "Activate C&C shell with IP - Using execve backdoor";
     printf("\t%-40s %-50s\n\n", line, desc);
     line = "-e IP";
-    desc = "Activate encrypted C&C shell with IP - with v1 trigger";
+    desc = "Activate encrypted C&C shell with IP - with pattern-based trigger";
     printf("\t%-40s %-50s\n\n", line, desc);
     line = "-s IP";
     desc = "Activate encrypted C&C shell with IP - with multi-packet trigger";
     printf("\t%-40s %-50s\n\n", line, desc);
     line = "-p IP";
-    desc = "Launch a phantom shell - with v1 trigger";
+    desc = "Launch a phantom shell - with pattern-based trigger";
     printf("\t%-40s %-50s\n\n", line, desc);
     line = "-a IP";
     desc = "Activate all of rootkit's hooks";
