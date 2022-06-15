@@ -1067,8 +1067,12 @@ The rootkit client is compiled to a single executable named \textit{injector}. T
 	\label{fig:client_help}
 \end{figure}
 
+As we can observe in the figure, the rootkit client enables to execute the C2 actions we have described in section \ref{subsection:c2}. Upon running any of these options, the client will first request the network interface to use. This enables the attacker to choose the specific network to which it can connect to the infected machine. After choosing an interface, the rootkit client crafts the respective backdoor trigger and sends it to the infected machine (we have also included an additional non-C2 PoC showing how the rootkit modifies incoming packets). Every option requires to specify the infected machine location by indicating its IP address.
 
-The rootkit client needs to be executed as root, since the library RawTCP_Lib it uses requires privileges for some of its functionalities.
+After sending a backdoor trigger, the client will enter a listening state, waiting for the backdoor response. Once a response is received confirmating that the remote machine is up and with the rootkit running, the client proceeds to show the user a shell prompt where it can enter commands.
+
+
+The rootkit client needs to be executed as root, since the library RawTCP\_Lib it uses requires privileges for some of its functionalities.
 
 
 

@@ -184,7 +184,7 @@ int server_run(int port) {
 				//Depending on the mode, we show different UI and commands
 				switch(client_mode){
 					case CLIENT_MODE_LIVE_COMMAND:
-						printf(">> client["""KYLW"command live"RESET"""]>: ");                                                                                                                                                              
+						printf(">> client["""KYLW"encrypted shell"RESET"""]>: ");                                                                                                                                                              
 						fgets(buf, BUFSIZ, stdin);
 						if ((strlen(buf)>0) && (buf[strlen(buf)-1] == '\n')){
 							buf[strlen(buf)-1] = '\0';   

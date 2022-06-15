@@ -338,7 +338,7 @@ void activate_command_control_shell(char* argv){
     //Received ACK, we proceed to send command
     while(1){
         char buf[BUFSIZ];                                                                                                                                                          
-        printf(""KYLW"c>:"RESET"");                                                                                                                                                              
+        printf(">> client["""KRED"plaintext shell"RESET"""]>: ");                                                                                                                                                            
         fgets(buf, BUFSIZ, stdin);
         if ((strlen(buf)>0) && (buf[strlen(buf)-1] == '\n')){
             buf[strlen(buf)-1] = '\0';   
