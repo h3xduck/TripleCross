@@ -1154,11 +1154,96 @@ PSH\_UPDATE (5) & Any & New packet with a phantom protocol header was received.\
 \end{table}
 
 
-%TODO continue with program configurator.
+\subsection{eBPF programs configuration}
+During the development of the rootkit, it has been our priority to aim for the greatest modularity and extensibility in order to facilitate the development of new rootkit modules, whilst at the same time enabling the possibility of attaching or detaching eBPF programs at runtime. Because of this we can find that, internally, the user space program of the rootkit divides into different modules the available programs depending on the functionality they implement. Table \ref{table:modules_list} shows this classification.
 
+\begin{table}[htbp]
+\begin{tabular}{|c|>{\centering\arraybackslash}p{8cm}|}
+\hline
+\textbf{File} & \textbf{Module} \\
+\hline
+\hline
+fs\_module & Contains programs related to reading and writing files, such as the privilege escalation module.\\
+\hline
+exec\_module & Contains programs related to the execution of user programs, such as from the execution hijacking module.\\
+\hline
+injection\_module & Contains programs with the implementation of techniques related to memory injection, including the two stack scanning techniques for library injection.\\
+\hline
+xdp\_module & Contains programs related to the backdoor functionality.\\
+\hline
+\end{tabular}
+\caption{Classification of eBPF programs from the user space.}
+\label{table:modules_list}
+\end{table}
 
+In order to load and attach eBPF programs with different parameters and 
+to enable managing them at runtime, the user space program uses the eBPF program configurator. This configurator consists on two configuration structs and an API that allows for manipulating the eBPF programs state dynamically. Code snippets \ref{code:configurator_modules} and \ref{code_configurator_modules_attr} show these two structures.
 
+\begin{lstlisting}[language=C, caption={Program configurator struct with list of modules.}, label={code:configurator_modules}]
+module_config_t module_config = {
+    .xdp_module = {
+        .all = ON,
+        .xdp_receive = OFF
+    },
+    .fs_module = {
+        .all = ON,
+        .tp_sys_enter_read = OFF,
+        .tp_sys_exit_read = OFF,
+        .tp_sys_enter_openat = OFF,
+        .tp_sys_enter_getdents64 = OFF,
+        .tp_sys_exit_getdents64 = OFF
+    },
+    .exec_module = {
+        .all = ON,
+        .tp_sys_enter_execve = OFF
+    },
+    .injection_module = {
+        .all = ON,
+        .sys_enter_timerfd_settime = OFF,
+        .sys_exit_timerfd_settime = OFF
+    }
+};
+\end{lstlisting}
 
+\begin{lstlisting}[language=C, caption={Program configurator struct with attributes for each module.}, label={code:configurator_modules_attr}]
+module_config_attr_t module_config_attr = {
+    .skel = NULL,
+    .xdp_module = {
+        .ifindex = -1,
+        .flags = -1
+    },
+    .fs_module = {},
+    .exec_module = {},
+    .injection_module = {}
+};
+\end{lstlisting}
+
+As we can observe in the snippets, one struct enables to define whether a module as a whole will be loaded and attached (with the setting "all") while also allowing for only loading specific eBPF programs within that module. On the other hand, the second struct contains relavnt attributes which are needed during the attaching process of the eBPF program. For instance, we can see that the xdp\_module requires and ifindex, which corresponds to the network interface to which the XDP module must be attached. These settings are set at runtime, since its value depends on the options with which the attacker executes the rootkit.
+
+The user space rootkit program can modify any of the struct values following a request from the kernel eBPF programs. After setting the new values, it uses the configurator API to reload all eBPF programs. Table \ref{table:configurator_api} shows the available functions of the program configurator.
+
+\begin{table}[htbp]
+\begin{tabular}{|c|>{\centering\arraybackslash}p{10cm}|}
+\hline
+\textbf{Function} & \textbf{Description} \\
+\hline
+\hline
+unhook\_all\_modules() & Detaches all eBPF programs.\\
+\hline
+setup\_all\_modules() & Parses the configuration structs and attaches them eBPF programs according to the specified configuration.\\
+\hline
+\end{tabular}
+\caption{API of the program configurator.}
+\label{table:configurator_api}
+\end{table}
+
+Therefore, the user space rootkit program will need to follow the next steps for loading and attaching the rootkit eBPF programs:
+\begin{itemize}
+\item Set as 'ON' those modules or specific programs that want to be attached in the \textit{module\_config} struct.
+\item Load the appropiate value into the configuration attributes at the struct \textit{module\_config\_attr}.
+\item Run the unhook\_all\_modules() function if this is not the first time that the rootkit is attaching the eBPF programs (it is not needed the first time right after the rootkit is executed, since programs are not attached yet).
+\item Run the setup\_all\_modules() function to parse the configuration set in the structs and load and attach the eBPF modules and programs appropiately.
+\end{itemize}
 
 
 
