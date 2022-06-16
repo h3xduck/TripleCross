@@ -1071,15 +1071,90 @@ As we can observe in the figure, the rootkit client enables to execute the C2 ac
 
 After choosing an interface, the rootkit client crafts the respective backdoor trigger and sends it to the infected machine (we have also included an additional non-C2 PoC showing how the rootkit modifies incoming packets). Every option requires to specify the infected machine location by indicating its IP address.
 
-After sending a backdoor trigger, the client will enter a listening state, waiting for the backdoor response. Once a response is received confirmating that the remote machine is up and the rootkit is installed, the client proceeds to show the user a shell prompt where it can enter commands. This shell prompt 
+After sending a backdoor trigger, the client will enter a listening state, waiting for the backdoor response. Once a response is received confirmating that the remote machine is up and the rootkit is installed, the client proceeds to show the user a shell prompt where it can enter commands. This shell prompt indicates whether we have spawned a plaintext, encrypted, or phantom psedo-shell. Figure \ref{fig:enc_shell} shows an encrypted pseudo-shell after receiving the backdoor response.
+
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=15cm]{sch_enc_shell.png}
+	\caption{Recently spawned encrypted pseudo-shell.}
+	\label{fig:enc_shell}
+\end{figure}
+
+Once the command prompt appears, the attacker may introduce commands to be executed in the infected machine. Commands may only be introduced one at a time, since the client waits for the rootkit response before showing another command prompt. When the attacker finishes using the shell, it is recommended to close the connection gracefully. For this, the client supports "global commands", a special type of command which, when introduced in the shell, does not get sent to the rootkit but instead it triggers an action locally. Currently, although the infraestructure for supporting a large list of global commands has been developed, only one has been included. The attacker may introduce "EXIT" to close the connection gracefully (see in \ref{subsection:c2}, that packets for closing the connection are sent according to the protocol). Figure \ref{fig:enc_shell_comm_ex} shows the execution of multiple commands and closing the connection.
+
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=12cm]{sch_enc_shell_comm_ex.png}
+	\caption{Execution of commands with encrypted pseudo-shell and closing the connection.}
+	\label{fig:enc_shell_comm_ex}
+\end{figure}
+
+As we can observe in figures \ref{fig:enc_shell} and \ref{fig:enc_shell_comm_ex}, the client also introduces multiple messages which provide additional information to the attacker about the state of the rootkit, the client and the ongoing connection. The existing message types are INFO, SUCCESS, WARN and ERROR.
+
+Also, note that the rootkit client needs to be executed as root, since the library RawTCP\_Lib it uses requires privileges for some of its functionalities. 
 
 
-The rootkit client needs to be executed as root, since the library RawTCP\_Lib it uses requires privileges for some of its functionalities.
+\subsection{RawTCP\_Lib}
+RawTCP\_Lib is the library on which the rootkit client delegates the task of building backdoor triggers, messages according to the rootkit protocol, and sending and receiving packets. This library is of our own authorship and available publicly \cite{rawtcp_lib}).
+
+RawTCP\_Lib incorporates the following functionalities:
+\begin{itemize}
+\item Build and customize TCP/IP packets. This includes setting any arbitrary value on either the TCP or IP headers, enabling to customize every detail of the packet belonging to either the network or the transport layer (working with Ethernet headers is not supported).
+\item Monitor the incoming network traffic, sniffing all received packets. Additionally, the library has support for sniffing packets with a certain data pattern in the payload.
+\item Sending packets over raw sockets \cite{raw_sockets}, which enable us to send packets with our own custom headers.
+\end{itemize}
+
+Only by using RawTCP\_Lib, the rootkit client is be able to craft backdoor triggers whose data is contained in TCP headers (such as the multi-packet trigger). This gives us a great amount of freedom at the time of designing hidden messages. 
+
+Apart from this, since raw sockets are indicated for reimplementing network protocols in the user space, it allows us to avoid undesired additional traffic in our rootkit transmissions. For instance, we do not need a 3-way handshake preceeding any of our transmissions.
+
+Finally, the sniffing capabilities of this library are responsible of capturing the responses of the rootkit from the rootkit client. If we observe tables \ref{table:ups_headers}, \ref{table:eps_headers} and \ref{table:phantom_headers}, we can appreciate that the headers start at a common prefix "CC". This is used by the rootkit to sniff the network and capture any packet whose payload starts with that pattern.
 
 
 
+\section{Rootkit user space program}
+This section overviews the design and architecture of the user program that is launched with the rootkit. Its main responsability is loading and attaching the eBPF programs when the rootkit is executed, and of managing any further request of attaching or detaching programs during runtime that the backdoor may issue. Also, it interacts with the eBPF programs at the kernel in order to provide user space-only functionalities, such as executing commands. 
+
+\subsection{Ring buffer communication}
+The user space rootkit program communicates with the other components of the rootkit using two different means:
+\begin{itemize}
+\item A ring buffer, to which the program subscribes so that any new element written into it results in an event on the user program. Therefore it enables kernel to user space communication.
+\item Other eBPF maps, on which the user program can write from the user space, thus enabling user to kernel communication.
+\end{itemize}
+
+In particular, the backdoor will be the responsible of most of the data written at the ring buffer, using it to request the actions corresponding to the commands received trhough the network (although the library injection module uses it too, see figure \ref{fig:flow_lib_injection_compact}. 
+
+Any data written into the ring buffer is encapsulated in an "event", embodied by a struct \textit{rb\_event}. This struct supports all types data that any program using the ring buffer will need (thus not all of them are filled). In order to let the user program know which fields will need to be read for a given event, each \textit{rb\_event} is marked with an attribute \textit{event\_type}, which denotes the type of data that has been written in the buffer, and an attribute \textit{code}, that futher distinguishes events from the same type into their purpose. Table \ref{table:ring_buf_events} shows the event types and codes recognized by the user program:
+
+\begin{table}[htbp]
+\begin{tabular}{|c|c|>{\centering\arraybackslash}p{8cm}|}
+\hline
+\textbf{Event type} & \textbf{Code} & \textbf{Action requested} \\
+\hline
+\hline
+INFO (0) & Any & Informative message, not requesting an action.\\
+\hline
+DEBUG (1) & Any & Debug message. Event currently deactivated.\\
+\hline
+ERROR (2) & Any & Reports an error from the kernel space. Event currently deactivated.\\
+\hline
+EXIT (3) & Any & Requests to stop the rootkit completely. Event currently deactivated.\\
+\hline
+COMMAND (4) & 0 & Requests to initiate an encrypted pseudo-shell.\\
+\hline
+COMMAND (4) & 1 & Requests to activate all hooks in the rootkit.\\
+\hline
+COMMAND (4) & 2 & Requests to deactivate all hooks in the rootkit.\\
+\hline
+PSH\_UPDATE (5) & Any & New packet with a phantom protocol header was received.\\
+\hline
+\end{tabular}
+\caption{Events and their classification in the ring buffer.}
+\label{table:ring_buf_events}
+\end{table}
 
 
+%TODO continue with program configurator.
 
 
 
