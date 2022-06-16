@@ -1,4 +1,4 @@
-# TFG
+# TripleCross
 ## Build and run
 ```bash
 cd src
