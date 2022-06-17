@@ -25,29 +25,29 @@ Figure \ref{fig:rootkit} shows an overview of the rootkit modules and components
 
 As we can observe in the figure, we can distinguish 6 different rootkit modules, along with a rootkit client which provides remote control of the rootkit over the network from the attacker machine. Also, there exists a rootkit user space process, which is listening for commands issued from the kernel-side, transmitted through a ring buffer.
 \begin{itemize}
-\item The \textbf{user space process} of the rootkit is in charge of loading and attaching the eBPF rootkit in the kernel, and creating the eBPF maps needed for their operations. For this, it uses the eBPF programs configurator, an internal structure that manages the eBPF modules at runtime, being able to attach or deattach them after a command to do so is received.
+\item The \textbf{user space process} of the rootkit is in charge of loading and attaching the eBPF rootkit in the kernel, and creating the eBPF maps needed for their operations. For this, it uses the eBPF programs configurator, an internal structure that manages the eBPF modules at runtime, being able to attach or detach them after a command to do so is received.
 
-The user space process also listens to any data received at the ring buffer, an special map which the eBPF program at the kernel will use to communicate with the user-side, issuing commands and triggering actions from it. Between others actions, the rootkit user space process can spawn TLS clients, execute malicious programs or use the eBPF program configurator for managing the eBPF programs.
+The user space process also listens to any data received at the ring buffer, a special map which the eBPF program at the kernel will use to communicate with the user-side, issuing commands and triggering actions from it. Between other actions, the rootkit user space process can spawn TLS clients, execute malicious programs or use the eBPF program configurator for managing the eBPF programs.
 
 \item The \textbf{library injection} module is in charge of hijacking the execution of target processes by injecting a malicious library. For this, it uses a set of eBPF tracepoints in the kernel side, and a code caver module in the user side in charge of scanning user processes and injecting shellcode, apart from the malicious library itself, which is prepared to communicate with the attacker's remote client.
 
 \item The \textbf{execution hijacking} module is in charge of hijacking the execution of programs right before the process is even created, modifying the kernel function arguments in such a way that the a new malicious program is called, but the original information is not lost so that the malicious program can still create the original process. Therefore, it hijacks the creation of processes by transparently injecting the creation of one additional malicious process on top of the intended one.
 
-\item The \textbf{privilege escalation} module is in charge of ensuring that any user process spawned by the rootkit will maintain full privilege in the system. Therefore, it hijacks any call to the sudoers file (on which privileged users are listed) so that the user on which the rootkit is loaded is always treated as root. Note that we have not listed this module as one of the main project objetives mainly because it acts as a helper to other modules, such as the execution hijacking one.
+\item The \textbf{privilege escalation} module is in charge of ensuring that any user process spawned by the rootkit will maintain full privilege in the system. Therefore, it hijacks any call to the sudoers file (on which privileged users are listed) so that the user on which the rootkit is loaded is always treated as root. Note that we have not listed this module as one of the main project objectives mainly because it acts as a helper to other modules, such as the execution hijacking one.
 
 \item The \textbf{backdoor} is one of the most critical modules in the rootkit. It has full control over incoming traffic with an XDP program, and outgoing traffic with a TC egress program. As we will see, both the XDP and TC programs are loaded in different eBPF programs, so they use a shared eBPF map to communicate between them.
 
-The backdoor maintains a Command and Control (C2) system that is prepared to listen for specially-crafted network triggers which intend to be stealthy and go unnoticed by network firewalls. These triggers transmit information and commands to the XDP program at the network border, which the backdoor is in charge of interpreting and issuing the corresponding actions, either by writing data at an eBPF map in which other eBPF programs are reading, or issuing an action request via the ring buffer. On top of that, the TC program interprets the data parsed by the XDP program and shapes the outgoint traffic, being able to inject secret messages into packets. 
+The backdoor maintains a Command and Control (C2) system that is prepared to listen for specially crafted network triggers which intend to be stealthy and go unnoticed by network firewalls. These triggers transmit information and commands to the XDP program at the network border, which the backdoor is in charge of interpreting and issuing the corresponding actions, either by writing data at an eBPF map in which other eBPF programs are reading or issuing an action request via the ring buffer. On top of that, the TC program interprets the data parsed by the XDP program and shapes the outgoing traffic, being able to inject secret messages into packets. 
 
 \item The \textbf{rootkit stealth} module is in charge of implementing measures to hide the rootkit from the infected host. For this, it hijacks certain system calls so that rootkit-related files and directories are hidden from the system.
 
 \item The \textbf{rootkit persistence} module is in charge of ensuring that the rootkit will stay loaded even after a complete reboot of the infected system. For this, it injects secret files at the \textit{cron} system (which will launch the rootkit after a reboot) and at the sudo system (which maintains the privileged permissions of the rootkit after the reboot).
 
-\item The \textbf{rootkit client} is a command-line interface (CLI) program that enables the attacker to remotely control the rootkit at the infected machine. For this, it incorporates multiple operation modes that launch different commands and network triggers. These network triggers, and any other packet sent to the backdoor, are customly designed TCP packets sent over a raw socket, enabling to avoid the noisy TCP 3-way handshake and to control every detail of the packet fields. Each of the messages generated by the client (and sent by the backdoor) follow a custom rootkit protocol, that defines the format of the messages and allows both the client and the backdoor to identify those packets belonging to this malicious traffic. In order to craft these packets, the rootkit client uses a raw sockets library (RawTCP\_Lib) that we have developed for this purpose \cite{rawtcp_lib}.
+\item The \textbf{rootkit client} is a command-line interface (CLI) program that enables the attacker to remotely control the rootkit at the infected machine. For this, it incorporates multiple operation modes that launch different commands and network triggers. These network triggers, and any other packet sent to the backdoor, are custom designed TCP packets sent over a raw socket, enabling to avoid the noisy TCP 3-way handshake and to control every detail of the packet fields. Each of the messages generated by the client (and sent by the backdoor) follow a custom rootkit protocol, that defines the format of the messages and allows both the client and the backdoor to identify those packets belonging to this malicious traffic. In order to craft these packets, the rootkit client uses a raw sockets library (RawTCP\_Lib) that we have developed for this purpose \cite{rawtcp_lib}. Section \ref{subsection:rawtcplib} covers in great detail the development of this library.
 
 The RawTCP\_Lib library incorporates packets building, raw socket packet transmissions, and a sniffer for incoming packets. This sniffer is particularly relevant since the client will need to listen for responses by the rootkit backdoor and quickly detect those that follow the rootkit protocol format.
 
-Apart from the network triggers, upon receiving a response by the backdoor the rootkit client can start pseudo-shells connections (commands can be sent to the backdoor and the backdoor executes them, but no shell process is spawned in the client), or spawn TLS servers that establish an encrypted connection with the backdoor. This connection, internally, still uses the custom rootkit protocol to act as a pseudo-shell, enabling to execute commands remotey.
+Apart from the network triggers, upon receiving a response by the backdoor the rootkit client can start pseudo-shells connections (commands can be sent to the backdoor and the backdoor executes them, but no shell process is spawned in the client), or spawn TLS servers that establish an encrypted connection with the backdoor. This connection, internally, still uses the custom rootkit protocol to act as a pseudo-shell, enabling to execute commands remotely.
 \end{itemize}
 
 
@@ -77,7 +77,7 @@ This program is also responsible of creating the shared map which the backdoor w
 
 
 \section{Library injection module} \label{section:lib_injection}
-In this section, we will discuss how to hijack an user process running in the system so that it executes arbitrary code instructed from an eBPF program. For this, we will be injecting a library which will be executed by taking advantage of the fact that the GOT section in ELFs is flagged as writable (as we introduced in section \ref{subsection:elf_lazy_binding} and using the stack scanning technique covered in section \ref{subsection:bpf_probe_write_apps}. This injection will be stealthy (it must not crash the process), and will be able to hijack privileged programs such as systemd, so that the code is executed as root.
+In this section, we will discuss how to hijack a user process running in the system so that it executes arbitrary code instructed from an eBPF program. For this, we will be injecting a library which will be executed by taking advantage of the fact that the GOT section in ELFs is flagged as writable (as we introduced in section \ref{subsection:elf_lazy_binding} and using the stack scanning technique covered in section \ref{subsection:bpf_probe_write_apps}. This injection will be stealthy (it must not crash the process) and will be able to hijack privileged programs such as systemd, so that the code is executed as root.
 
 We will also research how to circumvent the protections which modern compilers have set in order to prevent similar attacks (when performed without eBPF), as we overview in section \ref{subsection:hardening_elf}.
 
@@ -85,7 +85,7 @@ This technique has some advantages and disadvantages to the one described by Jef
 
 
 \subsection{ROP with eBPF} \label{subsection:rop_ebpf}
-In 2019, Jeff Dileo presented in DEFCON 27 the first technique to achieve arbitrary code execution using eBPF \cite{evil_ebpf_p6974}. For this, he used the ROP technique we described in section \ref{subsection:rop} to inject malicious code into a process. We will present an overview on his technique, in order to later compare it to the one we will develop for our rootkit, and find advantages and disadvantages. Note that this is a summary and some aspects have been simplified, however we will go in full detail during the explanation of our own technique.
+In 2019, Jeff Dileo presented in DEFCON 27 the first technique to achieve arbitrary code execution using eBPF \cite{evil_ebpf_p6974}. For this, he used the ROP technique we described in section \ref{subsection:rop} to inject malicious code into a process. We will present an overview on his technique, in order to later compare it to the one we will develop for our rootkit and find advantages and disadvantages. Note that this is a summary and some aspects have been simplified, however we will go in full detail during the explanation of our own technique.
 
 Figure \ref{fig:rop_evil_ebpf_1} shows an overview on the process memory and the eBPF programs loaded. For this injection, we will use the stack scanning technique (section \ref{subsection:bpf_probe_write_apps}) using the arguments of a system call whose arguments are passed using the stack (sys\_timerfd\_settime, which receives two structs utmr and otmr). Therefore, a kprobe is attached to the system call, so that it can start to scan for the return address of the system call, which we know is the original value of register rip which was pushed into the stack (ret).
 
@@ -321,7 +321,7 @@ Therefore, we will use the proc filesystem which we introduced in section \ref{s
 
 Although we may write freely into any virtual address using this technique, as we saw in section \ref{subsection:proc_maps} executable memory usually corresponds to the .text section. Therefore, we are at risk of overwriting critical instructions of the program. This is the reason why we must search for empty memory spaces inside the virtual memory, called code caves.
 
-We will consider an appropiate code cave as a continuous memory space inside the .text section that consists of a series of NULL bytes (opcode 0x00). Although in principle this may seem like a rare occurence, it is a common find in most processes due to how memory access control is implemented.
+We will consider an appropriate code cave as a continuous memory space inside the .text section that consists of a series of NULL bytes (opcode 0x00). Although in principle this may seem like a rare occurence, it is a common find in most processes due to how memory access control is implemented.
 
 In figure \ref{fig:proc_maps_sample}, we can observe how virtual memory sections have a length of 0x1000, or are a multiple of it. This is not an arbitrary number, but rather it is because memory sections must always be of length multiple of the system page length (4 KB = 0x1000 bytes). Therefore, the minimum granularity of a set of permissions over a memory section is of 0x1000 bytes.
 
@@ -393,9 +393,9 @@ The value of these entries is taken from the parameters set in figure \ref{fig:s
 \item Fourth ALL: Any command
 \end{itemize}
 
-Therefore, user osboxes, as part of the sudo group, may run any command as any user in any host as sudo. The host part is not relevant for our us, since it is used when a single sudoers file is distributed betweem multiple machines, but we still have to follow the appropiate format when writing an entry in the \textit{/etc/sudoers} file.
+Therefore, user osboxes, as part of the sudo group, may run any command as any user in any host as sudo. The host part is not relevant for our us, since it is used when a single sudoers file is distributed between multiple machines, but we still have to follow the appropriate format when writing an entry in the \textit{/etc/sudoers} file.
 
-Each time we execute a command with sudo, a process named 'sudo' will open and read the \textit{/etc/sudoers} file, interpreting the contents and allowing or rejecting the action. Note that, although once an user introduces the sudo password it may not be asked again for a period of time, the sudo process will still open and read the \textit{/etc/sudoers} file for each time sudo is used. This aspect is particularly relevant for our technique.
+Each time we execute a command with sudo, a process named 'sudo' will open and read the \textit{/etc/sudoers} file, interpreting the contents and allowing or rejecting the action. Note that, although once a user introduces the sudo password it may not be asked again for a period of time, the sudo process will still open and read the \textit{/etc/sudoers} file for each time sudo is used. This aspect is particularly relevant for our technique.
 
 
 \subsection{Hijacking sudoers read accesses}
@@ -442,7 +442,7 @@ The table shows that there exist two arguments marked as \textit{\_\_user}, whic
 \item Modify the buffer \textit{buf} in the sys\_read syscall so that it returns specially crafted data to the sudo program.
 \end{itemize}
 
-Although the first option is easier, the second technique can not only apply to reading files, but also to any system calls that loads data into an user buffer. Therefore, the privilege escalation module will incorporate the second technique to show the potential of eBPF in this area.
+Although the first option is easier, the second technique can not only apply to reading files, but also to any system calls that loads data into a user buffer. Therefore, the privilege escalation module will incorporate the second technique to show the potential of eBPF in this area.
 
 Figure \ref{fig:privilege_esc_module} shows the complete process of the technique we will use.
 \begin{figure}[htbp]
@@ -473,7 +473,7 @@ Taking the above into account, we designed the privilege escalation technique as
 	\end{itemize}
 	The key of the map fs\_open is the PID of the user process from which the call to an eBPF program originated, this can be obtained using the bpf\_get\_current\_pid\_tgid() helper (see section \ref{subsection:ebpf_helpers}).
 \end{itemize}
-\item A malicious program we executed from user "osboxes" requests sudo privileges. Our goal is to let it run with privileged permissions without having to introduce a password. Note that, although in the system we are using osboxes is an user in the \textit{/etc/sudoers} file already (although requiring a password for running as sudo), this process also works if we used an user not included on it in the first place.
+\item A malicious program we executed from user "osboxes" requests sudo privileges. Our goal is to let it run with privileged permissions without having to introduce a password. Note that, although in the system we are using osboxes is a user in the \textit{/etc/sudoers} file already (although requiring a password for running as sudo), this process also works if we used a user not included on it in the first place.
 
 The sudo process opens the \textit{/etc/sudoers} file. The syscall is called and the sys\_enter\_openat tracepoint is called before the syscall is executed. We check that the syscall was called by the sudo process using the helper bpf\_get\_current\_comm() (see section \ref{subsection:ebpf_helpers}) and, if it is, write the filename into the fs\_open map. After that, the tracepoint exists and the syscall is executed.
 
@@ -490,7 +490,7 @@ Injecting that string into the read file will grant us with password-less sudo p
 \item A \# symbol is included at the end so that any data not overwritten at that line is considered a comment (see figure \ref{fig:sudoers}).
 \end{itemize}
 
-Although the previous is sufficient for tricking the sudo process into believing we have sudo privileges, it can happen that an user (in this case, osboxes) already has an entry in the \textit{/etc/sudoers} file. When this happens, the sudo process usually chooses the last entry that appears on the file or fails. 
+Although the previous is sufficient for tricking the sudo process into believing we have sudo privileges, it can happen that a user (in this case, osboxes) already has an entry in the \textit{/etc/sudoers} file. When this happens, the sudo process usually chooses the last entry that appears on the file or fails. 
 
 Although not the most elegant solution, the solution for this issue incorporated in our rootkit is that the tracepoint program will continue writing \# symbols until an error happens (thus indicating we reached the end of the file).
 
@@ -538,7 +538,7 @@ As we will discuss, apart from running the original program, the malicious progr
 
 
 \subsection{Overwriting sys\_execve} \label{subsection:sys_execve_writing}
-We have mentioned the possibility of overwriting the parameters of the sys\_execve syscall. However, after loading an eBPF \textit{enter} tracepoint attached to sys\_execve and writing into any of this buffers, we found three scenarios:
+We have mentioned the possibility of overwriting the parameters of the sys\_execve syscall. However, after loading an eBPF \textit{enter} tracepoint attached to sys\_execve and writing into any of these buffers, we found three scenarios:
 \begin{itemize}
 \item The helper successfully overwrites the user buffers.
 \item The helper fails to overwrite all or some of the buffers.
@@ -547,13 +547,13 @@ We have mentioned the possibility of overwriting the parameters of the sys\_exec
 
 The reason for this is that, as we covered in section \ref{subsection:bpf_probe_write_apps}, the bpf\_probe\_write\_user() helper fails to write any data in the occurence of a page fault. As we explained in section \ref{subsection:mem_faults}, minor memory faults are particularly common when executing a fork() of a process, since the child process will not get its page table completely copied from the parent, but will request the mapping once it is attempted to be read.
 
-Because of the fact that programs calling sys\_execve will be completely replaced by the new program, we can find this function used commonly in two contexts:
+Because programs calling sys\_execve will be completely replaced by the new program, we can find this function used commonly in two contexts:
 \begin{itemize}
 \item User programs which execute a new program as a child, but they do not want to be terminated themselves. For this, they call a fork() and then execute execve() (which calls the sys\_execve syscall) in the child process.
 \item Programs that are run by the user in the command-line interface. Once a command is introduced, the program corresponding to the command is searched, and the bash process (or any other shell being used) will fork() itself and execute the new program.
 \end{itemize}
 
-Therefore, when modifying the arguments of sys\_execve, we will find that most calls are from programs which had executed fork() previously, thus having a high probability of failing. Note that the exact reason why writing one buffer with bpf\_probe\_write\_user() modifies multiple buffers simultaneouslly is unknown, but it is a situation we must account for, since we cannot trust in the helper not returning an error, we must check the result of this write accesses.
+Therefore, when modifying the arguments of sys\_execve, we will find that most calls are from programs which had executed fork() previously, thus having a high probability of failing. Note that the exact reason why writing one buffer with bpf\_probe\_write\_user() modifies multiple buffers simultaneously is unknown, but it is a situation we must account for, since we cannot trust in the helper not returning an error, we must check the result of this write accesses.
 
 \subsection{Hiding data in a system call}
 Apart from having to take into account that the bpf\_probe\_write\_user helper may fail in unexpected manners as we described, we also need to give special attention to how we will preserve the original information of the program being executed via sys\_execve after we modify the arguments of this call. As we showed in figure \ref{fig:summ_execve_hijack}, the malicious program executed using the hijacked syscall must be able to execute the original program. For this, the program will fork() and create a child process, on which execve() will be called with the original program arguments. Therefore, the main issue would be how to recover the original arguments once they were overwritten by eBPF.
@@ -609,7 +609,7 @@ int main (int argc, char *argv[], char *envp[]){}
 Hence, the malicious program will use the argv[] and envp[] arrays to make another sys\_execve call with the original arguments, running the original program. 
 
 \subsection{Hijacking a program execution}
-Once we have analysed the two fundamental issues regarding this module (bpf\_probe\_write\_user fails and hiding information in the syscall arguments) we will now analyze the execution hijacking module in detail using a sample program execution.
+Once we have analysed the two fundamental issues regarding this module (bpf\_probe\_write\_user fails and hiding information in the syscall arguments) we will now analyse the execution hijacking module in detail using a sample program execution.
 
 Figure \ref{fig:execve_hijack_overall} shows an overview on how the eBPF program will proceed to overwrite a sys\_execve call.
 
@@ -629,14 +629,14 @@ As we can observe in the figure, the steps followed will be the following:
 	\item Check using the helper bpf\_get\_current\_comm() that we are hooking the syscall of our target program. For instance, if we are targeting the commands entered by the user in the terminal, we would look for process \textit{bash}.
 	\item Backup the values of the filename and all arguments.
 	\item Write using bpf\_probe\_write\_user into the filename, subtituting it with the filename of our malicious program.
-	\item Check that the write call was successful, and that the values of the arguments are still the same as before (since as we explained in section \ref{subsection:sys_execve_writing}, these may be modified simultaneously). If one of these errors happened, we will write back into the filename the original program filename, and exit from the tracepoint.
-	\item Write using bpf\_probe\_write\_user into the first argument argv[0], subtituting it with the filename of the original program.
+	\item Check that the write call was successful, and that the values of the arguments are still the same as before (since as we explained in section \ref{subsection:sys_execve_writing}, these may be modified simultaneously). If one of these errors happened, we will write back into the filename the original program filename and exit from the tracepoint.
+	\item Write using bpf\_probe\_write\_user into the first argument argv[0], substituting it with the filename of the original program.
 	\item Check again that the write call was successful, and that the values of the arguments are still the same as before. If one of these errors happened, we will write back into the argv[0] the original argument, and exit from the tracepoint.
 \end{enumerate}
 \item If the previous steps were executed successfully, once we exit from the tracepoint and the syscall sys\_execve is executed we will find that our malicious program has been run.
 \end{enumerate}
 
-Once our malicious program has been executed, it is its responsability to execute the original program too. Also, we would like this program to be run with root privileges even if the process which issued the original sys\_execve call did not posess those. For this, multiple methods can be used:
+Once our malicious program has been executed, it is its responsibility to execute the original program too. Also, we would like this program to be run with root privileges even if the process which issued the original sys\_execve call did not possess those. For this, multiple methods can be used:
 \begin{enumerate}
 \item We could call sys\_execve again and an eBPF program would modify the arguments with the original program arguments.
 \item We could use the information we have hidden in argv[0] to call the original program and to execute the program as sudo.
@@ -660,24 +660,24 @@ As we can observe in the figure, the malicious program will create multiple sys\
 
 Since our malicious program does not have sudo permissions, we make use of the privilege escalation module we explained in section \ref{section:privesc} in order to modify the contents of the \textit{/etc/sudoers} file and tricking the sudo process into considering we have sudo privilege. After this, the sudo process makes a sys\_execve call to the malicious process, which this time will be running with root permissions.
 
-\item Once the malicious program is running with root privileges, it can perform different actions in the infected machine. In our rootkit, this program (which can be found in ), establishes a connection with the remote rootkit client using a raw sockets-based protocol (which will be explain in section \ref{TODO}).
+\item Once the malicious program is running with root privileges, it can perform different actions in the infected machine. In our rootkit, this program (which can be found in TODO), establishes a connection with the remote rootkit client using a raw sockets-based protocol (which will be explain in section \ref{TODO}).
 
 Apart from this, the malicious program will now run the original program, by taking argv[1] as the filename and considering the rest of the argv[] array, starting at position 2, as the program arguments (argv[1], argv[2]...). With respect to argv[0], its original value is easily recovered from the original filename. 
 %TODO link to program in repository
 \end{enumerate}
 
 
-\section{Backdoor and C2}
+\section{Backdoor and C2} \label{section:c2}
 This section covers a comprehensive analysis of the design, implementation and functioning of the rootkit backdoor and its C2 capabilities. As we explained at the beginning of the chapter, the rootkit will be capable of controlling all incoming and outgoing network traffic, and we will weaponize this capability to build a remotely controllable system which executes orders from the rootkit client.
 
-Apart from the XDP and TC eBPF programs which compound the core of the backdoor module, we had to design and implement a series of network protocols which enable to communicate through the network with the rootkit client. Also, we will take into account that a firewall, or an Intrusion Detection System (IDS) \cite{ips} may be scanning the traffic, searching for suspicious packet. Therefore, we will attempt to camouflage our traffic as common traffic generated by benign applications. 
+Apart from the XDP and TC eBPF programs which compound the core of the backdoor module, we had to design and implement a series of network protocols which enable to communicate through the network with the rootkit client. Also, we will consider that a firewall, or an Intrusion Detection System (IDS) \cite{ips} may be scanning the traffic, searching for suspicious packet. Therefore, we will attempt to camouflage our traffic as common traffic generated by benign applications. 
 
 Note that IDSs and firewalls are usually located outside of the host, in the middle point between the router which connects to the Internet and the host. Therefore, it is not enough that we hide our rootkit packets from the kernel using XDP as we explained in section \ref{section:abusing_networking}, but rather we must aim to design packets which are not suspicious to be malicious even from the perspective of software that sits in the middle of all of our transmissions through the network.
 
 \subsection{Backdoor triggers} \label{subsection:triggers}
-After a machine is infected by the rootkit, the rootkit client program will be used by the attacker to initiate a connection with the backdoor. However, first and foremost the backdoor needs to be able to detect whether a packet corresponds to common traffic generated by the host applications, or if it is coming from the rootkit client. This is because the attacker may be launching the rootkit client from any IP address, and listening at any port, so the backdoor must learn this parameters from the rootkit client, whose identity must be "authenticated" before establishing a connection with it. The first packet or group of packets whose purpose is to instruct the backdoor about who is the rootkit client and initiate a connection is known as a "trigger".
+After a machine is infected by the rootkit, the rootkit client program will be used by the attacker to initiate a connection with the backdoor. However, first and foremost the backdoor needs to be able to detect whether a packet corresponds to common traffic generated by the host applications, or if it is coming from the rootkit client. This is because the attacker may be launching the rootkit client from any IP address, and listening at any port, so the backdoor must learn these parameters from the rootkit client, whose identity must be "authenticated" before establishing a connection with it. The first packet or group of packets whose purpose is to instruct the backdoor about who is the rootkit client and initiate a connection is known as a "trigger".
 
-Although there exist a wide variety types of triggers, each type offers different advantages and drawbacks. In our rootkit, we have implemented multiple triggers with the purpose of discussing multiple authentication options, ranging from simple keywords inserted on packets, to complex packet streams that are based on triggers found in real-world rootkits.
+Although there exist a wide variety of types of triggers, each type offers different advantages and drawbacks. In our rootkit, we have implemented multiple triggers with the purpose of discussing multiple authentication options, ranging from simple keywords inserted on packets, to complex packet streams that are based on triggers found in real-world rootkits.
 
 Note that, as we introduced in section \ref{section:networking_fundamentals}, we will be exclusively working with TCP/IP packets, but an eBPF backdoor is capable of operating with any protocol of the network stack.
 
@@ -691,7 +691,7 @@ These triggers are one of the simplest but also the most easily detectable by an
 	\label{fig:keyword_trigger}
 \end{figure}
 
-Our rootkit is prepared to listen for keyword-based triggers, although it is a simple Proof of Concept (PoC) which does not take part in the main C2 functionality. In the case of the trigger shown in figure \ref{fig:keyword_trigger}, the rootkit will analyze the packet and detect that the pre-defined keyword "XDP\_PoC\_0" has been inserted into the payload, thus learning that the packet has been sent by the attacker. In the PoC implemented in our rootkit, this triggers an overwrite action, in which the XDP program will proceed to modify the payload and the packet size, changing the contents of the packet. This PoC can be seen in action in section \ref{TODO}.
+Our rootkit is prepared to listen for keyword-based triggers, although it is a simple Proof of Concept (PoC) which does not take part in the main C2 functionality. In the case of the trigger shown in figure \ref{fig:keyword_trigger}, the rootkit will analyse the packet and detect that the pre-defined keyword "XDP\_PoC\_0" has been inserted into the payload, thus learning that the packet has been sent by the attacker. In the PoC implemented in our rootkit, this triggers an overwrite action, in which the XDP program will proceed to modify the payload and the packet size, changing the contents of the packet. This PoC can be seen in action in section \ref{TODO}.
 
 \textbf{Port-knocking triggers}\\
 This type of triggers is based on a common previously agreed sequence of ports which both the backdoor and the client share beforehand. When the client wants to initiate a connection with the backdoor, it will send an ordered sequence of packets directed to multiple of the ports of the infected host, so that the order of these ports corresponds to the sequence agreed with the backdoor \cite{port_knocking}. A backdoor sniffing network traffic will detect this pattern and initiate a connection with the source.
@@ -699,13 +699,13 @@ This type of triggers is based on a common previously agreed sequence of ports w
 This type of trigger has not been implemented in our rootkit, although it has been discussed here for being one the most popular options.
 
 \textbf{Advanced pattern-based triggers}\\
-One of the main issues with keyword-based triggers is that, upon inspection of the packet, the trigger is easily reconizable (the payload contains a plaintext string) and this can lead to firewalls and IDSs flagging it as suspicious. 
+One of the main issues with keyword-based triggers is that, upon inspection of the packet, the trigger is easily recognizable (the payload contains a plaintext string) and this can lead to firewalls and IDSs flagging it as suspicious. 
 
 We can, however, work on top of the idea of building a pattern that can be recognized by the backdoor, but at the same time seems random enough for an external network supervisor. This is the basis of some of the triggers we can find in real-world rootkit, such is the case of the rootkit Bvp47 \cite{bvp47_report}. %TODO the link is too slow, should we put our repository as a source?
 
-Bvp47 is a rootkit with C2 capabilities built as a Linux kernel module developed by the NSA Equation Group and discovered by the research laboratory Pangu Lab \cite{pangu_lab}. One of its capabilities is communicating with a backdoor via pattern-based triggers. These triggers are seemingly random, but they follow a hidden pattern that only the entity who knows it will be able to detect it, acting as a "key". The triggers used in the Bvp47 rootkit consist of a TCP packet whose payload has been filled with random memory, with the exeception of a selection of bits which are the result of certain XOR operations \cite{bvp47_report_p49}.
+Bvp47 is a rootkit with C2 capabilities built as a Linux kernel module developed by the NSA Equation Group and discovered by the research laboratory Pangu Lab \cite{pangu_lab}. One of its capabilities is communicating with a backdoor via pattern-based triggers. These triggers are seemingly random, but they follow a hidden pattern that only the entity who knows it will be able to detect it, acting as a "key". The triggers used in the Bvp47 rootkit consist of a TCP packet whose payload has been filled with random memory, with the exception of a selection of bits which are the result of certain XOR operations \cite{bvp47_report_p49}.
 
-The backdoor of our rootkit is capable of working with pattern-based triggers similar to those presented in Bvp47. Figure \ref{fig:bvp47_trigger} shows the trigger we implemented for our backdoor.
+The backdoor of our rootkit can work with pattern-based triggers similar to those presented in Bvp47. Figure \ref{fig:bvp47_trigger} shows the trigger we implemented for our backdoor.
 
 \begin{figure}[htbp]
 	\centering
@@ -714,7 +714,7 @@ The backdoor of our rootkit is capable of working with pattern-based triggers si
 	\label{fig:bvp47_trigger}
 \end{figure}
 
-As we can observe in the figure, a series of 8 data sections of 2 bytes of length each are included in the payload. Some of these are completely random, while others are the result of calculating operations involving other sections and some "keys". These keys are data shared by the backdoor and the rootkit client, and enable to encode hidden information in what would seem random data after they are XORed with other data. Specifically, the key K3 encodes the command which the rootkit client wants the backdoor to execute. Table \ref{table:k3_values} shows the values and the actions triggered by K3 once they are parsed by the backdoor. Table \ref{table:k1_k2_values} shows the shared values of K1 and K2, which do not trigger an action like K3, but serve to ensure that the value at the 7th data section (S3 XOR K3) was not generated by accident by another packet.
+As we can observe in the figure, a series of 8 data sections of 2 bytes of length each are included in the payload. Some of these are completely random, while others are the result of calculating operations involving other sections and some "keys". These keys are data shared by the backdoor and the rootkit client and enable to encode hidden information in what would seem random data after they are XORed with other data. Specifically, the key K3 encodes the command which the rootkit client wants the backdoor to execute. Table \ref{table:k3_values} shows the values and the actions triggered by K3 once they are parsed by the backdoor. Table \ref{table:k1_k2_values} shows the shared values of K1 and K2, which do not trigger an action like K3, but serve to ensure that the value at the 7th data section (S3 XOR K3) was not generated by accident by another packet.
 
 \begin{table}[htbp]
 \begin{tabular}{|c|>{\centering\arraybackslash}p{8cm}|}
@@ -754,7 +754,7 @@ The above format guarantees that two packets will never contain the same data, w
 
 Although this type of trigger is stealthier than the previous we presented, its main drawback is that, upon a forensic investigation and decompilation of the rootkit and backdoor, the value of the keys can be found and therefore its traffic detected. 
 
-Also, we want our TCP packet to be as similar to normal traffic as possible, therefore sending a single TCP packet without a previous 3-way handhsake would be slightly suspicious from a firewall standpoint. This is why the pattern-based trigger we have presented will be a SYN packet (in the TCP header, we set to 1 the SYN FLAG), so that the trigger could be seen as a normal request for initiating a connection.
+Also, we want our TCP packet to be as similar to normal traffic as possible, therefore sending a single TCP packet without a previous 3-way handshake would be slightly suspicious from a firewall standpoint. Therefore the pattern-based trigger we have presented will be a SYN packet (in the TCP header, we set to 1 the SYN FLAG), so that the trigger could be seen as a normal request for initiating a connection.
 
 Although using SYN packets is stealthier than sending single data packet without being in the context of a connection, it can be argued that SYN packets in a 3-way handshake do not usually have a payload. However, the TCP standard allows for the inclusion of data in SYN packets, and there exist some cases in which SYN packets with data are being actively used, such is the case of TCP Fast Open \cite{tcp_syn_payload} \cite{rfc_tcp4}. Also, we can find that firewalls such as Cisco do not drop SYN packets even if they have data by default \cite{cisco_syn_firewall}.
 
@@ -775,12 +775,12 @@ Firstly, the rootkit client will define the data payload to send as shown in fig
 	\label{fig:hive_data}
 \end{figure}
 
-As we can observe in the figure, the rootkit will tell the backdoor information about to which IP address the rootkit has to send back a response. This enables to send the multi-packet trigger from an spoofed IP address and port. It also contain another K3 XORed with the port, so that the backdoor knows which action is requested by the rootkit client. The values for this K3 are the same as we showed in table \ref{table:k3_values}.
+As we can observe in the figure, the rootkit will tell the backdoor information about to which IP address the rootkit has to send back a response. This enables to send the multi-packet trigger from a spoofed IP address and port. It also contains another K3 XORed with the port, so that the backdoor knows which action is requested by the rootkit client. The values for this K3 are the same as we showed in table \ref{table:k3_values}.
 
 The payload also contains two particularly relevant fields, a CRC and a XOR key:
 \begin{itemize}
-\item The XOR key will be used to calculate a rolling XOR over the whole payload before it is sent. This operation consists of calculating the XOR of each byte X with its adjacent X+1, and storing the result of the operation in byte X+1. Therefore, byte 0x00 is XORed with 0x01 and stored into 0x01, byte 0x01 XOR 0x02 is stored in 0x02, and we repeat the operation with the whole payload. The result is an seamingly random array of bytes, which may go under the radar of any software supervising the network.
-\item The Cyclic Redundancy Check (CRC) is an error-detecting code commonly used to check for errors during data transmission \cite{crc}. By calculating the CRC of our payload we aim to ensure that the complete payload has been reconstructed successfully after transmitting it to the backdoor.
+\item The XOR key will be used to calculate a rolling XOR over the whole payload before it is sent. This operation consists of calculating the XOR of each byte X with its adjacent X+1, and storing the result of the operation in byte X+1. Therefore, byte 0x00 is XORed with 0x01 and stored into 0x01, byte 0x01 XOR 0x02 is stored in 0x02, and we repeat the operation with the whole payload. The result is a seemingly random array of bytes, which may go under the radar of any software supervising the network.
+\item The Cyclic Redundancy Check (CRC) is an error-detecting code commonly used to check for errors during data transmission \cite{crc}. By calculating the CRC of our payload, we aim to ensure that the complete payload has been reconstructed successfully after transmitting it to the backdoor.
 
 A CRC is necessary because we may receive corrupted packets (TCP guarantees integrity of data during a connection between applications, but we are capturing the packets from the kernel in the backdoor) and because a firewall may modify our packets before they reach the kernel at the host.
 \end{itemize}
@@ -796,7 +796,7 @@ After the rootkit client has built the data payload to send, it will divide it i
 	\label{fig:hive_seqnum}
 \end{figure}
 
-\item The second type of trigger consits of dividing the payload into 6 chunks of 2 bytes each, and injecting them into the source port of SYN TCP packets, as shown in figure \ref{fig:hive_srcport}.
+\item The second type of trigger consists of dividing the payload into 6 chunks of 2 bytes each, and injecting them into the source port of SYN TCP packets, as shown in figure \ref{fig:hive_srcport}.
 
 \begin{figure}[htbp]
 	\centering
@@ -809,7 +809,7 @@ After the rootkit client has built the data payload to send, it will divide it i
 
 Note that, although in figure \ref{fig:hive_seqnum} and \ref{fig:hive_srcport} the data is injected directly, this data has been transformed under the rolling XOR, so a firewall or IDS would not easily reconstruct the IP or the PORT just by looking at the packet.
 
-After the rootkic client constructs the packet stream to send, the packets are sent in order to the infected system and the backdoor will have to process them. The backdoor will only be able to acknowledge that a trigger has been sent after the 3 (or the 6) packets have been received, therefore the XDP program is in charge of saving the last 3 (or the last 6) packets received from each IP address at a minimum.
+After the rootkit client constructs the packet stream to send, the packets are sent in order to the infected system and the backdoor will have to process them. The backdoor will only be able to acknowledge that a trigger has been sent after the 3 (or the 6) packets have been received, therefore the XDP program is in charge of saving the last 3 (or the last 6) packets received from each IP address at a minimum.
 
 In our rootkit, this is achieved by using eBPF maps which work as a First-In-First-Out (FIFO) structure:
 \begin{itemize}
@@ -833,20 +833,20 @@ If the previous checks do not fail, it means the packet stream was a multi-strea
 \subsection{Command and Control} \label{subsection:c2}
 This section details the C2 capabilities incorporated in our rootkit, that is, mechanisms that enable the attacker to introduce rootkit commands (not to be confused with Linux commands in a shell) from the remote rootkit client and to be executed in the infected machine, returning the output of the command (if any) back to the client. These rootkit commands can be instructed by sending a backdoor trigger, which as we mentioned, depending on the value of K3 in the trigger, a different rootkit action will be executed by the backdoor (available values are displayed in table \ref{table:k3_values}).
 
-Some of the actions triggered by the backdoor involve modifying the behaviour of the rootkit (such as attaching/detaching eBPF programs reotely), while others enable the attacker to spawn rootkit 'pseudo-shells'. These pseudo-shells are a special rootkit-to-´rootkit client connections which simulate a shell program, enabling the attacker to execute Linux commands remotely and get the results as if it was executing them directly in the infected machine. During this connection, the rootkit and the rootkit client will exchange messages containing commands and information. For this, both programs need to agree on a common protocol which is mutually understood, defining the format and content of these transmissions.
+Some of the actions triggered by the backdoor involve modifying the behaviour of the rootkit (such as attaching/detaching eBPF programs remotely), while others enable the attacker to spawn rootkit 'pseudo-shells'. These pseudo-shells are a special rootkit-to-´rootkit client connections which simulate a shell program, enabling the attacker to execute Linux commands remotely and get the results as if it was executing them directly in the infected machine. During this connection, the rootkit and the rootkit client will exchange messages containing commands and information. For this, both programs need to agree on a common protocol which is mutually understood, defining the format and content of these transmissions.
 
 Apart from being able to spawn pseudo-shells by sending such action requests to the backdoor using a backdoor trigger, some other shells can also be spawned as a result of a successful exploitation of either the library injection module or the execution hijacking module. In particular, the malicious library we injected in section \ref{section:lib_injection} and the malicious user program of section \ref{section:execution_hijack} spawn one of these shells once they are executed.
 
-As a summary, figure \ref{fig:c2_summ} shows an overview of C2 infraestructure.
+As a summary, figure \ref{fig:c2_summ} shows an overview of C2 infrastructure.
 
 \begin{figure}[htbp]
 	\centering
 	\includegraphics[width=14cm]{c2_summ_infra.png}
-	\caption{Command and Control infraestructure of the rootkit.}
+	\caption{Command and Control infrastructure of the rootkit.}
 	\label{fig:c2_summ_infra}
 \end{figure}
 
-As we can observe in the figure, the rootkit client offers a command launcher, which sends backdoor triggers to the backdoor. The backdoor scans the traffic and executes the according action corresponding to K3. After that, the backdoor can use the ring buffer to instruct the rootkit user process to launch actions from the user space. One of this actions is starting an encrypted pseudo-shell connection, enabling the rootkit client to remotely execute commands in the infected machine. As we mentioned, other types of shells can be spawned, including a simple reverse shell by the malicious library of the library injection module, a plaintext pseudo-shell connection by the execution hijacking module, and a pseudo-shell based on packets hijacked by the backdoor called the 'phantom shell'. 
+As we can observe in the figure, the rootkit client offers a command launcher, which sends backdoor triggers to the backdoor. The backdoor scans the traffic and executes the according action corresponding to K3. After that, the backdoor can use the ring buffer to instruct the rootkit user process to launch actions from the user space. One of these actions is starting an encrypted pseudo-shell connection, enabling the rootkit client to remotely execute commands in the infected machine. As we mentioned, other types of shells can be spawned, including a simple reverse shell by the malicious library of the library injection module, a plaintext pseudo-shell connection by the execution hijacking module, and a pseudo-shell based on packets hijacked by the backdoor called the 'phantom shell'. 
 
 We will now proceed to analyse each of these connections and shell-like mechanisms which compound the C2 functionality.
 
@@ -872,9 +872,9 @@ This shell-like connection enables the attacker to send commands, execute them i
 
 This type of shell is obtained by running the malicious program of the execution hijacking module of the rootkit. The rootkit currently does not incorporate a backdoor trigger that launches this module, but rather it is started automatically once the malicious program is executed (see table \ref{table:k3_values}, we have not included a K3 for running an unencrypted pseudo-shell).
 
-While running a plaintext pseudo-shell, the rootkit client and the malicious program from the execution hijacking module (hereafter called the rootkit, since it is part of it) will make use of a master/slave protocol where the rootkit client acts as the master (sending commands) and the rootkit acts as the slave (it only sends data in response of a client message). On each transmission, the rootkit client will send a single TCP packet (without a preceeding 3-way handshake) in which the command is embedded as the payload. The rootkit will execute this command and answer back with the output in another single TCP packet.
+While running a plaintext pseudo-shell, the rootkit client and the malicious program from the execution hijacking module (hereafter called the rootkit, since it is part of it) will make use of a master/slave protocol where the rootkit client acts as the master (sending commands) and the rootkit acts as the slave (it only sends data in response of a client message). On each transmission, the rootkit client will send a single TCP packet (without a preceding 3-way handshake) in which the command is embedded as the payload. The rootkit will execute this command and answer back with the output in another single TCP packet.
 
-Apart from the data being transmitted (the command and the output of that command), we will find a protocol header embedded in the packet payload too. This header will be positioned starting at the first byte of the packet payload, preceeding any other data, which is written in the next byte right after the header ends. Figure \ref{fig:ups_packet_struct} shows the overall structure of one of the TCP packets being used in the protocol. Table \ref{table:ups_headers} shows the different headers and their meaning in the protocol.
+Apart from the data being transmitted (the command and the output of that command), we will find a protocol header embedded in the packet payload too. This header will be positioned starting at the first byte of the packet payload, preceding any other data, which is written in the next byte right after the header ends. Figure \ref{fig:ups_packet_struct} shows the overall structure of one of the TCP packets being used in the protocol. Table \ref{table:ups_headers} shows the different headers and their meaning in the protocol.
 
 \begin{figure}[htbp]
 	\centering
@@ -915,13 +915,13 @@ Figure \ref{fig:ups_transmission} illustrates a common transmission following th
 
 As we can observe in figure \ref{fig:ups_transmission}, packets containing CC\_SYN and CC\_ACK act as a custom 2-way handshake. This step could be considered redundant and has been included only to share a resemblance with the TCP protocol.
 
-Also, note that after a successful CC\_SYN-CC\_ACK exchange there is no need to repeat it after a CC\_MSG, the transmission will consist on consecutive CC\_MSG packets until the pseudo-shell is closed from the rootkit client with a CC\_FIN.
+Also, note that after a successful CC\_SYN-CC\_ACK exchange there is no need to repeat it after a CC\_MSG, the transmission will consist of consecutive CC\_MSG packets until the pseudo-shell is closed from the rootkit client with a CC\_FIN.
 
 
 \textbf{Encrypted pseudo-shell}\\
 Similarly to plaintext pseudo-shells, encrypted pseudo-shells enable the attacker to send commands, execute them in the infected machine and receive back the output, but all transmissions will be contained in the context of a secure encrypted connection using TLS.
 
-In our rootkit, this type of shells are spawned after the rootkit client requests such an action to the network backdoor by setting the appropiate value of K3 (see table \ref{table:k3_values}) on either a pattern-based backdoor trigger or a multi-packet trigger. Once such a trigger is received in the backdoor, it will request to the rootkti user process to execute a TLS client that connects to the TLS server run at the rootkit client. 
+In our rootkit, this type of shells are spawned after the rootkit client requests such an action to the network backdoor by setting the appropriate value of K3 (see table \ref{table:k3_values}) on either a pattern-based backdoor trigger or a multi-packet trigger. Once such a trigger is received in the backdoor, it will request to the rootkit user process to execute a TLS client that connects to the TLS server run at the rootkit client. 
 
 Once both parties are connected using TLS, they exchange data using a custom protocol, similar to the one used for plaintext pseudo-shells, but this time using TLS-contained messages. This message exchange works as master/slave protocol too, where the rootkit client will send a command to the rootkit, and the rootkit will execute the command and answer back with the output. Similarly to plaintext pseudo-shells, these messages are composed of a header and the data being transmitted. Table \ref{table:eps_headers} show the headers according to the protocol.
 
@@ -949,7 +949,7 @@ As we can observe, this protocol works similarly to the one in pseudo-shells, wi
 
 
 \textbf{Phantom shell}\\
-This shell-like connection works with the coordination of both the XDP and TC modules at the backdoor. It does not involve sending any packets from the user space, but rather the backdoor will reuse packets being sent by other applications in the infected machine, modifying them so that they are directed to the rootkit client. Afterwards, the original packet will be transmitted without modifications to its original destinatary due to the TCP retransmissions. This technique has been explained in detail in section \ref{subsection:network_attacks}.
+This shell-like connection works with the coordination of both the XDP and TC modules at the backdoor. It does not involve sending any packets from the user space, but rather the backdoor will reuse packets being sent by other applications in the infected machine, modifying them so that they are directed to the rootkit client. Afterwards, the original packet will be transmitted without modifications to its original destination due to the TCP retransmissions. This technique has been explained in detail in section \ref{subsection:network_attacks}.
 
 A phantom shell can be obtained from the rootkit client by sending a backdoor trigger (only pattern-based triggers are supported for this shell) with the corresponding value of K3 (see table \ref{table:k3_values}). The XDP program at the backdoor receives the trigger and communicates to the TC program that the backdoor has been instructed to start a phantom shell. TC will modify a single packet and send it to the rootkit client, indicating that the backdoor is ready to start the phantom shell. After that, the client and the backdoor exchange TCP packets using a shared protocol (similar to that of plaintext pseudo-shells) in the following manner:
 \begin{enumerate}
@@ -988,9 +988,9 @@ CC\_ERR & Sent by the backdoor. Indicates that the rootkit user space program fa
 \label{table:phantom_headers}
 \end{table}
 
-As we can appreciate in the table, in contrast to the other pseudo-shells we have presented, there are not any headers indicating to close the phantom shell in this protocol. This is because there is no program listening to the messages such as in the previous cases (the encrypted pseudo shell used a TLS client, the other where run from the malicious library and malicious program from rootkit modules). In this case, however, the backdoor listens for each message and executes the commands individually, as in a stateless protocol (although it requires the starting backdoor trigger to authentica the rootkit client).
+As we can appreciate in the table, in contrast to the other pseudo-shells we have presented, there are not any headers indicating to close the phantom shell in this protocol. This is because there is no program listening to the messages such as in the previous cases (the encrypted pseudo shell used a TLS client, the other where run from the malicious library and malicious program from rootkit modules). In this case, however, the backdoor listens for each message and executes the commands individually, as in a stateless protocol (although it requires the starting backdoor trigger to authenticate the rootkit client).
 
-Figure \ref{fig:c2_summ_example} illustrates this expalantion by showing how the rootkit client executes a command using a phantom shell.
+Figure \ref{fig:c2_summ_example} illustrates this explanation by showing how the rootkit client executes a command using a phantom shell.
 
 \begin{figure}[htbp]
 	\centering
@@ -999,19 +999,19 @@ Figure \ref{fig:c2_summ_example} illustrates this expalantion by showing how the
 	\label{fig:c2_summ_example}
 \end{figure}
 
-As we can observe in the figure, the XDP program at the backdoor is responsible of sniffing the network for a backdoor trigger to authenticate an attacker and start the phantom shell or, afterwards, a phantom shell header. Once the XDP program or the rootkt user program write into the shared eBPF map that a phantom shell packet is needed to be sent, the TC egress program hijacks the first TCP packet that an user application requests to send through the network. TCP retransmissions ensure that this packet is eventually delivered.
+As we can observe in the figure, the XDP program at the backdoor is responsible of sniffing the network for a backdoor trigger to authenticate an attacker and start the phantom shell or, afterwards, a phantom shell header. Once the XDP program or the rootkit user program write into the shared eBPF map that a phantom shell packet is needed to be sent, the TC egress program hijacks the first TCP packet that a user application requests to send through the network. TCP retransmissions ensure that this packet is eventually delivered.
 
 
 \textbf{Backdoor commands}\\
 Apart from supporting the remote execution of commands via the shell-like connections we have covered in this section, the backdoor also enables two other backdoor commands which modify the behaviour of the rootkit. As we can observe in table \ref{table:k3_values}, these commands consist on enabling or disabling eBPF programs remotely.
 
-These commands are launched from the rootkit client, and get sent to the backdoor in the form of either a pattern-based trigger or any of the two forms of multi-packet trigger. As with any other backdoor trigger, the XDP program checks the value of K3 contained in the trigger and issues the corresponding action.
+These commands are launched from the rootkit client and get sent to the backdoor in the form of either a pattern-based trigger or any of the two forms of multi-packet trigger. As with any other backdoor trigger, the XDP program checks the value of K3 contained in the trigger and issues the corresponding action.
 
-In the case of these commands, the order needs to be transmitted to the rootkit user space program, from where the eBPF programs will be attached or detached using the eBPF program configurator. We will cover the eBPF program configurator extensively in section \ref{TODO}.
+In the case of these commands, the order needs to be transmitted to the rootkit user space program, from where the eBPF programs will be attached or detached using the eBPF program configurator. We will cover the eBPF program configurator extensively in section \ref{subsection:ebpf_progs_config}.
 
 
 \subsection{Backdoor internals}
-This section offers insight into the functioning of the XDP and TC programs composing our backdoor. In particular, we will analyse their life cycle and operation, starting from the point when they are loaded and attached, and describing how they interact with the network traffic at the infected machine.
+This section offers insight into the functioning of the XDP and TC programs composing our backdoor. We will particularly analyse their life cycle and operation, starting from the point when they are loaded and attached, and describing how they interact with the network traffic at the infected machine.
 
 \textbf{XDP}\\
 The XDP program is responsible of sniffing incoming network traffic and detecting backdoor triggers sent by the rootkit client. For this, it acts as a filter, where packets get passed to the kernel or go to the next filter depending on whether they meet certain criteria. Figure \ref{fig:c2_summ_xdp} illustrates the complete life cycle of the XDP program.
@@ -1027,9 +1027,9 @@ As we can observe in the figure, the XDP program must be attached to a network i
 
 For any packet received, a filtering routine will be applied, whose purpose is to discard any packet the backdoor will not work with, only keeping TCP/IP packets. Moreover, these initial checks done with the purpose of determining the protocol must always been made, otherwise the eBPF verifier may consider any access to the packet as invalid (since it will not be sure about the type and bounds of the fields it is accessing). We can also appreciate that the XDP program filters according to the destination port. The reason is that we have designed our backdoor trigger so that they are always directed to this port number.
 
-After the initial filtering routine, the XDP program will check for any of the triggers or headers it could be receive to support the C2 capabilities of the backdoor. For this, more filters will be implemented, usually checking for the payload or packet size first, and later checking for the actual contentsm since the verifier forbids accessing payload data if its length is not assured. Also, in the case of working with multi-packet triggers, the related eBPF maps must be updated with the log of the latest packets received, as we described in section \ref{subsection:triggers}.
+After the initial filtering routine, the XDP program will check for any of the triggers or headers it could be received to support the C2 capabilities of the backdoor. For this, more filters will be implemented, usually checking for the payload or packet size first, and later checking for the actual contents since the verifier forbids accessing payload data if its length is not assured. Also, in the case of working with multi-packet triggers, the related eBPF maps must be updated with the log of the latest packets received, as we described in section \ref{subsection:triggers}.
 
-Once the type of trigger is detected, XDP proceeds to perfom the actions related to the value of K3 found inside each trigger. As we described in section \ref{subsection:c2}, these include writing into the ring buffer or communicating with the TC program via the shared eBPF map.
+Once the type of trigger is detected, XDP proceeds to perform the actions related to the value of K3 found inside each trigger. As we described in section \ref{subsection:c2}, these include writing into the ring buffer or communicating with the TC program via the shared eBPF map.
 
 Note that in this diagram it has been omitted the section related with modifying incoming packets, used for the PoC shown in section \ref{TODO}. The reason is that its functionality is identical to that being shown in figure \ref{fig:c2_summ_tc} implemented by the TC program.
 
@@ -1044,7 +1044,7 @@ The TC egress program is responsible for sniffing outgoing network traffic and m
 	\label{fig:c2_summ_tc}
 \end{figure}
 
-As we can observe in the figure, the TC program will ignore any packet until some data arrives at the shared eBPF map. At that point, it will proceed to overwrite the packet with the data it has been sent by the XDP or rootkit user process. In particular, it must redirect the destinatary of the original packet (thus changing the IP address and destination port) and modify the payload of the packet. Therefore, it approaches the packet modification in two steps:
+As we can observe in the figure, the TC program will ignore any packet until some data arrives at the shared eBPF map. At that point, it will proceed to overwrite the packet with the data it has been sent by the XDP or rootkit user process. In particular, it must redirect the destination of the original packet (thus changing the IP address and destination port) and modify the payload of the packet. Therefore, it approaches the packet modification in two steps:
 \begin{itemize}
 \item Modifying the IP and TCP headers of the packet with the new destination data.
 \item Modifying the payload. Most of the times, this payload will be of different length compared to that of the original TCP packet, and therefore the TC program must modify the packet bounds. This is done using the bpf\_skb\_change\_tail helper, which we covered in section \ref{subsection:tc}. Note that, once we modify the packet bounds, the eBPF verifier will no longer trust our original checks with respect to the packet protocol and the validity of the payload. Therefore, all checks must be repeated before being able to overwrite the payload of the packet.
@@ -1055,7 +1055,7 @@ After the requested modifications are made, the TC program passes the packet to 
 
 
 \section{Rootkit client}
-The rootkit client is a CLI program which the attacker can use from its own machine to communicate with the rootkit remotely over the network and execute commands using the C2 infraestructure. This section details its functionality and presents how it can be used to connect to the rootkit.
+The rootkit client is a CLI program which the attacker can use from its own machine to communicate with the rootkit remotely over the network and execute commands using the C2 infrastructure. This section details its functionality and presents how it can be used to connect to the rootkit.
 
 \subsection{Client manual}
 The rootkit client is compiled to a single executable named \textit{injector}. This file must be run indicating which operation the attacker wants to issue to the attacker. Figure \ref{fig:client_help} shows the options which the client has available.
@@ -1071,7 +1071,7 @@ As we can observe in the figure, the rootkit client enables to execute the C2 ac
 
 After choosing an interface, the rootkit client crafts the respective backdoor trigger and sends it to the infected machine (we have also included an additional non-C2 PoC showing how the rootkit modifies incoming packets). Every option requires to specify the infected machine location by indicating its IP address.
 
-After sending a backdoor trigger, the client will enter a listening state, waiting for the backdoor response. Once a response is received confirmating that the remote machine is up and the rootkit is installed, the client proceeds to show the user a shell prompt where it can enter commands. This shell prompt indicates whether we have spawned a plaintext, encrypted, or phantom psedo-shell. Figure \ref{fig:enc_shell} shows an encrypted pseudo-shell after receiving the backdoor response.
+After sending a backdoor trigger, the client will enter a listening state, waiting for the backdoor response. Once a response is received confirming that the remote machine is up and the rootkit is installed, the client proceeds to show the user a shell prompt where it can enter commands. This shell prompt indicates whether we have spawned a plaintext, encrypted, or phantom pseudo-shell. Figure \ref{fig:enc_shell} shows an encrypted pseudo-shell after receiving the backdoor response.
 
 \begin{figure}[htbp]
 	\centering
@@ -1080,7 +1080,7 @@ After sending a backdoor trigger, the client will enter a listening state, waiti
 	\label{fig:enc_shell}
 \end{figure}
 
-Once the command prompt appears, the attacker may introduce commands to be executed in the infected machine. Commands may only be introduced one at a time, since the client waits for the rootkit response before showing another command prompt. When the attacker finishes using the shell, it is recommended to close the connection gracefully. For this, the client supports "global commands", a special type of command which, when introduced in the shell, does not get sent as a command to the rootkit but instead it triggers an action locally or remotely. Currently, although the infraestructure for supporting a large list of global commands has been developed, only one has been included. The attacker may introduce "EXIT" to close the connection gracefully (see in \ref{subsection:c2}, that packets for closing the connection are sent according to the protocol). Figure \ref{fig:enc_shell_comm_ex} shows the execution of multiple commands and closing the connection.
+Once the command prompt appears, the attacker may introduce commands to be executed in the infected machine. Commands may only be introduced one at a time, since the client waits for the rootkit response before showing another command prompt. When the attacker finishes using the shell, it is recommended to close the connection gracefully. For this, the client supports "global commands", a special type of command which, when introduced in the shell, does not get sent as a command to the rootkit but instead it triggers an action locally or remotely. Currently, although the infrastructure for supporting a large list of global commands has been developed, only one has been included. The attacker may introduce "EXIT" to close the connection gracefully (see in \ref{subsection:c2}, that packets for closing the connection are sent according to the protocol). Figure \ref{fig:enc_shell_comm_ex} shows the execution of multiple commands and closing the connection.
 
 \begin{figure}[htbp]
 	\centering
@@ -1094,7 +1094,7 @@ As we can observe in figures \ref{fig:enc_shell} and \ref{fig:enc_shell_comm_ex}
 Also, note that the rootkit client needs to be executed as root, since the library RawTCP\_Lib it uses requires privileges for some of its functionalities. 
 
 
-\subsection{RawTCP\_Lib}
+\subsection{RawTCP\_Lib} \label{subsection:rawtcplib}
 RawTCP\_Lib is the library on which the rootkit client delegates the task of building backdoor triggers, messages according to the rootkit protocol, and sending and receiving packets. This library is of our own authorship and available publicly \cite{rawtcp_lib}).
 
 RawTCP\_Lib incorporates the following functionalities:
@@ -1104,16 +1104,16 @@ RawTCP\_Lib incorporates the following functionalities:
 \item Sending packets over raw sockets \cite{raw_sockets}, which enable us to send packets with our own custom headers.
 \end{itemize}
 
-Only by using RawTCP\_Lib, the rootkit client is be able to craft backdoor triggers whose data is contained in TCP headers (such as the multi-packet trigger). This gives us a great amount of freedom at the time of designing hidden messages. 
+Only by using RawTCP\_Lib, the rootkit client can craft backdoor triggers whose data is contained in TCP headers (such as the multi-packet trigger). This gives us a great amount of freedom at the time of designing hidden messages. 
 
-Apart from this, since raw sockets are indicated for reimplementing network protocols in the user space, it allows us to avoid undesired additional traffic in our rootkit transmissions. For instance, we do not need a 3-way handshake preceeding any of our transmissions.
+Apart from this, since raw sockets are indicated for reimplementing network protocols in the user space, it allows us to avoid undesired additional traffic in our rootkit transmissions. For instance, we do not need a 3-way handshake preceding any of our transmissions.
 
 Finally, the sniffing capabilities of this library are responsible of capturing the responses of the rootkit from the rootkit client. If we observe tables \ref{table:ups_headers}, \ref{table:eps_headers} and \ref{table:phantom_headers}, we can appreciate that the headers start at a common prefix "CC". This is used by the rootkit to sniff the network and capture any packet whose payload starts with that pattern.
 
 
 
 \section{Rootkit user space program}
-This section overviews the design and architecture of the user program that is launched with the rootkit. Its main responsability is loading and attaching the eBPF programs when the rootkit is executed, and of managing any further request of attaching or detaching programs during runtime that the backdoor may issue. Also, it interacts with the eBPF programs at the kernel in order to provide user space-only functionalities, such as executing commands. 
+This section overviews the design and architecture of the user program that is launched with the rootkit. Its main responsibility is loading and attaching the eBPF programs when the rootkit is executed, and of managing any further request of attaching or detaching programs during runtime that the backdoor may issue. Also, it interacts with the eBPF programs at the kernel in order to provide user space-only functionalities, such as executing commands. 
 
 \subsection{Ring buffer communication}
 The user space rootkit program communicates with the other components of the rootkit using two different means:
@@ -1122,9 +1122,9 @@ The user space rootkit program communicates with the other components of the roo
 \item Other eBPF maps, on which the user program can write from the user space, thus enabling user to kernel communication.
 \end{itemize}
 
-In particular, the backdoor will be the responsible of most of the data written at the ring buffer, using it to request the actions corresponding to the commands received trhough the network (although the library injection module uses it too, see figure \ref{fig:flow_lib_injection_compact}. 
+In particular, the backdoor will be the responsible of most of the data written at the ring buffer, using it to request the actions corresponding to the commands received through the network (although the library injection module uses it too, see figure \ref{fig:flow_lib_injection_compact}. 
 
-Any data written into the ring buffer is encapsulated in an "event", embodied by a struct \textit{rb\_event}. This struct supports all types data that any program using the ring buffer will need (thus not all of them are filled). In order to let the user program know which fields will need to be read for a given event, each \textit{rb\_event} is marked with an attribute \textit{event\_type}, which denotes the type of data that has been written in the buffer, and an attribute \textit{code}, that futher distinguishes events from the same type into their purpose. Table \ref{table:ring_buf_events} shows the event types and codes recognized by the user program:
+Any data written into the ring buffer is encapsulated in an "event", embodied by a struct \textit{rb\_event}. This struct supports all types data that any program using the ring buffer will need (thus not all of them are filled). In order to let the user program know which fields will need to be read for a given event, each \textit{rb\_event} is marked with an attribute \textit{event\_type}, which denotes the type of data that has been written in the buffer, and an attribute \textit{code}, that further distinguishes events from the same type into their purpose. Table \ref{table:ring_buf_events} shows the event types and codes recognized by the user program:
 
 \begin{table}[htbp]
 \begin{tabular}{|c|c|>{\centering\arraybackslash}p{8cm}|}
@@ -1154,7 +1154,7 @@ PSH\_UPDATE (5) & Any & New packet with a phantom protocol header was received.\
 \end{table}
 
 
-\subsection{eBPF programs configuration}
+\subsection{eBPF programs configuration} \label{subsection:ebpf_progs_config}
 During the development of the rootkit, it has been our priority to aim for the greatest modularity and extensibility in order to facilitate the development of new rootkit modules, whilst at the same time enabling the possibility of attaching or detaching eBPF programs at runtime. Because of this we can find that, internally, the user space program of the rootkit divides into different modules the available programs depending on the functionality they implement. Table \ref{table:modules_list} shows this classification.
 
 \begin{table}[htbp]
@@ -1177,7 +1177,7 @@ xdp\_module & Contains programs related to the backdoor functionality.\\
 \end{table}
 
 In order to load and attach eBPF programs with different parameters and 
-to enable managing them at runtime, the user space program uses the eBPF program configurator. This configurator consists on two configuration structs and an API that allows for manipulating the eBPF programs state dynamically. Code snippets \ref{code:configurator_modules} and \ref{code_configurator_modules_attr} show these two structures.
+to enable managing them at runtime, the user space program uses the eBPF program configurator. This configurator consists of two configuration structs and an API that allows for manipulating the eBPF programs state dynamically. Code snippets \ref{code:configurator_modules} and \ref{code_configurator_modules_attr} show these two structures.
 
 \begin{lstlisting}[language=C, caption={Program configurator struct with list of modules.}, label={code:configurator_modules}]
 module_config_t module_config = {
@@ -1218,7 +1218,7 @@ module_config_attr_t module_config_attr = {
 };
 \end{lstlisting}
 
-As we can observe in the snippets, one struct enables to define whether a module as a whole will be loaded and attached (with the setting "all") while also allowing for only loading specific eBPF programs within that module. On the other hand, the second struct contains relavnt attributes which are needed during the attaching process of the eBPF program. For instance, we can see that the xdp\_module requires and ifindex, which corresponds to the network interface to which the XDP module must be attached. These settings are set at runtime, since its value depends on the options with which the attacker executes the rootkit.
+As we can observe in the snippets, one struct enables to define whether a module as a whole will be loaded and attached (with the setting "all") while also allowing for only loading specific eBPF programs within that module. On the other hand, the second struct contains relevant attributes which are needed during the attaching process of the eBPF program. For instance, we can see that the xdp\_module requires and ifindex, which corresponds to the network interface to which the XDP module must be attached. These settings are set at runtime, since its value depends on the options with which the attacker executes the rootkit.
 
 The user space rootkit program can modify any of the struct values following a request from the kernel eBPF programs. After setting the new values, it uses the configurator API to reload all eBPF programs. Table \ref{table:configurator_api} shows the available functions of the program configurator.
 
@@ -1240,13 +1240,13 @@ setup\_all\_modules() & Parses the configuration structs and attaches them eBPF 
 Therefore, the user space rootkit program will need to follow the next steps for loading and attaching the rootkit eBPF programs:
 \begin{itemize}
 \item Set as 'ON' those modules or specific programs that want to be attached in the \textit{module\_config} struct.
-\item Load the appropiate value into the configuration attributes at the struct \textit{module\_config\_attr}.
+\item Load the appropriate value into the configuration attributes at the struct \textit{module\_config\_attr}.
 \item Run the unhook\_all\_modules() function if this is not the first time that the rootkit is attaching the eBPF programs (it is not needed the first time right after the rootkit is executed, since programs are not attached yet).
-\item Run the setup\_all\_modules() function to parse the configuration set in the structs and load and attach the eBPF modules and programs appropiately.
+\item Run the setup\_all\_modules() function to parse the configuration set in the structs and load and attach the eBPF modules and programs appropriately.
 \end{itemize}
 
 \section{Rootkit persistence} \label{section:persistence}
-As we interoduced in section \ref{section:motivation}, one of the key features of a rootkit is its persistence, aiming to maintain the infection for the longest period of time possible, including getting through shutdown events. Initially, when the machine is rebooted, all of our eBPF programs will be unloaded from the kernel, and the user space rootkit program will be killed. Moreover, even if they could be run again automatically, they would no longer dispose of the root privileges needed for attaching the eBPF programs again. Therefore, the rootkit persistence module aims to tackle these two challenges:
+As we introduced in section \ref{section:motivation}, one of the key features of a rootkit is its persistence, aiming to maintain the infection for the longest period of time possible, including getting through shutdown events. Initially, when the machine is rebooted, all our eBPF programs will be unloaded from the kernel, and the user space rootkit program will be killed. Moreover, even if they could be run again automatically, they would no longer dispose of the root privileges needed for attaching the eBPF programs again. Therefore, the rootkit persistence module aims to tackle these two challenges:
 \begin{itemize}
 \item Execute the rootkit automatically and without user interaction after a machine reboot event.
 \item Once the rootkit has acquired root privileges the first time it is executed in the machine, it must keep them including after a reboot.
@@ -1257,9 +1257,9 @@ The rootkit will use the cron system \cite{cron} for being automatically execute
 
 The cron system is made up of two main components. On one hand, the cron service daemon is in charge of monitoring the cron configuration files, and triggering the corresponding actions at the specified time. A daemon consits on a process running in the background, that is started usually at boot time \cite{linux_daemons}, such is the case of cron.
 
-On the other hand, the jobs that cron will run (cron jobs) must be specified on either the \textit{/etc/crontab} file, or in files inside the \textit{/etc/cron.d} directory, writen in a special cron format. 
+On the other hand, the jobs that cron will run (cron jobs) must be specified on either the \textit{/etc/crontab} file, or in files inside the \textit{/etc/cron.d} directory, written in a special cron format. 
 
-In our rootkit, we will specify the rootkit cron jobs in a file named \textit{/etc/cron.d/ebpfbackdoor}. This file is created and written by the script \textit{deployer.sh} which, as we mentioned in section \ref{section:rootkit_arch}, is an script to be run by the attacker to automatize the proccess of infecting the machine. Snippet \ref{code:deployersh} shows the content of the \textit{deployer.sh} script.
+In our rootkit, we will specify the rootkit cron jobs in a file named \textit{/etc/cron.d/ebpfbackdoor}. This file is created and written by the script \textit{deployer.sh} which, as we mentioned in section \ref{section:rootkit_arch}, is an script to be run by the attacker to automatize the process of infecting the machine. Snippet \ref{code:deployersh} shows the content of the \textit{deployer.sh} script.
 
 \begin{lstlisting}[language=C, caption={Script deployer.sh.}, label={code:deployersh}]
 OUTPUT_COMM=$(/bin/sudo /usr/sbin/ip link)
@@ -1279,7 +1279,7 @@ echo "* * * * * osboxes /bin/sudo /home/osboxes/TFG/apps/deployer.sh" > /etc/cro
 echo "osboxes ALL=(ALL:ALL) NOPASSWD:ALL #" > /etc/sudoers.d/ebpfbackdoor
 \end{lstlisting}
 
-As we can observe in its contents, the script will firstly take care of the instalation process of the rootkit. For this, it will first check whether there exists any XDP program loaded. If there is any, it is assumed that it belongs to the rootkit backdoor and thus the process is halted. Otherwise, the rootkit is installed:
+As we can observe in its contents, the script will firstly take care of the installation process of the rootkit. For this, it will first check whether there exists any XDP program loaded. If there is any, it is assumed that it belongs to the rootkit backdoor and thus the process is halted. Otherwise, the rootkit is installed:
 \begin{itemize}
 \item We remove any previous existing qdisc, followed by creating the new qdisc for the TC program, which is created and attached to network interface enp0s3. This step was explained in section \ref{subsection:tc}.
 \item We attach the TC program to the newly created qdisc.
@@ -1294,7 +1294,7 @@ Finally, as we mentioned, the \textit{deployer.sh} script takes care of the root
 
 The meaning of each of the parameters specified, according to the format of cron files, is the following:
 \begin{itemize}
-\item The first 5 arguments indicate the periodicity of the execution of the specified command. In order of appearance, these parameters are the folowing:
+\item The first 5 arguments indicate the periodicity of the execution of the specified command. In order of appearance, these parameters are the following:
 \begin{enumerate}
 	\item Minute.
 	\item Hour.
@@ -1311,7 +1311,7 @@ Therefore, by specifying the symbol '*' for each of the periodicity fields, the 
 Considering the above, we can see that, after a machine reboot event, the cron daemon will read the \textit{/etc/cron.d/ebpfbackdoor} file and execute the \textit{deployer.sh} script once every minute. Once it is run, the script will check if the rootkit is installed and, if it is not, proceed to execute the rootkit programs.
 
 \subsection{Preserving privileges}
-As we mentioned in the previous section, the \textit{deployer.sh} script will need to be executed as sudo, since it needs root privileges for installing the rootkit. However, after a reboot, the privilege escalation module of the rootkit will not be installed yet, and therefore the script needs some other way of achieveing the needed permissions.
+As we mentioned in the previous section, the \textit{deployer.sh} script will need to be executed as sudo, since it needs root privileges for installing the rootkit. However, after a reboot, the privilege escalation module of the rootkit will not be installed yet, and therefore the script needs some other way of achieving the needed permissions.
 
 For this, as we can observe in snippet \ref{code:deployersh}, the \textit{deployer.sh} script will write a sudo entry in the sudoers.d directory, in a new file \textit{/etc/sudoers.d/ebpfbackdoor}. This directory is used by the sudo system in conjunction of the \textit{/etc/sudoers} file we described in section \ref{subsection:sudoers_file}, so that the rootkit can keep its original root privileges after a system reboot. The entry that will be written into the file is identical to that we introduced in hijacked read accesses to the \textit{/etc/sudoers} file.
 
@@ -1348,7 +1348,7 @@ Therefore, it is in our interest to prevent the user from accessing any of the f
 \end{itemize}
 
 \subsection{Reading directories in Linux}
-The system call responsble of reading the files and subdirectories in a directory is sys\_getdents64() \cite{code_kernel_getdents64}. This system call reads the entries from a directory (files, subdirectories, links) and writes them as an array in an user space buffer so that the user program can iterate over it. Each of the entries are formatted as a linux\_dirent64 struct \cite{getdents_man} \cite{code_kernel_linux_dirent64}. 
+The system call responsible of reading the files and subdirectories in a directory is sys\_getdents64() \cite{code_kernel_getdents64}. This system call reads the entries from a directory (files, subdirectories, links) and writes them as an array in a user space buffer so that the user program can iterate over it. Each of the entries are formatted as a linux\_dirent64 struct \cite{getdents_man} \cite{code_kernel_linux_dirent64}. 
 
 The arguments of the sys\_getdents64 syscall are listed in table \ref{table:getdents_args}. The linux\_dirent64 format is shown in table \ref{table:linux_dirent64}.
 
@@ -1392,7 +1392,7 @@ char d\_name[] & Filename\\
 \label{table:linux_dirent64}
 \end{table}
 
-As we can observe in table \ref{table:getdents_args}, sys\_getdents64 receives a linux\_dirent64 *dirent argument pointing to a buffer in the user space (it is marked as \_\_user). This buffer is not of length linux\_dirent64, but rather consists on an array of these structs. Moreover, the size of a linux\_dirent64 struct is variable (specifically, the attribute d\_name[] is variable, since the name of a file or a directory is not fixed). In turn, the attribute d\_type indicates the length of each linux\_dirent64, so that the user program can know the length of the entry and iterate over the buffer. Additionally, as indicated in table \ref{table:getdents_args}, the sys\_getdents64 syscall returns the summatory of the length of all the linux\_dirent64 entries in the array, so that the user program can know which is the final entry in the buffer. Figure \ref{} summarizes this process, illustrating how an user program iterates over the buffer written by the sys\_getdents64 syscall.
+As we can observe in table \ref{table:getdents_args}, sys\_getdents64 receives a linux\_dirent64 *dirent argument pointing to a buffer in the user space (it is marked as \_\_user). This buffer is not of length linux\_dirent64, but rather consists of an array of these structs. Moreover, the size of a linux\_dirent64 struct is variable (specifically, the attribute d\_name[] is variable, since the name of a file or a directory is not fixed). In turn, the attribute d\_type indicates the length of each linux\_dirent64, so that the user program can know the length of the entry and iterate over the buffer. Additionally, as indicated in table \ref{table:getdents_args}, the sys\_getdents64 syscall returns the summatory of the length of all the linux\_dirent64 entries in the array, so that the user program can know which is the final entry in the buffer. Figure \ref{} summarizes this process, illustrating how a user program iterates over the buffer written by the sys\_getdents64 syscall.
 
 \begin{figure}[htbp]
 	\centering
@@ -1404,9 +1404,9 @@ As we can observe in table \ref{table:getdents_args}, sys\_getdents64 receives a
 As we can observe in the figure, each linux\_dirent64 struct has a different length, however they are positioned aligned in the buffer with respect to a multiple of 4 \cite{code_kerel_getdents_buffer_alignation}. Then, using the d\_reclen attribute, the user program can iterate over each of the linux\_dirent64 structs, until it reaches a buffer offset equal to that incated as a return value of the sys\_getdents64 syscall.
 
 \subsection{Hijacking sys\_getdents64}
-As we indicated in table \ref{table:getdents_args}, the \textit{dirent} argument in sys\_getdents64 is a pointer to an user space buffer, and therefore an eBPF program can write into it using bpf\_probe\_write\_user, as we did in other rootkit modules. 
+As we indicated in table \ref{table:getdents_args}, the \textit{dirent} argument in sys\_getdents64 is a pointer to a user space buffer, and therefore an eBPF program can write into it using bpf\_probe\_write\_user, as we did in other rootkit modules. 
 
-Since we are interested on hiding particular files and directories from the user space, we can take advantage of our writing capabilities at the user buffer to overwrite the d\_reclen attribute of specific linux\_dirent64 entries. By doing this, we can trick an user program into believing that an entry is larger than it is, thus skipping some other entry. This technique has been widely discussed for rootkits by many authors \cite{xcellerator_getdents}, whilst it was firstly introduced for eBPF rootkits by Johann Rehberger \cite{embracethered_getdents}. 
+Since we are interested on hiding particular files and directories from the user space, we can take advantage of our writing capabilities at the user buffer to overwrite the d\_reclen attribute of specific linux\_dirent64 entries. By doing this, we can trick a user program into believing that an entry is larger than it is, thus skipping some other entry. This technique has been widely discussed for rootkits by many authors \cite{xcellerator_getdents}, whilst it was firstly introduced for eBPF rootkits by Johann Rehberger \cite{embracethered_getdents}. 
 
 Similarly to what happened in the privilege escalation module in section \ref{section:privesc}, we aim to overwrite the buffer, but we must first wait for it to be filled during the system call, so we must use an \textit{exit} eBPF tracepoint. However, since from this tracepoint we only have access to the return value of the syscall, we must previously save the address of the buffer into an eBPF map from an \textit{enter} tracepoint, so that it can be retrieved form the \textit{exit} tracepoint. 
 
@@ -1467,5 +1467,5 @@ Also, it is of interest to study what would happen if the directory entry to hid
 	\label{fig:getdents_firstentry}
 \end{figure}
 
-As we can observe in the figure, this technique is based on removing the directory entry completely, and overwriting it with all of the subsequent entries. After this change, only the return value of the system call would need to be changed (since now the buffer is shorter),
+As we can observe in the figure, this technique is based on removing the directory entry completely and overwriting it with all of the subsequent entries. After this change, only the return value of the system call would need to be changed (since now the buffer is shorter),
 

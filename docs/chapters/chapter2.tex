@@ -1,5 +1,5 @@
 \chapter{Background}
-This chapter is dedicated to an study of all the background needed for our research into offensive eBPF applications. Although our rootkit has been developed using a library that will provide us with a layer of abstraction over the underlying operations, this background is needed to understand how eBPF is embedded in the kernel and which capabilities and limits we can expect to achieve with it.
+This chapter is dedicated to a study of all the background needed for our research into offensive eBPF applications. Although our rootkit has been developed using a library that will provide us with a layer of abstraction over the underlying operations, this background is needed to understand how eBPF is embedded in the kernel and which capabilities and limits we can expect to achieve with it.
 
 Firstly, we will analyse the origins of the eBPF technology, understanding what it is and how it works, and discuss the reasons why it is a necessary component of the Linux kernel today. Afterwards, we will cover the main features of eBPF in detail and discuss the security features incorporated in the system, together with an study of the currently existing alternatives for developing eBPF applications.
 
@@ -10,7 +10,7 @@ Finally, we will offer an overview into multiple aspects of the Linux system (me
 In this section we will detail the origins of eBPF in the Linux kernel. By offering us background into the earlier versions of the system, the goal is to acquire insight on the design decisions included in modern versions of eBPF.
 
 \subsection{Introduction to the BPF system}
-Nowadays eBPF is not officially considered to be an acronym any more \cite{ebpf_io}, but it remains largely known as "extended Berkeley Packet Filters", given its roots in the Berkeley Packet Filter (BPF) technology, now known as classic BPF.
+Nowadays eBPF is not officially considered to be an acronym anymore \cite{ebpf_io}, but it remains largely known as "extended Berkeley Packet Filters", given its roots in the Berkeley Packet Filter (BPF) technology, now known as classic BPF.
 
 BPF was introduced in 1992 by Steven McCanne and Van Jacobson in the paper "The BSD Packet Filter: A New Architecture for User-level Packet Capture" \cite{bpf_bsd_origin}, as a new filtering technology for network packets in the BSD platform. It was first integrated in the Linux kernel on version 2.1.75 \cite{ebpf_history_opensource}.
 
@@ -30,7 +30,7 @@ In a technical level, BPF comprises both the BPF filter programs developed by th
 \begin{itemize}
 \item \textbf{An accumulator register}, used to store intermediate values of operations.
 \item \textbf{An index register}, used to modify operand addresses, it is usually incorporated to optimize vector operations \cite{index_register}.
-\item \textbf{An scratch memory store}, a temporary storage.
+\item \textbf{A scratch memory store}, a temporary storage.
 \item \textbf{A program counter}, used to point to the next machine instruction to execute in a filter program.
 \end{itemize}
 
@@ -74,7 +74,7 @@ BITS & 16 & 8 & 8 & 32\\
 \label{table:bpf_inst_format}
 \end{table}
 
-Table \ref{table:bpf_inst_format} shows the format of a BPF bytecode instruction. As it can be observed, it is a fixed-length 64 bit instruction composed of:
+Table \ref{table:bpf_inst_format} shows the format of a BPF bytecode instruction. As it can be observed, it is a fixed-length 64-bit instruction composed of:
 \begin{itemize}
 \item An \textbf{opcode}, similar to assembly opcode, it indicates the operation to be executed.
 \item Field \textbf{jt} indicates the offset to the next instruction to jump in case a condition is evaluated as \textit{true}.
@@ -86,7 +86,7 @@ Figure \ref{fig:bpf_instructions} shows how BPF instructions are defined accordi
 \begin{itemize}
 \item Rows 1-4 are \textbf{load instructions}, copying the addressed value into the index or accumulator register.
 \item Rows 4-6 are \textbf{store instructions}, copying the accumulator or index register into the scratch memory store.
-\item Rows 7-11 are \textbf{jump instructions}, changing the program counter register. These are usually present on each node of the CFG, and evaluate whether the condition to be evaluated is true or not.
+\item Rows 7-11 are \textbf{jump instructions}, changing the program counter register. These are usually present on each node of the CFG and evaluate whether the condition to be evaluated is true or not.
 \item Rows 12-19 and 21-22 are \textbf{arithmetic and miscellaneous instructions}, performing operations usually needed during the program execution.
 \item Row 20 is a \textbf{return instruction}, it is positioned in the final end of the CFG, and indicate whether the filter accepts the packet (returning true) or otherwise rejects it (return false).
 \end{itemize}
@@ -98,7 +98,7 @@ Figure \ref{fig:bpf_instructions} shows how BPF instructions are defined accordi
 	\label{fig:bpf_instructions}
 \end{figure}
 
-The column \textit{addr modes} in figure \ref{fig:bpf_instructions} describes how the parameters of a BPF instruction are referenced depending on the opcode. The address modes are detailed in figure \ref{fig:bpf_address_mode}. As it can be observed, paremeters may consist of immediate values, offsets to memory positions or on the packet, the index register or combinations of the previous.
+The column \textit{addr modes} in figure \ref{fig:bpf_instructions} describes how the parameters of a BPF instruction are referenced depending on the opcode. The address modes are detailed in figure \ref{fig:bpf_address_mode}. As it can be observed, parameters may consist of immediate values, offsets to memory positions or on the packet, the index register or combinations of the previous.
 
 \begin{figure}[htbp]
 	\centering
@@ -108,7 +108,7 @@ The column \textit{addr modes} in figure \ref{fig:bpf_instructions} describes ho
 \end{figure}
 
 \subsection{An example of BPF filter with tcpdump}
-At the time, by filtering packets before they are handled by the kernel instead of using an user-level application, BPF offered a performance improvement between 10 and 150 times the state-of-the art technologies of the moment \cite{bpf_bsd_origin_bpf_page1}. Since then, multiple popular tools began to use BPF, such as the network tracing tool \textit{tcpdump} \cite{tcpdump_page}.
+At the time, by filtering packets before they are handled by the kernel instead of using a user-level application, BPF offered a performance improvement between 10 and 150 times the state-of-the art technologies of the moment \cite{bpf_bsd_origin_bpf_page1}. Since then, multiple popular tools began to use BPF, such as the network tracing tool \textit{tcpdump} \cite{tcpdump_page}.
 
 \textit{tcpdump} is a command-line tool that enables to capture and analyse the network traffic going through the system. It works by setting filters on a network interface, so that it shows the packets that are accepted by the filter. Still today, \textit{tcpdump} uses BPF for the filter implementation. Figure \ref{fig:bpf_tcpdump_example} shows an example of BPF code used by \textit{tcpdump} to implement a simple filter.
 
@@ -172,7 +172,7 @@ Figure \ref{fig:ebpf_architecture} offers an overview of the current eBPF archit
 \subsection{eBPF instruction set} \label{subsection:ebpf_inst_set}
 The eBPF update included a complete remodel of the instruction set architecture (ISA) of the BPF VM. Therefore, eBPF programs will need to follow the new architecture in order to be interpreted as valid and executed.
 
-Table \ref{table:ebpf_inst_format} shows the new instruction format for eBPF programs \cite{ebpf_inst_set}. As it can be observed, it is a fixed-length 64 bit instruction. The new fields are similar to x86\_64 assembly, incorporating the typically found immediate and offset fields, and source and destination registers \cite{8664_inst_set_specs}. Similarly, the instruction set is extended to be similar to the one typically found on x86\_64 systems, the complete list can be consulted in the official documentation \cite{ebpf_inst_set}.
+Table \ref{table:ebpf_inst_format} shows the new instruction format for eBPF programs \cite{ebpf_inst_set}. As it can be observed, it is a fixed-length 64-bit instruction. The new fields are similar to x86\_64 assembly, incorporating the typically found immediate and offset fields, and source and destination registers \cite{8664_inst_set_specs}. Similarly, the instruction set is extended to be similar to the one typically found on x86\_64 systems, the complete list can be consulted in the official documentation \cite{ebpf_inst_set}.
 %Should I talk about assembly or this more in detail?
 
 \begin{table}[htbp]
@@ -285,7 +285,7 @@ BPF\_MAP\_TYPE\_PROG\_ARRAY & Stores descriptors of eBPF programs\\
 \end{table}
 
 \subsection{The eBPF ring buffer} \label{subsection:bpf_ring_buf}
-eBPF ring buffers are a special kind of eBPF maps, providing a one-way directional communication system, going from an eBPF program in the kernel to an user space program that subscribes to its events.
+eBPF ring buffers are a special kind of eBPF maps, providing a one-way directional communication system, going from an eBPF program in the kernel to a user space program that subscribes to its events.
 
 %TODO DIAGRAM OF A TYPICAL RING BUFFER
 
@@ -302,7 +302,7 @@ COMMAND & ATTRIBUTES & DESCRIPTION\\
 \hline
 BPF\_MAP\_CREATE & Struct with map info as defined in table \ref{table:ebpf_map_struct} & Create a new map\\
 \hline
-BPF\_MAP\_LOOKUP\_ELEM & Map ID, and struct with key to search in the map & Get the element on the map with an specific key\\
+BPF\_MAP\_LOOKUP\_ELEM & Map ID, and struct with key to search in the map & Get the element on the map with a specific key\\
 \hline
 BPF\_MAP\_UPDATE\_ELEM & Map ID, and struct with key and new value & Update the element of an specific key with a new value\\
 \hline
@@ -365,7 +365,7 @@ bpf\_probe\_read\_kernel() & Attempt to safely read data at an specific kernel a
 \hline
 bpf\_trace\_printk() & Similarly to printk() in kernel modules, writes buffer in \/sys\/kernel\/debug\/tracing\/trace\_pipe\\
 \hline
-bpf\_get\_current\_pid\_tgid() & Get the process process id (PID) and thread group id (TGID)\\
+bpf\_get\_current\_pid\_tgid() & Get the process' Process Id (PID) and thread group id (TGID)\\
 \hline
 bpf\_get\_current\_comm() & Get the name of the executable\\
 \hline
@@ -383,12 +383,11 @@ bpf\_tail\_call() & Jump to another eBPF program preserving the current stack\\
 \end{table}
 
 
-% Is this the best title?
 \section{eBPF program types} \label{section:ebpf_prog_types}
 In the previous subsection \ref{subsection:bpf_syscall} we introduced the new types of eBPF programs that are supported and that we will be developing for our offensive analysis. In this section, we will analyse in greater detail how eBPF is integrated in the Linux kernel in order to support these new functionalities.
 
 \subsection{XDP} \label{subsection:xdp}
-eXpress Data Path (XDP) programs are a novel type of eBPF program that allows for the lowest-latency traffic filtering and monitoring in the whole Linux kernel. In order to load an XDP program, a bpf() syscall with the command BPF\_PROG\_LOAD and the program type BPF\_PROG\_TYPE\_XDP must be issued. 
+EXpress Data Path (XDP) programs are a novel type of eBPF program that allows for the lowest-latency traffic filtering and monitoring in the whole Linux kernel. In order to load an XDP program, a bpf() syscall with the command BPF\_PROG\_LOAD and the program type BPF\_PROG\_TYPE\_XDP must be issued. 
 
 These programs are directly attached to the Network Interface Controller (NIC) driver, and thus they can process the packet before any other module \cite{xdp_gentle_intro}.
 
@@ -450,7 +449,7 @@ Traffic Control (TC) programs are also indicated for networking instrumentation.
 
 With respect to how TC programs operate, the Traffic Control system in Linux is greatly complex and would require a complete section by itself. In fact, it was already a complete system before the appearance of eBPF. Full documentation can be found at \cite{tc_docs_complete}. For this document, we will explain the overall process needed to load a TC program \cite{tc_direct_action}:
 \begin{enumerate}
-\item The TC program defines a so-called queuing discipline (qdisc), a packet scheduler that issues packets in a First-In-First-Out (FIFO) order as soon as they are received. This qdisc will be attached to an specific network interface (e.g.: wlan0).
+\item The TC program defines a so-called queuing discipline (qdisc), a packet scheduler that issues packets in a First-In-First-Out (FIFO) order as soon as they are received. This qdisc will be attached to a specific network interface (e.g.: wlan0).
 \item Our TC eBPF program is attached to the qdisc. It will work as a filter, being run for every of the packets dispatched by the qdisc.
 \end{enumerate}
 
@@ -482,7 +481,7 @@ eBPF helper & DESCRIPTION\\
 \hline
 bpf\_l3\_csum\_replace() & Recomputes the network layer 3 (e.g.: IP) checksum of the packet.\\
 \hline
-bpf\_l4\_csum\_replace() & Recomputes the network layer 4 (e.g: TCP) checksum of the packet.\\
+bpf\_l4\_csum\_replace() & Recomputes the network layer 4 (e.g.: TCP) checksum of the packet.\\
 \hline
 bpf\_skb\_store\_bytes() & Write a data buffer into the packet.\\
 \hline
@@ -521,16 +520,16 @@ Also similarly, since tracepoints could be found in their \textit{enter} and \te
 In eBPF, a program can issue a bpf() syscall with the command BPF\_PROG\_LOAD and the program type BPF\_PROG\_TYPE\_KPROBE, specifying which is the function with the kprobe to attach to and an arbitrary function probe to call when it is hit. This function probe is defined by the user in the eBPF program submitted to the kernel.
 
 \subsection{Uprobes}
-Uprobes is the last of the main tracing technologies which has been become accessible to eBPF programs. They are the counterparts of Kprobes, allowing for tracing the execution of an specific instruction in the user space, instead of in the kernel. When the exeuction flow reaches a hooked instruction, a probe function is run. 
+Uprobes is the last of the main tracing technologies which has been become accessible to eBPF programs. They are the counterparts of Kprobes, allowing for tracing the execution of an specific instruction in the user space, instead of in the kernel. When the execution flow reaches a hooked instruction, a probe function is run. 
 
-For setting an uprobe on an specific instruction of a program, we need to know three components:
+For setting an uprobe on a specific instruction of a program, we need to know three components:
 \begin{itemize}
 \item The name of the program.
 \item The address of the function where the instruction is contained.
 \item The offset at which the specific instruction is placed from the start of the function.
 \end{itemize}
 
-Similarly to kprobes, uprobes have access to the parameters received by the hooked function. Also, the complementary uretprobes also exist, running the probe function once the hooked function returns.
+Similarly to kprobes, uprobes have access to the parameters received by the hooked function. Also, the complementary uretprobes exist too, running the probe function once the hooked function returns.
 
 In eBPF, programs can issue a bpf() syscall with the command BPF\_PROG\_LOAD and the program type BPF\_PROG\_TYPE\_UPROBE, specifying the function with the uprobe to attach to and an arbitrary function probe to call when it is hit. This function probe is also defined by the user in the eBPF program submitted to the kernel.
 
@@ -543,10 +542,10 @@ Nowadays, there exist multiple popular alternatives for writing and running eBPF
 \subsection{BCC}
 BPF Compiler Collection (BCC) is one of the first and well-known toolkits for eBPF programming available \cite{bcc_github}. It allows to include eBPF code into user programs. These programs are developed in python, and the eBPF code is embedded as a plain string. An example of a BCC program is included in %TODO ANNEX???
 
-Although BCC offers a wide range of tools to easy the development of eBPF programs, we found it not to be the most appropriate for our large-scale eBPF project. This was in particular due to the feature of eBPF programs being stored as a python string, which leads to difficult scalability, poor development experience given that programming errors are detected at runtime (once the python program issues the compilation of the string), and simply better features from competing libraries.
+Although BCC offers a wide range of tools to easy the development of eBPF programs, we found it not to be the most appropriate for our large-scale eBPF project. In particular, this was due to the feature of eBPF programs being stored as a python string, which leads to difficult scalability, poor development experience given that programming errors are detected at runtime (once the python program issues the compilation of the string), and simply better features from competing libraries.
 
 \subsection{Bpftool}
-bpftool is not a development framework like BCC, but one of the most relevant tools for eBPF program development. Some of its functionalities include:
+Bpftool is not a development framework like BCC, but one of the most relevant tools for eBPF program development. Some of its functionalities include:
 \begin{itemize}
 \item Loading eBPF programs.
 \item List running eBPF programs.
@@ -558,12 +557,12 @@ bpftool is not a development framework like BCC, but one of the most relevant to
 Although we will not be covering bpftool during our overview on the constructed eBPF rootkit, it was used extensively during the development and became a key tool for debugging eBPF programs, particularly to peek data at eBPF maps during runtime.
 
 \subsection{Libbpf}
-libbpf \cite{libbpf_github} is a library for loading and interacting with eBPF programs, which is currently maintained in the Linux kernel source tree \cite{libbpf_upstream}. It is one of the most popular frameworks to develop eBPF applications, both because it makes eBPF programming similar to common kernel development and because it aims at reducing kernel-version dependencies, thus increasing programs portability between systems \cite{libbpf_core}. During our research, however, we will not make use of this functionalities given that a portable program is not in our research goals.
+Libbpf \cite{libbpf_github} is a library for loading and interacting with eBPF programs, which is currently maintained in the Linux kernel source tree \cite{libbpf_upstream}. It is one of the most popular frameworks to develop eBPF applications, both because it makes eBPF programming similar to common kernel development and because it aims at reducing kernel-version dependencies, thus increasing programs portability between systems \cite{libbpf_core}. During our research, however, we will not make use of this functionalities given that a portable program is not in our research goals.
 
 As we discussed in section \ref{section:modern_ebpf}, eBPF programs are composed of both the eBPF code in the kernel and a user space program that can interact with it. With libbpf, the eBPF kernel program is developed in C (a real program, not a string later compiled as with BCC), while user programs are usually developed in C, Rust or GO. For our project, we will use the C version of libbpf, so both the user and kernel side of our rootkit will be developed in this language.
 
 % Cites in the following paragraph?
-When using libbpf with the C language, both the user-side and kernel eBPF program are compiled together using the Clang/LLVM compiler, translating C instructions into eBPF bytecode. As a clarification, Clang is the front-end of the compiler, translating C instructions into an intermediate form understandable by LLVM, whilst LLVM is the back-end compiling the intermediate code into eBPF bytecode. As it can be observed in figure \ref{fig:libbpf}, the result of the compilation is a single program, comprising the user-side which will launch a user process, the eBPF bytecode to be run in the kernel, and other structures libbpf generates about eBPF maps and other meta data. This program is encapsulated as an ELF file (a common executable format).
+When using libbpf with the C language, both the user-side and kernel eBPF program are compiled together using the Clang/LLVM compiler, translating C instructions into eBPF bytecode. As a clarification, Clang is the front-end of the compiler, translating C instructions into an intermediate form understandable by LLVM, whilst LLVM is the back end compiling the intermediate code into eBPF bytecode. As it can be observed in figure \ref{fig:libbpf}, the result of the compilation is a single program, comprising the user-side which will launch a user process, the eBPF bytecode to be run in the kernel, and other structures libbpf generates about eBPF maps and other meta data. This program is encapsulated as an ELF file (a common executable format).
 
 \begin{figure}[htbp]
 	\centering
@@ -572,9 +571,9 @@ When using libbpf with the C language, both the user-side and kernel eBPF progra
 	\label{fig:libbpf}
 \end{figure}
 
-Finally, we will overview one of the main functionalities of libbpf to simplify eBPF programming, namely the BPF skeleton. This is auto-generated code by libbpf whose aim is to simplify working with eBPF from the user-side program. As a summary, it parses the eBPF programs developed (which may be using different technologies such as XDP, kprobes, TC...) and the eBPF maps used, and as a result offers a simple set of functions for dealing with these programs from the user program. In particular, it allows for loading and unloading an specific eBPF program from user space at runtime.
+Finally, we will overview one of the main functionalities of libbpf to simplify eBPF programming, namely the BPF skeleton. This is auto-generated code by libbpf whose aim is to simplify working with eBPF from the user-side program. As a summary, it parses the eBPF programs developed (which may be using different technologies such as XDP, kprobes, TC...) and the eBPF maps used, and as a result offers a simple set of functions for dealing with these programs from the user program. In particular, it allows for loading and unloading a specific eBPF program from user space at runtime.
 
-Table \ref{table:libbpf_skel} describes the API offered by the BPF skeleton. Note that <name> is subtituted by the name of the program being compiled.
+Table \ref{table:libbpf_skel} describes the API offered by the BPF skeleton. Note that <name> is substituted by the name of the program being compiled.
 
 \begin{table}[htbp]
 \begin{tabular}{|c|>{\centering\arraybackslash}p{10cm}|}
@@ -584,7 +583,7 @@ Function name & Description\\
 \hline
 <name>\_\_open() & Parse the eBPF programs and maps.\\
 \hline
-<name>\_\_load() & Load the eBPF map in the kernel after its validation, create the maps. However the programs are not active yet.\\
+<name>\_\_load() & Load the eBPF map in the kernel after its validation, create the maps. However, the programs are not active yet.\\
 \hline
 <name>\_\_attach() & Activate the eBPF programs, attaching them to their corresponding parts in the kernel (e.g. kprobes to kernel functions).\\
 \hline
@@ -595,7 +594,7 @@ Function name & Description\\
 \label{table:libbpf_skel}
 \end{table}
 
-Note that the BPF skeleton also offers further granularity at the time of dealing with programs, so that individual programs can be loaded or attached instead of all simultaneously. This is the approach we will generally use in the development of our rootkit, as it will be explained in section \ref{TODO}.
+Note that the BPF skeleton also offers further granularity at the time of dealing with programs, so that individual programs can be loaded or attached instead of all simultaneously. This is the approach we will generally use in the development of our rootkit, as it will be explained in section \ref{subsection:ebpf_progs_config}.
 
 
 
@@ -639,7 +638,7 @@ Table \ref{table:ebpf_kernel_flags} is based on BCC's documentation, but the ful
 
 
 \subsection{Access control} \label{subsection:access_control}
-It must be noted that, similarly to kernel modules, loading an eBPF program requires privileged access in the system. In old kernel versions, this means either an user having full root permissions, or having the Linux capability \cite{ubuntu_caps} CAP\_SYS\_ADMIN. Therefore, there existed two main options:
+It must be noted that, similarly to kernel modules, loading an eBPF program requires privileged access in the system. In old kernel versions, this means either a user having full root permissions, or having the Linux capability \cite{ubuntu_caps} CAP\_SYS\_ADMIN. Therefore, there existed two main options:
 %TODO some words about capabilities
 \begin{itemize}
 \item \textbf{Privileged users} can load any kind of eBPF program and use any functionality.
@@ -669,7 +668,7 @@ CAP\_SYS\_ADMIN & Privileged eBPF. Includes iterating over eBPF maps, and CAP\_B
 \label{table:ebpf_caps_current}
 \end{table}
 
-Therefore, eBPF network programs usually require both CAP\_BPF and CAP\_NET\_ADMIN, whilst tracing programs require CAP\_BPF and CAP\_PERFMON. CAP\_SYS\_ADMIN still remains as the (non-preferred) capability to assign to eBPF programs with complete access in the system.
+Therefore, eBPF network programs usually require both CAP\_BPF and CAP\_NET\_ADMIN, whilst tracing programs require CAP\_BPF and CAP\_PERFMON. CAP\_SYS\_ADMIN remains as the (non-preferred) capability to assign to eBPF programs with complete access in the system.
 
 Although for a long time there have existed efforts towards enhancing unprivileged eBPF, it remains a worrying feature \cite{unprivileged_ebpf}. The main issue is that the verifier must be prepared to detect any attempt to extract kernel memory access or user memory modification by unprivileged eBPF programs, which is a complex task. In fact, there have existed numerous security vulnerabilities which allow for privilege escalation using eBPF, that is, execution of privileged eBPF programs by exploiting vulnerabilities in unprivileged eBPF \cite{cve_unpriv_ebpf}.
 
@@ -700,7 +699,7 @@ Nowadays, most Linux distributions have set value 1 to this parameter, therefore
 Multiple of the techniques incorporated in our rootkit require a deep understanding into how memory is managed in a Linux process. Therefore, in this section we will present all the background about memory management needed for our later discussion of the offensive capabilities of eBPF in this context.
 
 \subsection{Memory pages and faults} \label{subsection:mem_faults}
-Linux systems divide the available random access memory (RAM) into 'pages', subsections of an specific length, usually 4 KB. The collection of all pages is called physical memory.
+Linux systems divide the available random-access memory (RAM) into 'pages', subsections of an specific length, usually 4 KB. The collection of all pages is called physical memory.
 
 Likewise, individual memory sections need to be assigned to each running process in the system, but instead of assigning a set of pages from physical memory, a new address space is defined, named virtual memory, which is divided into pages as well. These virtual memory pages are related to physical memory pages via a page table, so that each virtual memory address of a process can be translated into a real, physical memory address in RAM \cite{mem_page_arch}. Figure \ref{fig:mem_arch_pages} shows a diagram of the described architecture.
 
@@ -713,7 +712,7 @@ Likewise, individual memory sections need to be assigned to each running process
 
 As we can observe in the figure, each virtual page is related to one physical page. However, RAM needs to maintain multiple processes and data simultaneously, and therefore sometimes the operating system (OS) will remove them from physical memory when it believes they are no longer being used. This leads to the occurrence of two type of memory events \cite{page_faults}:
 \begin{itemize}
-\item \textbf{Major page faults} occur when a process tries to access a virtual page, but the related physical page has been removed from RAM. In this case, the OS will need to request a secondary storage (such as a hard disk) for the data removed, and allocate a new physical page for the virtual page. Figure \ref{fig:mem_major_page_fault} illustrates a major page fault.
+\item \textbf{Major page faults} occur when a process tries to access a virtual page, but the related physical page has been removed from RAM. In this case, the OS will need to request a secondary storage (such as a hard disk) for the data removed and allocate a new physical page for the virtual page. Figure \ref{fig:mem_major_page_fault} illustrates a major page fault.
 \begin{figure}[htbp]
 	\centering
 	\includegraphics[width=11cm]{mem_major_page_fault.jpg}
@@ -744,7 +743,7 @@ Figure \ref{fig:mem_proc_arch} describes how virtual memory is distributed withi
 \item A section where shared libraries code is stored.
 \item A .text section, which contains the code of the program being run.
 \item A .data section, containing initialized static and global variables.
-\item A .bss section, which contains global and static variables which are unitialized or initialized to zero.
+\item A .bss section, which contains global and static variables which are uninitialized or initialized to zero.
 \item The heap, a section which grows from lower to higher memory addresses, and which contains memory dynamically allocated by the program.
 \item The stack, a section which grows from higher to lower memory addresses, towards the heap. It is a Last In First Out (LIFO) structure used to store local variables, function parameters and return addresses.
 \item Right at the start of the stack we can find the arguments with which the programs has been executed.
@@ -858,7 +857,7 @@ In the figure, we can observe how, during the execution of the called function, 
 Attackers have historically used multiple techniques to overwrite the ret value in the stack. In this section, we will present two of the most popular techniques, which will be used as a basis for designing our own attacks using eBPF.
 
 \subsection{Buffer overflow} \label{subsection: buf_overflow}
-The stack buffer overflow is one of the most popular exploitation techniques to overwrite data at the stack. In this technique, an attacker takes advantage of a program receiving an user value stored in a buffer whose capacity is smaller of that of the supplied value. Code snippet \ref{code:vuln_overflow} shows an example of a vulnerable program:
+The stack buffer overflow is one of the most popular exploitation techniques to overwrite data at the stack. In this technique, an attacker takes advantage of a program receiving a user value stored in a buffer whose capacity is smaller of that of the supplied value. Code snippet \ref{code:vuln_overflow} shows an example of a vulnerable program:
 
 \begin{lstlisting}[language=C, caption={Program vulnerable to buffer overflow.}, label={code:vuln_overflow}]
 void foo(char *bar){ // bar may be larger than 12 characters
@@ -892,7 +891,7 @@ Usually, an attacker exploiting a program vulnerable to stack buffer overflow is
 	\label{fig:buffer_overflow_shellcode}
 \end{figure}
 
-As we can observe in the figure, the attacker will take advantage of the buffer overflow to overwrite not only ret, but also the rest of the current stack frame and sfp with malicious code. This code is known as shellcode, consisting on instruction opcodes (machine assembly instructions translated to their representation in hexadecimal values) which the processor will execute. We will briefly explain how to write shellcode in section \ref{TODO probably an Annex}. Therefore, in this technique the attacker will:
+As we can observe in the figure, the attacker will take advantage of the buffer overflow to overwrite not only ret, but also the rest of the current stack frame and sfp with malicious code. This code is known as shellcode, consisting of instruction opcodes (machine assembly instructions translated to their representation in hexadecimal values) which the processor will execute. We will briefly explain how to write shellcode in section \ref{TODO probably an Annex}. Therefore, in this technique the attacker will:
 \begin{itemize}
 \item Introduce a byte array that overflows the buffer, consisting on SHELLCODE + the address of the buffer.
 \begin{itemize}
@@ -902,9 +901,9 @@ As we can observe in the figure, the attacker will take advantage of the buffer 
 \item When the function exits and ret is popped from the stack, the register rip will now point to the address of the buffer at the stack, processing the stack data as instructions part of a program. The malicious code will be executed.
 \end{itemize}
 
-Although the classic buffer overflow is one of the best-known techniques in binary exploitation, it is also one of the oldest and thus numerous protections have historically been incorporated to mitigate these type of exploits. This is why the attack presented here does not work work in a modern system any more. 
+Although the classic buffer overflow is one of the best-known techniques in binary exploitation, it is also one of the oldest and thus numerous protections have historically been incorporated to mitigate this type of exploits. This is why the attack presented here does not work work in a modern system anymore. 
 
-The reason is that one of the protections consits on the prohibition of executing code from the stack. By marking the stack as non-executable, in the case of rip pointing to an address in the stack any malicious code will not be run, even if an application was vulnerable to a buffer overflow. We will explain more in detail the main protections that nowadays are incorporated in modern systems in section \ref{TODO}.
+The reason is that one of the protections consists of the prohibition of executing code from the stack. By marking the stack as non-executable, in the case of rip pointing to an address in the stack any malicious code will not be run, even if an application was vulnerable to a buffer overflow. We will explain more in detail the main protections that nowadays are incorporated in modern systems in section \ref{subsection:hardening_elf}.
 
 \subsection{Return oriented programming attacks} \label{subsection:rop}
 After the stack was marked non-executable, a new refined technique was invented to circumvent this restriction and adapt the classic buffer overflow to modern systems. In the end, attackers still maintained the ability to overflow the buffer in the stack of vulnerable applications, writing shellcode and overwriting ret, the only issue was that the shellcode could not be executed.
@@ -922,7 +921,7 @@ mov rdx, 10
 mov rax, [rsp]
 \end{lstlisting}
 
-After finding the address of the ROP gadgets manually or using an automated tool, the attacker takes advantage of a buffer overflow (or, in our case, a direct write using eBPF's bpf\_probe\_write\_user()) to overwrite the vale of ret with the address of the first ROP gadget, and also additional data in the stack. Figure \ref{fig:rop_compund} shows how we can execute the original program using ROP:
+After finding the address of the ROP gadgets manually or using an automated tool, the attacker takes advantage of a buffer overflow (or, in our case, a direct write using eBPF's bpf\_probe\_write\_user()) to overwrite the value of ret with the address of the first ROP gadget, and also additional data in the stack. Figure \ref{fig:rop_compund} shows how we can execute the original program using ROP:
 
 \begin{figure}[htbp]
 	\centering
@@ -961,7 +960,7 @@ As we can observe, we can distinguish five different network layers in the frame
 \item Layer 1 corresponds to the physical layer, and it is processed by the NIC hardware, even before it reaches the XDP module (see figure \ref{fig:xdp_diag}). Therefore, this layer is discarded and completely invisible to the kernel. Note that it does not only include a header, but also a trailer (a Frame Check Sequence, a redundancy check included to check frame integrity).
 \item Layer 2 is the data layer, it is in charge of transporting the frame via physical media, in our case an Ethernet connection. Most relevant fields are the MAC destination and source, used for performing physical addressing.
 \item Layer 3 is the network layer, in charge of packet forwarding and routing. In our case, packets will be using the IP protocol. Most relevant fields are the source and destination IP, used to indicate the host that sent the packet and who is the receiver.
-\item Layer 4 is the transport layer, in charge of providing end-to-end connection services to applications in a host. We will be focusing on TCP during our research. Relevant fields include the source and destination port, which indicate the ports involved in the communication on which the application on each host are listening and sending packets.
+\item Layer 4 is the transport layer, in charge of providing end-to-end connection services to applications in a host. We will be focusing on TCP during our research. Relevant fields include the source and destination port, which indicate the ports involved in the communication on which the applications on each host are listening and sending packets.
 \item The last layer is the payload of the TCP packet, which contains, according to the OSI model, all layers belong to application data.
 \end{itemize}
 
@@ -1071,7 +1070,7 @@ Tool & Purpose & Permissions\\
 \hline
 .data & Contains initialized static and global variables. & Alloc, Writable\\
 \hline
-.bss & Contains global and static variables which are unitialized or initialized to zero. & Alloc, Writable\\
+.bss & Contains global and static variables which are uninitialized or initialized to zero. & Alloc, Writable\\
 \hline 
 \end{tabular}
 \caption{Tools used for analysis of ELF programs.}
@@ -1157,12 +1156,12 @@ Stack canaries are random data that is pushed into the stack before calling pote
 If a stack canary is present and a buffer overflow happened, it would potentially overwrite the value of the canary, therefore alerting of the attack, in which case the processor halts the execution of the program.
 
 \textbf{DEP/NX}\\
-Data Execution Prevention, also known as No Execute, is the option of marking the stack as non executable. This prevents, as we explained in section \ref{subsection: buf_overflow}, the possibility of executing injected shellcode in the stack after modifying the value of the saved rip.
+Data Execution Prevention, also known as No Execute, is the option of marking the stack as non-executable. This prevents, as we explained in section \ref{subsection: buf_overflow}, the possibility of executing injected shellcode in the stack after modifying the value of the saved rip.
 
 The creation of advanced techniques like ROP is one reaction to this mitigation, that circumvents this protection.
 
 \textbf{ASLR}\\
-Address Space Layout Randomization is a technique that randomizes the position of memory sections in a process virtual memory, including the heap, stack and libraries, so that an attacker cannot rely on known addresses during exploitation (e.g: libraries are loaded at a different memory address each time the program is run, so ROP gadgets change their position) \cite{aslr_pie_intro}.
+Address Space Layout Randomization is a technique that randomizes the position of memory sections in a process virtual memory, including the heap, stack and libraries, so that an attacker cannot rely on known addresses during exploitation (e.g.: libraries are loaded at a different memory address each time the program is run, so ROP gadgets change their position) \cite{aslr_pie_intro}.
 
 In the context of a stack buffer overflow attack, the memory position of the stack is random, and therefore even if shellcode is injected into the stack by an attacker, the address at which it resides cannot be written into the saved value of rip in order to hijack the flow of execution.
 
@@ -1200,7 +1199,7 @@ Value & Description\\
 \hline
 1 & Only privileged processes or those belonging to that PID may access the any file. Unprivileged process can still list the directories at \textit{/proc}, finding the complete list of running processes.\\
 \hline
-2 & Only privileged processes or those belonging to that PID may access the any file. Unlike with setting '1', unprivileged users cannot list the directores at \textit{/proc} any more.\\ 
+2 & Only privileged processes or those belonging to that PID may access the any file. Unlike with setting '1', unprivileged users cannot list the directores at \textit{/proc} anymore.\\ 
 \hline
 \end{tabular}
 \caption{Values for \textit{/proc/sys/kernel/yama/ptrace\_scope}.}
@@ -1233,7 +1232,7 @@ The ability to easily find memory sections on the virtual address space of a pro
 \subsection{/proc/<pid>/mem}
 This file enables a process to access the virtual memory of the process with process id <pid>. According to the documentation, "this file can be used to access the pages of a process's memory through open(2), read(2), and lseek(2)" \cite{proc_fs}, meaning that we can read any memory address from the virtual memory space of the process.
 
-However, we found the documentation not to be complete. In our experience, not only we can read virtual memory, but also freely write into it. There existed some discussions in the Linux community and it was considered safe enough to be set as writeable by privileged programs \cite{proc_mem_write}, although the changes were never reflected in the official documentation.
+However, we found the documentation not to be complete. In our experience, not only we can read virtual memory, but also freely write into it. There existed some discussions in the Linux community, and it was considered safe enough to be set as writeable by privileged programs \cite{proc_mem_write}, although the changes were never reflected in the official documentation.
 
 Apart from being able to write into virtual memory, this write accesses are performed without regard of the permission flags set on each memory section. Therefore, we can modify non-writeable virtual memory by writing into the \textit{/proc/<pid>/mem} file.
 

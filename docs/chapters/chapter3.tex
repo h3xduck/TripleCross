@@ -27,7 +27,7 @@ Therefore, a malicious privileged eBPF program can access and modify other progr
 eBPF tracing programs (kprobes, uprobes and tracepoints) are hooked to specific points in the kernel or in the user space, and call probe functions once the flow of execution reaches the instruction to which they are attached. This section details the main security concerns regarding this type of programs.
 
 \subsection{Access to function arguments} \label{subsection:tracing_arguments}
-As we saw in section \ref{section:ebpf_prog_types}, tracing programs receive as a parameter those arguments with which the hooked function originally was called. These parameters are read-only and thus, in principle, they cannot be modified inside the tracing program (we will show this is not entirely true in section \ref{section:mem_corruption}). The next code snippets show the format in which parameters are received when using libbpf (Note that libbpf also includes  some macros that offer an alternative format, but the parameters are the same).
+As we saw in section \ref{section:ebpf_prog_types}, tracing programs receive as a parameter those arguments with which the hooked function originally was called. These parameters are read-only and thus, in principle, they cannot be modified inside the tracing program (we will show this is not entirely true in section \ref{section:mem_corruption}). The next code snippets show the format in which parameters are received when using libbpf (Note that libbpf also includes some macros that offer an alternative format, but the parameters are the same).
 
 \begin{lstlisting}[language=C, caption={Probe function for a kprobe on the kernel function vfs\_write.}, label={code:format_kprobe}]
 SEC("kprobe/vfs_write")
@@ -72,7 +72,7 @@ struct pt_regs {
 };
 \end{lstlisting}
 
-By observing the value of the registers, we are able to extract the parameters of the original hooked function. This can be done by using the System V AMD64 ABI\cite{8664_params_abi}, the calling convention used in Linux. Depending on whether we are in the kernel or in user space, the registers used to store the values of the function arguments are different. Table \ref{table:systemv_abi} summarizes these two interfaces. 
+By observing the value of the registers, we can extract the parameters of the original hooked function. This can be done by using the System V AMD64 ABI\cite{8664_params_abi}, the calling convention used in Linux. Depending on whether we are in the kernel or in user space, the registers used to store the values of the function arguments are different. Table \ref{table:systemv_abi} summarizes these two interfaces. 
 
 \begin{table}[H]
 \begin{tabular}{|>{\centering\arraybackslash}p{2cm}|>{\centering\arraybackslash}p{3cm}|}
@@ -158,7 +158,7 @@ On a final note, as we mentioned in section \ref{section:ebpf_prog_types}, there
 \item kretprobes, uretprobes and \textit{exit} tracepoints will still receive the \textit{struct pt\_regs}, but without any of the parameters and with only the return value of the function.
 \end{itemize}
 
-Taking into account all the previous, the fact that tracing programs have read-only access to function arguments can be considered an useful and needed feature for tracing applications, but malicious eBPF can use this for purposes such as:
+Taking into account all the previous, the fact that tracing programs have read-only access to function arguments can be considered a useful and needed feature for tracing applications, but malicious eBPF can use this for purposes such as:
 \begin{itemize}
 \item Gather kernel and user data passed to a function as a parameter. In many cases this information can be potentially interesting for an attacker, such as passwords.
 \item Store in eBPF maps information about system activities, to be used by other malicious eBPF programs.
@@ -182,7 +182,7 @@ A particularly relevant case (which we will later use for our rootkit) involves 
 \subsection{Overriding function return values}
 A potentially dangerous functionality in eBPF tracing programs is the ability to modify the return value of kernel functions\cite{ebpf_friends_p15}\cite{ebpf_override_return}. This can be done via the eBPF helper bpf\_override\_return, and it works exclusively from kretprobes.
 
-Apart from only working on kretprobes, additional restrictions are applied to this helper. It will only work if the kernel was compiled with the CONFIG\_BPF\_KPROBE\_OVERRIDE flag, and only if the kretprobe is attached to a function to which, during the kernel development, the macro ALLOW\_ERROR\_INJECTION() has been indicated. Currently, only a small selection of functions include this macro, but most system calls can be found to implement it. The following code snippets show how a system call like sys\_open is defined in kernel v5.11:
+Apart from only working on kretprobes, additional restrictions are applied to this helper. It will only work if the kernel was compiled with the CONFIG\_BPF\_KPROBE\_OVERRIDE flag, and only if the kretprobe is attached to a function to which, during the kernel development, the macro ALLOW\_ERROR\_INJECTION() has been indicated. Currently, only a small selection of functions includes this macro, but most system calls can be found to implement it. The following code snippets show how a system call like sys\_open is defined in kernel v5.11:
 
 \begin{lstlisting}[language=C, caption={Definition of the syscall sys\_open in the kernel \cite{code_kernel_open}}, label={code:override_return_1}]
 SYSCALL_DEFINE3(open, const char __user *, filename, int, flags, umode_t, mode)
@@ -209,7 +209,7 @@ In order to be able to modify the return value of functions, the aforementioned 
 
 Taking the previous information into account, we can find that a malicious eBPF program, by tampering with the kernel-user space interface which are system calls, can mislead user programs, which trust the output of kernel code. This can lead to:
 \begin{itemize}
-\item A program believes a system call exited with an error, while in reality the kernel completed the operation with success, or viceversa. For instance, the result of a call to sys\_open can mislead a user program into thinking that a file does not exist.
+\item A program believes a system call exited with an error, while in reality the kernel completed the operation with success, or vice versa. For instance, the result of a call to sys\_open can mislead a user program into thinking that a file does not exist.
 \item A program receives incorrect data on purpose. For instance, a buffer may look empty or of a reduced size upon a sys\_read call, while in reality more data is available to be read.
 \end{itemize}
 
@@ -251,7 +251,7 @@ ssize_t vfs_read(struct file *file, char __user *buf, size_t count, loff_t *pos)
 Then, if we attach a kprobe to vfs\_read, we would be able to modify the value of the buffer.
 \item Modify process memory by taking function parameters as a reference and scanning the stack. This technique, first introduced in section \ref{subsection:out_read_bounds} when we mentioned that tracing programs can read any user memory location with the bpf\_probe\_read\_user() helper, and which was publicly first used by Jeff Dileo at his talk in DEFCON 27\cite{evil_ebpf_p6974}, consists of:
 \begin{enumerate}
-\item Take an user-passed parameter received on a tracing program. The parameter must be a pointer to a memory location (such as a pointer to a buffer), so that we can use that memory address as the reference point in user space. According to the x86\_64 documentation, this parameter will be stored in the stack\cite{8664_params_abi_p1922}, so we will receive an stack address.
+\item Take an user-passed parameter received on a tracing program. The parameter must be a pointer to a memory location (such as a pointer to a buffer), so that we can use that memory address as the reference point in user space. According to the x86\_64 documentation, this parameter will be stored in the stack\cite{8664_params_abi_p1922}, so we will receive a stack address.
 \item Locate the target data which we aim to write. There are two main methods for this:
 \begin{itemize}
 	\item Sequentially read the stack, using bpf\_probe\_read\_user(), until we locate the bytes we are looking for. This requires knowing which data we want to overwrite.
@@ -285,12 +285,12 @@ int main(){
 }
 \end{lstlisting}
 
-In the figure, we can clearly observe how the technique is used to overwrite an specific buffer. The attacker goal is to overwrite buffer \textit{c} with some other bytes, but the kprobe program only has direct access to buffer \textit{a}:
+In the figure, we can clearly observe how the technique is used to overwrite a specific buffer. The attacker goal is to overwrite buffer \textit{c} with some other bytes, but the kprobe program only has direct access to buffer \textit{a}:
 \begin{enumerate}
 \item By reverse engineering the program (we will see how this process works in section \ref{TODO}) we notice that buffer \textit{c} is stored 8 bytes lower on the stack than buffer \textit{a}.
 \item When register rip points to the write() instruction, the processor executes the instruction and a system call is issued to sys\_write().
 \item The kprobe eBPF program hooked to the syscall hijacks the program execution. Since it has access to the memory address of buffer \textit{a} and it knows the relative position of buffer \textit{c}, it writes to that location whatever it wants (e.g.: "DDD") with the bpf\_probe\_write\_user() helper.
-\item The eBPF program ends and the control flow goes back to the system call. It ends its execution successfully, and returns a value to the user space. The result of the program is that 1 byte has been written into file "FILE", and that buffer \textit{c} now contains "DDD".
+\item The eBPF program ends and the control flow goes back to the system call. It ends its execution successfully and returns a value to the user space. The result of the program is that 1 byte has been written into file "FILE", and that buffer \textit{c} now contains "DDD".
 \end{enumerate}
 
 \subsection{Takeaways}
@@ -298,7 +298,7 @@ As a summary, the bpf\_probe\_write\_user() helper is one of the main attack vec
 
 Therefore, if on the conclusion of section \ref{subsection:tracing_attacks_conclusion} we discussed that the ability to change the return value of kernel functions and kill processes hinders the trust between the user and kernel space (since what the kernel returns may not be a correct result), then the ability to directly overwrite process data is a complete disrupt of trust in any of the data in the user space itself, since it is subject to the control of a malicious eBPF program.
 
-Moreover, in the next sections we will discuss how we can create advanced attacks on the basis of the background and techniques previously discussed. We will research further into which sections of a process memory are writeable and whether they can lead to new attack vectors.
+Moreover, in the next sections we will discuss how we can create advanced attacks based on the background and techniques previously discussed. We will research further into which sections of a process memory are writeable and whether they can lead to new attack vectors.
 
 
 \section{Abusing networking programs}\label{section:abusing_networking}
@@ -320,9 +320,9 @@ Apart from write access to the packet, the other critical feature of networking 
 \subsection{Attacks and limitations of networking programs} \label{subsection:network_attacks}
 Based on the previous background, we will now proceed to explore which limitations exist on which actions a network eBPF program can perform:
 \begin{itemize}
-\item Read and write access to the packet is heavily controlled by the eBPF verifier. It is not possible to read or write data out of bounds. Extreme care must also be taken before attempting to read any data inside the packet, since the verifier first requires making lots of checks beforehand. For any access to take place, the program must first classify the packet according to the network protocol it belongs, and later check that every header of every layer is well defined (e.g: Ethernet, IP and TCP). Only after that, the headers can be modified. 
+\item Read and write access to the packet is heavily controlled by the eBPF verifier. It is not possible to read or write data out of bounds. Extreme care must also be taken before attempting to read any data inside the packet, since the verifier first requires making lots of checks beforehand. For any access to take place, the program must first classify the packet according to the network protocol it belongs, and later check that every header of every layer is well defined (e.g.: Ethernet, IP and TCP). Only after that, the headers can be modified. 
 
-If the program also wants to modify the packet payload, then it must be checked to be between the bounds of the packet and well defined according to the packet headers(using fields IHL, packet length and data offset, in figure \ref{fig:frame}). Also, after using any of the helpers that enlarge or reduce the size of the packet, all check operations must be repeated again before any subsequent operation.
+If the program also wants to modify the packet payload, then it must be checked to be between the bounds of the packet and well defined according to the packet headers(using fields IHL, packet length and data offset, in figure \ref{fig:frame}). Also, after using any of the helpers that enlarge or reduce the size of the packet, all check operations must be repeated before any subsequent operation.
 
 Finally, note that after any modification in the packet, some network protocols (such as IP and TCP) require to recalculate their checksum fields. 
 
@@ -334,7 +334,7 @@ Finally, note that after any modification in the packet, some network protocols 
 Having the previous restrictions in mind, we can find multiple possible malicious uses of an XDP/TC program:
 \begin{itemize}
 \item \textbf{Spy all network connections} in the system. An XDP or TC ingress program can read any packet from any interface, therefore achieving a comprehensive view on which are the running communications and opened ports (even if protocols with encryption are being used) and gathering transmitted data (if the connection is also in plaintext).
-\item \textbf{Hide arbitrary traffic} from the host. If an XDP program drops a packet, the kernel will not be able to know any packet was received in the first place. This can be used to hide malicious incoming traffic. However, as we will mention in section{TODO}, malicious traffic may still be detected by other external devices, such as network-wide firewalls.
+\item \textbf{Hide arbitrary traffic} from the host. If an XDP program drops a packet, the kernel will not be able to know any packet was received in the first place. This can be used to hide malicious incoming traffic. However, as we will mention in section \ref{section:c2}, malicious traffic may still be detected by other external devices, such as network-wide firewalls.
 \item \textbf{Modify incoming traffic} with XDP programs. Every packet can be modified (as we mentioned at the beginning of section \ref{section:abusing_networking}), and any modification will be unnoticeable to the kernel, meaning that we will have complete, invisible control over the packets received by the kernel.
 \item \textbf{Modify outgoing traffic} with TC egress programs. Since every packet can be modified at will, we will therefore have complete control over any packet sent by the host. This can be used to enable a malicious program to communicate over the network and exfiltrate data, since even if we cannot create a new connection from eBPF, we can still modify existing packets, writing any payload and headers on it (thus being able to, for instance, change the destination of the packet).
 
@@ -358,7 +358,7 @@ After the timer runs out, the TCP protocol itself will retransmit the same packe
 Using this technique, we will be able to send our own packets every time an application sends outgoing traffic. And, unless the network is being monitored, this attack will go unnoticed, provided that the delay of the original packet is similar to that when a single packet lost.
 
 \subsection{Takeaways}
-As a summary, networking eBPF programs offer complete control over incoming and outgoing traffic. If tracing programs and memory corruption techniques served to disrupt the trust in the execution of both any user or kernel program, then a malicious networking program has the potential to do the same with any communication, since any packet is under the control of eBPF.
+As a summary, networking eBPF programs offer complete control over incoming and outgoing traffic. If tracing programs and memory corruption techniques served to disrupt the trust in the execution of both any user and kernel program, then a malicious networking program has the potential to do the same with any communication, since any packet is under the control of eBPF.
 
 Ultimately, the capabilities discussed in this section unlock complete freedom for the design of malicious programs. As we will explain in the next chapter, one particularly relevant type of application can be built:
 \begin{itemize}
