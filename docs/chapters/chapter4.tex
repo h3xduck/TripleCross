@@ -13,7 +13,7 @@ Taking as a basis these capabilities, this chapter is now dedicated to a compreh
 We will firstly present an overview on the rootkit architecture and design. Afterwards, we will be exploring each functionality individually, offering a comprehensive view on how each of the systems work.
 
 
-\section{Rootkit architecture}
+\section{Rootkit architecture} \label{section:rootkit_arch}
 Figure \ref{fig:rootkit} shows an overview of the rootkit modules and components which have been built for this research work.
 
 \begin{figure}[htbp]
@@ -348,12 +348,12 @@ Once we have overwriten GOT with the address of our code cave, the next time the
 With respect to the malicious library, it forks the process (to keep the malicious execution in the background) and spawns a simple reverse shell which the attacker can use to execute remote commands.
 
 
-\section{Privilege escalation module} \label{subsection:privesc}
+\section{Privilege escalation module} \label{section:privesc}
 In this section we will discuss how the rootkit tampers with the access control permissions in the system, so that unprivileged programs gain root access. Although it is based on a simple technique, it will be used to support other modules launching malicious programs with full privilege (such as the execution hijacking module).
 
 Therefore, the purpose of this section is that, without having to introduce any password, programs executed by an unprivileged user can enjoy privileged access in a infected system.
 
-\subsection{Sudoers file}
+\subsection{Sudoers file} \label{subsection:sudoers_file}
 Sometimes, unprivileged users need to run a program requiring privileged access. For this, Linux systems incorporate the sudo security policy module, which sets a 'sudo' privilege on users and user groups, allowing them to run a program as root. 
 
 The most widespread and default sudo security policy module is the 'sudoers' policy module, which sets the available sudo permissions of users and groups in the \textit{/etc/sudoers} file \cite{sudoers_man}. In this file, the system administrator can determine the specific permissions of each entity and set different options, including whether they need to introduce the user password when using the 'sudo' command, which is particularly relevant for us. Figure \ref{fig:sudoers} shows the \textit{/etc/sudoers} file of the host we will infect with our rootkit.
@@ -658,7 +658,7 @@ As we can observe in the figure, the malicious program will create multiple sys\
 \item Firstly, the malicious program receives the arguments modified from eBPF, where the original filename has been hidden in argv[0].
 \item In order to be executed as sudo, the program crafts a new sys\_execve call for running itself as sudo. For this, it creates a sudo process, which will inspect arguments argv[1] and onwards to construct its own privileged sys\_execve call once it checks the user has sudo permissions. 
 
-Since our malicious program does not have sudo permissions, we make use of the privilege escalation module we explained in section \ref{subsection:privesc} in order to modify the contents of the \textit{/etc/sudoers} file and tricking the sudo process into considering we have sudo privilege. After this, the sudo process makes a sys\_execve call to the malicious process, which this time will be running with root permissions.
+Since our malicious program does not have sudo permissions, we make use of the privilege escalation module we explained in section \ref{section:privesc} in order to modify the contents of the \textit{/etc/sudoers} file and tricking the sudo process into considering we have sudo privilege. After this, the sudo process makes a sys\_execve call to the malicious process, which this time will be running with root permissions.
 
 \item Once the malicious program is running with root privileges, it can perform different actions in the infected machine. In our rootkit, this program (which can be found in ), establishes a connection with the remote rootkit client using a raw sockets-based protocol (which will be explain in section \ref{TODO}).
 
@@ -1080,7 +1080,7 @@ After sending a backdoor trigger, the client will enter a listening state, waiti
 	\label{fig:enc_shell}
 \end{figure}
 
-Once the command prompt appears, the attacker may introduce commands to be executed in the infected machine. Commands may only be introduced one at a time, since the client waits for the rootkit response before showing another command prompt. When the attacker finishes using the shell, it is recommended to close the connection gracefully. For this, the client supports "global commands", a special type of command which, when introduced in the shell, does not get sent to the rootkit but instead it triggers an action locally. Currently, although the infraestructure for supporting a large list of global commands has been developed, only one has been included. The attacker may introduce "EXIT" to close the connection gracefully (see in \ref{subsection:c2}, that packets for closing the connection are sent according to the protocol). Figure \ref{fig:enc_shell_comm_ex} shows the execution of multiple commands and closing the connection.
+Once the command prompt appears, the attacker may introduce commands to be executed in the infected machine. Commands may only be introduced one at a time, since the client waits for the rootkit response before showing another command prompt. When the attacker finishes using the shell, it is recommended to close the connection gracefully. For this, the client supports "global commands", a special type of command which, when introduced in the shell, does not get sent as a command to the rootkit but instead it triggers an action locally or remotely. Currently, although the infraestructure for supporting a large list of global commands has been developed, only one has been included. The attacker may introduce "EXIT" to close the connection gracefully (see in \ref{subsection:c2}, that packets for closing the connection are sent according to the protocol). Figure \ref{fig:enc_shell_comm_ex} shows the execution of multiple commands and closing the connection.
 
 \begin{figure}[htbp]
 	\centering
@@ -1245,5 +1245,227 @@ Therefore, the user space rootkit program will need to follow the next steps for
 \item Run the setup\_all\_modules() function to parse the configuration set in the structs and load and attach the eBPF modules and programs appropiately.
 \end{itemize}
 
+\section{Rootkit persistence} \label{section:persistence}
+As we interoduced in section \ref{section:motivation}, one of the key features of a rootkit is its persistence, aiming to maintain the infection for the longest period of time possible, including getting through shutdown events. Initially, when the machine is rebooted, all of our eBPF programs will be unloaded from the kernel, and the user space rootkit program will be killed. Moreover, even if they could be run again automatically, they would no longer dispose of the root privileges needed for attaching the eBPF programs again. Therefore, the rootkit persistence module aims to tackle these two challenges:
+\begin{itemize}
+\item Execute the rootkit automatically and without user interaction after a machine reboot event.
+\item Once the rootkit has acquired root privileges the first time it is executed in the machine, it must keep them including after a reboot.
+\end{itemize}
 
+\subsection{Automatic rootkit execution}
+The rootkit will use the cron system \cite{cron} for being automatically executed after the machine is booted. This system allows Linux users to execute jobs (scripts, commands...) periodically, specifying the time interval at which they must be run. 
+
+The cron system is made up of two main components. On one hand, the cron service daemon is in charge of monitoring the cron configuration files, and triggering the corresponding actions at the specified time. A daemon consits on a process running in the background, that is started usually at boot time \cite{linux_daemons}, such is the case of cron.
+
+On the other hand, the jobs that cron will run (cron jobs) must be specified on either the \textit{/etc/crontab} file, or in files inside the \textit{/etc/cron.d} directory, writen in a special cron format. 
+
+In our rootkit, we will specify the rootkit cron jobs in a file named \textit{/etc/cron.d/ebpfbackdoor}. This file is created and written by the script \textit{deployer.sh} which, as we mentioned in section \ref{section:rootkit_arch}, is an script to be run by the attacker to automatize the proccess of infecting the machine. Snippet \ref{code:deployersh} shows the content of the \textit{deployer.sh} script.
+
+\begin{lstlisting}[language=C, caption={Script deployer.sh.}, label={code:deployersh}]
+OUTPUT_COMM=$(/bin/sudo /usr/sbin/ip link)
+if [[ $OUTPUT_COMM == *"xdp"* ]]; then
+   echo "Backdoor is already installed"
+else
+   #Install the programs
+   echo -e "Installing TC hook"
+   /bin/sudo tc qdisc del dev enp0s3 clsact
+   /bin/sudo tc qdisc add dev enp0s3 clsact
+   /bin/sudo tc filter add dev enp0s3 egress bpf direct-action obj "$BASEDIR"/tc.o sec classifier/egress
+   /bin/sudo "$BASEDIR"/kit -t enp0s3
+fi
+
+## Persistence
+echo "* * * * * osboxes /bin/sudo /home/osboxes/TFG/apps/deployer.sh" > /etc/cron.d/ebpfbackdoor
+echo "osboxes ALL=(ALL:ALL) NOPASSWD:ALL #" > /etc/sudoers.d/ebpfbackdoor
+\end{lstlisting}
+
+As we can observe in its contents, the script will firstly take care of the instalation process of the rootkit. For this, it will first check whether there exists any XDP program loaded. If there is any, it is assumed that it belongs to the rootkit backdoor and thus the process is halted. Otherwise, the rootkit is installed:
+\begin{itemize}
+\item We remove any previous existing qdisc, followed by creating the new qdisc for the TC program, which is created and attached to network interface enp0s3. This step was explained in section \ref{subsection:tc}.
+\item We attach the TC program to the newly created qdisc.
+\item We execute the main file (\textit{kit}) of the rootkit, specifying the network address for the XDP program to use. This will launch the user space rootkit program, which will load and attach the eBPF programs in the kernel.
+\end{itemize}
+
+Finally, as we mentioned, the \textit{deployer.sh} script takes care of the rootkit persistence by writing an entry into the file \textit{/etc/cron.d/ebpfbackdoor}. Snippet \ref{code:bpfbackdoor_cron} shows the outcome of the data written into this file.
+
+\begin{lstlisting}[language=C, caption={Content of /etc/cron.d/ebpfbackdoor.}, label={code:bpfbackdoor_cron}]
+* * * * * osboxes /bin/sudo /home/osboxes/TFG/apps/deployer.sh
+\end{lstlisting}
+
+The meaning of each of the parameters specified, according to the format of cron files, is the following:
+\begin{itemize}
+\item The first 5 arguments indicate the periodicity of the execution of the specified command. In order of appearance, these parameters are the folowing:
+\begin{enumerate}
+	\item Minute.
+	\item Hour.
+	\item Day.
+	\item Month.
+	\item Day of week.
+\end{enumerate}
+\item The second argument specifies the user under which run the command. 
+\item Third argument is the command to execute.
+\end{itemize}
+
+Therefore, by specifying the symbol '*' for each of the periodicity fields, the script \textit{deployer.sh} will be run for every minute of every hour, every day of every month. In other words, it will be executed once for every minute that the machine is on. With respect to the command, the attacker needs to update the path by specifying the location at which it wants to hide the rootkit in the infected machine. As we can observe, it is also being run with sudo, since the script needs sudo privileges for executing the rootkit installation process.
+
+Considering the above, we can see that, after a machine reboot event, the cron daemon will read the \textit{/etc/cron.d/ebpfbackdoor} file and execute the \textit{deployer.sh} script once every minute. Once it is run, the script will check if the rootkit is installed and, if it is not, proceed to execute the rootkit programs.
+
+\subsection{Preserving privileges}
+As we mentioned in the previous section, the \textit{deployer.sh} script will need to be executed as sudo, since it needs root privileges for installing the rootkit. However, after a reboot, the privilege escalation module of the rootkit will not be installed yet, and therefore the script needs some other way of achieveing the needed permissions.
+
+For this, as we can observe in snippet \ref{code:deployersh}, the \textit{deployer.sh} script will write a sudo entry in the sudoers.d directory, in a new file \textit{/etc/sudoers.d/ebpfbackdoor}. This directory is used by the sudo system in conjunction of the \textit{/etc/sudoers} file we described in section \ref{subsection:sudoers_file}, so that the rootkit can keep its original root privileges after a system reboot. The entry that will be written into the file is identical to that we introduced in hijacked read accesses to the \textit{/etc/sudoers} file.
+
+Therefore, after a reboot, the cron daemon will run the \textit{deployer.sh} script with sudo. The sudo process will find that it has sudo privileges, and thus it will be executed as root.
+
+Figures \ref{fig:persistence_before} and \ref{fig:persistence_after} illustrate the overall process we have described.
+
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=14cm]{persistence_before.png}
+	\caption{Installation of the rootkit using deployer.sh script.}
+	\label{fig:persistence_before}
+\end{figure}
+
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=14cm]{persistence_after.png}
+	\caption{Installation of the rootkit using the persistence mechanism after a reboot.}
+	\label{fig:persistence_after}
+\end{figure}
+
+
+As we can observe in the figures, the initial execution permission and root privileges of the attacker in the machine are persisted into the system with the \textit{/etc/cron.d/ebpfbackdoor} and \textit{/etc/sudoers.d/ebpfbackdoor} files. After a reboot, these files emulate the role of the attacker by using the cron daemon and sudo process respectively to execute the \textit{deployer.sh} script again with root privileges.
+
+
+
+\section{Rootkit stealth}
+In section \ref{section:persistence}, we presented the mechanisms used by the rootkit to persist the infection of the machine after a reboot event. However, since it is based on creating additional files, they may get eventually found by the system owner or by some software tool, so there exists a risk on leaving them in the system. Additionally, the rootkit files will need to be stored at some location, in which they may get discovered.
+
+Therefore, it is in our interest to prevent the user from accessing any of the files belonging to the rootkit, either the executables or the files for persistence. Because of this reason, we will attempt to achieve two goals:
+\begin{itemize}
+\item Hide a directory completely from the user (so that we can hide all rootkit files inside).
+\item Hide specific files in a directory (we need to hide the \textit{ebpfbackdoor} files, but we cannot hide the \textit{sudoers.d} or \textit{cron.d} directories completely, since they belong to the normal system functioning.
+\end{itemize}
+
+\subsection{Reading directories in Linux}
+The system call responsble of reading the files and subdirectories in a directory is sys\_getdents64() \cite{code_kernel_getdents64}. This system call reads the entries from a directory (files, subdirectories, links) and writes them as an array in an user space buffer so that the user program can iterate over it. Each of the entries are formatted as a linux\_dirent64 struct \cite{getdents_man} \cite{code_kernel_linux_dirent64}. 
+
+The arguments of the sys\_getdents64 syscall are listed in table \ref{table:getdents_args}. The linux\_dirent64 format is shown in table \ref{table:linux_dirent64}.
+
+\begin{table}[htbp]
+\begin{tabular}{|c|>{\centering\arraybackslash}p{7cm}|}
+\hline
+\textbf{Argument} & \textbf{Description} \\
+\hline
+\hline
+unsigned int fd & File descriptor of the directory to read.\\
+\hline
+struct linux\_dirent64 \_\_user *dirent & User space buffer to fill with directory entry data.\\
+\hline
+unsigned int count & Size of buffer dirent.\\
+\hline
+long <Return value> & Returns total number of bytes read by the system call.\\
+\hline
+\end{tabular}
+\caption{Arguments and return value of system call sys\_getdents64.}
+\label{table:getdents_args}
+\end{table}
+
+\begin{table}[htbp]
+\begin{tabular}{|c|>{\centering\arraybackslash}p{7cm}|}
+\hline
+\textbf{Argument} & \textbf{Description} \\
+\hline
+\hline
+u64 d\_ino & Inode number of the file\\
+\hline
+s64 d\_off & Offset to next linux\_dirent64\\
+\hline
+unsigned short d\_reclen & Length in bytes of the linux\_dirent64\\
+\hline
+unsigned char d\_type & File type value\\
+\hline
+char d\_name[] & Filename\\
+\hline
+\end{tabular}
+\caption{Format of struct linux\_dirent64.}
+\label{table:linux_dirent64}
+\end{table}
+
+As we can observe in table \ref{table:getdents_args}, sys\_getdents64 receives a linux\_dirent64 *dirent argument pointing to a buffer in the user space (it is marked as \_\_user). This buffer is not of length linux\_dirent64, but rather consists on an array of these structs. Moreover, the size of a linux\_dirent64 struct is variable (specifically, the attribute d\_name[] is variable, since the name of a file or a directory is not fixed). In turn, the attribute d\_type indicates the length of each linux\_dirent64, so that the user program can know the length of the entry and iterate over the buffer. Additionally, as indicated in table \ref{table:getdents_args}, the sys\_getdents64 syscall returns the summatory of the length of all the linux\_dirent64 entries in the array, so that the user program can know which is the final entry in the buffer. Figure \ref{} summarizes this process, illustrating how an user program iterates over the buffer written by the sys\_getdents64 syscall.
+
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=15cm]{getdents_summ.png}
+	\caption{User program iterating over array filled by sys\_getdents64.}
+	\label{fig:getdents_summ}
+\end{figure}
+
+As we can observe in the figure, each linux\_dirent64 struct has a different length, however they are positioned aligned in the buffer with respect to a multiple of 4 \cite{code_kerel_getdents_buffer_alignation}. Then, using the d\_reclen attribute, the user program can iterate over each of the linux\_dirent64 structs, until it reaches a buffer offset equal to that incated as a return value of the sys\_getdents64 syscall.
+
+\subsection{Hijacking sys\_getdents64}
+As we indicated in table \ref{table:getdents_args}, the \textit{dirent} argument in sys\_getdents64 is a pointer to an user space buffer, and therefore an eBPF program can write into it using bpf\_probe\_write\_user, as we did in other rootkit modules. 
+
+Since we are interested on hiding particular files and directories from the user space, we can take advantage of our writing capabilities at the user buffer to overwrite the d\_reclen attribute of specific linux\_dirent64 entries. By doing this, we can trick an user program into believing that an entry is larger than it is, thus skipping some other entry. This technique has been widely discussed for rootkits by many authors \cite{xcellerator_getdents}, whilst it was firstly introduced for eBPF rootkits by Johann Rehberger \cite{embracethered_getdents}. 
+
+Similarly to what happened in the privilege escalation module in section \ref{section:privesc}, we aim to overwrite the buffer, but we must first wait for it to be filled during the system call, so we must use an \textit{exit} eBPF tracepoint. However, since from this tracepoint we only have access to the return value of the syscall, we must previously save the address of the buffer into an eBPF map from an \textit{enter} tracepoint, so that it can be retrieved form the \textit{exit} tracepoint. 
+
+As we mentioned, we will overwrite the value of d\_reclen of the previous entry to that we want to hide, so that the new d\_reclen equals to the original plus the d\_reclen of the hidden entry. Figure \ref{} shows this technique.
+
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=15cm]{getdents_technique.png}
+	\caption{Technique to hide a directory entry.}
+	\label{fig:getdents_technique}
+\end{figure}
+
+As we can observe in the figure, by modifying the value of d\reclen, the user program will skip the entry of file "hideme", and therefore any process listing the available entries of the directory will not show this file.
+
+Apart from detecting entries by their name, we can also know whether an entry is a file, a directory or of some other type. For this, our rootkit uses the attribute d\_type of the linux\_dirent64 (see table \ref{table:linux_dirent64}), whose value determines the type of file. The most relevant values of the d\_type attribute are shown in table \ref{table:dtype_values} \cite{dtype_dirent}.
+
+\begin{table}[htbp]
+\begin{tabular}{|c|c|}
+\hline
+\textbf{Value} & \textbf{Description} \\
+\hline
+\hline
+DT\_DIR (4) & Directory\\
+\hline
+DT\_REG (8) & Regular file\\
+\hline
+DT\_LNK (10) & Symbolic link\\
+\hline
+\end{tabular}
+\caption{Relevant values for d\_type in linux\_dirent64.}
+\label{table:dtype_values}
+\end{table}
+
+Therefore, our rootkit will hide the following entries when found in a linux\_dirent64:
+
+\begin{table}[htbp]
+\begin{tabular}{|c|c|c|}
+\hline
+\textbf{d\_name} & \textbf{d\_type} & \textbf{Purpose} \\
+\hline
+\hline
+ebpfbackdoor & DT\_DIR (8) & Hide persistence files.\\
+\hline
+SECRETDIR & DT\_REG (4) & Provide the rootkit a secret directory where to hide its files.\\
+\hline
+\end{tabular}
+\caption{Directory entries actively hidden by the rootkit.}
+\label{table:dtype_values}
+\end{table}
+
+% No me ha dado tiempo a implementar esto en codigo como menciono, se me ha ocurrido tarde
+Also, it is of interest to study what would happen if the directory entry to hide was not in the middle of the buffer, but rather it was the first one to be written. In this case, we cannot modify the d\_reclen of the previous entry to trick the user into skipping an entry. In order to illustrate this case, we are providing another technique (although this functionality is not available in the rootkit currently). Figure \ref{fig:getdents_firstentry} illustrates this alternative process.
+
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=15cm]{getdents_firstentry.png}
+	\caption{Technique to hide the first directory entry.}
+	\label{fig:getdents_firstentry}
+\end{figure}
+
+As we can observe in the figure, this technique is based on removing the directory entry completely, and overwriting it with all of the subsequent entries. After this change, only the return value of the system call would need to be changed (since now the buffer is shorter),
 

