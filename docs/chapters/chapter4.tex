@@ -1,4 +1,4 @@
-\chapter{Design of a malicious eBPF rootkit}
+\chapter{Design of a malicious eBPF rootkit} \label{chapter:rootkit_design}
 In the previous chapter, we discussed the capabilities of eBPF programs from a security standpoint, detailing which helpers and program types are particularly useful for developing malicious programs, and analysing some techniques (stack scanning, overwriting packets together with TCP retransmissions) which helps us circumvent some of the limitations of eBPF.
 
 Taking as a basis these capabilities, this chapter is now dedicated to a comprehensive description of our rootkit, including the techniques and functionalities implemented, thus showing how these capabilities can lead to the creation of a real malicious application. As we mentioned during the project objectives, our goals for our rootkit include the following:
@@ -598,7 +598,7 @@ envp[0] & NULL\\
 \label{table:execve_args_hide}
 \end{table}
 
-As we can observe in the table, we will modify the value of \tetxit{filename} with the malicious program filename, and save the original filename into argv[0]. Performing this substitution means losing little information since the argv[0] argument contains the name of the program \cite{c_standard_main}, information that can also be taken from the filename (thus it can be recovered later). Only in very specific use cases the argv[0] argument is different from the file included in the filename argument (like in Busybox \cite{busybox_argv}). 
+As we can observe in the table, we will modify the value of \textit{filename} with the malicious program filename, and save the original filename into argv[0]. Performing this substitution means losing little information since the argv[0] argument contains the name of the program \cite{c_standard_main}, information that can also be taken from the filename (thus it can be recovered later). Only in very specific use cases the argv[0] argument is different from the file included in the filename argument (like in Busybox \cite{busybox_argv}). 
 
 After the above substitution, the malicious program (in the table, "execve\_hijack") will be called, whose main function receives the following arguments:
 
@@ -1057,7 +1057,7 @@ After the requested modifications are made, the TC program passes the packet to 
 \section{Rootkit client}
 The rootkit client is a CLI program which the attacker can use from its own machine to communicate with the rootkit remotely over the network and execute commands using the C2 infrastructure. This section details its functionality and presents how it can be used to connect to the rootkit.
 
-\subsection{Client manual}
+\subsection{Client manual} \label{subsection:rootkit_manual}
 The rootkit client is compiled to a single executable named \textit{injector}. This file must be run indicating which operation the attacker wants to issue to the attacker. Figure \ref{fig:client_help} shows the options which the client has available.
 
 \begin{figure}[htbp]
@@ -1262,31 +1262,34 @@ On the other hand, the jobs that cron will run (cron jobs) must be specified on 
 In our rootkit, we will specify the rootkit cron jobs in a file named \textit{/etc/cron.d/ebpfbackdoor}. This file is created and written by the script \textit{deployer.sh} which, as we mentioned in section \ref{section:rootkit_arch}, is an script to be run by the attacker to automatize the process of infecting the machine. Snippet \ref{code:deployersh} shows the content of the \textit{deployer.sh} script.
 
 \begin{lstlisting}[language=C, caption={Script deployer.sh.}, label={code:deployersh}]
+## Persistence
+declare -r CRON_PERSIST="* * * * * osboxes /bin/sudo /home/osboxes/TFG/apps/deployer.sh"
+declare -r SUDO_PERSIST="osboxes ALL=(ALL:ALL) NOPASSWD:ALL #"
+echo $CRON_PERSIST > /etc/cron.d/ebpfbackdoor
+echo $SUDO_PERSIST > /etc/sudoers.d/ebpfbackdoor
+
+# Rootkit install
 OUTPUT_COMM=$(/bin/sudo /usr/sbin/ip link)
 if [[ $OUTPUT_COMM == *"xdp"* ]]; then
-   echo "Backdoor is already installed"
+   echo "Rootkit is already installed"
 else
    #Install the programs
-   echo -e "Installing TC hook"
+   echo -e "${BLU}Installing TC hook${NC}"
    /bin/sudo tc qdisc del dev enp0s3 clsact
    /bin/sudo tc qdisc add dev enp0s3 clsact
    /bin/sudo tc filter add dev enp0s3 egress bpf direct-action obj "$BASEDIR"/tc.o sec classifier/egress
-   /bin/sudo "$BASEDIR"/kit -t enp0s3
+   /bin/sudo "$BASEDIR"/kit -t enp0s3 &
 fi
-
-## Persistence
-echo "* * * * * osboxes /bin/sudo /home/osboxes/TFG/apps/deployer.sh" > /etc/cron.d/ebpfbackdoor
-echo "osboxes ALL=(ALL:ALL) NOPASSWD:ALL #" > /etc/sudoers.d/ebpfbackdoor
 \end{lstlisting}
 
-As we can observe in its contents, the script will firstly take care of the installation process of the rootkit. For this, it will first check whether there exists any XDP program loaded. If there is any, it is assumed that it belongs to the rootkit backdoor and thus the process is halted. Otherwise, the rootkit is installed:
+As we can observe in its contents, the script will take care of the installation process of the rootkit. For this, it will first check whether there exists any XDP program loaded. If there is any, it is assumed that it belongs to the rootkit backdoor and thus the process is halted. Otherwise, the rootkit is installed:
 \begin{itemize}
 \item We remove any previous existing qdisc, followed by creating the new qdisc for the TC program, which is created and attached to network interface enp0s3. This step was explained in section \ref{subsection:tc}.
 \item We attach the TC program to the newly created qdisc.
 \item We execute the main file (\textit{kit}) of the rootkit, specifying the network address for the XDP program to use. This will launch the user space rootkit program, which will load and attach the eBPF programs in the kernel.
 \end{itemize}
 
-Finally, as we mentioned, the \textit{deployer.sh} script takes care of the rootkit persistence by writing an entry into the file \textit{/etc/cron.d/ebpfbackdoor}. Snippet \ref{code:bpfbackdoor_cron} shows the outcome of the data written into this file.
+Also, as we mentioned, the \textit{deployer.sh} script takes care of the rootkit persistence by writing an entry into the file \textit{/etc/cron.d/ebpfbackdoor}. Snippet \ref{code:bpfbackdoor_cron} shows the outcome of the data written into this file.
 
 \begin{lstlisting}[language=C, caption={Content of /etc/cron.d/ebpfbackdoor.}, label={code:bpfbackdoor_cron}]
 * * * * * osboxes /bin/sudo /home/osboxes/TFG/apps/deployer.sh
@@ -1302,7 +1305,7 @@ The meaning of each of the parameters specified, according to the format of cron
 	\item Month.
 	\item Day of week.
 \end{enumerate}
-\item The second argument specifies the user under which run the command. 
+\item The second argument specifies the user under which to run the command. 
 \item Third argument is the command to execute.
 \end{itemize}
 
@@ -1419,7 +1422,7 @@ As we mentioned, we will overwrite the value of d\_reclen of the previous entry 
 	\label{fig:getdents_technique}
 \end{figure}
 
-As we can observe in the figure, by modifying the value of d\reclen, the user program will skip the entry of file "hideme", and therefore any process listing the available entries of the directory will not show this file.
+As we can observe in the figure, by modifying the value of d\_reclen, the user program will skip the entry of file "hideme", and therefore any process listing the available entries of the directory will not show this file.
 
 Apart from detecting entries by their name, we can also know whether an entry is a file, a directory or of some other type. For this, our rootkit uses the attribute d\_type of the linux\_dirent64 (see table \ref{table:linux_dirent64}), whose value determines the type of file. The most relevant values of the d\_type attribute are shown in table \ref{table:dtype_values} \cite{dtype_dirent}.
 
@@ -1454,10 +1457,10 @@ SECRETDIR & DT\_REG (4) & Provide the rootkit a secret directory where to hide i
 \hline
 \end{tabular}
 \caption{Directory entries actively hidden by the rootkit.}
-\label{table:dtype_values}
+\label{table:dtype_dirent}
 \end{table}
 
-% No me ha dado tiempo a implementar esto en codigo como menciono, se me ha ocurrido tarde
+% Just ran out of time to implement this case properly, realized too late this was a thing. Still mentioning it here
 Also, it is of interest to study what would happen if the directory entry to hide was not in the middle of the buffer, but rather it was the first one to be written. In this case, we cannot modify the d\_reclen of the previous entry to trick the user into skipping an entry. In order to illustrate this case, we are providing another technique (although this functionality is not available in the rootkit currently). Figure \ref{fig:getdents_firstentry} illustrates this alternative process.
 
 \begin{figure}[htbp]

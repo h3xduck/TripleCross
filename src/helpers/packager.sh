@@ -5,7 +5,7 @@
 #The current directory full path
 declare -r DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 #The location of the file where to write the full rootkit package
-declare -r OUTPUTDIR="/home/osboxes/TFG/apps/"
+declare -r OUTPUTDIR="$DIR/../../apps/"
 #A variable to determine whether to silence output of internal commands
 declare firstvar=$1
 

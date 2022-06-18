@@ -1,4 +1,4 @@
-// This code is based from the following tutorial:
+// This code is based on the following tutorial:
 // https://aticleworld.com/ssl-server-client-using-openssl-in-c/
 
 #include "openssl/err.h"
@@ -203,9 +203,9 @@ int server_run(int port) {
 	}
 	close(server); /* close server socket */
 
-	ERR_free_strings(); /* free memory from SSL_load_error_strings */
-	EVP_cleanup();      /* free memory from OpenSSL_add_all_algorithms */
-	SSL_CTX_free(ctx);  /* release context */
+	//ERR_free_strings(); /* free memory from SSL_load_error_strings */
+	//EVP_cleanup();      /* free memory from OpenSSL_add_all_algorithms */
+	//SSL_CTX_free(ctx);  /* release context */
 
 	return 0;
 }

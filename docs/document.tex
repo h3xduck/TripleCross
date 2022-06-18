@@ -313,6 +313,9 @@ hmargin=3cm
 \clearpage
 \pagenumbering{arabic}
 
+% This prevents the underscores going out of the margins
+\renewcommand\_{\textunderscore\allowbreak}
+
 \input{chapters/chapter1}
 \input{chapters/chapter2}
 \input{chapters/chapter3}
