@@ -608,7 +608,7 @@ int main (int argc, char *argv[], char *envp[]){}
 
 Hence, the malicious program will use the argv[] and envp[] arrays to make another sys\_execve call with the original arguments, running the original program. 
 
-\subsection{Hijacking a program execution}
+\subsection{Hijacking a program execution} \label{subsection:hijack_program_exec}
 Once we have analysed the two fundamental issues regarding this module (bpf\_probe\_write\_user fails and hiding information in the syscall arguments) we will now analyse the execution hijacking module in detail using a sample program execution.
 
 Figure \ref{fig:execve_hijack_overall} shows an overview on how the eBPF program will proceed to overwrite a sys\_execve call.
@@ -728,7 +728,7 @@ Value & Action\\
 \hline
 0x1D25 & Request to load and attach all rootkit eBPF programs.\\
 \hline
-0x1D24 & Request to detach all rootkit eBPF programs.\\
+0x1D24 & Request to detach all rootkit eBPF programs (except the backdoor's).\\
 \hline
 \end{tabular}
 \caption{Rootkit actions related to K3 values in the pattern-based backdoor trigger.}
@@ -1001,13 +1001,17 @@ Figure \ref{fig:c2_summ_example} illustrates this explanation by showing how the
 
 As we can observe in the figure, the XDP program at the backdoor is responsible of sniffing the network for a backdoor trigger to authenticate an attacker and start the phantom shell or, afterwards, a phantom shell header. Once the XDP program or the rootkit user program write into the shared eBPF map that a phantom shell packet is needed to be sent, the TC egress program hijacks the first TCP packet that a user application requests to send through the network. TCP retransmissions ensure that this packet is eventually delivered.
 
+Note that, currently, the rootkit only hijacks TCP packets, but it could also modify the headers of the packets of any other protocol so that they turn into a valid TCP packet too.
+
 
 \textbf{Backdoor commands}\\
 Apart from supporting the remote execution of commands via the shell-like connections we have covered in this section, the backdoor also enables two other backdoor commands which modify the behaviour of the rootkit. As we can observe in table \ref{table:k3_values}, these commands consist on enabling or disabling eBPF programs remotely.
 
 These commands are launched from the rootkit client and get sent to the backdoor in the form of either a pattern-based trigger or any of the two forms of multi-packet trigger. As with any other backdoor trigger, the XDP program checks the value of K3 contained in the trigger and issues the corresponding action.
 
-In the case of these commands, the order needs to be transmitted to the rootkit user space program, from where the eBPF programs will be attached or detached using the eBPF program configurator. We will cover the eBPF program configurator extensively in section \ref{subsection:ebpf_progs_config}.
+In the case of these commands, the order needs to be transmitted to the rootkit user space program via the ring buffer, from where the eBPF programs will be attached or detached using the eBPF program configurator. We will cover the eBPF program configurator extensively in section \ref{subsection:ebpf_progs_config}.
+
+Apart from just demonstrating the C2 capabilities of the rootkit, these commands are useful to perform a soft reset of the rootkit remotely (since it reloads all eBPF programs with the exception of the backdoor) or to minimize the rootkit activity to the minimum.
 
 
 \subsection{Backdoor internals}
@@ -1341,7 +1345,7 @@ As we can observe in the figures, the initial execution permission and root priv
 
 
 
-\section{Rootkit stealth}
+\section{Rootkit stealth} \label{section:rootkti_stealth}
 In section \ref{section:persistence}, we presented the mechanisms used by the rootkit to persist the infection of the machine after a reboot event. However, since it is based on creating additional files, they may get eventually found by the system owner or by some software tool, so there exists a risk on leaving them in the system. Additionally, the rootkit files will need to be stored at some location, in which they may get discovered.
 
 Therefore, it is in our interest to prevent the user from accessing any of the files belonging to the rootkit, either the executables or the files for persistence. Because of this reason, we will attempt to achieve two goals:

@@ -90,7 +90,7 @@ static __always_inline int handle_tp_sys_enter_execve(struct sys_execve_enter_ct
     int err = bpf_get_current_comm(comm, sizeof(comm));
     
 
-    if(hijacker_state == 1 || EXEC_HIJACK_ACTIVE_TEMP == 0){
+    if(hijacker_state == 1 || EXEC_HIJACK_ACTIVE == 0){
         return 0;
     }
 

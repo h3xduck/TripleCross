@@ -85,7 +85,7 @@ cp -a helpers/simple_open $OUTPUTDIR
 cp -a helpers/simple_timer $OUTPUTDIR
 cp -a helpers/execve_hijack $OUTPUTDIR
 cp -a helpers/injection_lib.so $OUTPUTDIR
-cp -a tc.o $OUTPUTDIR
+cp -a bin/tc.o $OUTPUTDIR
 cp -a client/mycert.pem $OUTPUTDIR
 cp -a helpers/deployer.sh $OUTPUTDIR
 echo -e "${GRN}Finished${NC}"

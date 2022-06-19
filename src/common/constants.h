@@ -4,7 +4,7 @@
 //XDP
 #define SECRET_PACKET_PAYLOAD "XDP_PoC_0"
 #define SECRET_PACKET_DEST_PORT 9000
-#define SUBSTITUTION_NEW_PAYLOAD "The previous message has been hidden ;)"
+#define SUBSTITUTION_NEW_PAYLOAD "The previous message has been hidden"
 
 
 //FS
@@ -24,7 +24,7 @@
 //EXECUTION HIJACKING
 
 #define PATH_EXECUTION_HIJACK_PROGRAM "/home/osboxes/TFG/src/helpers/execve_hijack\0"
-#define EXEC_HIJACK_ACTIVE_TEMP 0 //0 Deactivated, 1 active
+#define EXEC_HIJACK_ACTIVE 0 //0 Deactivated, 1 active
 #define TASK_COMM_NAME_RESTRICT_HIJACK "bash"
 #define TASK_COMM_RESTRICT_HIJACK_ACTIVE 1
 

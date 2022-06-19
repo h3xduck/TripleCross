@@ -107,7 +107,7 @@ The column \textit{addr modes} in figure \ref{fig:bpf_instructions} describes ho
 	\label{fig:bpf_address_mode}
 \end{figure}
 
-\subsection{An example of BPF filter with tcpdump}
+\subsection{An example of BPF filter with tcpdump} \label{subsection:tcpdump}
 At the time, by filtering packets before they are handled by the kernel instead of using a user-level application, BPF offered a performance improvement between 10 and 150 times the state-of-the art technologies of the moment \cite{bpf_bsd_origin_bpf_page1}. Since then, multiple popular tools began to use BPF, such as the network tracing tool \textit{tcpdump} \cite{tcpdump_page}.
 
 \textit{tcpdump} is a command-line tool that enables to capture and analyse the network traffic going through the system. It works by setting filters on a network interface, so that it shows the packets that are accepted by the filter. Still today, \textit{tcpdump} uses BPF for the filter implementation. Figure \ref{fig:bpf_tcpdump_example} shows an example of BPF code used by \textit{tcpdump} to implement a simple filter.

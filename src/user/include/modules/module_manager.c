@@ -123,7 +123,6 @@ int activate_all_modules_config(){
 
 int deactivate_all_modules_config(){
     //XDP
-    //This is not deactivated, since it is needed for backdoor to keep listening
     //module_config.xdp_module.all = OFF;
 
     //SCHED
@@ -143,28 +142,39 @@ int deactivate_all_modules_config(){
 
 int unhook_all_modules(){
     //Alias
+    module_config_t config = module_config;
     module_config_attr_t attr = module_config_attr;
     int ret;
 
     //XDP
-    ret = detach_xdp_all(attr.skel);
-    if(ret!=0) return -1;
+    if(config.xdp_module.all == OFF){
+        ret = detach_xdp_all(attr.skel);
+        if(ret!=0) return -1;
+    }
 
     //SCHED
-    ret = detach_sched_all(attr.skel);
-    if(ret!=0) return -1;
+    if(config.exec_module.all == OFF){
+        ret = detach_sched_all(attr.skel);
+        if(ret!=0) return -1;
+    }
 
     //FS (File system)
-    ret = detach_fs_all(attr.skel);
-    if(ret!=0) return -1;
+    if(config.fs_module.all == OFF){
+        ret = detach_fs_all(attr.skel);
+        if(ret!=0) return -1;
+    }
 
     //EXEC
-    ret = detach_exec_all(attr.skel);
-    if(ret!=0) return -1;
+    if(config.exec_module.all == OFF){
+        ret = detach_exec_all(attr.skel);
+        if(ret!=0) return -1;
+    }
 
     //INJECTION
-    detach_injection_all(attr.skel);
-    if(ret!=0) return -1;
+    if(config.injection_module.all == OFF){
+        detach_injection_all(attr.skel);
+        if(ret!=0) return -1;
+    }
 
     return 0;    
 }

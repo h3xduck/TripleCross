@@ -47,15 +47,17 @@ else
 endif
 
 .PHONY: all
-all: $(APPS) tckit
+all: $(APPS) tckit help
 
 .PHONY: clean
 clean:
-	$(call msg,CLEAN)
+	$(call msg, CLEANING ROOTKIT FILES)
 	$(Q)rm -rf $(OUTPUT) user/$(APPS)
 	$(Q)rm -rf $(OUTPUT) ebpf/$(APPS)
 	$(Q)rm -rf $(OUTPUT) bin/*
 	$(Q)rm -f $(USER_INCLUDES_OBJ)
+	$(call msg, CLEANING HELPER FILES)
+	$(Q)$(MAKE) -C ./helpers/ clean
 
 $(OUTPUT) $(OUTPUT)/libbpf:
 	$(call msg,MKDIR,$@)
@@ -100,9 +102,15 @@ $(APPS): %: $(OUTPUT)/%.o $(LIBBPF_OBJ) $(USER_INCLUDES_OBJ) | $(OUTPUT)
 	$(Q)$(CC) $(CFLAGS) $(INCLUDES) $^ -lelf -lbpf -lz  -lssl -lcrypto -Wno-deprecated-declarations -o bin/$@ -ldl
 	$(Q)rm $(USER_INCLUDES_OBJ)
 
+# TC egress program
 tckit: $(abspath $(EBPF)/include/bpf)/tc.c $(LIBBPF_OBJ)
 	clang -O2 -emit-llvm -g -c $(abspath $(EBPF)/include/bpf)/tc.c -o - | \
-	llc -march=bpf -mcpu=probe -filetype=obj -o tc.o
+	llc -march=bpf -mcpu=probe -filetype=obj -o bin/tc.o
+
+
+# Helper programs
+help:
+	$(MAKE) -C ./helpers
 
 
 # delete failed targets
