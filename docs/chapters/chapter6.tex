@@ -1,27 +1,77 @@
 \chapter{Related work} \label{chapter:related_work}
 % Comparison of the rootkit with other eBPF and non eBPF rootkits.
-During this research work, we have developed a rootkit that loads itself in the kernel, incorporating functionalities at the network, and at both the user and kernel space. Although eBPF, the technology used for this rootkit, has been rarely explored before, many of the techniques presented here directly correspond or mimic those historically incorporated in classic rootkits, while others are also inspirated in techniques already explored with eBPF in recent research. 
+In this work, we have developed a rootkit that loads itself in the kernel
+and incorporates network-level capabilities and other functionalities both
+at user and kernel space. Although eBPF, the technology used for this
+rootkit, has been rarely explored before, some of the techniques presented
+here are equivalent (or mimic) those historically incorporated in classic
+rootkits, while others are also inspired by malicious uses of eBPF explored
+in recent research. 
 
-In this section, we will provide a comprehensive review on previous research and work on rootkits, its types and most relevant examples, apart from offering a comparison in terms of techniques and functionality with them. In particular, we will attempt to highlight the differences of our eBPF rootkit with respect with others that can be built with other methods and also compared to those already built using eBPF.
+In this chapter, we provide a comprehensive review of previous
+work on UNIX/Linux rootkits, their main types and most relevant examples.
+We also offer a comparison in terms of techniques and functionality with
+previous families. In particular, we highlight the differences of our
+eBPF rootkit with respect to others that rely on traditional methods,
+and also to those already built using eBPF.
 
 \section{User-mode rootkits}
-As we mentioned during section \ref{section:motivation}, user-mode rootkits are those that are run at the same level as common user applications. They do not require to be loaded at the kernel to tamper with the execution of programs, but rather they usually redirect or substitute common system programs to achieve their malicious purposes.
+As discussed in Section \ref{section:motivation}, user-mode rootkits
+are those that are run at the same level as common user applications. They
+do not require to be loaded in the kernel to tamper with the execution of
+programs. Instead, they usually redirect or substitute common system
+programs to achieve their malicious purposes.
 
-The most popular and commonly found technique in user-mode rootkits is the LD\_PRELOAD technique, which enables to redefine function calls at shared libraries. LD\_PRELOAD is an environment variable interpreted by the dynamic linker at runtime that indicates to preload a shared library before those already indicated at the ELF file \cite{ldpreload_pros}. If this preloaded library implements the same function as some other library, then the preloaded function overrides the original. This means that a rootkit may define functions into programs so that its custom malicious code is run instead of that from the original shared libraries, without the need of modifying any of these pro
+The most popular and commonly found technique in user-mode rootkits is the
+LD\_PRELOAD technique, which enables to redefine function calls at shared
+libraries. LD\_PRELOAD is an environment variable interpreted by the
+dynamic linker at runtime that indicates to preload a shared library
+before those already indicated at the ELF file \cite{ldpreload_pros}. If
+this preloaded library implements the same function as some other library,
+then the preloaded function overrides the original. This means that a
+rootkit may define functions with malicious functionality that will run in
+any program that loads the library instead of that from the original
+function, without the need of modifying any of these programs.
 
-This type of rootkits are considered trivial to detect by an investigator, however they are easy to write and their capabilities can be quickly extended, which has motivated the creation of many LD\_PRELOAD rootkits.
+This type of rootkits are considered trivial to detect by an investigator,
+however they are easy to write and their capabilities can be quickly
+extended, which has motivated the creation of many LD\_PRELOAD rootkits.
 
-\subsection{Jynx/Jynx2}
-Jynx \cite{jynx_github} is one of the most well-known rootkits using the LD\_PRELOAD technique. It injects the name of its malicious library into the file \textit{/etc/ld.so.preload}, which acts similarly to defining the LD\_PRELOAD environment variable for each executable, but instead applying this setting to any program (since every program checks this file to know the libraries to preload) \cite{ldpreload_so_jynx}.
+\subsection{Jynx/Jynx2} Jynx \cite{jynx_github} is one of the most
+well-known rootkits using the LD\_PRELOAD technique. It injects the name of
+its malicious library into the file \textit{/etc/ld.so.preload}, which acts
+similarly to defining the LD\_PRELOAD environment variable for each
+executable, but instead applying this setting to any program (since every
+program checks this file to know the libraries to preload)
+\cite{ldpreload_so_jynx}.
 
-Its first version, Jynx, was best known for implementing a backdoor by hooking the function accept() \cite{ldpreload_pros_2327}. This function, responsible of accepting a connection, was defined in a preloaded malicious library so that any connection (specifically encrypted ones) could be checked to come from a remote attacker. If they were, the rootkit would accept and establish a connection, followed by executing a remote root shell which provided the attacker with remote access.
+Its first version, Jynx, was best known for implementing a backdoor by
+hooking the socket function accept() \cite{ldpreload_pros_2327}. This
+function, responsible of accepting a connection, was defined in a preloaded
+malicious library so that any connection (specifically encrypted ones)
+could be checked to come from a remote attacker. If that is the case, the
+rootkit would accept and establish a connection, and then execute a remote
+root shell which provided the attacker with remote access.
 
-In its later version Jynx2 \cite{jynx2_github}, the rootkit incorporated other mechanisms focused on hiding the rootkit activity \cite{jynx2_infosecinstitute}. This included hiding Jynx's connections by hooking read calls at the /proc filesystem (which we covered in section \ref{section:proc_filesystem} so that processes related with the rootkit activity remain undisclosed. Other functionalities include file hiding, privilege escalation or multi-factor authentication in the rootkit backdoor.
+In its later version, Jynx2 \cite{jynx2_github}, the rootkit incorporated
+other mechanisms focused on hiding the rootkit activity
+\cite{jynx2_infosecinstitute}. This included hiding Jynx's connections by
+hooking read calls at the \textit{/proc} filesystem (which we covered in
+section \ref{section:proc_filesystem} so that processes related with the
+rootkit activity remain undisclosed. Other functionalities include file
+hiding, privilege escalation, or multi-factor authentication in the rootkit
+backdoor.
 
 \subsection{Azazel}
-Azazel is another LD\_PRELOAD rootkit originally based on Jynx and that extends its functionalities in multiple areas, including additional anti-debugging and anti-detection techniques. This rootkit incorporates more hooked functions into its preloaded library to achieve capabilities such as:
+Azazel is another LD\_PRELOAD rootkit originally based on Jynx and that
+extends its functionalities in multiple areas, including additional
+anti-debugging and anti-detection techniques. This rootkit incorporates
+more hooked functions into its preloaded library to achieve capabilities
+such as:
 \begin{itemize}
-\item Avoid detection by programs such as ldd (which lists libraries to be loaded in an executable), ps (which lists processes) or lsof (that displays opened files by processes).
+\item Avoid detection by programs such as \textit{ldd} (which lists
+libraries to be loaded in an executable), \textit{ps} (which lists
+processes) or \textit{lsof} (that displays opened files by processes).
 \item Hide rootkit files and processes.
 \item Hide rootkit-related network connections.
 \item Incorporate backdoors (one launching an encrypted connection, another in plaintext).
@@ -30,35 +80,102 @@ Azazel is another LD\_PRELOAD rootkit originally based on Jynx and that extends 
 \end{itemize}
 
 \subsection{TripleCross comparison}
-Jynx and specially Azazel are advanced rootkits with many functionalities, but they are restricted both because of the LD\_PRELOAD technique and because of working from the user space.
+Jynx---and, especially, Azazel---are advanced rootkits with many
+functionalities, but they are restricted both because of the LD\_PRELOAD
+technique and because of working from the user space.
+%
+In particular, the use of LD\_PRELOAD in a program can be detected by the
+\textit{export} command and removed via \textit{unset}
+\cite{ld_preload_detect}. In addition, this technique does not work on
+statically-linked programs, that is, those where the calls to libraries
+and exported functions are resolved at compile time \cite{ldpreload_pros}.
+On the other hand, because they only have access to user-space programs and
+components, their activities can be more easily detected than a rootkit
+working from inside the kernel.
 
-In particular, the use of LD\_PRELOAD in a program can be detected by the \textit{export} command and removed via \textit{unset} \cite{ld_preload_detect}. This technique also does not work on statically-linked programs, that is, those at which the calls at libraries and exported functions are resolved at compile time \cite{ldpreload_pros}. On the other hand, because they only have access to user space programs and components, their activities can be more easily detected than a rootkit working from inside the kernel.
+Since TripleCross is composed of both a kernel-side component (the eBPF
+programs at the kernel) and a user-side component (the rootkit user program
+that communicates with eBPF), the capabilities of user-mode rootkits are
+more limited than those that could be eventually implemented in
+TripleCross, yet they are easier and faster to implement, and do not
+require loading an eBPF program in the kernel, an event which is likely to
+be logged by EDRs and IDSs.
 
-Since TripleCross is composed of both a kernel-side component (the eBPF programs at the kernel) and a user-side component (the rootkit user program that communicates with eBPF), the capabilities of user-mode rootkits are more limited than those that could be eventually implemented in TripleCross, yet they are easier and faster to implement, and do not require loading an eBPF program in the kernel, an event which is likely to be logged by EDRs and IDSs. 
-
-With respect of the capabilities offered, the ability to hook function calls by preloading libraries so that malicious code is run can be considered analogous to eBPF tracepoint, kprobe and uprobes programs. On one hand, eBPF can modify parameters and execute code from the kernel transparently from user programs whilst, on the other hand, user-mode rootkits may execute any instruction at the preloaded libraries, but eBPF is restricted to a certain range of operations and those offered by eBPF helpers. Nevertheless, both types of rootkits are able to implement the key features of rootkits, including a backdoor and C2 system, and basic stealth mechanisms.
+With respect to the capabilities offered, the ability to hook function
+calls by preloading libraries so that malicious code is run can be
+considered analogous to eBPF tracepoint, kprobe, and uprobes programs. On
+the one hand, eBPF can modify parameters and execute kernel code
+transparently from user programs. On the other hand, user-mode
+rootkits may execute any instruction on the preloaded libraries, but eBPF
+is restricted to a certain range of operations and those offered by eBPF
+helpers. Nevertheless, both types of rootkits are able to implement the key
+features needed for a usual rootkit, including a backdoor and a C2 system,
+in addition to the basic stealth mechanisms.
 
 \section{Kernel-mode rootkits}
-As we mentioned during section \ref{section:motivation}, kernel-mode rootkits are run at the same level of privilege as the operating system, thus enjoying unrestricted access in both the kernel and user space. These are the hardest and riskiest to develop (since they need to work with kernel structures and any error could cause a kernel panic), yet the offer the richest and most powerful variety of functionalities. Also, they mostly remain hidden from the user space, thus boosting their stealth, while at the same time thye are capable of  further hiding their activities thanks to their capabilities at both the user and kernel space.
+As described in Section \ref{section:motivation}, kernel-mode
+rootkits are run at the same level of privilege as the operating system,
+thus enjoying unrestricted access in both the kernel- and user-space. These
+are the hardest and riskiest to develop (since they need to work with
+kernel structures and any error could cause a kernel panic), yet the offer
+the richest and most powerful variety of functionalities. Also, they mostly
+remain hidden from the user space, thus boosting their stealth, while at
+the same time they are capable of further hiding their activities thanks
+to their capabilities at both the user- and kernel-space.
 
-Historically, kernel-mode rootkits in Unix systems have been built as Loadable Kernel Modules (LKM), whose original purpose is to expand the capabilities of the kernel by adding new modules for specific tasks without the need of recompiling or even reloading the kernel. 
+Historically, kernel-mode rootkits in UNIX systems have been built as
+Loadable Kernel Modules (LKM), whose original purpose is to expand the
+capabilities of the kernel by adding new modules for specific tasks without
+the need of recompiling or even reloading the kernel. 
 
 \subsection{SucKIT rootkit}
-Although the great majority of kernel-mode rootkits are loaded as LKMs, SucKIT \cite{suckit_rootkit} belongs to one of the exceptions. This old rootkit uses the \textit{/dev/kmem} special file \cite{dev_kmem} for accessing kernel memory, including both reading and writing. This means that the rootkit could potentially find and overwrite key data at the kernel \cite{suckit_lasamhna}.
+Although the great majority of kernel-mode rootkits are loaded as LKMs,
+SucKIT \cite{suckit_rootkit} remains one of the exceptions to this rule.
+This old rootkit uses the \textit{/dev/kmem} special file \cite{dev_kmem}
+for directly accessing kernel memory, including both reading and writing.
+This means that the rootkit could potentially find and overwrite key data
+at the kernel \cite{suckit_lasamhna}.
 
-Nowadays, this type of rootkit is not relevant outside of old machines, since distributions such as Debian have limited access to this file to kernels compiled with the CONFIG\_DEVKMEM parameter \cite{dev_kmem_debian} which is disabled by default \cite{dev_kmem_off_default}.
+Nowadays, this type of rootkit is not relevant except for historical
+reasons, since distributions such as Debian have limited access to this file to
+kernels compiled with the CONFIG\_DEVKMEM parameter \cite{dev_kmem_debian}
+which is disabled by default \cite{dev_kmem_off_default}.
 
 \subsection{Diamorphine}
-Diamorphine \cite{diamorphine_github} is one of the best known kernel-mode rootkits, and it is implemented as a LKM. This type of rootkits commonly intercept and hook system calls from the kernel, executing malicious code (together with the original function) with the aim of achieving different malicious purposes.
+Diamorphine \cite{diamorphine_github} is one of the best known kernel-mode
+rootkits, and it is implemented as a LKM. This type of rootkits commonly
+intercept and hook system calls from the kernel, executing malicious code
+(together with the original function) with the aim of achieving different
+malicious purposes.
 
-When a system call takes place in the user space, an interrupt is issued to the kernel, which checks the type of syscall that has been issued. This is done using a syscall table, which relates each system call to the function at the kernel where its implementation is stored. A common technique by LKMs is to modify the syscall table, so that it points to the functions implemented by the LKM, where the malicious code will be executed \cite{incibe_rootkit_lkm}. This code may be a modified version of the original (e.g.: a sys\_getdents64 call that lists files but hides those belonging to the rootkit) or modify kernel and user data received at the hooked function.
+When a system call takes place in the user space, an interrupt is issued to
+the kernel, which checks the type of syscall that has been issued. This is
+done using a syscall table, which relates each system call to the function
+at the kernel where its implementation is stored. A common technique by
+LKMs is to modify the syscall table, so that it points to the functions
+implemented by the LKM, where the malicious code will be executed
+\cite{incibe_rootkit_lkm}. This code may be a modified version of the
+original (e.g.: a sys\_getdents64 call that lists files but hides those
+belonging to the rootkit) or modify kernel and user data received at the
+hooked function.
 
-Because LKMs are run directly in the kernel, they are not limitied and thus they can read, write and allocate kernel and user memory freely. It is also possible to hook and modify data at internal kernel functions by means of, for instance, kprobe programs.
+Because LKMs are run directly inside the kernel, they are not limitied and thus
+they can read, write and allocate kernel and user memory freely. It is also
+possible to hook and modify data at internal kernel functions by means of,
+for instance, kprobe programs.
 
-In the case of Diamorphine, it uses the aforementioned capabilities to hide processes, provide local privilege escalation, hide files and directories and implement a messaging protocol using system calls (it enables a malicious user to locally communicate actions to the rootkit with \textit{kill} signals). Most importantly, it hides itself from commands such as \textit{lsmod}, which list the LKMs loaded into the kernel, thus turning invisible.
+In the case of Diamorphine, it uses the aforementioned capabilities to hide
+processes, provide local privilege escalation, hide files and directories
+and implement a messaging protocol using system calls (it enables a
+malicious user to locally communicate actions to the rootkit with
+\textit{kill} signals). Most importantly, it hides itself from commands
+such as \textit{lsmod}, which list the LKMs loaded into the kernel, thus
+turning invisible.
 
 \subsection{Reptile}
-Reptile \cite{reptile_github} is another LKM rootkit which incorporates advanced stealth and network functionalities. Some of its most relevant capabilities include:
+Reptile \cite{reptile_github} is another LKM rootkit which incorporates
+advanced stealth and network functionalities. Some of its most relevant
+capabilities include:
 \begin{itemize}
 \item Hiding files, directories, processes and network connections related to the rootkit activity.
 \item A backdoor that is operated via port-knocking triggers (which we explained in section \ref{subsection:triggers}).
@@ -66,45 +183,132 @@ Reptile \cite{reptile_github} is another LKM rootkit which incorporates advanced
 \end{itemize}
 
 \subsection{TripleCross comparison}
-Although TripleCross incorporates many of the techniques mentioned in Reptile and Diamorphine (backdooring, modification of files and directories or local privilege escalation) these capabilities are achieved using workarounds for the limitations of eBPF programs, namely not having write access in kernel memory. For instance, Reptile can grant root privileges to any program by overwriting the kernel data structure storing the user privileges, whilst this is not achievable for TripleCross, which has to take advantage of user buffers when reading the \textit{/etc/sudoers} file.
+Although TripleCross incorporates many of the techniques mentioned in
+Reptile and Diamorphine (backdooring, modification of files and directories
+or local privilege escalation) these capabilities are achieved using
+workarounds for the limitations of eBPF programs, namely not having write
+access in kernel memory. For instance, Reptile can grant root privileges to
+any program by overwriting the kernel data structure storing the user
+privileges, whilst this is not achievable for TripleCross, which has to
+take advantage of user buffers when reading the \textit{/etc/sudoers}
+file.
 
-Therefore, LKMs are more powerful since they enjoy almost no restrictions in the kernel, while TripleCross' modules will always be limited to those capabilities achievable without kernel memory modifications. In terms of developing complexity, LKMs are more difficult to develop, since eBPF programs will never crash the kernel (because of the eBPF verifier), whilst developing kernel modules may incur in causing kernel panics, often because of tiny kernel differences between kernel versions, which leads to having to adjust the LKM for multiple kernels. On the other hand, although an eBPF program is guaranteed to work once in the kernel, it requires deep knowledge of which actions are accepted by the verifier, and about which are the limitations of these programs.
+Therefore, LKMs are more powerful since they enjoy almost no restrictions
+in the kernel, while TripleCross' modules will always be limited to those
+capabilities achievable without kernel memory modifications. In terms of
+developing complexity, LKMs are more difficult to develop, since eBPF
+programs will never crash the kernel (because of the eBPF verifier), whilst
+developing kernel modules may incur in causing kernel panics, often because
+of tiny kernel differences between kernel versions, which leads to having
+to adjust the LKM for multiple kernels. On the other hand, although an eBPF
+program is guaranteed to work once in the kernel, it requires deep
+knowledge of which actions are accepted by the verifier, and about which
+are the limitations of these programs.
 
-With respect to the techniques used we can also find similarities, since both LKMs and eBPF rootkits make heavy use of hooking syscalls and kernel functions, with the only difference that the instructions that can be executed at the eBPF probe function are restricted to those allowed by the eBPF helpers, whilst LKMs may read or write any memory section. In terms of the network, both eBPF and LKMs enjoy similar capabilities, with the exception that LKMs may create their own packets, whilst eBPF may only modify or drop existing ones. Finally, both LKMs and eBPF rootkits may execute user space programs (in eBPF, by hijacking calls or triggering actions via a messaging system such as a ring buffer, and in LKMs using, for instance, the function call\_usermodehelper \cite{usermode_helper_lkm}).
+With respect to the techniques used we can also find similarities, since
+both LKMs and eBPF rootkits make heavy use of hooking syscalls and kernel
+functions, with the only difference that the instructions that can be
+executed at the eBPF probe function are restricted to those allowed by
+the eBPF helpers, whilst LKMs may read or write any memory section. In
+terms of network-related functions, both eBPF and LKMs enjoy similar
+capabilities, with the exception that LKMs may create their own packets,
+whilst eBPF may only modify or drop existing ones. Finally, both LKMs and
+eBPF rootkits may execute user space programs (in eBPF, by hijacking calls
+or triggering actions via a messaging system such as a ring buffer, and in
+LKMs using, for instance, the function call\_usermodehelper
+\cite{usermode_helper_lkm}).
 
 
 \section{eBPF rootkits}
-Although eBPF is loaded at the kernel like kernel-mode rootkits, we will analyse this type of rootkits separately given their novelty and the difference of their capabilities with classic LKMs.
+Although eBPF is loaded at the kernel like kernel-mode rootkits, we will
+analyze this type of rootkits separately given their novelty and the
+difference of their capabilities with classic LKMs.
 
-Most research work on the offensive capabilities of eBPF has been conducted in the recent years, while the first publicly-released eBPF-only rootkits date from 2021. In particular, the work on this matter by Jeff Dileo and Andy Olsen from NCC Group firstly at the 35th Chaos Communication Congress (35C3) in 2018 \cite{god_ebpf} and later from Jeff Dileo at DEFCON 27 in 2019 \cite{evil_ebpf} remain as one one of the first efforts to explore the capabilities of eBPF applied to computer security. Between others advancements, the capabilities of eBPF helpers such as bpf\_probe\_write\_user() or the possibility of hooking and modifying syscalls are first discussed in the first congress. On the other hand his work at DEFCON 27 shows the ROP technique for achieving library injection which we have discussed in section \ref{subsection:rop_ebpf}. NCC Group has publicly available a set of programs developed in BCC showing a proof of concept for this technique \cite{evil_ebpf_github}.
+Most research work on the offensive capabilities of eBPF has been conducted
+in recent years, while the first publicly-released eBPF-only rootkit dates
+from 2021. The work on this matter by Jeff Dileo and Andy Olsen from NCC
+Group appeared first in 2018 at the 35th Chaos Communication Congress
+(35C3) \cite{god_ebpf}, and later by Jeff Dileo at DEFCON 27 (2019)
+\cite{evil_ebpf}. These works remain one of the first efforts to explore
+the capabilities of eBPF applied to computer security. Between others
+advancements, the capabilities of eBPF helpers, such as
+bpf\_probe\_write\_user() or the possibility of hooking and modifying
+syscalls, were first discussed in the CCC presentation. On the other
+hand, the work presented at DEFCON 27 introduces the ROP technique for
+achieving library injection, which we have discussed in section
+\ref{subsection:rop_ebpf}. NCC Group has made publicly available a set of
+programs developed in BCC showing a proof of concept for this technique
+\cite{evil_ebpf_github}.
 
-In 2021, the work of Pat Hogan presented at DEFCON 29 \cite{bad_ebpf} further elaborates onto the offensive capabilities of eBPF both in the network and at the user space. Specifically, the possibilities of eBPF network programs as backdoors with C2 functionality are discussed, together with the capabilities of eBPF to modify data read from critical files, such as \textit{/etc/sudoers}. Although not a rootkit by itself, Hogan released a set of tools that demonstrate some of these capabilities \cite{bad_ebpf_github}, including local privilege escalation, hiding processes or replacing the content of files.
+In 2021, the work of Pat Hogan presented at DEFCON 29 \cite{bad_ebpf}
+further elaborates on the offensive capabilities of eBPF both in the
+network and at the user space. Specifically, the possibilities of eBPF
+network programs as backdoors with C2 functionality are discussed, together
+with the capabilities of eBPF to modify data read from critical files, such
+as \textit{/etc/sudoers}. Although not a rootkit by itself, Hogan released
+a set of tools that demonstrate some of these capabilities
+\cite{bad_ebpf_github}, including local privilege escalation, hiding
+processes, or replacing the content of files.
 
 \subsection{Ebpfkit}
-Ebpfkit is the first publicly released rootkit fully developed using eBPF. It was presented on 2021 by Guillaume Fournier and Sylvain Afchain from Datadog at DEFCON 29 \cite{ebpf_friends}, and it is also available at GitHub \cite{ebpf_friends_github}. The same rootkit was also presented in BlackHat 2021 with some additional functionalities \cite{ebpf_friends_blackhat}. This rootkit uses the Go version of the libbpf library.
+Ebpfkit is the first publicly released rootkit fully developed using eBPF.
+It was presented in 2021at DEFCON 29 by Guillaume Fournier and Sylvain Afchain from
+Datadog \cite{ebpf_friends}, and it is also available at
+GitHub \cite{ebpf_friends_github}. The same rootkit was also presented at
+BlackHat 2021 with some additional functionalities
+\cite{ebpf_friends_blackhat}. This rootkit uses the Go version of the
+libbpf library.
 
-The work of Fournier and Afchainte is developed around the three fundamental pillars on which eBPF programs operate: the network, the user space and the kernel space.
+The work of Fournier and Afchainte is developed around the three
+fundamental pillars on which eBPF programs operate: the network, the user
+space and the kernel space.
 \begin{itemize}
 \item In the network, ebpfkit incorporates the first eBPF backdoor with C2 capabilities powered by an XDP and TC program. It presents for the first time the TCP retransmissions technique we explained in section \ref{subsection:tcp} for sending new packets from the backdoor. It also incorporates a network scanning functionality based on this technique.
 %TODO note that the chapter 3 needs to be modified to explain the technique a bit.
 \item In the kernel space, ebpfkit incorporates hooks at open and read syscalls, with the purpose of hiding the rootkit (such as hiding the PID at the proc filesystem) or adding custom ssh keys when the keys file is read by the sshd process. Most importantly, it incorporates the first technique to hide the warning log messages shown in the kernel log buffer, which we mentioned in section \ref{subsection:bpf_probe_write_apps}. This technique works by hooking sys\_read calls during the attachment process, during which the eBPF program will indicate the kernel that nothing is available to be read from the buffer by means of bpf\_override\_return(), followed by overwritting the warning messages using bpf\_probe\_write\_user().
-\item In the user space, ebpfkit incorporates multiple techniques to target specific versions of common software by hooking their function calls using uprobes and modifying its arguments. An example of this is bypassing the protection of Runtime Application Self Protection (RASP) software \cite{rasps}, which are programs oriented towards monitoring the data in a program to prevent malicious data input by an attacker, so that a SQL injection attack \cite{sql_injection} could take place.
+\item At user space, ebpfkit incorporates multiple techniques to target specific versions of common software by hooking their function calls using uprobes and modifying its arguments. An example of this is bypassing the protection of Runtime Application Self Protection (RASP) software \cite{rasps}, which are programs oriented towards monitoring the data in a program to prevent malicious data input by an attacker, so that a SQL injection attack \cite{sql_injection} could take place.
 \end{itemize}
 
 \subsection{Boopkit}
-After the creation of ebpfkit and during 2022, the computer security community has contributed to the creation of more eBPF rootkits, being Boopkit one of the best known, created by Kris Nóva and available publicly on GitHub \cite{boopkit}. 
+After the creation of ebpfkit and during 2022, the computer security
+community has contributed to the creation of more eBPF rootkits, being
+Boopkit one of the best known, created by Kris Nóva and available publicly
+on GitHub \cite{boopkit}. 
 
-Boopkit incorporates a network backdoor which can be operated via a remote boopkit-boop remote client. This backdoor incorporates C2 capabilities that enable to spawn a reverse shell and execute commands remotely. Also, the backdoor listens for 'Boop-Vectors', backdoor triggers consisting of either TCP packets with bad calculated checksums or TCP packets with the RST and ACK flags activated.
+Boopkit incorporates a network backdoor which can be operated via a remote
+boopkit-boop remote client. This backdoor incorporates C2 capabilities that
+enable to spawn a reverse shell and execute commands remotely. Also, the
+backdoor listens for 'Boop-Vectors', backdoor triggers consisting of either
+TCP packets with bad calculated checksums or TCP packets with the RST and
+ACK flags activated.
 
-Note that Boopkit is younger than TripleCross and thus it takes no inspiration on this project.
+Note that Boopkit is younger than TripleCross and thus it takes no
+inspiration on this project.
 
 \subsection{Rootkits in the wild}
-Most rootkits found to be actively being used to infect machines are not completely eBPF-based, but rather incorporate eBPF programs for particular modules of the rootkit, usually the network. This the case of rootkits Bvp47 (on which as we mentioned we based our design of one backdoor trigger) \cite{bvp47_report_p49} and BPFDoor, a rootkit that was discovered by PwC to be targeting telecommunication companies at Asia and Middle East \cite{bpfdoor_pwc}. Both rootkits were found to incorporate eBPF for implementing a network backdoor and supporing C2 operations.
+Most rootkits found to be actively being used to infect machines are not
+completely eBPF-based, but rather incorporate eBPF programs for particular
+modules of the rootkit, usually the network. This the case of rootkits
+Bvp47 (on which as we mentioned we based our design of one backdoor
+trigger) \cite{bvp47_report_p49} and BPFDoor, a rootkit that was discovered
+by PwC to be targeting telecommunication companies at Asia and Middle East
+\cite{bpfdoor_pwc}. Both rootkits were found to incorporate eBPF for
+implementing a network backdoor and supporing C2 operations.
 
-Because eBPF XDP programs allow for hiding network communications and hooking packets before they are even received at the kernel (and LKMs cannot access XDP), this type of rootkits with eBPF backdoors are a growing tendency. For instance, in June 2022, a new Linux rootkit named Symbiote discovered by Blackberry was found to combine the LD\_PRELOAD technique with a eBPF backdoor \cite{symbiote}.
+Because eBPF XDP programs allow for hiding network communications and
+hooking packets before they are even received at the kernel (and LKMs
+cannot access XDP), this type of rootkits with eBPF backdoors are a growing
+tendency. For instance, in June 2022, a new Linux rootkit named Symbiote
+discovered by Blackberry was found to combine the LD\_PRELOAD technique
+with a eBPF backdoor \cite{symbiote}.
 
 \subsection{TripleCross comparison}
-Although ebpfkit and boopkit are the only major eBPF rootkits publicly available, the capabilities incorporated into them, together with those described by Jeff Dileo and Pat Hogan compound a great range of possible functionalities for eBPF rootkits, and TripleCross development has been greatly inspired by this past work. In particular, there exist the following similarities:
+Although ebpfkit and boopkit are the only major eBPF rootkits publicly
+available, the capabilities incorporated into them, together with those
+described by Jeff Dileo and Pat Hogan compound a great range of possible
+functionalities for eBPF rootkits, and TripleCross development has been
+greatly inspired by this past work. In particular, there exist the
+following similarities:
 \begin{itemize}
 \item The backdoor module and C2 capabilities are based on those presented by ebpfkit, since both rootkits use a combination of XDP and TC programs (for managing incoming and outgoing traffic respectively). The phantom shell of TripleCross is also based on the TCP retransmissions technique of ebpfkit. With respect to backdoor triggers, these were based on the Bvp47 and Hive rootkits, as we mentioned in section \ref{subsection:triggers}.
 \item The privilege escalation module is based on the file sys\_read syscalls modification presented by Pat Hogan, which describes its possibilities for obtaining sudo privileges by modifying data read from the \textit{/etc/sudoers} file. Also, the execution hijacking process is based on the capability of modifying sys\_execve described by Hogan.
@@ -128,5 +332,5 @@ It must also be noted that, although the ability to modify outgoing traffic and 
 \item TripleCross in general has been designed and implemented to be as modular as possible, therefore its eBPF program configurator and multi-purpose events sent via the ring buffer compound another relevant feature.
 \end{itemize}
 
-As a summary, TripleCross offers new techniques and remodels others presented in previous research work, while at the same time takes as a basis both well-known techniques in rootkit development and also those already presented in previous eBPF rootkits which are key for certain functionalities, such as ebpfkit's TCP retransmissions for duplicating packets.
+In summary, TripleCross offers new techniques and modifies others presented in previous research work, while at the same time takes as a basis both well-known techniques in rootkit development and also those already presented in previous eBPF rootkits which are key for certain functionalities, such as ebpfkit's TCP retransmissions for duplicating packets.
 
