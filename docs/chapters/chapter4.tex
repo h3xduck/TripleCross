@@ -1399,7 +1399,7 @@ char d\_name[] & Filename\\
 \label{table:linux_dirent64}
 \end{table}
 
-As we can observe in table \ref{table:getdents_args}, sys\_getdents64 receives a linux\_dirent64 *dirent argument pointing to a buffer in the user space (it is marked as \_\_user). This buffer is not of length linux\_dirent64, but rather consists of an array of these structs. Moreover, the size of a linux\_dirent64 struct is variable (specifically, the attribute d\_name[] is variable, since the name of a file or a directory is not fixed). In turn, the attribute d\_type indicates the length of each linux\_dirent64, so that the user program can know the length of the entry and iterate over the buffer. Additionally, as indicated in table \ref{table:getdents_args}, the sys\_getdents64 syscall returns the summatory of the length of all the linux\_dirent64 entries in the array, so that the user program can know which is the final entry in the buffer. Figure \ref{} summarizes this process, illustrating how a user program iterates over the buffer written by the sys\_getdents64 syscall.
+As we can observe in table \ref{table:getdents_args}, sys\_getdents64 receives a linux\_dirent64 *dirent argument pointing to a buffer in the user space (it is marked as \_\_user). This buffer is not of length linux\_dirent64, but rather consists of an array of these structs. Moreover, the size of a linux\_dirent64 struct is variable (specifically, the attribute d\_name[] is variable, since the name of a file or a directory is not fixed). In turn, the attribute d\_type indicates the length of each linux\_dirent64, so that the user program can know the length of the entry and iterate over the buffer. Additionally, as indicated in table \ref{table:getdents_args}, the sys\_getdents64 syscall returns the summatory of the length of all the linux\_dirent64 entries in the array, so that the user program can know which is the final entry in the buffer. Figure \ref{fig:getdents_summ} summarizes this process, illustrating how a user program iterates over the buffer written by the sys\_getdents64 syscall.
 
 \begin{figure}[htbp]
 	\centering
@@ -1417,7 +1417,7 @@ Since we are interested on hiding particular files and directories from the user
 
 Similarly to what happened in the privilege escalation module in section \ref{section:privesc}, we aim to overwrite the buffer, but we must first wait for it to be filled during the system call, so we must use an \textit{exit} eBPF tracepoint. However, since from this tracepoint we only have access to the return value of the syscall, we must previously save the address of the buffer into an eBPF map from an \textit{enter} tracepoint, so that it can be retrieved form the \textit{exit} tracepoint. 
 
-As we mentioned, we will overwrite the value of d\_reclen of the previous entry to that we want to hide, so that the new d\_reclen equals to the original plus the d\_reclen of the hidden entry. Figure \ref{} shows this technique.
+As we mentioned, we will overwrite the value of d\_reclen of the previous entry to that we want to hide, so that the new d\_reclen equals to the original plus the d\_reclen of the hidden entry. Figure \ref{fig:getdents_technique} shows this technique.
 
 \begin{figure}[htbp]
 	\centering

@@ -73,3 +73,60 @@ Therefore, LKMs are more powerful since they enjoy almost no restrictions in the
 With respect to the techniques used we can also find similarities, since both LKMs and eBPF rootkits make heavy use of hooking syscalls and kernel functions, with the only difference that the instructions that can be executed at the eBPF probe function are restricted to those allowed by the eBPF helpers, whilst LKMs may read or write any memory section. In terms of the network, both eBPF and LKMs enjoy similar capabilities, with the exception that LKMs may create their own packets, whilst eBPF may only modify or drop existing ones. Finally, both LKMs and eBPF rootkits may execute user space programs (in eBPF, by hijacking calls or triggering actions via a messaging system such as a ring buffer, and in LKMs using, for instance, the function call\_usermodehelper \cite{usermode_helper_lkm}).
 
 
+\section{eBPF rootkits}
+Although eBPF is loaded at the kernel like kernel-mode rootkits, we will analyse this type of rootkits separately given their novelty and the difference of their capabilities with classic LKMs.
+
+Most research work on the offensive capabilities of eBPF has been conducted in the recent years, while the first publicly-released eBPF-only rootkits date from 2021. In particular, the work on this matter by Jeff Dileo and Andy Olsen from NCC Group firstly at the 35th Chaos Communication Congress (35C3) in 2018 \cite{god_ebpf} and later from Jeff Dileo at DEFCON 27 in 2019 \cite{evil_ebpf} remain as one one of the first efforts to explore the capabilities of eBPF applied to computer security. Between others advancements, the capabilities of eBPF helpers such as bpf\_probe\_write\_user() or the possibility of hooking and modifying syscalls are first discussed in the first congress. On the other hand his work at DEFCON 27 shows the ROP technique for achieving library injection which we have discussed in section \ref{subsection:rop_ebpf}. NCC Group has publicly available a set of programs developed in BCC showing a proof of concept for this technique \cite{evil_ebpf_github}.
+
+In 2021, the work of Pat Hogan presented at DEFCON 29 \cite{bad_ebpf} further elaborates onto the offensive capabilities of eBPF both in the network and at the user space. Specifically, the possibilities of eBPF network programs as backdoors with C2 functionality are discussed, together with the capabilities of eBPF to modify data read from critical files, such as \textit{/etc/sudoers}. Although not a rootkit by itself, Hogan released a set of tools that demonstrate some of these capabilities \cite{bad_ebpf_github}, including local privilege escalation, hiding processes or replacing the content of files.
+
+\subsection{Ebpfkit}
+Ebpfkit is the first publicly released rootkit fully developed using eBPF. It was presented on 2021 by Guillaume Fournier and Sylvain Afchain from Datadog at DEFCON 29 \cite{ebpf_friends}, and it is also available at GitHub \cite{ebpf_friends_github}. The same rootkit was also presented in BlackHat 2021 with some additional functionalities \cite{ebpf_friends_blackhat}. This rootkit uses the Go version of the libbpf library.
+
+The work of Fournier and Afchainte is developed around the three fundamental pillars on which eBPF programs operate: the network, the user space and the kernel space.
+\begin{itemize}
+\item In the network, ebpfkit incorporates the first eBPF backdoor with C2 capabilities powered by an XDP and TC program. It presents for the first time the TCP retransmissions technique we explained in section \ref{subsection:tcp} for sending new packets from the backdoor. It also incorporates a network scanning functionality based on this technique.
+%TODO note that the chapter 3 needs to be modified to explain the technique a bit.
+\item In the kernel space, ebpfkit incorporates hooks at open and read syscalls, with the purpose of hiding the rootkit (such as hiding the PID at the proc filesystem) or adding custom ssh keys when the keys file is read by the sshd process. Most importantly, it incorporates the first technique to hide the warning log messages shown in the kernel log buffer, which we mentioned in section \ref{subsection:bpf_probe_write_apps}. This technique works by hooking sys\_read calls during the attachment process, during which the eBPF program will indicate the kernel that nothing is available to be read from the buffer by means of bpf\_override\_return(), followed by overwritting the warning messages using bpf\_probe\_write\_user().
+\item In the user space, ebpfkit incorporates multiple techniques to target specific versions of common software by hooking their function calls using uprobes and modifying its arguments. An example of this is bypassing the protection of Runtime Application Self Protection (RASP) software \cite{rasps}, which are programs oriented towards monitoring the data in a program to prevent malicious data input by an attacker, so that a SQL injection attack \cite{sql_injection} could take place.
+\end{itemize}
+
+\subsection{Boopkit}
+After the creation of ebpfkit and during 2022, the computer security community has contributed to the creation of more eBPF rootkits, being Boopkit one of the best known, created by Kris Nóva and available publicly on GitHub \cite{boopkit}. 
+
+Boopkit incorporates a network backdoor which can be operated via a remote boopkit-boop remote client. This backdoor incorporates C2 capabilities that enable to spawn a reverse shell and execute commands remotely. Also, the backdoor listens for 'Boop-Vectors', backdoor triggers consisting of either TCP packets with bad calculated checksums or TCP packets with the RST and ACK flags activated.
+
+Note that Boopkit is younger than TripleCross and thus it takes no inspiration on this project.
+
+\subsection{Rootkits in the wild}
+Most rootkits found to be actively being used to infect machines are not completely eBPF-based, but rather incorporate eBPF programs for particular modules of the rootkit, usually the network. This the case of rootkits Bvp47 (on which as we mentioned we based our design of one backdoor trigger) \cite{bvp47_report_p49} and BPFDoor, a rootkit that was discovered by PwC to be targeting telecommunication companies at Asia and Middle East \cite{bpfdoor_pwc}. Both rootkits were found to incorporate eBPF for implementing a network backdoor and supporing C2 operations.
+
+Because eBPF XDP programs allow for hiding network communications and hooking packets before they are even received at the kernel (and LKMs cannot access XDP), this type of rootkits with eBPF backdoors are a growing tendency. For instance, in June 2022, a new Linux rootkit named Symbiote discovered by Blackberry was found to combine the LD\_PRELOAD technique with a eBPF backdoor \cite{symbiote}.
+
+\subsection{TripleCross comparison}
+Although ebpfkit and boopkit are the only major eBPF rootkits publicly available, the capabilities incorporated into them, together with those described by Jeff Dileo and Pat Hogan compound a great range of possible functionalities for eBPF rootkits, and TripleCross development has been greatly inspired by this past work. In particular, there exist the following similarities:
+\begin{itemize}
+\item The backdoor module and C2 capabilities are based on those presented by ebpfkit, since both rootkits use a combination of XDP and TC programs (for managing incoming and outgoing traffic respectively). The phantom shell of TripleCross is also based on the TCP retransmissions technique of ebpfkit. With respect to backdoor triggers, these were based on the Bvp47 and Hive rootkits, as we mentioned in section \ref{subsection:triggers}.
+\item The privilege escalation module is based on the file sys\_read syscalls modification presented by Pat Hogan, which describes its possibilities for obtaining sudo privileges by modifying data read from the \textit{/etc/sudoers} file. Also, the execution hijacking process is based on the capability of modifying sys\_execve described by Hogan.
+\item The stack scanning technique used by the library injection module is based on that presented for the ROP attack by Jeff Dileo.
+\item The files and directories hiding technique is a common functionality incorporated at rootkits, although it was first discussed by Johann Rehberger \cite{embracethered_getdents}.
+\end{itemize}
+
+On the other hand, TripleCross incorporates new features, and builds new capabilities on top of those techniques in which as we mentioned it is inspired:
+\begin{itemize}
+\item The backdoor in TripleCross is the first incorporating the possibility of managing multi-packet triggers, apart from featuring a novel C2 system with stealth in mind and on which actions are not hardcoded values nor they need to be inserted in the TCP payload field (they can be hidden at the headers). Also, it features encrypted shell connections for the first time, disguising the malicious traffic with from common applications, together with the other three types of shells implemented. Finally, the new RawTCP\_Lib library allows the C2 system to incorporate its own protocol without the need of supplementary network traffic (like 3-way TCP handshakes) between other purposes, thus reducing the network noise.
+
+It must also be noted that, although the ability to modify outgoing traffic and to duplicate packets using retransmissions is incorporated in ebpfkit, TripleCross remains as the only other rootkit to implement this functionality.
+\item The library injection module not only presents an alternative technique to scan scanning presented by Jeff Dileo but also incorporates the possibility of performing GOT hijacking for the first time with the support of an eBPF program. Overwriting GOT is a well-known technique (and frequently used before the incorporation of RELRO), but TripleCross revives it to demonstrate the capabilities of eBPF at the user space.
+
+\item The privilege escalation module mostly uses the same technique as Hogan, but it incorporates some improvements so that it also enables to work with \textit{/etc/sudoers} files which already have a sudo entry at that file.
+
+\item The execution hijacking module just takes as a basis that the sys\_execve call could be hijacked, proceeding to build the module on top of that idea. Specifically, new research into the cases on which this substitution fails has been made (e.g.: page faults), together with the argument hiding and malicious program in charge of manipulating the hijacked calls so that it executes both the original program and malicious code.
+
+\item The rootkit persistence module uses cron, which is widely known for rootkit development, however it is the first eBPF rootkit to incorporate it. On the other hand, hiding files and directories is one of the best known techniques in rootkits so it was the only module leaving little possibilities for innovation.
+
+\item TripleCross in general has been designed and implemented to be as modular as possible, therefore its eBPF program configurator and multi-purpose events sent via the ring buffer compound another relevant feature.
+\end{itemize}
+
+As a summary, TripleCross offers new techniques and remodels others presented in previous research work, while at the same time takes as a basis both well-known techniques in rootkit development and also those already presented in previous eBPF rootkits which are key for certain functionalities, such as ebpfkit's TCP retransmissions for duplicating packets.
+
