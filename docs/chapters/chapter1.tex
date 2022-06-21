@@ -73,16 +73,92 @@ The rootkit will work in a fresh-install of a Linux system with the following ch
 \item Kernel version: 5.11.0-49.
 \end{itemize} 
 
-\section{Regulatory framework}
-%MARCOS-> Is this the appropiate place? Looking at other TFGs it is sometimes here and others in a final chapter
-
-%TODO - Leaving this for the end
 
 \subsection{Social and economic environment}
 %M-> Mentioned talking about community outreach and its role under pentesting
 %TODO Talk about the difference between having always on BPF and always on kernel modules, BPF is consider "safe" in production while it's almost as dangerous (I think this might fit here)
 
-%TODO - Leaving this for the end
+Our modern world has a growing dependency on digital systems. From the use of increasingly complex computer systems and networks in business environments to the thriving industry of consumer devices, the use these digital systems has shaped today's society and will continue to do so in the future. 
+
+However, as we explained in our project motivation, this has also implicated a raising relevance of the cybersecurity industry given the emergence of increasingly more common cyber incidents. The use of malware and, in particular, ransomware attacks has standed as one of the major trends between threat actors, which has impacted both the private and public sector with infamous attacks. Moreover, there has continued to exist an steady influx of targeted high-impact attacks featuring increasingly complex techniques and attack vectors, which raises the need to stay up to date with the latest discovered vulnerabilities.
+
+As a response for this growing concern, the computer security community has proposed multiple procedures and frameworks with the aim of minimizing these cyber incidents, setting a series of fundamental pillars on which cyber protection activities on organizations shall be based. As a summary, these pillars are often defined to revolve around the following actions \cite{nisa_cyber}:
+\begin{itemize}
+\item Identifying security risks.
+\item Protecting computer systems from the identified security risks.
+\item Detecting attacks and malicious activity.
+\item Responding and taking action when a cyber incident is detected.
+\item Recovering after the cyber incident, reducing the impact of the attack.
+\end{itemize} 
+
+Focusing our view on the identification of security risks, we can find the use of adversary simulation exercises, whose purpose is to test the security of a system or network by emulating the role of a threat actor, thus trying to find vulnerabilities and exploit them in this controlled environment so that these security flaws can be patched. There exist two main types of assessments \cite{pentest_redteam}:
+\begin{itemize}
+\item Penetration testing (pentesting) exercises, whose aim is mainly to discover which known unpatched vulnerabilities are present in the computer system, attempting to exploit them. These exercises are focused on uncovering as many vulnerabilities as possible and, therefore, in many ocassions the stealth which a real attacker would need while performing such process is disregarded.
+\item Red teaming exercises, whose aim is to uncover vulnerabilities as in pentesting, but this process is done quietly (with stealth in mind) and using any resource available, often crafting targeted attacks emulating the procedures which a real threat actor such as an APT would follow. Therefore, the goal is not to find as many vulnerabilities as possible, but rather these exercises take place in already security-audited environments to be further protected from targeted cyber attacks.
+\end{itemize}
+
+Both in the context of pentesting and red teaming, we can find our rootkit TripleCross to gain the most relevance. For the security professionals performing these exercises, it is essential not only to know about the latest security trends being used by threat actors, but also to have great expertise on the techniques and attack vectors employed in these cyber attacks. Therefore, a research on last-generation rootkits using eBPF is useful and relevant for the security community, which will benefit positively from having an open-source rootkit showcasing the offensive capabilities of the eBPF technology.
+
+Consequently, given the importance of TripleCross for offensive security, it also undertakes a positive impact in the area of defensive security. In particular, it presents a clear example on how eBPF may be weaponized for malicious purposes, thus inspiring system administrators and other professionals to consider eBPF programs as a possible attack vector. As we will show during this research work, TripleCross can achieve similar capabilities compared to classic rootkits which use kernel modules, but whilst kernel modules are usually considered a risk and forbidden in many environments, eBPF remains as a technology often available by default and not considered in the security framework of most organizations. Therefore our project aims to raise awareness on this regard and contribute knowledge about eBPF to the computer security community.
+
+
+\section{Regulatory framework}
+As we have mentioned during the social and economic environment, this project is tightly related both to cybersecurity in general and to offensive tools in particular. We will now analyse the most relevant frameworks that regulate both activities with the purpose of studying how they can be applied to the development of our rootkit.
+
+\subsection{NIST framework}
+In the case of activities related to cybersecurity, multiple standards and frameworks regulate the best practices and guidelines to follow for managing cyber risks. One of the most relevant is the Framework for Improving Critical Infrastructure Cybersecurity by the National Institute of Standards and Technology (NIST) \cite{nist_cyber}. This is the framework that regulates the 5 pillars of cyber risk mamagement which we have shown in section \ref{}, describing the needs originated by each pillar (in the framework named as 'Categories') and the actions needed for meeting the requirements of each of these needs ('Subcategories'). In particular, we can identify the following procedures on each of these pillars relevant in our context:
+\begin{itemize}
+\item With respect to the 'Identify' pillar, the framework highlights the need for Asset Management and Risk Assessment between others:
+	\begin{itemize}
+	\item Asset Management refers to the identification and management of data, devices and systems, so as to consider their relative importance in the organization objectives and cyber risk strategy. This involves inventorizing all software platforms and applications used in the organization. In our case, maintaining strict control over the software present on each system reduces the risk of an infection.
+	\item Risk Assessment refers to the identification of the vulnerabilities of each of the organization assets, receiving intelligence about cyber threat from external forums and sources, and identifying the risks, likelihook and impact of an specific risk. In the case of eBPF, it relates to the identification of devices and systems supporting this technology and assessing the risk of malicious eBPF programs using, for instance, this research work as one of the external sources described in the framework.
+	\end{itemize}
+\item With respect to the 'Protect' pillar, it describes the need for Identify Management, Authentication and Access Control, together with the use of Protective Technologies, between others:
+	\begin{itemize}
+	\item With respect to Identify Management, Authentication and Access Control, the framework describes the need to use the principle of least privilege and management of access permissions, that is, assigning the least permissions possible to each system component. In the case of our rootkit, this is particularly relevant given that it needs to be executed as root or by an user with specific capabilities, as we will explain in section \ref{section:ebpf_security}.
+	\item Protective Techniques are solutions with the aim of managing the security of systems and organization assets. In this category we can find the storage of log records about activity on the system, and the protection of communication in the organization network. In the case of our rootkit, maintaining logs and non-plaintext connection means the rootkit shall increase its complexity and invest some resources into stealth functionalities.
+	\end{itemize}
+\item With respect to the 'Detection' pillar, the framework describes the need for an Anomalies and Events policy and Security Continuous Monitoring, between others.
+	\begin{itemize}
+	\item An Anomalies and Events policy relates to detecting and analysing the risk of suspicious events in the network and at systems. This includes gathering information about each of the events in the system using multiple sensors, analysing the data and the origin of each, and analysing the impact of them. In the context of our rootkit, a proper management of system events could disclose the rootkit activities (e.g.: when it is loaded or when it executes user process) although this can be mitigated by the use of stealth techniques.
+	\item Security Continuous Monitoring relates to the monitoring of information systems and organization assets with the purpose of identifying cybersecurity-related events. Some actions described in this regard by the framework include monitoring the network for events, scanning programs for malicious code, and implementing monitoring policies for detecting unauthorized software and network connections. In our case, these all belong to recommended steps an organization shall take to prevent and early detect an infection by a rootkit (and therefore the rootkit will attempt to circumvent these actions by means of stealth techniques).
+	\end{itemize}
+\item With respect to the 'Respond' pillar, the framework describes the need for Analysis, between others:
+	\begin{itemize}
+	\item Analysis refers to conducting response processes after the detection of a cyber attack, analysing the causes to support recovery activities. This includes analysing the events gathered in log traces and other sensors, performing a forensic investigation on the cyber attack. In our case, an organization infected by an eBPF rootktit needs to analyse the source of the compromise and analyse its functioning so as to know the extent of the infection.
+	\end{itemize}
+\item Finally, with respect to the 'Recover' pillar the NIST framework shows the need for Recovery Planning and Improvements policies between others:
+	\begin{itemize}
+	\item Recovery Planning relates to the process of restoring the original state of systems and assets impacted by a cyber incident. In the case of our rootkit, previous conduced analysis should unveil the rootkit persistence capabilities, so that in this step these are nullified and the eBPF programs belonging to the rootkit are unloaded.
+	\item Improvements relates to the need to incorporate the new knowledge and leasons learned after the cyber incident into existing organization policies. In the case of an organization infected by an eBPF rootkit, it would proceed to adopt protective measures for mitigating a similar attack, such as blocking its use. 
+	\end{itemize}
+\end{itemize}
+
+
+\subsection{MITRE ATT\&CK}
+MITRE Adversarial Tactics, Techniques, and Common Knowledge (MITRE ATT\&CK) is a framework collecting knowledge about adversarial techniques, that is, techniques, methodologies and offensive actions followed by threat actors that can be used against computer systems. This is an useful framework for red teaming or pentesting activities performing adversary emulation exercises, since it details adversary behaviours and the techniques being used, which can help to build multiple attack scenarios. Moreover, it is also relevant for professionals in charge of defending a system, since they can prepare and design mitigations for the techniques described in the framework \cite{mitre_blog}\cite{mitre_blog_2}.
+
+A relevant aspect of the MITRE ATT\&CK framework is the MITRE ATT\&CK Matrix, which contains all the adversarial techniques organized as 'tactics'. These tactics are the objective of the adversary, which it aims to achieve by using each corresponding technique. Therefore, the MITRE ATT\&CK Matrix shows a list of columns, where each column is one tactic (one adversary objective), and each row on that column shows the techniques associated to that tactic, explaining how that objective can be achieved. Additionally, different matrices exist depending on the platform. In this project, we will consider the Linux Matrix \cite{mitre_matrix_linux}.
+
+Using the Linux MITRE ATT\&CK matrix, red teamers and pentesters can evaluate the techniques incorporated in our rootkit according to the tactics described in the framework. These tactics range from an initial access step (which usually preceeds the adversary attack) to the description of the impact that the attack has on the normal functioning of the system. In summary, these tactics are the following:
+\begin{itemize}
+\item \textbf{Initial access}, comprising techniques to gain a foothold in the system or network, such as spear-phising attacks, with which the adversary may obtain credentials that can be used to achieve access to a machine.
+\item \textbf{Execution}, comprising techniques used to execute code in the target system. This includes exploiting vulnerabilities that lead to Remote Code Execution (RCE).
+\item \textbf{Persistence}, comprising techniques that enable the adversary to maintain access at the system after the initial foothold, independently on the actions performed by the target machine (which may reboot or change passwords). One of these techniques is using scheduled jobs (such as Cron, which will be used in our rootkit).
+\item \textbf{Privelege escalation}, consisting on techniques used to achieve privileged access in a machine from an original unprivileged access position. This includes techniques that abuse the elevation control mechanisms of a system, such as sudo, which will be used in our rootkit.
+\item \textbf{Defense evasion}, comprising techniques to avoid detection after a machine infection. This includes hiding processes, files and directories, or network connections related to the adversary activities.
+\item \textbf{Credential access}, comprising techniques to steal passwords and other credentials from the system. An example of such a technique is sniffing the network for credentials transmitted in plaintext.
+\item \textbf{Discovery}, comprising techniques used by the adversary to gather knowledge about the target system and the available actions it may engage with (once it has access to the system, e.g. execution of commands). This includes techniques such as listing running processes or scanning the network.
+\item \textbf{Lateral movement}, comprising techniques allowing for pivoting through systems from the internal network after having compromised the original target machine. An example of a technique acomplishing this is the exploitation of vulnerabilities that can only be exploited from the local network.
+\item \textbf{Collection}, comprising techniques to gather critical information in the compromised system, with the purpose of, often, leaking them. In contrast to the discovery tactic, collection techniques do not search for possible targets in the compromised system, but rather use this knowledge to locate key data and exfiltrate it.
+\item \textbf{Command and control}, comprising techniques that enable an attacker to communicate with the compromised machine, usually issuing commands and actions to be executed by it. Since network traffic belonging to the adversary activities should remain hidden, techniques belonging to this category include encoding or obfuscating data so that they can be transmitted secretly.
+\item \textbf{Exfiltration}, containing the techniques used for exfiltrating the data collected during the Collection step, transmitting this data outside of the compromised network. The use of C2 encrypted channels is a recurrent technique. Our rootkit will use this and other communication means for sending data from the infected to the attacker machine.
+\item \textbf{Impact}, comprising techniques used by the adversary to manipulate or destroy data, and to disrupt the normal services at the compromised machine. A common technique belonging to this tactic is the modification of system files, which we will use to implement multiple of the rootkit functionalities.
+\end{itemize}
+
+\subsection{Software licenses}
+Finally, it must be noted that this project uses the libbpf library \cite{libbpf_github}, as we will mention in section \ref{subsection:libbpf}, for the development of our eBPF rootkit. This library is licensed under dual BSD 2-clause license and GNU LGPL v2.1 license. 
+%Should I say something else? I usually license my own projects under GPLv3 because I don't like corporations taking the code, but I guess I am restricted to use the Creative Commons license.
 
 \subsection{Budget}
 %TODO - Leaving this for the end
