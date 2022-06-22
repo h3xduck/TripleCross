@@ -201,7 +201,7 @@ proposed multiple procedures and frameworks with the aim of minimizing
 these cyber incidents, setting a series of fundamental pillars on which
 cyber protection activities on organizations shall be based. As a summary,
 these pillars are often defined to revolve around the following actions
-\cite{nisa_cyber}:
+\cite{nist_cyber}:
 \begin{itemize}
 \item Identifying security risks.
 \item Protecting computer systems from the identified security risks.
@@ -322,8 +322,55 @@ BSD 2-clause license and GNU LGPL v2.1 license.
 
 
 \section{Structure of the document}
-%TODO - Best to be done at the end
+This section details the structure of this document and the contents of each chapter with the aim of offering a summarized view and improving its readibility.
+
+\textbf{Chapter 1: Introduction} describes the motivation behind the project and the purposes it aims to achieve, presenting the functionalities expected to be implemented in our rootkit. It also discusses the regulatory frameworks and the environmental issues related to the development of the research work.
+
+\textbf{Chapter 2: Background} presents all the concepts needed for the later discussion of offensive capabilities. It includes an in-depth description of the eBPF system, a brief discussion of its security features and multiple alternatives for developing eBPF programs. It also discusses networking concepts and an offers an overview on the memory architecture at Linux systems, showing basic attacks and techniques that are the basis of those later incorporated to the rootkit.
+
+\textbf{Chapter 3: Analysis of offensive capabilities of eBPF} discusses the possible capabilities of a malicious eBPF program, describing which features of the eBPF system could be weaponized and used for offensive purposes.
+
+\textbf{Chapter 4: Design of a malicious eBPF rootkit} describes the architecture of the rootkit we have developed, offering a comprehensive view of the different techniques and attacks designed and implemented on each of the rootkit modules and components.
+
+\textbf{Chapter 5: Evaluation} analyses whether the rootkit developed meets the expected functionality proposed in the project objectives by testing the rootkit capabilities in a simulated testing environment. We will prepare a virtualized network consisting of two connected machines, where one is the infected host and the other belongs to the attacker, proceeding to test every rootkit functionality.
+
+\textbf{Chapter 6: Related work} includes a comprehensive review of previous work on UNIX/Linux rootkits, their main types and most relevant examples. We also offer a comparison in terms of techniques and functionality with previous families. In particular, we highlight the differences of our eBPF rootkit with respect to others that rely on traditional methods, and also to those already built using eBPF.
+
+\textbf{Chapter 7: Budget} describes the costs associated to the development of this project, including personnel, hardware and software related costs.
+
+\textbf{Chapter 8: Conclusions and future work} revisits the project objectives, discusses the work presented in this document, and describes possible future research lines.
 
 \section{Code availability}
-%TODO
+%Is it ok to reference the repo as a cite? Maybe it's better writing the link directly?
+All the source code belonging to the rootkit development can be visited publicly at the GitHub repository \cite{triplecross_github}. The most important folders and files of this repository are described in Table \ref{table:triplecross_dirs}.
+
+%I can go with more detail if needed. Is it needed?
+\begin{table}[htbp]
+\begin{tabular}{|>{\centering\arraybackslash}p{4cm}|>{\centering\arraybackslash}p{10cm}|}
+\hline
+\textbf{DIRECTORY} & \textbf{DESCRIPTION}\\
+\hline
+\hline
+src/client & Source code of rootkit client.\\
+\hline
+src/client/lib & RawTCP\_Lib shared library.\\
+\hline
+src/common & Constants and configuration for the rootkit. It also includes the implementation of elements common to the eBPF and user space side of the rootkit, such as the ring buffer.\\
+\hline
+src/ebpf & Source code of the eBPF programs used by the rootkit.\\
+\hline
+src/helpers & Includes programs for testing rootkit modules functionality, and the malicious program and library used at the execution hijacking and library injection modules respectively.\\
+\hline
+src/libbpf & Contains the libbpf library, integrated with the rootkit.\\
+\hline
+src/user & Source code of the user land programs used by the rootkits.\\
+\hline
+src/vmlinux & Headers containing the definition of kernel data structures (this is the recommended method when using libbpf).\\
+\hline
+\end{tabular}
+\caption{Relevant directories at TripleCross repository.}
+\label{table:triplecross_dirs}
+\end{table} 
+
+Additionally, the source code of the RawTCP\_Lib library can be visited publicly at its own GitHub directory \cite{rawtcp_lib}.
 
