@@ -1,33 +1,102 @@
 \chapter{Conclusions and future work}
-This chapter includes a discussion about the project objectives achieved and possible future research lines that could be followed after the realisation of this work.
+This chapter revisits the project objectives, discusses the work presented
+in this document, and describes possible future research lines.
 
 \section{Conclusions}
-At the beginning of this project, we proposed to study the offensive capabilities of eBPF at the network, and in both the user and kernel space. Our research has shown that a malicious eBPF program can drop any network packet and have read and write access over both incoming and outgoing network traffic using XDP and TC programs, that it can read and write any memory at the user space using kprobes and tracepoints, and that it can tamper with user data passed to the kernel at system calls, although kernel memory cannot be written. In the end, these capabilities result in a complete disrupt of trust between the user and kernel space since eBPF may modify data passed to system calls and thus change the outcome of the execution, a disrupt of trust among the user space programs themselves since eBPF may redirect the flow of execution or overwrite any data by writing to specific sections at processes virtual memory, and finally total control over the data sent or receieved at the network.
+At the beginning of this project, we proposed to study the offensive
+capabilities of eBPF at the network level and both user- and kernel-space.
+Our research shows that a malicious eBPF program can drop any network
+packet and have read and write access over both incoming and outgoing
+network traffic using XDP and TC programs. We also discusses how it can
+read and write any memory at the user-space using kprobes and tracepoints,
+and that it can tamper with user data passed to the kernel at system calls,
+although kernel memory cannot be written. In the end, these capabilities
+result in a complete disrupt of trust between the user and kernel space
+since eBPF may modify data passed to system calls and thus change the
+outcome of the execution, a disrupt of trust among the user space programs
+themselves since eBPF may redirect the flow of execution or overwrite any
+data by writing to specific sections at processes virtual memory, and
+finally total control over the data sent or receieved at the network.
 
-With these capabilities in mind, we proposed to develop an eBPF-based rootkit that uses these offensive capabilities to showcase multiple malicious use cases. Our rootkit TripleCross has incorporated a library injection module to execute malicious code by writing at processes virtual memory, an execution hijacking module that modifies data passed to the kernel to execute malicious programs, a local privilege escalation module that allows for running malicious programs with root privileges, a backdoor with C2 capabilities that can monitor the network and execute commands sent from a remote rootkit client and that incorporates multiple backdoor triggers so that these actions are transmitted to the backdoor with stealth in mind, a rootkit client program that allows the attacker to establish 3 different types of shell-like connections for sending commands and multiple other actions that control the rootkit state remotely, a persistence module that uses a combination of scheduled jobs and malicious configuration files at the sudo system to ensure the rootkit remains installed with full privileges even after a reboot event, and a stealth module that hides rootkit-related files and directories from the user.
+With these capabilities in mind, we have developed an eBPF-based rootkit
+that uses these offensive capabilities to showcase multiple malicious use
+cases. Our rootkit, named TripleCross, incorporates (1) a library injection
+module to execute malicious code by writing at processes virtual memory;
+(2) an execution hijacking module that modifies data passed to the kernel
+to execute malicious programs; (3) a local privilege escalation module that
+allows for running malicious programs with root privileges; (4) a
+backdoor with C2 capabilities that can monitor the network and execute
+commands sent from a remote rootkit client which incorporates multiple
+backdoor triggers so that these actions are transmitted to the backdoor
+with stealth in mind; (5) a rootkit client program that allows the attacker
+to establish 3 different types of shell-like connections for sending
+commands and multiple other actions that control the rootkit state
+remotely; (6) a persistence module that uses a combination of scheduled
+jobs and malicious configuration files at the sudo system to ensure the
+rootkit remains installed with full privileges even after a reboot event;
+and (7) a stealth module that hides rootkit-related files and directories
+from the user.
 
-Therefore, TripleCross demonstrates the existing danger when running eBPF programs, a technology also available by default in most distributions. On the other hand, it must be noted that there exist some defense measures against these rootkits:
+TripleCross demonstrates the existing danger when running eBPF programs, a
+technology also available by default in most distributions. On the other
+hand, it must be noted that there exist some defense measures against these
+rootkits:
 \begin{itemize}
 \item Monitor the loaded eBPF programns and the data stored at eBPF maps using tools like \textit{bpftool} or \textit{ebpfkit-monitor} \cite{ebpfkit_monitor_github} (a tool released by Fournier and Afchain that monitors the loaded eBPF programs and maps).
 \item Monitor the use of the bpf() syscall in the system. The \textit{ebpfkit-monitor} tool also incorporates this capability.
 \item Wait until eBPF signing is implemented in the kernel. Although this capability is not currently available, there exist some efforts towards its incorporation in the kernel \cite{bpf_signing}. Similarly to how LKMs can be signed with a private key so that the kernel only trust modules signed by the entity with the corresponding public key \cite{lkm_signing}, eBPF programs may require a similar signing process before being loaded into the BPF VM.
 
-Note that, even if this capability is included in the future, it may be left off by default, as it has happened with signing LKMs. Signing modules is governed by the parameter CONFIG\_MODULE\_SIG\_FORCE, which is left deactivated in some kernel compilations for backwards compatibility \cite{arch_linux_sign}.
+Note that, even if this capability is included in the future, it may be
+left off by default, as it has happened with signed LKMs. Signing modules is governed by the parameter CONFIG\_MODULE\_SIG\_FORCE, which is left deactivated in some kernel compilations for backwards compatibility \cite{arch_linux_sign}.
 \item Assign the lowest privilege possible to eBPF programs according to their expected functionality, as described in Section \ref{subsection:access_control}.
 \item Monitor the network using IDSs and network-wide firewalls, detecting suspicious communications. Firewalls installed on the endpoints may detect ongoing malicious traffic too (but incoming traffic would be masked by XDP before it reaches the firewall).
 \end{itemize}
 
-Nevertheless, with the exception of signing eBPF programs, a sufficiently advanced rootkit built for an specific targeted attack will be able to bypass any monitoring actions taken at the infected host. This rootkit could hide itself from the \textit{bpftool} tool, block access to its eBPF maps and, ultimately, hide its activities from any monitoring tool or log traces. This is the conclusion at which Fournier and Afchain also arrive \cite{ebpf_friends_54}.
+Nevertheless, with the exception of signing eBPF programs, a sufficiently
+advanced rootkit built for an specific targeted attack will be able to
+bypass any monitoring actions taken at the infected host. This rootkit
+could hide itself from the \textit{bpftool} tool, block access to its eBPF
+maps and, ultimately, hide its activities from any monitoring tool or log
+traces. This is the conclusion at which Fournier and Afchain also arrive
+\cite{ebpf_friends_54}.
 
 \section{Future work}
-Although in this project we identified a series of offensive capabilities using the current functionality supported by eBPF, this technology is currently being extended and, therefore, the incorporation of new eBPF helpers and program types could result in new offensive uses.
+Although in this project we identified several offensive capabilities
+using the current functionality supported by eBPF, this technology is
+currently being extended and, therefore, the incorporation of new eBPF
+helpers and program types could result in new offensive uses.
+%
+In addition, there also exist multiple capabilities that have not been
+researched in depth and that can result in other attacks. Namely, the use
+of uprobes, which hooks functions from specific programs, could be used to
+modify the data of user space programs in the benefit of the rootkit. For
+instance, an attacker could overwrite the data gathered by a firewall
+installed in the system so that malicious outgoing traffic appears as
+benign. Therefore, further research on uprobe programs with eBPF could
+result in new attacks against specific user programs that could be
+incorporated into a rootkit.
 
-Nevertheless, there also exist multiple capabilities that have not been researched in depth and that can result in other attacks. Namely, the use of uprobes, which hooks functions from specific programs, could be used to modify the data of user space programs in the benefit of the rootkit. For instance, it could overwrite the data gathered by a firewall installed in the system so that malicious outgoing traffic appears as benign. Therefore, a research on uprobe programs with eBPF could result in new attacks against specific user programs that could be incorporated into a rootkit.
+Another relevant line of work would be the modification of buffers passed
+by the user which, instead of being received at system calls, are received
+and operated at internal kernel functions. A rootkit overwriting this data
+could alter the execution of the kernel itself outside of syscalls. 
 
-Another relevant line of investigation would be the modification of buffers passed by the user which, instead of being received at system calls, are received and operated at internal kernel functions. A rootkit overwriting this data could alter the execution of the kernel itself outside of syscalls. 
+Other lines of research include building rootkit modules using eBPF helpers
+that we did not incorporate in our rootkit, such as bpf\_override\_return
+and  bpf\_send\_signal, or the XDP packet modification capabilities that we
+only showed as a PoC. TripleCross could then incorporate techniques such as
+hiding itself from the kernel logs and find new uses for modifying incoming
+network packets.
 
-Some other lines of investigation include building rootkit modules using the eBPF helpers we did not incorporate in our rootkit, such as bpf\_override\_return and  bpf\_send\_signal, or the XDP packet modification capabilities we only showed as a PoC. TripleCross could then incorporate techniques such as hiding itself from the kernel logs and find new uses for modifying incoming network packets.
+A final but very relevant research line consists of exploring the
+capabilities of eBPF in Windows and Android. Since it is a novel
+incorporation, there currently exists little knowledge about the limits of
+eBPF in these systems, and thus it is of great interest to research which
+actions a malicious program could perform in these platforms.
 
-A final but very relevant research line consists of exploring the capabilities of eBPF in Windows and Android. Since it is a novel incorporation, there currently exists little knowledge about the limits of eBPF in these systems, and thus it is of great interest to research which actions a malicious program could perform in these platforms.
-
-In summary, future work in offensive eBPF could be intended to finding new attack vectors for the capabilities used to develop our rootkit, and building more complex techniques combining those we did not explore in this work. Moreover, since the eBPF system keeps being expanded not only in Linux but in other platforms too, it is relevant to analyse the offensive uses for the newer functionalities of eBPF incorporated in the future.
+In summary, future work in offensive eBPF could be aimed at finding new
+attack vectors for the capabilities used to develop our rootkit, and
+building more complex techniques combining those we did not explore in this
+work. Moreover, since the eBPF system keeps being expanded not only in
+Linux but in other platforms too, it is relevant to analyze the offensive
+uses for the newer functionalities of eBPF incorporated in the future.
