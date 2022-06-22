@@ -177,15 +177,31 @@ The rootkit will work in a fresh-install of a Linux system with the following ch
 \end{itemize} 
 
 
-\subsection{Social and economic environment}
+\subsection{Social and economic environment}\label{sec:social_econ_env}
 %M-> Mentioned talking about community outreach and its role under pentesting
 %TODO Talk about the difference between having always on BPF and always on kernel modules, BPF is consider "safe" in production while it's almost as dangerous (I think this might fit here)
 
-Our modern world has a growing dependency on digital systems. From the use of increasingly complex computer systems and networks in business environments to the thriving industry of consumer devices, the use these digital systems has shaped today's society and will continue to do so in the future. 
+Our world has a growing dependency on digital systems. From the use of
+increasingly complex computer systems and networks in business environments
+to the thriving industry of consumer devices, the use these digital systems
+has shaped today's society and will likely continue to do so in the future. 
 
-However, as we explained in our project motivation, this has also implicated a raising relevance of the cybersecurity industry given the emergence of increasingly more common cyber incidents. The use of malware and, in particular, ransomware attacks has standed as one of the major trends between threat actors, which has impacted both the private and public sector with infamous attacks. Moreover, there has continued to exist an steady influx of targeted high-impact attacks featuring increasingly complex techniques and attack vectors, which raises the need to stay up to date with the latest discovered vulnerabilities.
+As discussed in our project motivation, this has also implied an increasing
+relevance of the cybersecurity industry, particularly as a consequence of a
+growing number of cyber incidents. The use of malware and, in particular,
+ransomware attacks currently stands as one of the major trends among threat
+actors, which has impacted both the private and public sector with infamous
+attacks. Moreover, during the last decade there has been a steady influx of
+targeted high-impact attacks featuring increasingly complex techniques and
+attack vectors, which raises the need to stay up to date with the latest
+discovered vulnerabilities.
 
-As a response for this growing concern, the computer security community has proposed multiple procedures and frameworks with the aim of minimizing these cyber incidents, setting a series of fundamental pillars on which cyber protection activities on organizations shall be based. As a summary, these pillars are often defined to revolve around the following actions \cite{nisa_cyber}:
+As a response for this growing concern, the computer security community has
+proposed multiple procedures and frameworks with the aim of minimizing
+these cyber incidents, setting a series of fundamental pillars on which
+cyber protection activities on organizations shall be based. As a summary,
+these pillars are often defined to revolve around the following actions
+\cite{nisa_cyber}:
 \begin{itemize}
 \item Identifying security risks.
 \item Protecting computer systems from the identified security risks.
@@ -194,22 +210,60 @@ As a response for this growing concern, the computer security community has prop
 \item Recovering after the cyber incident, reducing the impact of the attack.
 \end{itemize} 
 
-Focusing our view on the identification of security risks, we can find the use of adversary simulation exercises, whose purpose is to test the security of a system or network by emulating the role of a threat actor, thus trying to find vulnerabilities and exploit them in this controlled environment so that these security flaws can be patched. There exist two main types of assessments \cite{pentest_redteam}:
+Focusing our view on the identification of security risks, we can find the
+use of adversary simulation exercises, whose purpose is to test the
+security of a system or network by emulating the role of a threat actor,
+thus trying to find vulnerabilities and exploit them in this controlled
+environment so that these security flaws can be patched. There exist two
+main types of assessments \cite{pentest_redteam}:
 \begin{itemize}
 \item Penetration testing (pentesting) exercises, whose aim is mainly to discover which known unpatched vulnerabilities are present in the computer system, attempting to exploit them. These exercises are focused on uncovering as many vulnerabilities as possible and, therefore, in many ocassions the stealth which a real attacker would need while performing such process is disregarded.
 \item Red teaming exercises, whose aim is to uncover vulnerabilities as in pentesting, but this process is done quietly (with stealth in mind) and using any resource available, often crafting targeted attacks emulating the procedures which a real threat actor such as an APT would follow. Therefore, the goal is not to find as many vulnerabilities as possible, but rather these exercises take place in already security-audited environments to be further protected from targeted cyber attacks.
 \end{itemize}
 
-Both in the context of pentesting and red teaming, we can find our rootkit TripleCross to gain the most relevance. For the security professionals performing these exercises, it is essential not only to know about the latest security trends being used by threat actors, but also to have great expertise on the techniques and attack vectors employed in these cyber attacks. Therefore, a research on last-generation rootkits using eBPF is useful and relevant for the security community, which will benefit positively from having an open-source rootkit showcasing the offensive capabilities of the eBPF technology.
+Our efforts to better understand the offensive capabilities offered by eBPF
+are relevant to both pentesters and red teamers. For the security
+professionals performing these exercises, it is essential not only to know
+about the latest security trends being used by threat actors, but also to
+have expertise on the techniques and attack vectors employed in these cyber
+attacks. Therefore, a research on last-generation rootkits using eBPF is
+useful and relevant for the security community, which will benefit
+positively from having an open-source rootkit showcasing the offensive
+capabilities of the eBPF technology.
 
-Consequently, given the importance of TripleCross for offensive security, it also undertakes a positive impact in the area of defensive security. In particular, it presents a clear example on how eBPF may be weaponized for malicious purposes, thus inspiring system administrators and other professionals to consider eBPF programs as a possible attack vector. As we will show during this research work, TripleCross can achieve similar capabilities compared to classic rootkits which use kernel modules, but whilst kernel modules are usually considered a risk and forbidden in many environments, eBPF remains as a technology often available by default and not considered in the security framework of most organizations. Therefore our project aims to raise awareness on this regard and contribute knowledge about eBPF to the computer security community.
+Consequently, given the growing importance of eBPF for offensive security,
+it also undertakes a positive impact in the area of defensive security. In
+particular, it presents a clear example on how eBPF may be weaponized for
+malicious purposes, thus inspiring system administrators and other
+professionals to consider eBPF programs as a possible attack vector. As we
+will show during this research work, our rootkit can achieve similar
+capabilities compared to classic rootkits based on kernel modules. However,
+while kernel modules are usually considered a risk and might be restricted
+(or its activity, particularly loading a new one, easy to flag), in many
+environments eBPF remains as a technology often available by default and
+not considered in the security framework of most organizations. Therefore
+our project aims to raise awareness on this regard.
 
 
 \section{Regulatory framework}
-As we have mentioned during the social and economic environment, this project is tightly related both to cybersecurity in general and to offensive tools in particular. We will now analyse the most relevant frameworks that regulate both activities with the purpose of studying how they can be applied to the development of our rootkit.
+As discussed in Section \ref{sec:social_econ_env}, this project is tightly
+related to both cybersecurity in general and to offensive tools in
+particular. We will now analyze the most relevant frameworks that regulate
+or are related to both activities with the purpose of studying how they can
+be applied to the development of our rootkit.
 
-\subsection{NIST framework}
-In the case of activities related to cybersecurity, multiple standards and frameworks regulate the best practices and guidelines to follow for managing cyber risks. One of the most relevant is the Framework for Improving Critical Infrastructure Cybersecurity by the National Institute of Standards and Technology (NIST) \cite{nist_cyber}. This is the framework that regulates the 5 pillars of cyber risk mamagement which we have shown in section \ref{}, describing the needs originated by each pillar (in the framework named as 'Categories') and the actions needed for meeting the requirements of each of these needs ('Subcategories'). In particular, we can identify the following procedures on each of these pillars relevant in our context:
+\subsection{NIST Cybersecurity Framework}
+In the case of activities related to cybersecurity, multiple standards and
+frameworks regulate the best practices and guidelines to follow for
+managing cyber risks. One of the most relevant is the Framework for
+Improving Critical Infrastructure Cybersecurity by the National Institute
+of Standards and Technology (NIST) \cite{nist_cyber}. This is the framework
+that regulates the 5 pillars of cyber risk mamagement which we have
+discussed in Section \ref{sec:social_econ_env}, describing the needs
+originated by each pillar (in the framework named as 'Categories') and the
+actions needed for meeting the requirements of each of these needs
+('Subcategories'). In particular, we can identify the following procedures
+on each of these pillars relevant in our context:
 \begin{itemize}
 \item With respect to the 'Identify' pillar, the framework highlights the need for Asset Management and Risk Assessment between others:
 	\begin{itemize}
@@ -260,7 +314,10 @@ Using the Linux MITRE ATT\&CK matrix, red teamers and pentesters can evaluate th
 \end{itemize}
 
 \subsection{Software licenses}
-Finally, it must be noted that this project uses the libbpf library \cite{libbpf_github}, as we will mention in section \ref{subsection:libbpf}, for the development of our eBPF rootkit. This library is licensed under dual BSD 2-clause license and GNU LGPL v2.1 license. 
+Finally, it must be noted that this project uses the libbpf library
+\cite{libbpf_github}, as described in Section \ref{subsection:libbpf}, for
+the development of our eBPF rootkit. This library is licensed under dual
+BSD 2-clause license and GNU LGPL v2.1 license. 
 %Should I say something else? I usually license my own projects under GPLv3 because I don't like corporations taking the code, but I guess I am restricted to use the Creative Commons license.
 
 \subsection{Budget}
