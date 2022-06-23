@@ -1,4 +1,7 @@
 # TripleCross
+Instructions soon!
+For now, you can read the paper at docs/ebpf_offensive_rootkit
+<!---
 ## Build and run
 ```bash
 cd src
@@ -29,3 +32,4 @@ sudo ./injector -S 127.0.0.1
 echo "This won't be seen" > /tmp/txt.txt
 cat /tmp/txt.txt
 ```
+---!>
