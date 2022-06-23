@@ -82,7 +82,7 @@ This program is also responsible of creating the shared map which the backdoor w
 
 
 \section{Library injection module} \label{section:lib_injection}
-In this section, we will discuss how to hijack a user process running in the system so that it executes arbitrary code instructed from an eBPF program. For this, we will be injecting a library which will be executed by taking advantage of the fact that the GOT section in ELFs is flagged as writable (as we introduced in section \ref{subsection:elf_lazy_binding} and using the stack scanning technique covered in Section \ref{subsection:bpf_probe_write_apps}. This injection will be stealthy (it must not crash the process) and will be able to hijack privileged programs such as systemd, so that the code is executed as root.
+In this section, we will discuss how to hijack a user process running in the system so that it executes arbitrary code instructed from an eBPF program. For this, we will be injecting a library which will be executed by taking advantage of the fact that the GOT section in ELFs is flagged as writable (as we introduced in Section \ref{subsection:elf_lazy_binding} and using the stack scanning technique covered in Section \ref{subsection:bpf_probe_write_apps}. This injection will be stealthy (it must not crash the process) and will be able to hijack privileged programs such as systemd, so that the code is executed as root.
 
 We will also research how to circumvent the protections which modern compilers have set in order to prevent similar attacks (when performed without eBPF), as we overview in Section \ref{subsection:hardening_elf}.
 
@@ -101,7 +101,7 @@ Figure \ref{fig:rop_evil_ebpf_1} shows an overview on the process memory and the
 	\label{fig:rop_evil_ebpf_1}
 \end{figure}
 
-An additional aspect must be introduced now (we will cover it more in detail in section \ref{subsection:got_attack}): system calls are not directly called by the instructions in the .text section, but rather user programs in C make use of the C Standard Library to delegate the actual syscall, which in this case is the GNU Standard Library (glibc) \cite{glibc}. Therefore, a program calls a function in glibc (in this case timerfd\_settime) in which the syscall is performed, and the kernel executes it.
+An additional aspect must be introduced now (we will cover it more in detail in Section \ref{subsection:got_attack}): system calls are not directly called by the instructions in the .text section, but rather user programs in C make use of the C Standard Library to delegate the actual syscall, which in this case is the GNU Standard Library (glibc) \cite{glibc}. Therefore, a program calls a function in glibc (in this case timerfd\_settime) in which the syscall is performed, and the kernel executes it.
 
 This means that, during the stack scanning technique, if we start from struct utmr and scan forward in the stack, what we will find in ret is the return address of the PLT stub that calls the function at glibc, and not directly that of the syscall to the kernel. Therefore, our goal is, for every data in the stack while scanning forward, check whether it is the real return address of the PLT stub we are looking for. For an address to be the real return address, we will follow the next steps:
 \begin{enumerate}
@@ -125,7 +125,7 @@ Once the attacker has finished executing the injected code, the stack must be re
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=15cm]{rop_evil_ebpf_3.jpg}
+	\includegraphics[width=15cm]{rop_evil_ebpf_3.png}
 	\caption{Stack data is restored and program continues its execution.}
 	\label{fig:rop_evil_ebpf_3}
 \end{figure}
@@ -975,7 +975,7 @@ With respect to the protocol being used, the TCP packets exchanged between the r
 \begin{table}[htbp]
 \begin{tabular}{|c|>{\centering\arraybackslash}p{8cm}|}
 \hline
-\textbf{Header} & \textbf{Description}\\
+\textbf{HEADER} & \textbf{DESCRIPTION}\\
 \hline
 \hline
 CC\_PHANTOM\_INIT & Sent by the TC program to the rootkit client after receiving the pattern-based backdoor trigger indicating request to initiate a phantom shell.\\

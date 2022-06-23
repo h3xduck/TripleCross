@@ -4,6 +4,7 @@ bibliography/texput.log
 document.pdf
 !document.tex
 !*.xmpdata
+!*tfg.pdf
 !Makefile
 !original_template/
 !images/
