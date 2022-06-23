@@ -178,7 +178,7 @@ advanced stealth and network functionalities. Some of its most relevant
 capabilities include:
 \begin{itemize}
 \item Hiding files, directories, processes and network connections related to the rootkit activity.
-\item A backdoor that is operated via port-knocking triggers (which we explained in section \ref{subsection:triggers}).
+\item A backdoor that is operated via port-knocking triggers (which we explained in Section \ref{subsection:triggers}).
 \item C2 capabilities via a custom shell (similar to the pseudo-shells of our rootkit).
 \end{itemize}
 
@@ -310,7 +310,7 @@ functionalities for eBPF rootkits, and TripleCross development has been
 greatly inspired by this past work. In particular, there exist the
 following similarities:
 \begin{itemize}
-\item The backdoor module and C2 capabilities are based on those presented by ebpfkit, since both rootkits use a combination of XDP and TC programs (for managing incoming and outgoing traffic respectively). The phantom shell of TripleCross is also based on the TCP retransmissions technique of ebpfkit. With respect to backdoor triggers, these were based on the Bvp47 and Hive rootkits, as we mentioned in section \ref{subsection:triggers}.
+\item The backdoor module and C2 capabilities are based on those presented by ebpfkit, since both rootkits use a combination of XDP and TC programs (for managing incoming and outgoing traffic respectively). The phantom shell of TripleCross is also based on the TCP retransmissions technique of ebpfkit. With respect to backdoor triggers, these were based on the Bvp47 and Hive rootkits, as we mentioned in Section \ref{subsection:triggers}.
 \item The privilege escalation module is based on the file sys\_read syscalls modification presented by Pat Hogan, which describes its possibilities for obtaining sudo privileges by modifying data read from the \textit{/etc/sudoers} file. Also, the execution hijacking process is based on the capability of modifying sys\_execve described by Hogan.
 \item The stack scanning technique used by the library injection module is based on that presented for the ROP attack by Jeff Dileo.
 \item The files and directories hiding technique is a common functionality incorporated at rootkits, although it was first discussed by Johann Rehberger \cite{embracethered_getdents}.

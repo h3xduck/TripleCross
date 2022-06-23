@@ -692,7 +692,7 @@ These triggers are one of the simplest but also the most easily detectable by an
 	\label{fig:keyword_trigger}
 \end{figure}
 
-Our rootkit is prepared to listen for keyword-based triggers, although it is a simple Proof of Concept (PoC) which does not take part in the main C2 functionality. In the case of the trigger shown in Figure \ref{fig:keyword_trigger}, the rootkit will analyse the packet and detect that the pre-defined keyword "XDP\_PoC\_0" has been inserted into the payload, thus learning that the packet has been sent by the attacker. In the PoC implemented in our rootkit, this triggers an overwrite action, in which the XDP program will proceed to modify the payload and the packet size, changing the contents of the packet. This PoC can be seen in action in section \ref{subsection:poc_evaluation}.
+Our rootkit is prepared to listen for keyword-based triggers, although it is a simple Proof of Concept (PoC) which does not take part in the main C2 functionality. In the case of the trigger shown in Figure \ref{fig:keyword_trigger}, the rootkit will analyse the packet and detect that the pre-defined keyword "XDP\_PoC\_0" has been inserted into the payload, thus learning that the packet has been sent by the attacker. In the PoC implemented in our rootkit, this triggers an overwrite action, in which the XDP program will proceed to modify the payload and the packet size, changing the contents of the packet. This PoC can be seen in action in Section \ref{subsection:poc_evaluation}.
 
 Note that this functionality of XDP, although it has not been integrated in our rootkit, enables a wide range of attacks related with the network, effectively working as Man-in-the-Middle. An example of this is HTTPS Downgrade attacks, where we would tamper with the traffic related to the cipher suite negotiation process so that it turns into a plaintext HTTP connection or an HTTPS connection with a less-secure cipher suite \cite{downgrade_attack}.
 
@@ -1431,7 +1431,7 @@ As we mentioned, we will overwrite the value of d\_reclen of the previous entry 
 
 As we can observe in the figure, by modifying the value of d\_reclen, the user program will skip the entry of file "hideme", and therefore any process listing the available entries of the directory will not show this file.
 
-Apart from detecting entries by their name, we can also know whether an entry is a file, a directory or of some other type. For this, our rootkit uses the attribute d\_type of the linux\_dirent64 (see table \ref{table:linux_dirent64}), whose value determines the type of file. The most relevant values of the d\_type attribute are shown in Table \ref{table:dtype_values} \cite{dtype_dirent}.
+Apart from detecting entries by their name, we can also know whether an entry is a file, a directory or of some other type. For this, our rootkit uses the attribute d\_type of the linux\_dirent64 (see Table \ref{table:linux_dirent64}), whose value determines the type of file. The most relevant values of the d\_type attribute are shown in Table \ref{table:dtype_values} \cite{dtype_dirent}.
 
 \begin{table}[htbp]
 \begin{tabular}{|c|c|}

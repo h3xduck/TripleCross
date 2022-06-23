@@ -250,7 +250,7 @@ The following are the most relevant checks that the verifier performs in eBPF pr
 
 These checks are performed by two main algorithms:
 \begin{itemize}
-\item Build a graph representing the eBPF instructions (similar to the one shown in section \ref{subsection:analysis_bpf_filter_prog}. Check that it is in fact a direct acyclic graph (DAG), meaning that the verifier prevents loops and unreachable instructions.
+\item Build a graph representing the eBPF instructions (similar to the one shown in Section \ref{subsection:analysis_bpf_filter_prog}. Check that it is in fact a direct acyclic graph (DAG), meaning that the verifier prevents loops and unreachable instructions.
 \item Simulate execution flow by starting on the first instruction and following each possible path, observing at each instruction the state of every register and of the stack.
 \end{itemize}
 
@@ -267,7 +267,7 @@ Therefore, creating a map requires a struct with the fields shown in Table \ref{
 \textbf{FIELD} & \textbf{VALUE}\\
 \hline
 \hline
-type & Type of eBPF map. Described in table \ref{table:ebpf_map_types}\\
+type & Type of eBPF map. Described in Table \ref{table:ebpf_map_types}\\
 \hline
 key\_size & Size of the data structure to use as a key\\
 \hline
@@ -318,7 +318,7 @@ The main operations that can be issued are described in Table \ref{table:ebpf_sy
 \textbf{COMMAND} & \textbf{ATTRIBUTES} & \textbf{DESCRIPTION}\\
 \hline
 \hline
-BPF\_MAP\_CREATE & Struct with map info as defined in table \ref{table:ebpf_map_struct} & Create a new map\\
+BPF\_MAP\_CREATE & Struct with map info as defined in Table \ref{table:ebpf_map_struct} & Create a new map\\
 \hline
 BPF\_MAP\_LOOKUP\_ELEM & Map ID, and struct with key to search in the map & Get the element on the map with a specific key\\
 \hline
@@ -413,7 +413,7 @@ Figure \ref{fig:xdp_diag} shows how XDP is integrated in the network processing 
 \begin{itemize}
 \item Analyse the data between the packet buffer bounds.
 \item Modify the packet contents, and modify the packet length.
-\item Decide between one of the actions displayed in table \ref{table:xdp_actions_av}.
+\item Decide between one of the actions displayed in Table \ref{table:xdp_actions_av}.
 \end{itemize}
 
 \begin{figure}[htbp]
@@ -617,7 +617,7 @@ Note that the BPF skeleton also offers further granularity at the time of dealin
 
 
 \section{Security features in eBPF} \label{section:ebpf_security}
-As we have shown in Section \ref{section:modern_ebpf}, eBPF has been an active part of the Linux kernel from its 3.18 version. However, as with many other components of the kernel, its availability to the user depends on the parameters with which the kernel has been compiled. Specifically, eBPF is only available to kernels compiled with the flags specified in table \ref{table:ebpf_kernel_flags}.
+As we have shown in Section \ref{section:modern_ebpf}, eBPF has been an active part of the Linux kernel from its 3.18 version. However, as with many other components of the kernel, its availability to the user depends on the parameters with which the kernel has been compiled. Specifically, eBPF is only available to kernels compiled with the flags specified in Table \ref{table:ebpf_kernel_flags}.
 
 \begin{table}[htbp]
 \begin{tabular}{|c|c|>{\centering\arraybackslash}p{7cm}|}
@@ -663,7 +663,7 @@ It must be noted that, similarly to kernel modules, loading an eBPF program requ
 \item \textbf{Unprivileged users} can only load and attach eBPF programs of type BPF\_PROG\_TYPE\_SOCKET\_FILTER \cite{evil_ebpf_p9}, offering the very limited functionality of filtering packets received on a socket.
 \end{itemize}
 
-More recently, in an effort to further granulate the permissions needed for loading, attaching and running eBPF programs, CAP\_SYS\_ADMIN has been substituted by more specific capabilities \cite{ebpf_caps_intro} \cite{ebpf_caps_lwn}. The current system is therefore described in table \ref{table:ebpf_caps_current}.
+More recently, in an effort to further granulate the permissions needed for loading, attaching and running eBPF programs, CAP\_SYS\_ADMIN has been substituted by more specific capabilities \cite{ebpf_caps_intro} \cite{ebpf_caps_lwn}. The current system is therefore described in Table \ref{table:ebpf_caps_current}.
 
 \begin{table}[htbp]
 \begin{tabular}{|>{\centering\arraybackslash}p{4cm}|>{\centering\arraybackslash}p{10cm}|}

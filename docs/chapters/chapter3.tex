@@ -20,7 +20,7 @@ Map IDs are known by a program after creating the eBPF map, however, a program c
 Therefore, a malicious privileged eBPF program can access and modify other programs' maps, which can lead to:
 \begin{itemize}
 \item Modify data used for the program operation. This is the case for maps which mainly store data structures, such as BPF\_MAP\_TYPE\_HASH.
-\item Modify the program control flow, altering the instructions executed by an eBPF program. This can be achieved if a program is using the bpf\_tail\_call() helper (introduced in table \ref{table:ebpf_helpers}) which is taking data from a map storing eBPF programs (BPF\_MAP\_TYPE\_PROG\_ARRAY, introduced in Table \ref{table:ebpf_map_types}).
+\item Modify the program control flow, altering the instructions executed by an eBPF program. This can be achieved if a program is using the bpf\_tail\_call() helper (introduced in Table \ref{table:ebpf_helpers}) which is taking data from a map storing eBPF programs (BPF\_MAP\_TYPE\_PROG\_ARRAY, introduced in Table \ref{table:ebpf_map_types}).
 \end{itemize}
 
 
@@ -335,7 +335,7 @@ Having the previous restrictions in mind, we can find multiple possible maliciou
 \begin{itemize}
 \item \textbf{Monitor all network connections} in the system. An XDP or TC ingress program can read any packet from any interface, therefore achieving a comprehensive view on which are the running communications and opened ports (even if protocols with encryption are being used) and gathering transmitted data (if the connection is also in plaintext).
 \item \textbf{Hide arbitrary traffic} from the host. If an XDP program drops a packet, the kernel will not be able to know any packet was received in the first place. This can be used to hide malicious incoming traffic. However, as we will mention in Section \ref{section:c2}, malicious traffic may still be detected by other external devices, such as network-wide firewalls.
-\item \textbf{Modify incoming traffic} with XDP programs. Every packet can be modified (as we mentioned at the beginning of section \ref{section:abusing_networking}), and any modification will be unnoticeable to the kernel, meaning that we will have complete, invisible control over the packets received by the kernel.
+\item \textbf{Modify incoming traffic} with XDP programs. Every packet can be modified (as we mentioned at the beginning of Section \ref{section:abusing_networking}), and any modification will be unnoticeable to the kernel, meaning that we will have complete, invisible control over the packets received by the kernel.
 \item \textbf{Modify outgoing traffic} with TC egress programs. Since every packet can be modified at will, we will therefore have complete control over any packet sent by the host. This can be used to enable a malicious program to communicate over the network and exfiltrate data, since even if we cannot create a new connection from eBPF, we can still modify existing packets, writing any payload and headers on it (thus being able to, for instance, change the destination of the packet).
 
 Notice, however, that these modifications are not transparent to the kernel as with XDP, and thus an internal firewall may detect our malicious traffic.
