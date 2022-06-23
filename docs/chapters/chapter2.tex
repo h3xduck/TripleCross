@@ -141,16 +141,22 @@ The addition of classic BPF in the Linux kernel set the foundations of eBPF, but
 \hline
 \hline
 \textit{BPF}: First addition in the kernel & 2.1.75 & 1997\\
+\hline
 \textit{BPF+}: New JIT assembler & 3.0 & 2011\\
+\hline
 \textit{eBPF}: Added eBPF support & 3.15 & 2014\\
+\hline
 \textit New bpf() syscall & 3.18 & 2014\\
+\hline
 \textit Introduction of eBPF maps & 3.19 & 2015\\
+\hline
 \textit eBPF attached to kprobes & 4.1 & 2015\\
+\hline
 \textit Introduction of Traffic Control & 4.5 & 2016\\
+\hline
 \textit eBPF attached to tracepoints & 4.7 & 2016\\
+\hline
 \textit Introduction of XDP & 4.8 & 2016\\
-
-
 \hline
 \end{tabular}
 \caption{Relevant eBPF updates. Selection of the official complete table at \cite{ebpf_funcs_by_ver}.}
@@ -295,7 +301,6 @@ BPF\_MAP\_TYPE\_ARRAY & Elements are stored in an array.\\
 BPF\_MAP\_TYPE\_RINGBUF & Map providing alerts from kernel to user space, covered in Section \ref{subsection:bpf_ring_buf}\\
 \hline
 BPF\_MAP\_TYPE\_PROG\_ARRAY & Stores descriptors of eBPF programs\\
-\hline
 \hline
 \end{tabular}
 \caption{Relevant types of eBPF maps. Full list can be consulted in the man page \cite{bpf_syscall}}
@@ -508,7 +513,6 @@ bpf\_skb\_pull\_data() & Reads a sequence of packet bytes into a buffer.\\
 bpf\_skb\_change\_head() & (Only) enlarges the extension of a packet, by moving the address of its first byte.\\
 \hline
 bpf\_skb\_change\_tail() & Enlarges or reduces the extension of a packet, by moving the address of its last byte.\\
-\hline
 \hline
 \end{tabular}
 \caption{Relevant TC-exclusive eBPF helpers.}
