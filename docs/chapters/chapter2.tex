@@ -943,7 +943,7 @@ After finding the address of the ROP gadgets manually or using an automated tool
 
 \begin{figure}[htbp]
 	\centering
-	\includegraphics[width=16cm]{ROPcompound.jpg}
+	\includegraphics[width=15cm]{ROPcompound.jpg}
 	\caption{Steps for executing code sample using ROP.}
 	\label{fig:rop_compund}
 \end{figure}
@@ -1114,14 +1114,14 @@ $ objdump -d simple_timer
 
 \begin{figure}[htbp]
 	\centering
-	\includegraphics[width=15.5cm]{sch_gdb_plt.png}
+	\includegraphics[width=14.5cm]{sch_gdb_plt.png}
 	\caption{PLT stub for timerfd\_settime, seen from gdb-peda.}
 	\label{fig:lazy_bind_2}
 \end{figure}
 
 \begin{figure}[htbp]
 	\centering
-	\includegraphics[width=15.5cm]{sch_gdb_got_prev.png}
+	\includegraphics[width=14.5cm]{sch_gdb_got_prev.png}
 	\caption{Inspecting address stored in GOT section before dynamic linking, seen from gdb-peda.}
 	\label{fig:lazy_bind_3}
 \end{figure}
@@ -1130,14 +1130,14 @@ $ objdump -d simple_timer
 
 \begin{figure}[htbp]
 	\centering
-	\includegraphics[width=15.5cm]{sch_gdb_got_after.png}
+	\includegraphics[width=14.5cm]{sch_gdb_got_after.png}
 	\caption{Inspecting address stored in GOT section after dynamic linking, seen from gdb-peda.}
 	\label{fig:lazy_bind_4}
 \end{figure}
 
 \begin{figure}[htbp]
 	\centering
-	\includegraphics[width=15.5cm]{sch_glibc_func.png}
+	\includegraphics[width=14.5cm]{sch_glibc_func.png}
 	\caption{Glibc function to which PLT jumps using address stored at GOT, seen from gdb-peda.}
 	\label{fig:lazy_bind_5}
 \end{figure}
