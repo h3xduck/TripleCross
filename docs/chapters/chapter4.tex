@@ -16,12 +16,17 @@ We will firstly present an overview on the rootkit architecture and design. Afte
 \section{Rootkit architecture} \label{section:rootkit_arch}
 Figure \ref{fig:rootkit} shows an overview of the rootkit modules and components which have been built for this research work.
 
+\newgeometry{hmargin=3cm,vmargin=2cm}
+\thispagestyle{lscape}
+\begin{landscape}
 \begin{figure}[htbp]
 	\centering
-	\includegraphics[width=15.5cm]{rootkit.png}
-	\caption{Overview of the rootkit subsystems and components.}
+	\includegraphics[width=21cm]{rootkit.png}
+	\caption{Overview of the rootkit modules and components.}
 	\label{fig:rootkit}
 \end{figure}
+\end{landscape}
+\restoregeometry
 
 As we can observe in the figure, we can distinguish 6 different rootkit modules, along with a rootkit client which provides remote control of the rootkit over the network from the attacker machine. Also, there exists a rootkit user space process, which is listening for commands issued from the kernel-side, transmitted through a ring buffer.
 \begin{itemize}
@@ -51,7 +56,7 @@ Apart from the network triggers, upon receiving a response by the backdoor the r
 \end{itemize}
 
 
-With respect to how the rootkit implementation is distributed into multiple programs, we can find that, overall, there exist 4 main components, as shown in figure \ref{fig:rootkit_files}.
+With respect to how the rootkit implementation is distributed into multiple programs, we can find that, overall, there exist 4 main components, as shown in Figure \ref{fig:rootkit_files}.
 
 \begin{figure}[htbp]
 	\centering
@@ -77,21 +82,18 @@ This program is also responsible of creating the shared map which the backdoor w
 
 
 \section{Library injection module} \label{section:lib_injection}
-In this section, we will discuss how to hijack a user process running in the system so that it executes arbitrary code instructed from an eBPF program. For this, we will be injecting a library which will be executed by taking advantage of the fact that the GOT section in ELFs is flagged as writable (as we introduced in section \ref{subsection:elf_lazy_binding} and using the stack scanning technique covered in section \ref{subsection:bpf_probe_write_apps}. This injection will be stealthy (it must not crash the process) and will be able to hijack privileged programs such as systemd, so that the code is executed as root.
+In this section, we will discuss how to hijack a user process running in the system so that it executes arbitrary code instructed from an eBPF program. For this, we will be injecting a library which will be executed by taking advantage of the fact that the GOT section in ELFs is flagged as writable (as we introduced in section \ref{subsection:elf_lazy_binding} and using the stack scanning technique covered in Section \ref{subsection:bpf_probe_write_apps}. This injection will be stealthy (it must not crash the process) and will be able to hijack privileged programs such as systemd, so that the code is executed as root.
 
-We will also research how to circumvent the protections which modern compilers have set in order to prevent similar attacks (when performed without eBPF), as we overview in section \ref{subsection:hardening_elf}.
+We will also research how to circumvent the protections which modern compilers have set in order to prevent similar attacks (when performed without eBPF), as we overview in Section \ref{subsection:hardening_elf}.
 
-This technique has some advantages and disadvantages to the one described by Jeff Dileo at DEFCON 27 \cite{evil_ebpf_p6974}, which we will briefly cover before presenting ours. Both techniques will be later compared in chapter \ref{chapter:related_work}.
+This technique has some advantages and disadvantages to the one described by Jeff Dileo at DEFCON 27 \cite{evil_ebpf_p6974}, which we will briefly cover before presenting ours. Both techniques will be later compared in Chapter \ref{chapter:related_work}.
 
 
 \subsection{ROP with eBPF} \label{subsection:rop_ebpf}
-In 2019, Jeff Dileo presented in DEFCON 27 the first technique to achieve arbitrary code execution using eBPF \cite{evil_ebpf_p6974}. For this, he used the ROP technique we described in section \ref{subsection:rop} to inject malicious code into a process. We will present an overview on his technique, in order to later compare it to the one we will develop for our rootkit and find advantages and disadvantages. Note that this is a summary and some aspects have been simplified, however we will go in full detail during the explanation of our own technique.
+In 2019, Jeff Dileo presented in DEFCON 27 the first technique to achieve arbitrary code execution using eBPF \cite{evil_ebpf_p6974}. For this, he used the ROP technique we described in Section \ref{subsection:rop} to inject malicious code into a process. We will present an overview on his technique, in order to later compare it to the one we will develop for our rootkit and find advantages and disadvantages. Note that this is a summary and some aspects have been simplified, however we will go in full detail during the explanation of our own technique.
 
-Figure \ref{fig:rop_evil_ebpf_1} shows an overview on the process memory and the eBPF programs loaded. For this injection, we will use the stack scanning technique (section \ref{subsection:bpf_probe_write_apps}) using the arguments of a system call whose arguments are passed using the stack (sys\_timerfd\_settime, which receives two structs utmr and otmr). Therefore, a kprobe is attached to the system call, so that it can start to scan for the return address of the system call, which we know is the original value of register rip which was pushed into the stack (ret).
+Figure \ref{fig:rop_evil_ebpf_1} shows an overview on the process memory and the eBPF programs loaded. For this injection, we will use the stack scanning technique (Section \ref{subsection:bpf_probe_write_apps}) using the arguments of a system call whose arguments are passed using the stack (sys\_timerfd\_settime, which receives two structs utmr and otmr). Therefore, a kprobe is attached to the system call, so that it can start to scan for the return address of the system call, which we know is the original value of register rip which was pushed into the stack (ret).
 
-%TODO This figure needs a remodel. I tried to keep it simple to explain the main concepts on the technique described afterwards, but after writing the next section I realised it gets some things wrong:
-% - It does not show .got and .plt sections.
-% - It shows the RBP register in an incorrect place.
 \begin{figure}[htbp]
 	\centering
 	\includegraphics[width=15cm]{rop_evil_ebpf_1.jpg}
@@ -99,8 +101,7 @@ Figure \ref{fig:rop_evil_ebpf_1} shows an overview on the process memory and the
 	\label{fig:rop_evil_ebpf_1}
 \end{figure}
 
-%TODO I don't quite like this. Maybe the glibc bit, because of its importance, is better somewhere else
-An additional aspect must be introduced now (we will cover it more in detail in section \ref{TODO}): system calls are not directly called by the instructions in the .text section, but rather user programs in C make use of the C Standard Library to delegate the actual syscall, which in this case is the GNU Standard Library (glibc) \cite{glibc}. Therefore, a program calls a function in glibc (in this case timerfd\_settime) in which the syscall is performed, and the kernel executes it.
+An additional aspect must be introduced now (we will cover it more in detail in section \ref{subsection:got_attack}): system calls are not directly called by the instructions in the .text section, but rather user programs in C make use of the C Standard Library to delegate the actual syscall, which in this case is the GNU Standard Library (glibc) \cite{glibc}. Therefore, a program calls a function in glibc (in this case timerfd\_settime) in which the syscall is performed, and the kernel executes it.
 
 This means that, during the stack scanning technique, if we start from struct utmr and scan forward in the stack, what we will find in ret is the return address of the PLT stub that calls the function at glibc, and not directly that of the syscall to the kernel. Therefore, our goal is, for every data in the stack while scanning forward, check whether it is the real return address of the PLT stub we are looking for. For an address to be the real return address, we will follow the next steps:
 \begin{enumerate}
@@ -118,7 +119,7 @@ Now that we have found the return address, we save a backup of the stack (to rec
 	\label{fig:rop_evil_ebpf_2}
 \end{figure}
 
-As we can see in the figure, the function has already exited, and ret has been popped into register rip. As we explained in section \ref{subsection:rop}, the attacker places in that position the address of the first ROP gadget. After that, the attacker can execute arbitrary code. Jeff Dileo, for instance, loads a malicious library into the process (we will do the same and explain this process in the next sections).
+As we can see in the figure, the function has already exited, and ret has been popped into register rip. As we explained in Section \ref{subsection:rop}, the attacker places in that position the address of the first ROP gadget. After that, the attacker can execute arbitrary code. Jeff Dileo, for instance, loads a malicious library into the process (we will do the same and explain this process in the next sections).
 
 Once the attacker has finished executing the injected code, the stack must be restored to the original position so that the program can continue without crashing. A simplified view of this procedure consists of attaching a kprobe to a random system call (in this case, sys\_close()) so that, from the ROP code, we can alert the eBPF program when it is time to remove the ROP code and restore the original stack. Figure \ref{fig:rop_evil_ebpf_3} shows this final step:
 
@@ -129,17 +130,17 @@ Once the attacker has finished executing the injected code, the stack must be re
 	\label{fig:rop_evil_ebpf_3}
 \end{figure}
 
-As we can see, eBPF writes back the original stack and thus the execution can continue. Note that, in practice, some final gadgets must also be executed in order to restore the state of rip and rsp, the stack data for this is written in the free memory zone, so that it does not need to be removed.
+As we can see, eBPF writes back the original stack and thus the execution can continue. Note that, in practice, some final gadgets must also be executed in order to restore the state of rip and rsp. The stack data for this is written in the free memory zone, so that it does not need to be removed.
 
 
-%TODO Eligible to writing more. This was merged with the explanation of each feature before, so it was more extense, but now it might need some more info??
+
 \subsection{Bypassing hardening features in ELFs} \label{subsection:hardening_bypass}
-During section \ref{subsection:hardening_elf}, we presented multiple  security hardening measures that have been introduced to prevent common exploitation techniques (such as stack buffer overflows) and that nowadays can be incorporated, usually by default, in ELF binaries generated using modern compilers. We will now explore how to bypass these features, so that we can design an injection technique that can target any process in the system, independently on whether it was compiled using these mitigations.
+During Section \ref{subsection:hardening_elf}, we presented multiple  security hardening measures that have been introduced to prevent common exploitation techniques (such as stack buffer overflows) and that nowadays can be incorporated, usually by default, in ELF binaries generated using modern compilers. We will now explore how to bypass these features, so that we can design an injection technique that can target any process in the system, independently on whether it was compiled using these mitigations.
 
 \textbf{Stack canaries}\\
 Since stack canaries will be checked after the vulnerable function returns, an attacker seeking to overwrite the stack must ensure that the value of the canary remains constant. In the context of a buffer overflow attack, this can be achieved by leaking the value of the canary and incorporating it into the overflowing data at the stack, so that the same value is written on the same address \cite{canary_exploit}.
 
-In our rootkit, unlike in the ROP technique presented in section \ref{subsection:rop_ebpf}, we will avoid overwriting the value of the saved rip in the stack completely. Therefore, as long as our eBPF program leaves all registers and stack data in the same state as before calling the function, we will not trigger any alerts.
+In our rootkit, unlike in the ROP technique presented in Section \ref{subsection:rop_ebpf}, we will avoid overwriting the value of the saved rip in the stack completely. Therefore, as long as our eBPF program leaves all registers and stack data in the same state as before calling the function, we will not trigger any alerts.
 
 \textbf{DEP/NX}\\
 The only alternative for an attacker upon a non-executable stack is either injecting shellcode at any other executable memory address, or the use of advanced techniques like ROP that fully circumvent this mitigation since the data at the stack is not directly executed at any step.
@@ -147,14 +148,14 @@ The only alternative for an attacker upon a non-executable stack is either injec
 In our rootkit, we will choose the first option, scanning the process virtual memory for an executable page where we will inject our shellcode. This process is usually known as finding 'code caves'.
 
 \textbf{ASLR}\\
-In order to bypass ASLR, attackers must take into account that, although the address at which, for instance, a library is loaded is random, the internal structure of the library remains unchanged, with all symbols in the same relative position, as figure \ref{table:aslr_offset} shows.
+In order to bypass ASLR, attackers must take into account that, although the address at which, for instance, a library is loaded is random, the internal structure of the library remains unchanged, with all symbols in the same relative position, as Figure \ref{fig:aslr_offset} shows.
 
 %TODO Add the .data section here
 \begin{figure}[htbp]
 	\centering
 	\includegraphics[width=13cm]{aslr_offset.jpg}
 	\caption{Two runs of the same executable using ASLR, showing a library and two symbols.}
-	\label{fig:alsr_offset}
+	\label{fig:aslr_offset}
 \end{figure}
 
 As we can observe in the figure, although glibc is loaded at a different base address each run, the offset between the functions it implements, malloc() and free(), remains constant. Therefore, a method for bypassing ASLR is to gather information about the absolute address of any symbol, which can then easily lead to knowing the address of any other if the attacker decompiles the executable and calculates the offset between a pair of addresses where one is known. This is the chosen method for our technique.
@@ -169,13 +170,13 @@ In our rootkit, we will directly write using eBPF the value of GOT if it was com
 
 
 \subsection{Library injection via GOT hijacking} \label{subsection:got_attack}
-Taking into account the previous background and that about stack attacks, ELF's lazy binding and hardening features for binaries we presented in section \ref{section:elf}, we will now present the exploitation technique incorporated in our rootkit to inject a malicious library into a running process. 
+Taking into account the previous background and that about stack attacks, ELF's lazy binding and hardening features for binaries we presented in Section \ref{section:elf}, we will now present the exploitation technique incorporated in our rootkit to inject a malicious library into a running process. 
 
-This attack is based on the possibility of overwriting the data at the GOT section. As we have mentioned previously, this section is marked as writeable if the program was compiled using Partial RELRO, meaning that we will be able to overwrite its value from an eBPF program using the helper bpf\_probe\_write\_user(). After modifying the value of GOT, a PLT stub will take the new value as the jump address (as we explained in section \ref{subsection:elf_lazy_binding}), effectively hijacking the flow of execution of the program. In the case that a program was compiled with Full RELRO (which will be the case of many programs running by default in a Linux system such as systemd), we will make use of the /proc filesystem for overwriting this value.
+This attack is based on the possibility of overwriting the data at the GOT section. As we have mentioned previously, this section is marked as writeable if the program was compiled using Partial RELRO, meaning that we will be able to overwrite its value from an eBPF program using the helper bpf\_probe\_write\_user(). After modifying the value of GOT, a PLT stub will take the new value as the jump address (as we explained in Section \ref{subsection:elf_lazy_binding}), effectively hijacking the flow of execution of the program. In the case that a program was compiled with Full RELRO (which will be the case of many programs running by default in a Linux system such as systemd), we will make use of the /proc filesystem for overwriting this value.
 
 The rootkit will inject the library once an specific syscall is called by a process, but the library injection will only happen after the second syscall, since we need to wait for the GOT address to be loaded by the dynamic linker. This is a necessary step because eBPF will need to validate that it really is the GOT section to overwrite.
 
-This technique works both in compilers with low hardening fetaures by default (Clang) and also on a compiler with all of them active (GCC), see table \ref{table:compilers}. On each of the steps, we will detail the different existing methods depending on the compiler features.
+This technique works both in compilers with low hardening fetaures by default (Clang) and also on a compiler with all of them active (GCC), see Table \ref{table:compilers}. On each of the steps, we will detail the different existing methods depending on the compiler features.
 
 For this research work, the rootkit is prepared to perform this attack on any process that makes use of either the system call sys\_openat or sys\_timerfd\_settime, which are called by the standard library glibc.
 
@@ -191,7 +192,7 @@ We will now describe the multiple exploitation stages for our technique. Figure 
 \textbf{Stage 1: eBPF tracing and scan the stack}\\
 We load and attach a tracepoint eBPF program at the \textit{enter} position of syscall sys\_timerfd\_settime. Firstly, we must ensure that the process calling the tracepoint is one of the processes to hijack.
 
-We will then proceed with the stack scanning technique, as we explained in section \ref{subsection:bpf_probe_write_apps}. In this case, we will take one of the syscall parameters and scan forward in the stack. For each iteration, we must check if the data at the stack corresponds to the saved return address of the PLT stub that jumps to glibc where the syscall sys\_timerfd\_settime is called. Figure \ref{fig:lib_stage1} shows an overview of how these call instructions relate each memory section. 
+We will then proceed with the stack scanning technique, as we explained in Section \ref{subsection:bpf_probe_write_apps}. In this case, we will take one of the syscall parameters and scan forward in the stack. For each iteration, we must check if the data at the stack corresponds to the saved return address of the PLT stub that jumps to glibc where the syscall sys\_timerfd\_settime is called. Figure \ref{fig:lib_stage1} shows an overview of how these call instructions relate each memory section. 
 
 
 \begin{figure}[htbp]
@@ -203,7 +204,7 @@ We will then proceed with the stack scanning technique, as we explained in secti
 
 The following are the steps we will follow to perform check some data at the stack is the saved return address:
 \begin{enumerate}
-\item Check that the previous instruction is a call instruction, by checking the instruction length and opcodes (call instructions always start with e8, and the length is 5 bytes, see figure \ref{fig:firstcall}).
+\item Check that the previous instruction is a call instruction, by checking the instruction length and opcodes (call instructions always start with e8, and the length is 5 bytes, see Figure \ref{fig:firstcall}).
 \begin{figure}[htbp]
 	\centering
 	\includegraphics[width=13cm]{sch_firstcall.png}
@@ -211,7 +212,7 @@ The following are the steps we will follow to perform check some data at the sta
 	\label{fig:firstcall}
 \end{figure}
 \item Now that we know we localized a call instruction, we take the address at which it jumps. That should be an address in a PLT stub.
-\item We analyse the instructions at the PLT stub. If the program was compiled with GCC, the first instruction will be an \textit{endbr64} instruction followed by the PLT jump instruction using the address at GOT (see figure \ref{fig:plt_gcc}), since it generates Intel CET-compatible programs. Otherwise, if using Clang, which does not generate Intel CET instructions, the first instruction is the PLT jump (see figure \ref{fig:plt_clang}).
+\item We analyse the instructions at the PLT stub. If the program was compiled with GCC, the first instruction will be an \textit{endbr64} instruction followed by the PLT jump instruction using the address at GOT (see Figure \ref{fig:plt_gcc}), since it generates Intel CET-compatible programs. Otherwise, if using Clang, which does not generate Intel CET instructions, the first instruction is the PLT jump (see Figure \ref{fig:plt_clang}).
 
 We analyse the jump instruction and, again, take the address at which it jumps. This time, it should be the address of the function at glibc.
 \begin{figure}[htbp]
@@ -227,7 +228,7 @@ We analyse the jump instruction and, again, take the address at which it jumps. 
 	\label{fig:plt_clang}
 \end{figure}
 
-\item We now have the address of timerfd\_settime at glibc, from where the syscall will be called. From eBPF, we continue to scan the first opcodes and compare them to those we expect to find at glibc. Specifically, the function would have to contain the instruction opcodes shown in figure \ref{fig:settime_glibc}. Note that, in our version of Ubuntu, we will find Glibc compiled with GCC.
+\item We now have the address of timerfd\_settime at glibc, from where the syscall will be called. From eBPF, we continue to scan the first opcodes and compare them to those we expect to find at glibc. Specifically, the function would have to contain the instruction opcodes shown in Figure \ref{fig:settime_glibc}. Note that, in our version of Ubuntu, we will find Glibc compiled with GCC.
 
 \begin{figure}[htbp]
 	\centering
@@ -242,7 +243,7 @@ Once we ensured we reached the correct glibc function, we are now sure that the 
 
 Our rootkit also incorporates an alternative scanning technique for processes calling the syscall sys\_openat(). This technique enables to scan the stack even when the system call does not incorporate any arguments from the userspace (and thus we cannot take them from our eBPF tracing program to use them as a foothold in the stack).
 
-As we explained in section \ref{subsection:tracing_arguments}, tracepoint programs receive an struct pt\_regs pointer as an argument. We can take this struct and use the value of register rbp as our starting point for scanning the stack. As we can see on figures \ref{fig:plt_clang}, \ref{fig:plt_gcc} and \ref{fig:settime_glibc}, the  PLT does not contain any function prologue (it does not modify the value of rsp) and the function at glibc does not change this value either. Therefore, in our eBPF program, since we are hooking the syscall at the beginning of its execution, the value of rbp will be the original frame pointer before calling the PLT, and therefore we can use it as our starting address for stack scan, proceeding to scan forward until we find the saved return address.
+As we explained in Section \ref{subsection:tracing_arguments}, tracepoint programs receive an struct pt\_regs pointer as an argument. We can take this struct and use the value of register rbp as our starting point for scanning the stack. As we can see on Figures \ref{fig:plt_clang}, \ref{fig:plt_gcc} and \ref{fig:settime_glibc}, the  PLT does not contain any function prologue (it does not modify the value of rsp) and the function at glibc does not change this value either. Therefore, in our eBPF program, since we are hooking the syscall at the beginning of its execution, the value of rbp will be the original frame pointer before calling the PLT, and therefore we can use it as our starting address for stack scan, proceeding to scan forward until we find the saved return address.
 
 \textbf{Stage 2: Programming shellcode}\\
 Once that we have the address of the GOT section, we need to prepare our shellcode to be injected into the process memory. We will overwrite the value at GOT and redirect the flow of execution to the address at which our shellcode is stored in memory. 
@@ -250,9 +251,9 @@ Once that we have the address of the GOT section, we need to prepare our shellco
 Since we want our shellcode to be able to load a library, it will need to call the function \_\_libc\_dlopen\_mode, which can be found in glibc. This function expects to receive as an argument a string with the file path of the malicious library, and therefore the shellcode will also need to call \_\_libc\_malloc to allocate space for the argument. Tables \ref{table:libc_malloc} and \ref{table:libc_dlopen_mode} explain the expected arguments and return value of each function in detail.
 
 \begin{table}[htbp]
-\begin{tabular}{|>{\centering\arraybackslash}p{4cm}|>{\centering\arraybackslash}p{10cm}|}
+\begin{tabular}{|>{\centering\arraybackslash}p{3cm}|>{\centering\arraybackslash}p{10cm}|}
 \hline
-Register & Value\\
+\textbf{REGISTER} & \textbf{VALUE}\\
 \hline
 \hline
 edi & Number of bytes to allocate. \\
@@ -265,9 +266,9 @@ rax & Return value, contains the address at which the requested bytes were alloc
 \end{table}
 
 \begin{table}[htbp]
-\begin{tabular}{|>{\centering\arraybackslash}p{4cm}|>{\centering\arraybackslash}p{10cm}|}
+\begin{tabular}{|>{\centering\arraybackslash}p{3cm}|>{\centering\arraybackslash}p{10cm}|}
 \hline
-Register & Value\\
+\textbf{REGISTER} & \textbf{VALUE}\\
 \hline
 \hline
 rsi & 0x1, indicating flag RTLD\_LAZY\\
@@ -279,7 +280,7 @@ rdi & Address where to read path of library to load\\
 \label{table:libc_dlopen_mode}
 \end{table}
 
-The programs were compiled having ASLR active, and therefore we cannot know the virtual address at which these functions are loaded into the process memory. However, since we have leaked the address of timerfd\_settime at glibc with the previous eBPF scan, we can calculate the address of the other functions, as we introduced in section \ref{subsection:hardening_bypass}. Figure \ref{fig:aslr_bypass_example} shows an example of this process.
+The programs were compiled having ASLR active, and therefore we cannot know the virtual address at which these functions are loaded into the process memory. However, since we have leaked the address of timerfd\_settime at glibc with the previous eBPF scan, we can calculate the address of the other functions, as we introduced in Section \ref{subsection:hardening_bypass}. Figure \ref{fig:aslr_bypass_example} shows an example of this process.
 
 \begin{figure}[htbp]
 	\centering
@@ -317,13 +318,13 @@ Once we have developed our shellcode, and before overwriting the value of GOT, w
 
 Because of DEP/NX, we cannot use the stack for executing code. On top of that, as we can observe in the section header dump at Appendix \ref{annexsec:readelf_sec_headers}, for security reasons all sections are nowadays marked either writeable or executable, but never both simultaneously.
 
-Therefore, we will use the proc filesystem which we introduced in section \ref{section:proc_filesystem}. By using the file under \textit{/proc/<pid>/maps}, we will easily identify the address range of those memory sections marked as executable, and by using the file \textit{/proc/<pid>/mem}, we will write our shellcode into that memory section, bypassing the absence of a write flag.
+Therefore, we will use the proc filesystem which we introduced in Section \ref{section:proc_filesystem}. By using the file under \textit{/proc/<pid>/maps}, we will easily identify the address range of those memory sections marked as executable, and by using the file \textit{/proc/<pid>/mem}, we will write our shellcode into that memory section, bypassing the absence of a write flag.
 
-Although we may write freely into any virtual address using this technique, as we saw in section \ref{subsection:proc_maps} executable memory usually corresponds to the .text section. Therefore, we are at risk of overwriting critical instructions of the program. This is the reason why we must search for empty memory spaces inside the virtual memory, called code caves.
+Although we may write freely into any virtual address using this technique, as we saw in Section \ref{subsection:proc_maps} executable memory usually corresponds to the .text section. Therefore, we are at risk of overwriting critical instructions of the program. This is the reason why we must search for empty memory spaces inside the virtual memory, called code caves.
 
 We will consider an appropriate code cave as a continuous memory space inside the .text section that consists of a series of NULL bytes (opcode 0x00). Although in principle this may seem like a rare occurence, it is a common find in most processes due to how memory access control is implemented.
 
-In figure \ref{fig:proc_maps_sample}, we can observe how virtual memory sections have a length of 0x1000, or are a multiple of it. This is not an arbitrary number, but rather it is because memory sections must always be of length multiple of the system page length (4 KB = 0x1000 bytes). Therefore, the minimum granularity of a set of permissions over a memory section is of 0x1000 bytes.
+In Figure \ref{fig:proc_maps_sample}, we can observe how virtual memory sections have a length of 0x1000, or are a multiple of it. This is not an arbitrary number, but rather it is because memory sections must always be of length multiple of the system page length (4 KB = 0x1000 bytes). Therefore, the minimum granularity of a set of permissions over a memory section is of 0x1000 bytes.
 
 Since sections must occupy a multiple of 1000 bytes, this leads to multiple sections which leave lots of empty, NULL bytes, unocuppied without any instructions. This is the reason why we will, quite probably, find a code cave in most processes.
 
@@ -414,7 +415,7 @@ Table \ref{table:sudoers_syscall} shows the parameters expected by these system 
 \begin{table}[htbp]
 \begin{tabular}{|c|>{\centering\arraybackslash}p{8cm}|}
 \hline
-System call & Arguments\\
+\textbf{SYSTEM CALL} & \textbf{ARGUMENTS}\\
 \hline
 \hline
 \multirow{4}{*}{sys\_openat} & \multicolumn{1}{c|}{int dfd}\\
@@ -436,7 +437,7 @@ System call & Arguments\\
 \label{table:sudoers_syscall}
 \end{table}
 
-The table shows that there exist two arguments marked as \textit{\_\_user}, which, as we explained in section \ref{subsection:bpf_probe_write_apps}, can be overwritten from an eBPF tracing program using the helper bpf\_probe\_write\_user(). Therefore, there exist two different attack vectors:
+The table shows that there exist two arguments marked as \textit{\_\_user}, which, as we explained in Section \ref{subsection:bpf_probe_write_apps}, can be overwritten from an eBPF tracing program using the helper bpf\_probe\_write\_user(). Therefore, there exist two different attack vectors:
 \begin{itemize}
 \item Modify the argument \textit{filename}, so that the sudo process opens a fake, crafted sudoers file. In this file we would write the entries needed for our user to have sudo privilege without a password. Since the sys\_open syscall returns a file descriptor, which is later used by sys\_read, that is the only argument needed to be modified.
 \item Modify the buffer \textit{buf} in the sys\_read syscall so that it returns specially crafted data to the sudo program.
@@ -456,7 +457,7 @@ As we can observe in the figure, we will use three eBPF tracepoints. The reason 
 \begin{itemize}
 \item An \textit{enter} tracepoint at sys\_openat knows the file being opened, but it does not have access to the user buffer.
 \item An \textit{enter} tracepoint at sys\_read has access to the user buffer, but does not know the name of the file (it only has a file descriptor). Also, if it writes into the buffer now, it will be overwritten later when the kernel reads the \textit{/etc/sudoers} file.
-\item An \textit{exit} tracepoint at sys\_read only receives the return value as a parameter (as we explained in section \ref{subsection:tracing_arguments}), but it can freely write to the user buffer if it had access to it, since the kernel already finished writing on it.
+\item An \textit{exit} tracepoint at sys\_read only receives the return value as a parameter (as we explained in Section \ref{subsection:tracing_arguments}), but it can freely write to the user buffer if it had access to it, since the kernel already finished writing on it.
 \end{itemize}
 
 Taking the above into account, we designed the privilege escalation technique as follows:
@@ -471,11 +472,11 @@ Taking the above into account, we designed the privilege escalation technique as
 	\item A process name.
 	\item A filename.
 	\end{itemize}
-	The key of the map fs\_open is the PID of the user process from which the call to an eBPF program originated, this can be obtained using the bpf\_get\_current\_pid\_tgid() helper (see section \ref{subsection:ebpf_helpers}).
+	The key of the map fs\_open is the PID of the user process from which the call to an eBPF program originated, this can be obtained using the bpf\_get\_current\_pid\_tgid() helper (see Section \ref{subsection:ebpf_helpers}).
 \end{itemize}
 \item A malicious program we executed from user "osboxes" requests sudo privileges. Our goal is to let it run with privileged permissions without having to introduce a password. Note that, although in the system we are using osboxes is a user in the \textit{/etc/sudoers} file already (although requiring a password for running as sudo), this process also works if we used a user not included on it in the first place.
 
-The sudo process opens the \textit{/etc/sudoers} file. The syscall is called and the sys\_enter\_openat tracepoint is called before the syscall is executed. We check that the syscall was called by the sudo process using the helper bpf\_get\_current\_comm() (see section \ref{subsection:ebpf_helpers}) and, if it is, write the filename into the fs\_open map. After that, the tracepoint exists and the syscall is executed.
+The sudo process opens the \textit{/etc/sudoers} file. The syscall is called and the sys\_enter\_openat tracepoint is called before the syscall is executed. We check that the syscall was called by the sudo process using the helper bpf\_get\_current\_comm() (see Section \ref{subsection:ebpf_helpers}) and, if it is, write the filename into the fs\_open map. After that, the tracepoint exists and the syscall is executed.
 
 \item The sudo process now reads from the file descriptor of the file \textit{/etc/sudoers}. The sys\_enter\_read tracepoint is executed right before the syscall is called. In the tracepoint, we check if we can find an entry with a filename in the fs\_open map using the process PID as key (which is the same for all tracepoints, since they originated from the same sudo process). We now write address of the buffer supplied by the sudo process into the map.
 
@@ -504,12 +505,12 @@ This section describes how the rootkit can hijack the execution of programs. Alt
 \item Be transparent to the user space, that is, if we hijack the execution of a program so that another is run, the original program should be executed too with the least delay.
 \end{itemize}
 
-This technique is based on the modification of the arguments of the system call sys\_execve, used to execute programs. When it is called, it causes the program that is currently being run to be completely replaced by the new executed program \cite{execve_man}. Its arguments are listed in table \ref{table:execve_args}
+This technique is based on the modification of the arguments of the system call sys\_execve, used to execute programs. When it is called, it causes the program that is currently being run to be completely replaced by the new executed program \cite{execve_man}. Its arguments are listed in Table \ref{table:execve_args}
 
 \begin{table}[htbp]
 \begin{tabular}{|c|>{\centering\arraybackslash}p{7cm}|}
 \hline
-Argument & Description\\
+\textbf{ARGUMENT} & \textbf{DESCRIPTION}\\
 \hline
 \hline
 const char \_\_user *filename & Path and filename of the file to execute\\
@@ -523,7 +524,7 @@ const char \_\_user *const \_\_user *envp & NULL-terminated array with the envir
 \label{table:execve_args}
 \end{table}
 
-As we can observe in the table, all of the arguments of the syscall are marked with the keyword \_\_user, and therefore as we explain in section \ref{subsection:bpf_probe_write_apps} these arguments can be overwritten using the eBPF helper bpf\_probe\_write\_user(). This opens for us the possibility of modifying these arguments so that another file is modified.
+As we can observe in the table, all of the arguments of the syscall are marked with the keyword \_\_user, and therefore as we explain in Section \ref{subsection:bpf_probe_write_apps} these arguments can be overwritten using the eBPF helper bpf\_probe\_write\_user(). This opens for us the possibility of modifying these arguments so that another file is modified.
 
 Figure \ref{fig:summ_execve_hijack} summarizes the results of an attack using this rootkit module. As we can observe in the figure, we will hijack the execution of sys\_execve to run our own program, but as we mentioned we must execute the original program too in order not to raise concerns in the user space. Therefore, the malicious program must be able to access the original arguments of the sys\_execve call to execute the original program.
 
@@ -545,7 +546,7 @@ We have mentioned the possibility of overwriting the parameters of the sys\_exec
 \item The helper successfully overwrites a buffer but, with a single write operation, it has also modified the value of some other user buffer.
 \end{itemize}
 
-The reason for this is that, as we covered in section \ref{subsection:bpf_probe_write_apps}, the bpf\_probe\_write\_user() helper fails to write any data in the occurence of a page fault. As we explained in section \ref{subsection:mem_faults}, minor memory faults are particularly common when executing a fork() of a process, since the child process will not get its page table completely copied from the parent, but will request the mapping once it is attempted to be read.
+The reason for this is that, as we covered in Section \ref{subsection:bpf_probe_write_apps}, the bpf\_probe\_write\_user() helper fails to write any data in the occurence of a page fault. As we explained in Section \ref{subsection:mem_faults}, minor memory faults are particularly common when executing a fork() of a process, since the child process will not get its page table completely copied from the parent, but will request the mapping once it is attempted to be read.
 
 Because programs calling sys\_execve will be completely replaced by the new program, we can find this function used commonly in two contexts:
 \begin{itemize}
@@ -553,17 +554,17 @@ Because programs calling sys\_execve will be completely replaced by the new prog
 \item Programs that are run by the user in the command-line interface. Once a command is introduced, the program corresponding to the command is searched, and the bash process (or any other shell being used) will fork() itself and execute the new program.
 \end{itemize}
 
-Therefore, when modifying the arguments of sys\_execve, we will find that most calls are from programs which had executed fork() previously, thus having a high probability of failing. Note that the exact reason why writing one buffer with bpf\_probe\_write\_user() modifies multiple buffers simultaneously is unknown, but it is a situation we must account for, since we cannot trust in the helper not returning an error, we must check the result of this write accesses.
+Therefore, when modifying the arguments of sys\_execve, we will find that most calls are from programs which had executed fork() previously, thus having a high probability of failing. Note that the exact reason why writing one buffer with bpf\_probe\_write\_user() modifies multiple buffers simultaneously is unknown (and possibly undefined behaviour), but it is a situation we must account for, since we cannot trust in the helper not returning an error, we must check the result of this write accesses.
 
 \subsection{Hiding data in a system call}
-Apart from having to take into account that the bpf\_probe\_write\_user helper may fail in unexpected manners as we described, we also need to give special attention to how we will preserve the original information of the program being executed via sys\_execve after we modify the arguments of this call. As we showed in figure \ref{fig:summ_execve_hijack}, the malicious program executed using the hijacked syscall must be able to execute the original program. For this, the program will fork() and create a child process, on which execve() will be called with the original program arguments. Therefore, the main issue would be how to recover the original arguments once they were overwritten by eBPF.
+Apart from having to take into account that the bpf\_probe\_write\_user() helper may fail in unexpected manners as we described, we also need to give special attention to how we will preserve the original information of the program being executed via sys\_execve after we modify the arguments of this call. As we showed in Figure \ref{fig:summ_execve_hijack}, the malicious program executed using the hijacked syscall must be able to execute the original program. For this, the program will fork() and create a child process, on which execve() will be called with the original program arguments. Therefore, the main issue would be how to recover the original arguments once they were overwritten by eBPF.
 
-In order to achieve this, we will hide the original arguments in those passed to the malicious program. Table \ref{fig:execve_args_hide} shows how this process works with a sample sys\_execve call. Environment variables have been omitted for simpleness, but we can usually find a large array of them.
+In order to achieve this, we will hide the original arguments in those passed to the malicious program. Table \ref{table:execve_args_hide} shows how this process works with a sample sys\_execve call. Environment variables have been omitted for simpleness, but we can usually find a large array of them.
 
 \begin{table}[H]
 \begin{tabular}{|>{\centering\arraybackslash}p{2cm}|>{\centering\arraybackslash}p{3cm}|}
 \hline
-\multicolumn{2}{|c|}{Original arguments}\\
+\multicolumn{2}{|c|}{\textbf{ORIGINAL ARGUMENTS}}\\
 \hline
 \hline
 filename & "/bin/ls"\\
@@ -578,9 +579,9 @@ envp[0] & NULL\\
 \hline
 \end{tabular}
 \quad
-\begin{tabular}{|>{\centering\arraybackslash}p{2cm}|>{\centering\arraybackslash}p{3cm}|}
+\begin{tabular}{|>{\centering\arraybackslash}p{2cm}|>{\centering\arraybackslash}p{4cm}|}
 \hline
-\multicolumn{2}{|c|}{Modified arguments}\\
+\multicolumn{2}{|c|}{\textbf{MODIFIED ARGUMENTS}}\\
 \hline
 \hline
 filename & "/home/osboxes/execve\_hijack"\\
@@ -629,7 +630,7 @@ As we can observe in the figure, the steps followed will be the following:
 	\item Check using the helper bpf\_get\_current\_comm() that we are hooking the syscall of our target program. For instance, if we are targeting the commands entered by the user in the terminal, we would look for process \textit{bash}.
 	\item Backup the values of the filename and all arguments.
 	\item Write using bpf\_probe\_write\_user into the filename, subtituting it with the filename of our malicious program.
-	\item Check that the write call was successful, and that the values of the arguments are still the same as before (since as we explained in section \ref{subsection:sys_execve_writing}, these may be modified simultaneously). If one of these errors happened, we will write back into the filename the original program filename and exit from the tracepoint.
+	\item Check that the write call was successful, and that the values of the arguments are still the same as before (since as we explained in Section \ref{subsection:sys_execve_writing}, these may be modified simultaneously). If one of these errors happened, we will write back into the filename the original program filename and exit from the tracepoint.
 	\item Write using bpf\_probe\_write\_user into the first argument argv[0], substituting it with the filename of the original program.
 	\item Check again that the write call was successful, and that the values of the arguments are still the same as before. If one of these errors happened, we will write back into the argv[0] the original argument, and exit from the tracepoint.
 \end{enumerate}
@@ -658,12 +659,12 @@ As we can observe in the figure, the malicious program will create multiple sys\
 \item Firstly, the malicious program receives the arguments modified from eBPF, where the original filename has been hidden in argv[0].
 \item In order to be executed as sudo, the program crafts a new sys\_execve call for running itself as sudo. For this, it creates a sudo process, which will inspect arguments argv[1] and onwards to construct its own privileged sys\_execve call once it checks the user has sudo permissions. 
 
-Since our malicious program does not have sudo permissions, we make use of the privilege escalation module we explained in section \ref{section:privesc} in order to modify the contents of the \textit{/etc/sudoers} file and tricking the sudo process into considering we have sudo privilege. After this, the sudo process makes a sys\_execve call to the malicious process, which this time will be running with root permissions.
+Since our malicious program does not have sudo permissions, we make use of the privilege escalation module we explained in Section \ref{section:privesc} in order to modify the contents of the \textit{/etc/sudoers} file and tricking the sudo process into considering we have sudo privilege. After this, the sudo process makes a sys\_execve call to the malicious process, which this time will be running with root permissions.
 
-\item Once the malicious program is running with root privileges, it can perform different actions in the infected machine. In our rootkit, this program (which can be found in TODO), establishes a connection with the remote rootkit client using a raw sockets-based protocol (which will be explain in section \ref{TODO}).
+\item Once the malicious program is running with root privileges, it can perform different actions in the infected machine. In our rootkit, this program (which can be found in the repository at \cite{repo_execve_hijack}), establishes a connection with the remote rootkit client using a raw sockets-based protocol (which will be explain in Section \ref{subsection:c2}).
 
 Apart from this, the malicious program will now run the original program, by taking argv[1] as the filename and considering the rest of the argv[] array, starting at position 2, as the program arguments (argv[1], argv[2]...). With respect to argv[0], its original value is easily recovered from the original filename. 
-%TODO link to program in repository
+
 \end{enumerate}
 
 
@@ -672,14 +673,14 @@ This section covers a comprehensive analysis of the design, implementation and f
 
 Apart from the XDP and TC eBPF programs which compound the core of the backdoor module, we had to design and implement a series of network protocols which enable to communicate through the network with the rootkit client. Also, we will consider that a firewall, or an Intrusion Detection System (IDS) \cite{ips} may be scanning the traffic, searching for suspicious packet. Therefore, we will attempt to camouflage our traffic as common traffic generated by benign applications. 
 
-Note that IDSs and firewalls are usually located outside of the host, in the middle point between the router which connects to the Internet and the host. Therefore, it is not enough that we hide our rootkit packets from the kernel using XDP as we explained in section \ref{section:abusing_networking}, but rather we must aim to design packets which are not suspicious to be malicious even from the perspective of software that sits in the middle of all of our transmissions through the network.
+Note that IDSs and firewalls are usually located outside of the host, in the middle point between the router which connects to the Internet and the host. Therefore, it is not enough that we hide our rootkit packets from the kernel using XDP as we explained in Section \ref{section:abusing_networking}, but rather we must aim to design packets which are not suspicious to be malicious even from the perspective of software that sits in the middle of all of our transmissions through the network.
 
 \subsection{Backdoor triggers} \label{subsection:triggers}
 After a machine is infected by the rootkit, the rootkit client program will be used by the attacker to initiate a connection with the backdoor. However, first and foremost the backdoor needs to be able to detect whether a packet corresponds to common traffic generated by the host applications, or if it is coming from the rootkit client. This is because the attacker may be launching the rootkit client from any IP address, and listening at any port, so the backdoor must learn these parameters from the rootkit client, whose identity must be "authenticated" before establishing a connection with it. The first packet or group of packets whose purpose is to instruct the backdoor about who is the rootkit client and initiate a connection is known as a "trigger".
 
 Although there exist a wide variety of types of triggers, each type offers different advantages and drawbacks. In our rootkit, we have implemented multiple triggers with the purpose of discussing multiple authentication options, ranging from simple keywords inserted on packets, to complex packet streams that are based on triggers found in real-world rootkits.
 
-Note that, as we introduced in section \ref{section:networking_fundamentals}, we will be exclusively working with TCP/IP packets, but an eBPF backdoor is capable of operating with any protocol of the network stack.
+Note that, as we introduced in Section \ref{section:networking_fundamentals}, we will be exclusively working with TCP/IP packets, but an eBPF backdoor is capable of operating with any protocol of the network stack.
 
 \textbf{Keyword-based triggers}\\
 These triggers are one of the simplest but also the most easily detectable by any program inspecting the network traffic. This type of trigger consists of including a keyword (a simple string) inside the payload of the TCP packet. Figure \ref{fig:keyword_trigger} shows an example of a trigger of this kind.
@@ -691,7 +692,9 @@ These triggers are one of the simplest but also the most easily detectable by an
 	\label{fig:keyword_trigger}
 \end{figure}
 
-Our rootkit is prepared to listen for keyword-based triggers, although it is a simple Proof of Concept (PoC) which does not take part in the main C2 functionality. In the case of the trigger shown in figure \ref{fig:keyword_trigger}, the rootkit will analyse the packet and detect that the pre-defined keyword "XDP\_PoC\_0" has been inserted into the payload, thus learning that the packet has been sent by the attacker. In the PoC implemented in our rootkit, this triggers an overwrite action, in which the XDP program will proceed to modify the payload and the packet size, changing the contents of the packet. This PoC can be seen in action in section \ref{TODO}.
+Our rootkit is prepared to listen for keyword-based triggers, although it is a simple Proof of Concept (PoC) which does not take part in the main C2 functionality. In the case of the trigger shown in Figure \ref{fig:keyword_trigger}, the rootkit will analyse the packet and detect that the pre-defined keyword "XDP\_PoC\_0" has been inserted into the payload, thus learning that the packet has been sent by the attacker. In the PoC implemented in our rootkit, this triggers an overwrite action, in which the XDP program will proceed to modify the payload and the packet size, changing the contents of the packet. This PoC can be seen in action in section \ref{subsection:poc_evaluation}.
+
+Note that this functionality of XDP, although it has not been integrated in our rootkit, enables a wide range of attacks related with the network, effectively working as Man-in-the-Middle. An example of this is HTTPS Downgrade attacks, where we would tamper with the traffic related to the cipher suite negotiation process so that it turns into a plaintext HTTP connection or an HTTPS connection with a less-secure cipher suite \cite{downgrade_attack}.
 
 \textbf{Port-knocking triggers}\\
 This type of triggers is based on a common previously agreed sequence of ports which both the backdoor and the client share beforehand. When the client wants to initiate a connection with the backdoor, it will send an ordered sequence of packets directed to multiple of the ports of the infected host, so that the order of these ports corresponds to the sequence agreed with the backdoor \cite{port_knocking}. A backdoor sniffing network traffic will detect this pattern and initiate a connection with the source.
@@ -719,12 +722,12 @@ As we can observe in the figure, a series of 8 data sections of 2 bytes of lengt
 \begin{table}[htbp]
 \begin{tabular}{|c|>{\centering\arraybackslash}p{8cm}|}
 \hline
-Value & Action\\
+\textbf{VALUE} & \textbf{ACTION}\\
 \hline
 \hline
 0x1F29 & Request to start an encrypted pseudo-shell connection.\\
 \hline
-0x4E14 & Request to start a 'phantom shell' connection (this is explained in section \ref{TODO}).\\
+0x4E14 & Request to start a 'phantom shell' connection (this is explained in Section \ref{subsection:c2}).\\
 \hline
 0x1D25 & Request to load and attach all rootkit eBPF programs.\\
 \hline
@@ -738,7 +741,7 @@ Value & Action\\
 \begin{table}[htbp]
 \begin{tabular}{|c|c|}
 \hline
-Key & Value\\
+\textbf{KEY} & \textbf{VALUE}\\
 \hline
 \hline
 K1 & 0x56A4\\
@@ -750,7 +753,7 @@ K2 & 0x7813\\
 \label{table:k1_k2_values}
 \end{table}
 
-The above format guarantees that two packets will never contain the same data, while at the same time the result is a TCP packet with random data. Therefore, when the backdoor receives any TCP packet, it will attempt to use K1, K2 and K3 to calculate the operations shown in figure \ref{fig:bvp47_trigger}. If the format matches, then it will instruct the rootkit module responsible to execute the action related to K3.
+The above format guarantees that two packets will never contain the same data, while at the same time the result is a TCP packet with random data. Therefore, when the backdoor receives any TCP packet, it will attempt to use K1, K2 and K3 to calculate the operations shown in Figure \ref{fig:bvp47_trigger}. If the format matches, then it will instruct the rootkit module responsible to execute the action related to K3.
 
 Although this type of trigger is stealthier than the previous we presented, its main drawback is that, upon a forensic investigation and decompilation of the rootkit and backdoor, the value of the keys can be found and therefore its traffic detected. 
 
@@ -766,7 +769,7 @@ This trigger is based on the one included on the implant called "Hive", from whi
 
 In our rootkit, we will follow a similar approach, hiding a large set of data not in the payload of a TCP packet, but in the TCP headers itself. Our packets will also be marked with the SYN flag. By taking these two measures, the stream of packets would seem a harmless succession of SYN packets requesting to start a connection.
 
-Firstly, the rootkit client will define the data payload to send as shown in figure \ref{fig:hive_data}.
+Firstly, the rootkit client will define the data payload to send as shown in Figure \ref{fig:hive_data}.
 
 \begin{figure}[htbp]
 	\centering
@@ -775,7 +778,7 @@ Firstly, the rootkit client will define the data payload to send as shown in fig
 	\label{fig:hive_data}
 \end{figure}
 
-As we can observe in the figure, the rootkit will tell the backdoor information about to which IP address the rootkit has to send back a response. This enables to send the multi-packet trigger from a spoofed IP address and port. It also contains another K3 XORed with the port, so that the backdoor knows which action is requested by the rootkit client. The values for this K3 are the same as we showed in table \ref{table:k3_values}.
+As we can observe in the figure, the rootkit will tell the backdoor information about to which IP address the rootkit has to send back a response. This enables to send the multi-packet trigger from a spoofed IP address and port. It also contains another K3 XORed with the port, so that the backdoor knows which action is requested by the rootkit client. The values for this K3 are the same as we showed in Table \ref{table:k3_values}.
 
 The payload also contains two particularly relevant fields, a CRC and a XOR key:
 \begin{itemize}
@@ -787,7 +790,7 @@ A CRC is necessary because we may receive corrupted packets (TCP guarantees inte
 
 After the rootkit client has built the data payload to send, it will divide it into multiple chunks and inject them into some of the fields at the TCP headers. We have implemented two different triggers according to this:
 \begin{enumerate}
-\item The first type of trigger consists of dividing the payload into 3 chunks of 4 bytes each, and injecting them into the sequence number of SYN TCP packets, as shown in figure \ref{fig:hive_seqnum}.
+\item The first type of trigger consists of dividing the payload into 3 chunks of 4 bytes each, and injecting them into the sequence number of SYN TCP packets, as shown in Figure \ref{fig:hive_seqnum}.
 
 \begin{figure}[htbp]
 	\centering
@@ -796,7 +799,7 @@ After the rootkit client has built the data payload to send, it will divide it i
 	\label{fig:hive_seqnum}
 \end{figure}
 
-\item The second type of trigger consists of dividing the payload into 6 chunks of 2 bytes each, and injecting them into the source port of SYN TCP packets, as shown in figure \ref{fig:hive_srcport}.
+\item The second type of trigger consists of dividing the payload into 6 chunks of 2 bytes each, and injecting them into the source port of SYN TCP packets, as shown in Figure \ref{fig:hive_srcport}.
 
 \begin{figure}[htbp]
 	\centering
@@ -807,7 +810,7 @@ After the rootkit client has built the data payload to send, it will divide it i
 
 \end{enumerate}
 
-Note that, although in figure \ref{fig:hive_seqnum} and \ref{fig:hive_srcport} the data is injected directly, this data has been transformed under the rolling XOR, so a firewall or IDS would not easily reconstruct the IP or the PORT just by looking at the packet.
+Note that, although in Figure \ref{fig:hive_seqnum} and \ref{fig:hive_srcport} the data is injected directly, this data has been transformed under the rolling XOR, so a firewall or IDS would not easily reconstruct the IP or the PORT just by looking at the packet.
 
 After the rootkit client constructs the packet stream to send, the packets are sent in order to the infected system and the backdoor will have to process them. The backdoor will only be able to acknowledge that a trigger has been sent after the 3 (or the 6) packets have been received, therefore the XDP program is in charge of saving the last 3 (or the last 6) packets received from each IP address at a minimum.
 
@@ -831,13 +834,13 @@ If the previous checks do not fail, it means the packet stream was a multi-strea
 
 %TODO INTRODUCE IMAGES OF SHELLS
 \subsection{Command and Control} \label{subsection:c2}
-This section details the C2 capabilities incorporated in our rootkit, that is, mechanisms that enable the attacker to introduce rootkit commands (not to be confused with Linux commands in a shell) from the remote rootkit client and to be executed in the infected machine, returning the output of the command (if any) back to the client. These rootkit commands can be instructed by sending a backdoor trigger, which as we mentioned, depending on the value of K3 in the trigger, a different rootkit action will be executed by the backdoor (available values are displayed in table \ref{table:k3_values}).
+This section details the C2 capabilities incorporated in our rootkit, that is, mechanisms that enable the attacker to introduce rootkit commands (not to be confused with Linux commands in a shell) from the remote rootkit client and to be executed in the infected machine, returning the output of the command (if any) back to the client. These rootkit commands can be instructed by sending a backdoor trigger, which as we mentioned, depending on the value of K3 in the trigger, a different rootkit action will be executed by the backdoor (available values are displayed in Table \ref{table:k3_values}).
 
-Some of the actions triggered by the backdoor involve modifying the behaviour of the rootkit (such as attaching/detaching eBPF programs remotely), while others enable the attacker to spawn rootkit 'pseudo-shells'. These pseudo-shells are a special rootkit-to-´rootkit client connections which simulate a shell program, enabling the attacker to execute Linux commands remotely and get the results as if it was executing them directly in the infected machine. During this connection, the rootkit and the rootkit client will exchange messages containing commands and information. For this, both programs need to agree on a common protocol which is mutually understood, defining the format and content of these transmissions.
+Some of the actions triggered by the backdoor involve modifying the behaviour of the rootkit (such as attaching/detaching eBPF programs remotely), while others enable the attacker to spawn rootkit 'pseudo-shells'. These pseudo-shells are a special rootkit-to-rootkit client connections which simulate a shell program, enabling the attacker to execute Linux commands remotely and get the results as if it was executing them directly in the infected machine. During this connection, the rootkit and the rootkit client will exchange messages containing commands and information. For this, both programs need to agree on a common protocol which is mutually understood, defining the format and content of these transmissions.
 
-Apart from being able to spawn pseudo-shells by sending such action requests to the backdoor using a backdoor trigger, some other shells can also be spawned as a result of a successful exploitation of either the library injection module or the execution hijacking module. In particular, the malicious library we injected in section \ref{section:lib_injection} and the malicious user program of section \ref{section:execution_hijack} spawn one of these shells once they are executed.
+Apart from being able to spawn pseudo-shells by sending such action requests to the backdoor using a backdoor trigger, some other shells can also be spawned as a result of a successful exploitation of either the library injection module or the execution hijacking module. In particular, the malicious library we injected in Section \ref{section:lib_injection} and the malicious user program of Section \ref{section:execution_hijack} spawn one of these shells once they are executed.
 
-As a summary, figure \ref{fig:c2_summ} shows an overview of C2 infrastructure.
+As a summary, Figure \ref{fig:c2_summ_infra} shows an overview of C2 infrastructure.
 
 \begin{figure}[htbp]
 	\centering
@@ -852,7 +855,7 @@ We will now proceed to analyse each of these connections and shell-like mechanis
 
 
 \textbf{Reverse shell}\\
-This is the simplest and most automated shell we can obtain from an infected machine. This shell is spawned when we inject the malicious library of the library injection module (section \ref{section:lib_injection}), therefore the parties involved in the transmission are the rootkit client and the malicious library.
+This is the simplest and most automated shell we can obtain from an infected machine. This shell is spawned when we inject the malicious library of the library injection module (Section \ref{section:lib_injection}), therefore the parties involved in the transmission are the rootkit client and the malicious library.
 
 A reverse shell is initiated from the infected machine to the attacker, that is, the malicious library actively initiates the connection, and the rootkit client must listen for this request using a netcat listener (or a similar program). A reverse shell is usually created in three steps:
 \begin{enumerate}
@@ -870,7 +873,7 @@ The attacker, for its part, can accept the TCP connection requested by the infec
 \textbf{Plaintext pseudo-shell}\\
 This shell-like connection enables the attacker to send commands, execute them in the infected machine and receive back the output without the execution of any shell program, and with all transmissions being sent in plaintext over the network.
 
-This type of shell is obtained by running the malicious program of the execution hijacking module of the rootkit. The rootkit currently does not incorporate a backdoor trigger that launches this module, but rather it is started automatically once the malicious program is executed (see table \ref{table:k3_values}, we have not included a K3 for running an unencrypted pseudo-shell).
+This type of shell is obtained by running the malicious program of the execution hijacking module of the rootkit. The rootkit currently does not incorporate a backdoor trigger that launches this module, but rather it is started automatically once the malicious program is executed (see Table \ref{table:k3_values}, we have not included a K3 for running an unencrypted pseudo-shell).
 
 While running a plaintext pseudo-shell, the rootkit client and the malicious program from the execution hijacking module (hereafter called the rootkit, since it is part of it) will make use of a master/slave protocol where the rootkit client acts as the master (sending commands) and the rootkit acts as the slave (it only sends data in response of a client message). On each transmission, the rootkit client will send a single TCP packet (without a preceding 3-way handshake) in which the command is embedded as the payload. The rootkit will execute this command and answer back with the output in another single TCP packet.
 
@@ -886,7 +889,7 @@ Apart from the data being transmitted (the command and the output of that comman
 \begin{table}[htbp]
 \begin{tabular}{|c|>{\centering\arraybackslash}p{8cm}|}
 \hline
-\textbf{Header} & \textbf{Description}\\
+\textbf{HEADER} & \textbf{DESCRIPTION}\\
 \hline
 \hline
 CC\_SYN & Sent by the rootkit client to the rootkit, requests to initiate a connection. Expects a packet with CC\_ACK in response.\\
@@ -913,7 +916,7 @@ Figure \ref{fig:ups_transmission} illustrates a common transmission following th
 	\label{fig:ups_transmission}
 \end{figure}
 
-As we can observe in figure \ref{fig:ups_transmission}, packets containing CC\_SYN and CC\_ACK act as a custom 2-way handshake. This step could be considered redundant and has been included only to share a resemblance with the TCP protocol.
+As we can observe in Figure \ref{fig:ups_transmission}, packets containing CC\_SYN and CC\_ACK act as a custom 2-way handshake. This step could be considered redundant and has been included only to share a resemblance with the TCP protocol.
 
 Also, note that after a successful CC\_SYN-CC\_ACK exchange there is no need to repeat it after a CC\_MSG, the transmission will consist of consecutive CC\_MSG packets until the pseudo-shell is closed from the rootkit client with a CC\_FIN.
 
@@ -921,14 +924,14 @@ Also, note that after a successful CC\_SYN-CC\_ACK exchange there is no need to 
 \textbf{Encrypted pseudo-shell}\\
 Similarly to plaintext pseudo-shells, encrypted pseudo-shells enable the attacker to send commands, execute them in the infected machine and receive back the output, but all transmissions will be contained in the context of a secure encrypted connection using TLS.
 
-In our rootkit, this type of shells are spawned after the rootkit client requests such an action to the network backdoor by setting the appropriate value of K3 (see table \ref{table:k3_values}) on either a pattern-based backdoor trigger or a multi-packet trigger. Once such a trigger is received in the backdoor, it will request to the rootkit user process to execute a TLS client that connects to the TLS server run at the rootkit client. 
+In our rootkit, this type of shells are spawned after the rootkit client requests such an action to the network backdoor by setting the appropriate value of K3 (see Table \ref{table:k3_values}) on either a pattern-based backdoor trigger or a multi-packet trigger. Once such a trigger is received in the backdoor, it will request to the rootkit user process to execute a TLS client that connects to the TLS server run at the rootkit client. 
 
 Once both parties are connected using TLS, they exchange data using a custom protocol, similar to the one used for plaintext pseudo-shells, but this time using TLS-contained messages. This message exchange works as master/slave protocol too, where the rootkit client will send a command to the rootkit, and the rootkit will execute the command and answer back with the output. Similarly to plaintext pseudo-shells, these messages are composed of a header and the data being transmitted. Table \ref{table:eps_headers} show the headers according to the protocol.
 
 \begin{table}[htbp]
 \begin{tabular}{|c|>{\centering\arraybackslash}p{8cm}|}
 \hline
-\textbf{Header} & \textbf{Description}\\
+\textbf{HEADER} & \textbf{DESCRIPTION}\\
 \hline
 \hline
 CC\_COMM\_RQ\# & Sent by the rootkit client to the rootkit, sends a command to be executed.\\
@@ -949,9 +952,9 @@ As we can observe, this protocol works similarly to the one in pseudo-shells, wi
 
 
 \textbf{Phantom shell}\\
-This shell-like connection works with the coordination of both the XDP and TC modules at the backdoor. It does not involve sending any packets from the user space, but rather the backdoor will reuse packets being sent by other applications in the infected machine, modifying them so that they are directed to the rootkit client. Afterwards, the original packet will be transmitted without modifications to its original destination due to the TCP retransmissions. This technique has been explained in detail in section \ref{subsection:network_attacks}.
+This shell-like connection works with the coordination of both the XDP and TC modules at the backdoor. It does not involve sending any packets from the user space, but rather the backdoor will reuse packets being sent by other applications in the infected machine, modifying them so that they are directed to the rootkit client. Afterwards, the original packet will be transmitted without modifications to its original destination due to the TCP retransmissions. This technique has been explained in detail in Section \ref{subsection:network_attacks}.
 
-A phantom shell can be obtained from the rootkit client by sending a backdoor trigger (only pattern-based triggers are supported for this shell) with the corresponding value of K3 (see table \ref{table:k3_values}). The XDP program at the backdoor receives the trigger and communicates to the TC program that the backdoor has been instructed to start a phantom shell. TC will modify a single packet and send it to the rootkit client, indicating that the backdoor is ready to start the phantom shell. After that, the client and the backdoor exchange TCP packets using a shared protocol (similar to that of plaintext pseudo-shells) in the following manner:
+A phantom shell can be obtained from the rootkit client by sending a backdoor trigger (only pattern-based triggers are supported for this shell) with the corresponding value of K3 (see Table \ref{table:k3_values}). The XDP program at the backdoor receives the trigger and communicates to the TC program that the backdoor has been instructed to start a phantom shell. TC will modify a single packet and send it to the rootkit client, indicating that the backdoor is ready to start the phantom shell. After that, the client and the backdoor exchange TCP packets using a shared protocol (similar to that of plaintext pseudo-shells) in the following manner:
 \begin{enumerate}
 \item The rootkit client sends a TCP packet with the command to execute.
 \item The XDP program at the backdoor scans the traffic and detects that a TCP packet belonging to a phantom shell has been received (recognizing it by its header at the TCP payload).
@@ -967,7 +970,7 @@ Both XDP and the user space rootkit program will communicate with the TC program
 \item The command requested by the rootkit client (this is empty when XDP communicates having received the backdoor trigger in the first step).
 \end{itemize}
 
-With respect to the protocol being used, the TCP packets exchanged between the rootkit client and the TC program is the same as that shown in figure \ref{fig:ups_packet_struct}. The only difference is in the headers being used, which are described in table \ref{table:phantom_headers}.
+With respect to the protocol being used, the TCP packets exchanged between the rootkit client and the TC program is the same as that shown in Figure \ref{fig:ups_packet_struct}. The only difference is in the headers being used, which are described in Table \ref{table:phantom_headers}.
 
 \begin{table}[htbp]
 \begin{tabular}{|c|>{\centering\arraybackslash}p{8cm}|}
@@ -1005,11 +1008,11 @@ Note that, currently, the rootkit only hijacks TCP packets, but it could also mo
 
 
 \textbf{Backdoor commands}\\
-Apart from supporting the remote execution of commands via the shell-like connections we have covered in this section, the backdoor also enables two other backdoor commands which modify the behaviour of the rootkit. As we can observe in table \ref{table:k3_values}, these commands consist on enabling or disabling eBPF programs remotely.
+Apart from supporting the remote execution of commands via the shell-like connections we have covered in this section, the backdoor also enables two other backdoor commands which modify the behaviour of the rootkit. As we can observe in Table \ref{table:k3_values}, these commands consist on enabling or disabling eBPF programs remotely.
 
 These commands are launched from the rootkit client and get sent to the backdoor in the form of either a pattern-based trigger or any of the two forms of multi-packet trigger. As with any other backdoor trigger, the XDP program checks the value of K3 contained in the trigger and issues the corresponding action.
 
-In the case of these commands, the order needs to be transmitted to the rootkit user space program via the ring buffer, from where the eBPF programs will be attached or detached using the eBPF program configurator. We will cover the eBPF program configurator extensively in section \ref{subsection:ebpf_progs_config}.
+In the case of these commands, the order needs to be transmitted to the rootkit user space program via the ring buffer, from where the eBPF programs will be attached or detached using the eBPF program configurator. We will cover the eBPF program configurator extensively in Section \ref{subsection:ebpf_progs_config}.
 
 Apart from just demonstrating the C2 capabilities of the rootkit, these commands are useful to perform a soft reset of the rootkit remotely (since it reloads all eBPF programs with the exception of the backdoor) or to minimize the rootkit activity to the minimum.
 
@@ -1031,11 +1034,11 @@ As we can observe in the figure, the XDP program must be attached to a network i
 
 For any packet received, a filtering routine will be applied, whose purpose is to discard any packet the backdoor will not work with, only keeping TCP/IP packets. Moreover, these initial checks done with the purpose of determining the protocol must always been made, otherwise the eBPF verifier may consider any access to the packet as invalid (since it will not be sure about the type and bounds of the fields it is accessing). We can also appreciate that the XDP program filters according to the destination port. The reason is that we have designed our backdoor trigger so that they are always directed to this port number.
 
-After the initial filtering routine, the XDP program will check for any of the triggers or headers it could be received to support the C2 capabilities of the backdoor. For this, more filters will be implemented, usually checking for the payload or packet size first, and later checking for the actual contents since the verifier forbids accessing payload data if its length is not assured. Also, in the case of working with multi-packet triggers, the related eBPF maps must be updated with the log of the latest packets received, as we described in section \ref{subsection:triggers}.
+After the initial filtering routine, the XDP program will check for any of the triggers or headers it could be received to support the C2 capabilities of the backdoor. For this, more filters will be implemented, usually checking for the payload or packet size first, and later checking for the actual contents since the verifier forbids accessing payload data if its length is not assured. Also, in the case of working with multi-packet triggers, the related eBPF maps must be updated with the log of the latest packets received, as we described in Section \ref{subsection:triggers}.
 
-Once the type of trigger is detected, XDP proceeds to perform the actions related to the value of K3 found inside each trigger. As we described in section \ref{subsection:c2}, these include writing into the ring buffer or communicating with the TC program via the shared eBPF map.
+Once the type of trigger is detected, XDP proceeds to perform the actions related to the value of K3 found inside each trigger. As we described in Section \ref{subsection:c2}, these include writing into the ring buffer or communicating with the TC program via the shared eBPF map.
 
-Note that in this diagram it has been omitted the section related with modifying incoming packets, used for the PoC shown in section \ref{TODO}. The reason is that its functionality is identical to that being shown in figure \ref{fig:c2_summ_tc} implemented by the TC program.
+Note that in this diagram it has been omitted the section related with modifying incoming packets, used for the PoC shown in Section \ref{subsection:poc_evaluation}. The reason is that its functionality is identical to that being shown in Figure \ref{fig:c2_summ_tc} implemented by the TC program.
 
 
 \textbf{TC}\\
@@ -1051,7 +1054,7 @@ The TC egress program is responsible for sniffing outgoing network traffic and m
 As we can observe in the figure, the TC program will ignore any packet until some data arrives at the shared eBPF map. At that point, it will proceed to overwrite the packet with the data it has been sent by the XDP or rootkit user process. In particular, it must redirect the destination of the original packet (thus changing the IP address and destination port) and modify the payload of the packet. Therefore, it approaches the packet modification in two steps:
 \begin{itemize}
 \item Modifying the IP and TCP headers of the packet with the new destination data.
-\item Modifying the payload. Most of the times, this payload will be of different length compared to that of the original TCP packet, and therefore the TC program must modify the packet bounds. This is done using the bpf\_skb\_change\_tail helper, which we covered in section \ref{subsection:tc}. Note that, once we modify the packet bounds, the eBPF verifier will no longer trust our original checks with respect to the packet protocol and the validity of the payload. Therefore, all checks must be repeated before being able to overwrite the payload of the packet.
+\item Modifying the payload. Most of the times, this payload will be of different length compared to that of the original TCP packet, and therefore the TC program must modify the packet bounds. This is done using the bpf\_skb\_change\_tail() helper, which we covered in Section \ref{subsection:tc}. Note that, once we modify the packet bounds, the eBPF verifier will no longer trust our original checks with respect to the packet protocol and the validity of the payload. Therefore, all checks must be repeated before being able to overwrite the payload of the packet.
 \end{itemize}
 
 After the requested modifications are made, the TC program passes the packet to the next layer in the kernel.
@@ -1071,7 +1074,7 @@ The rootkit client is compiled to a single executable named \textit{injector}. T
 	\label{fig:client_help}
 \end{figure}
 
-As we can observe in the figure, the rootkit client enables to execute the C2 actions we have described in section \ref{subsection:c2}. Upon running any of these options, the client will first request the network interface to use. This enables the attacker to choose the specific network to which it can connect to the infected machine.
+As we can observe in the figure, the rootkit client enables to execute the C2 actions we have described in Section \ref{subsection:c2}. Upon running any of these options, the client will first request the network interface to use. This enables the attacker to choose the specific network to which it can connect to the infected machine.
 
 After choosing an interface, the rootkit client crafts the respective backdoor trigger and sends it to the infected machine (we have also included an additional non-C2 PoC showing how the rootkit modifies incoming packets). Every option requires to specify the infected machine location by indicating its IP address.
 
@@ -1084,7 +1087,7 @@ After sending a backdoor trigger, the client will enter a listening state, waiti
 	\label{fig:enc_shell}
 \end{figure}
 
-Once the command prompt appears, the attacker may introduce commands to be executed in the infected machine. Commands may only be introduced one at a time, since the client waits for the rootkit response before showing another command prompt. When the attacker finishes using the shell, it is recommended to close the connection gracefully. For this, the client supports "global commands", a special type of command which, when introduced in the shell, does not get sent as a command to the rootkit but instead it triggers an action locally or remotely. Currently, although the infrastructure for supporting a large list of global commands has been developed, only one has been included. The attacker may introduce "EXIT" to close the connection gracefully (see in \ref{subsection:c2}, that packets for closing the connection are sent according to the protocol). Figure \ref{fig:enc_shell_comm_ex} shows the execution of multiple commands and closing the connection.
+Once the command prompt appears, the attacker may introduce commands to be executed in the infected machine. Commands may only be introduced one at a time, since the client waits for the rootkit response before showing another command prompt. When the attacker finishes using the shell, it is recommended to close the connection gracefully. For this, the client supports "global commands", a special type of command which, when introduced in the shell, does not get sent as a command to the rootkit but instead it triggers an action locally or remotely. Currently, although the infrastructure for supporting a large list of global commands has been developed, only one has been included. The attacker may introduce "EXIT" to close the connection gracefully (see in Section \ref{subsection:c2}, that packets for closing the connection are sent according to the protocol). Figure \ref{fig:enc_shell_comm_ex} shows the execution of multiple commands and closing the connection.
 
 \begin{figure}[htbp]
 	\centering
@@ -1093,7 +1096,7 @@ Once the command prompt appears, the attacker may introduce commands to be execu
 	\label{fig:enc_shell_comm_ex}
 \end{figure}
 
-As we can observe in figures \ref{fig:enc_shell} and \ref{fig:enc_shell_comm_ex}, the client also introduces multiple messages which provide additional information to the attacker about the state of the rootkit, the client and the ongoing connection. The existing message types are INFO, SUCCESS, WARN and ERROR.
+As we can observe in Figure \ref{fig:enc_shell} and \ref{fig:enc_shell_comm_ex}, the client also introduces multiple messages which provide additional information to the attacker about the state of the rootkit, the client and the ongoing connection. The existing message types are INFO, SUCCESS, WARN and ERROR.
 
 Also, note that the rootkit client needs to be executed as root, since the library RawTCP\_Lib it uses requires privileges for some of its functionalities. 
 
@@ -1112,7 +1115,7 @@ Only by using RawTCP\_Lib, the rootkit client can craft backdoor triggers whose 
 
 Apart from this, since raw sockets are indicated for reimplementing network protocols in the user space, it allows us to avoid undesired additional traffic in our rootkit transmissions. For instance, we do not need a 3-way handshake preceding any of our transmissions.
 
-Finally, the sniffing capabilities of this library are responsible of capturing the responses of the rootkit from the rootkit client. If we observe tables \ref{table:ups_headers}, \ref{table:eps_headers} and \ref{table:phantom_headers}, we can appreciate that the headers start at a common prefix "CC". This is used by the rootkit to sniff the network and capture any packet whose payload starts with that pattern.
+Finally, the sniffing capabilities of this library are responsible of capturing the responses of the rootkit from the rootkit client. If we observe Table \ref{table:ups_headers}, \ref{table:eps_headers} and \ref{table:phantom_headers}, we can appreciate that the headers start at a common prefix "CC". This is used by the rootkit to sniff the network and capture any packet whose payload starts with that pattern.
 
 
 
@@ -1126,14 +1129,14 @@ The user space rootkit program communicates with the other components of the roo
 \item Other eBPF maps, on which the user program can write from the user space, thus enabling user to kernel communication.
 \end{itemize}
 
-In particular, the backdoor will be the responsible of most of the data written at the ring buffer, using it to request the actions corresponding to the commands received through the network (although the library injection module uses it too, see figure \ref{fig:flow_lib_injection_compact}. 
+In particular, the backdoor will be the responsible of most of the data written at the ring buffer, using it to request the actions corresponding to the commands received through the network (although the library injection module uses it too, see Figure \ref{fig:flow_lib_injection_compact}. 
 
 Any data written into the ring buffer is encapsulated in an "event", embodied by a struct \textit{rb\_event}. This struct supports all types data that any program using the ring buffer will need (thus not all of them are filled). In order to let the user program know which fields will need to be read for a given event, each \textit{rb\_event} is marked with an attribute \textit{event\_type}, which denotes the type of data that has been written in the buffer, and an attribute \textit{code}, that further distinguishes events from the same type into their purpose. Table \ref{table:ring_buf_events} shows the event types and codes recognized by the user program:
 
 \begin{table}[htbp]
 \begin{tabular}{|c|c|>{\centering\arraybackslash}p{8cm}|}
 \hline
-\textbf{Event type} & \textbf{Code} & \textbf{Action requested} \\
+\textbf{EVENT TYPE} & \textbf{CODE} & \textbf{ACTION REQUESTED} \\
 \hline
 \hline
 INFO (0) & Any & Informative message, not requesting an action.\\
@@ -1164,7 +1167,7 @@ During the development of the rootkit, it has been our priority to aim for the g
 \begin{table}[htbp]
 \begin{tabular}{|c|>{\centering\arraybackslash}p{8cm}|}
 \hline
-\textbf{File} & \textbf{Module} \\
+\textbf{FILE} & \textbf{MODULE} \\
 \hline
 \hline
 fs\_module & Contains programs related to reading and writing files, such as the privilege escalation module.\\
@@ -1181,7 +1184,7 @@ xdp\_module & Contains programs related to the backdoor functionality.\\
 \end{table}
 
 In order to load and attach eBPF programs with different parameters and 
-to enable managing them at runtime, the user space program uses the eBPF program configurator. This configurator consists of two configuration structs and an API that allows for manipulating the eBPF programs state dynamically. Code snippets \ref{code:configurator_modules} and \ref{code_configurator_modules_attr} show these two structures.
+to enable managing them at runtime, the user space program uses the eBPF program configurator. This configurator consists of two configuration structs and an API that allows for manipulating the eBPF programs state dynamically. Code snippets \ref{code:configurator_modules} and \ref{code:configurator_modules_attr} show these two structures.
 
 \begin{lstlisting}[language=C, caption={Program configurator struct with list of modules.}, label={code:configurator_modules}]
 module_config_t module_config = {
@@ -1229,7 +1232,7 @@ The user space rootkit program can modify any of the struct values following a r
 \begin{table}[htbp]
 \begin{tabular}{|c|>{\centering\arraybackslash}p{10cm}|}
 \hline
-\textbf{Function} & \textbf{Description} \\
+\textbf{FUNCTION} & \textbf{DESCRIPTION} \\
 \hline
 \hline
 unhook\_all\_modules() & Detaches all eBPF programs.\\
@@ -1250,7 +1253,7 @@ Therefore, the user space rootkit program will need to follow the next steps for
 \end{itemize}
 
 \section{Rootkit persistence} \label{section:persistence}
-As we introduced in section \ref{section:motivation}, one of the key features of a rootkit is its persistence, aiming to maintain the infection for the longest period of time possible, including getting through shutdown events. Initially, when the machine is rebooted, all our eBPF programs will be unloaded from the kernel, and the user space rootkit program will be killed. Moreover, even if they could be run again automatically, they would no longer dispose of the root privileges needed for attaching the eBPF programs again. Therefore, the rootkit persistence module aims to tackle these two challenges:
+As we introduced in Section \ref{section:motivation}, one of the key features of a rootkit is its persistence, aiming to maintain the infection for the longest period of time possible, including getting through shutdown events. Initially, when the machine is rebooted, all our eBPF programs will be unloaded from the kernel, and the user space rootkit program will be killed. Moreover, even if they could be run again automatically, they would no longer dispose of the root privileges needed for attaching the eBPF programs again. Therefore, the rootkit persistence module aims to tackle these two challenges:
 \begin{itemize}
 \item Execute the rootkit automatically and without user interaction after a machine reboot event.
 \item Once the rootkit has acquired root privileges the first time it is executed in the machine, it must keep them including after a reboot.
@@ -1263,7 +1266,7 @@ The cron system is made up of two main components. On one hand, the cron service
 
 On the other hand, the jobs that cron will run (cron jobs) must be specified on either the \textit{/etc/crontab} file, or in files inside the \textit{/etc/cron.d} directory, written in a special cron format. 
 
-In our rootkit, we will specify the rootkit cron jobs in a file named \textit{/etc/cron.d/ebpfbackdoor}. This file is created and written by the script \textit{deployer.sh} which, as we mentioned in section \ref{section:rootkit_arch}, is an script to be run by the attacker to automatize the process of infecting the machine. Snippet \ref{code:deployersh} shows the content of the \textit{deployer.sh} script.
+In our rootkit, we will specify the rootkit cron jobs in a file named \textit{/etc/cron.d/ebpfbackdoor}. This file is created and written by the script \textit{deployer.sh} which, as we mentioned in Section \ref{section:rootkit_arch}, is an script to be run by the attacker to automatize the process of infecting the machine. Code snippet \ref{code:deployersh} shows the content of the \textit{deployer.sh} script.
 
 \begin{lstlisting}[language=C, caption={Script deployer.sh.}, label={code:deployersh}]
 ## Persistence
@@ -1288,12 +1291,12 @@ fi
 
 As we can observe in its contents, the script will take care of the installation process of the rootkit. For this, it will first check whether there exists any XDP program loaded. If there is any, it is assumed that it belongs to the rootkit backdoor and thus the process is halted. Otherwise, the rootkit is installed:
 \begin{itemize}
-\item We remove any previous existing qdisc, followed by creating the new qdisc for the TC program, which is created and attached to network interface enp0s3. This step was explained in section \ref{subsection:tc}.
+\item We remove any previous existing qdisc, followed by creating the new qdisc for the TC program, which is created and attached to network interface enp0s3. This step was explained in Section \ref{subsection:tc}.
 \item We attach the TC program to the newly created qdisc.
 \item We execute the main file (\textit{kit}) of the rootkit, specifying the network address for the XDP program to use. This will launch the user space rootkit program, which will load and attach the eBPF programs in the kernel.
 \end{itemize}
 
-Also, as we mentioned, the \textit{deployer.sh} script takes care of the rootkit persistence by writing an entry into the file \textit{/etc/cron.d/ebpfbackdoor}. Snippet \ref{code:bpfbackdoor_cron} shows the outcome of the data written into this file.
+Also, as we mentioned, the \textit{deployer.sh} script takes care of the rootkit persistence by writing an entry into the file \textit{/etc/cron.d/ebpfbackdoor}. Code snippet \ref{code:bpfbackdoor_cron} shows the outcome of the data written into this file.
 
 \begin{lstlisting}[language=C, caption={Content of /etc/cron.d/ebpfbackdoor.}, label={code:bpfbackdoor_cron}]
 * * * * * osboxes /bin/sudo /home/osboxes/TFG/apps/deployer.sh
@@ -1320,7 +1323,7 @@ Considering the above, we can see that, after a machine reboot event, the cron d
 \subsection{Preserving privileges}
 As we mentioned in the previous section, the \textit{deployer.sh} script will need to be executed as sudo, since it needs root privileges for installing the rootkit. However, after a reboot, the privilege escalation module of the rootkit will not be installed yet, and therefore the script needs some other way of achieving the needed permissions.
 
-For this, as we can observe in snippet \ref{code:deployersh}, the \textit{deployer.sh} script will write a sudo entry in the sudoers.d directory, in a new file \textit{/etc/sudoers.d/ebpfbackdoor}. This directory is used by the sudo system in conjunction of the \textit{/etc/sudoers} file we described in section \ref{subsection:sudoers_file}, so that the rootkit can keep its original root privileges after a system reboot. The entry that will be written into the file is identical to that we introduced in hijacked read accesses to the \textit{/etc/sudoers} file.
+For this, as we can observe in Code snippet \ref{code:deployersh}, the \textit{deployer.sh} script will write a sudo entry in the sudoers.d directory, in a new file \textit{/etc/sudoers.d/ebpfbackdoor}. This directory is used by the sudo system in conjunction of the \textit{/etc/sudoers} file we described in Section \ref{subsection:sudoers_file}, so that the rootkit can keep its original root privileges after a system reboot. The entry that will be written into the file is identical to that we introduced in hijacked read accesses to the \textit{/etc/sudoers} file.
 
 Therefore, after a reboot, the cron daemon will run the \textit{deployer.sh} script with sudo. The sudo process will find that it has sudo privileges, and thus it will be executed as root.
 
@@ -1346,7 +1349,7 @@ As we can observe in the figures, the initial execution permission and root priv
 
 
 \section{Rootkit stealth} \label{section:rootkti_stealth}
-In section \ref{section:persistence}, we presented the mechanisms used by the rootkit to persist the infection of the machine after a reboot event. However, since it is based on creating additional files, they may get eventually found by the system owner or by some software tool, so there exists a risk on leaving them in the system. Additionally, the rootkit files will need to be stored at some location, in which they may get discovered.
+In Section \ref{section:persistence}, we presented the mechanisms used by the rootkit to persist the infection of the machine after a reboot event. However, since it is based on creating additional files, they may get eventually found by the system owner or by some software tool, so there exists a risk on leaving them in the system. Additionally, the rootkit files will need to be stored at some location, in which they may get discovered.
 
 Therefore, it is in our interest to prevent the user from accessing any of the files belonging to the rootkit, either the executables or the files for persistence. Because of this reason, we will attempt to achieve two goals:
 \begin{itemize}
@@ -1355,14 +1358,14 @@ Therefore, it is in our interest to prevent the user from accessing any of the f
 \end{itemize}
 
 \subsection{Reading directories in Linux}
-The system call responsible of reading the files and subdirectories in a directory is sys\_getdents64() \cite{code_kernel_getdents64}. This system call reads the entries from a directory (files, subdirectories, links) and writes them as an array in a user space buffer so that the user program can iterate over it. Each of the entries are formatted as a linux\_dirent64 struct \cite{getdents_man} \cite{code_kernel_linux_dirent64}. 
+The system call responsible of reading the files and subdirectories in a directory is sys\_getdents64 \cite{code_kernel_getdents64}. This system call reads the entries from a directory (files, subdirectories, links) and writes them as an array in a user space buffer so that the user program can iterate over it. Each of the entries are formatted as a linux\_dirent64 struct \cite{getdents_man} \cite{code_kernel_linux_dirent64}. 
 
-The arguments of the sys\_getdents64 syscall are listed in table \ref{table:getdents_args}. The linux\_dirent64 format is shown in table \ref{table:linux_dirent64}.
+The arguments of the sys\_getdents64 syscall are listed in Table \ref{table:getdents_args}. The linux\_dirent64 format is shown in Table \ref{table:linux_dirent64}.
 
 \begin{table}[htbp]
 \begin{tabular}{|c|>{\centering\arraybackslash}p{7cm}|}
 \hline
-\textbf{Argument} & \textbf{Description} \\
+\textbf{ARGUMENT} & \textbf{DESCRIPTION} \\
 \hline
 \hline
 unsigned int fd & File descriptor of the directory to read.\\
@@ -1381,7 +1384,7 @@ long <Return value> & Returns total number of bytes read by the system call.\\
 \begin{table}[htbp]
 \begin{tabular}{|c|>{\centering\arraybackslash}p{7cm}|}
 \hline
-\textbf{Argument} & \textbf{Description} \\
+\textbf{ARGUMENT} & \textbf{DESCRIPTION} \\
 \hline
 \hline
 u64 d\_ino & Inode number of the file\\
@@ -1399,7 +1402,7 @@ char d\_name[] & Filename\\
 \label{table:linux_dirent64}
 \end{table}
 
-As we can observe in table \ref{table:getdents_args}, sys\_getdents64 receives a linux\_dirent64 *dirent argument pointing to a buffer in the user space (it is marked as \_\_user). This buffer is not of length linux\_dirent64, but rather consists of an array of these structs. Moreover, the size of a linux\_dirent64 struct is variable (specifically, the attribute d\_name[] is variable, since the name of a file or a directory is not fixed). In turn, the attribute d\_type indicates the length of each linux\_dirent64, so that the user program can know the length of the entry and iterate over the buffer. Additionally, as indicated in table \ref{table:getdents_args}, the sys\_getdents64 syscall returns the summatory of the length of all the linux\_dirent64 entries in the array, so that the user program can know which is the final entry in the buffer. Figure \ref{fig:getdents_summ} summarizes this process, illustrating how a user program iterates over the buffer written by the sys\_getdents64 syscall.
+As we can observe in Table \ref{table:getdents_args}, sys\_getdents64 receives a linux\_dirent64 *dirent argument pointing to a buffer in the user space (it is marked as \_\_user). This buffer is not of length linux\_dirent64, but rather consists of an array of these structs. Moreover, the size of a linux\_dirent64 struct is variable (specifically, the attribute d\_name[] is variable, since the name of a file or a directory is not fixed). In turn, the attribute d\_type indicates the length of each linux\_dirent64, so that the user program can know the length of the entry and iterate over the buffer. Additionally, as indicated in Table \ref{table:getdents_args}, the sys\_getdents64 syscall returns the summatory of the length of all the linux\_dirent64 entries in the array, so that the user program can know which is the final entry in the buffer. Figure \ref{fig:getdents_summ} summarizes this process, illustrating how a user program iterates over the buffer written by the sys\_getdents64 syscall.
 
 \begin{figure}[htbp]
 	\centering
@@ -1411,11 +1414,11 @@ As we can observe in table \ref{table:getdents_args}, sys\_getdents64 receives a
 As we can observe in the figure, each linux\_dirent64 struct has a different length, however they are positioned aligned in the buffer with respect to a multiple of 4 \cite{code_kerel_getdents_buffer_alignation}. Then, using the d\_reclen attribute, the user program can iterate over each of the linux\_dirent64 structs, until it reaches a buffer offset equal to that incated as a return value of the sys\_getdents64 syscall.
 
 \subsection{Hijacking sys\_getdents64}
-As we indicated in table \ref{table:getdents_args}, the \textit{dirent} argument in sys\_getdents64 is a pointer to a user space buffer, and therefore an eBPF program can write into it using bpf\_probe\_write\_user, as we did in other rootkit modules. 
+As we indicated in Table \ref{table:getdents_args}, the \textit{dirent} argument in sys\_getdents64 is a pointer to a user space buffer, and therefore an eBPF program can write into it using bpf\_probe\_write\_user, as we did in other rootkit modules. 
 
 Since we are interested on hiding particular files and directories from the user space, we can take advantage of our writing capabilities at the user buffer to overwrite the d\_reclen attribute of specific linux\_dirent64 entries. By doing this, we can trick a user program into believing that an entry is larger than it is, thus skipping some other entry. This technique has been widely discussed for rootkits by many authors \cite{xcellerator_getdents}, whilst it was firstly introduced for eBPF rootkits by Johann Rehberger \cite{embracethered_getdents}. 
 
-Similarly to what happened in the privilege escalation module in section \ref{section:privesc}, we aim to overwrite the buffer, but we must first wait for it to be filled during the system call, so we must use an \textit{exit} eBPF tracepoint. However, since from this tracepoint we only have access to the return value of the syscall, we must previously save the address of the buffer into an eBPF map from an \textit{enter} tracepoint, so that it can be retrieved form the \textit{exit} tracepoint. 
+Similarly to what happened in the privilege escalation module in Section \ref{section:privesc}, we aim to overwrite the buffer, but we must first wait for it to be filled during the system call, so we must use an \textit{exit} eBPF tracepoint. However, since from this tracepoint we only have access to the return value of the syscall, we must previously save the address of the buffer into an eBPF map from an \textit{enter} tracepoint, so that it can be retrieved form the \textit{exit} tracepoint. 
 
 As we mentioned, we will overwrite the value of d\_reclen of the previous entry to that we want to hide, so that the new d\_reclen equals to the original plus the d\_reclen of the hidden entry. Figure \ref{fig:getdents_technique} shows this technique.
 
@@ -1428,12 +1431,12 @@ As we mentioned, we will overwrite the value of d\_reclen of the previous entry 
 
 As we can observe in the figure, by modifying the value of d\_reclen, the user program will skip the entry of file "hideme", and therefore any process listing the available entries of the directory will not show this file.
 
-Apart from detecting entries by their name, we can also know whether an entry is a file, a directory or of some other type. For this, our rootkit uses the attribute d\_type of the linux\_dirent64 (see table \ref{table:linux_dirent64}), whose value determines the type of file. The most relevant values of the d\_type attribute are shown in table \ref{table:dtype_values} \cite{dtype_dirent}.
+Apart from detecting entries by their name, we can also know whether an entry is a file, a directory or of some other type. For this, our rootkit uses the attribute d\_type of the linux\_dirent64 (see table \ref{table:linux_dirent64}), whose value determines the type of file. The most relevant values of the d\_type attribute are shown in Table \ref{table:dtype_values} \cite{dtype_dirent}.
 
 \begin{table}[htbp]
 \begin{tabular}{|c|c|}
 \hline
-\textbf{Value} & \textbf{Description} \\
+\textbf{VALUE} & \textbf{DESCRIPTION} \\
 \hline
 \hline
 DT\_DIR (4) & Directory\\
@@ -1452,12 +1455,12 @@ Therefore, our rootkit will hide the following entries when found in a linux\_di
 \begin{table}[htbp]
 \begin{tabular}{|c|c|c|}
 \hline
-\textbf{d\_name} & \textbf{d\_type} & \textbf{Purpose} \\
+\textbf{d\_name} & \textbf{d\_type} & \textbf{PURPOSE} \\
 \hline
 \hline
 ebpfbackdoor & DT\_DIR (8) & Hide persistence files.\\
 \hline
-SECRETDIR & DT\_REG (4) & Provide the rootkit a secret directory where to hide its files.\\
+SECRETDIR & DT\_REG (4) & Secret directory where the rootkit hides its files.\\
 \hline
 \end{tabular}
 \caption{Directory entries actively hidden by the rootkit.}

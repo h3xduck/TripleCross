@@ -16,6 +16,8 @@ hmargin=3cm
 \renewcommand{\baselinestretch}{1.15}
 \parskip=6pt
 
+\usepackage{pdflscape}
+
 % COLORS for cover and code
 \usepackage[table]{xcolor}
 \definecolor{azulUC3M}{RGB}{0,0,102}
@@ -43,8 +45,9 @@ hmargin=3cm
 \usepackage[babel, english=american]{csquotes}
 \AtBeginEnvironment{quote}{\small}
 
-% FOOTER
 \usepackage{fancyhdr}
+\usepackage{tikz}
+% FOOTER
 \pagestyle{fancy}
 \fancyhf{}
 \renewcommand{\headrulewidth}{1pt}
@@ -53,6 +56,22 @@ hmargin=3cm
 \fancyhead[RO]{\rightmark}  
 \rfoot{\thepage}
 \fancypagestyle{plain}{\pagestyle{fancy}}
+\fancypagestyle{plainnofancy}%
+{%
+\fancyhf{}
+\renewcommand{\headrulewidth}{0pt}
+\rfoot{\thepage}
+}
+
+%LANDSCAPE PAGES
+\fancypagestyle{lscape}{% 
+\fancyhf{} % clear all header and footer fields 
+\fancyfoot{%
+    \tikz[remember picture,overlay]
+      \node[outer sep=1cm,above,rotate=90] at (current page.45) {\thepage};}
+\renewcommand{\headrulewidth}{0pt} 
+\renewcommand{\footrulewidth}{0pt}
+}
 
 % TITLES
 \usepackage{titlesec}
@@ -229,12 +248,24 @@ hmargin=3cm
 %----------	
 \renewcommand\abstractname{\large\uppercase{Summary}}
 \begin{abstract}
-\thispagestyle{plain}
+\thispagestyle{plainnofancy}
 \setcounter{page}{3}
 	
-	% TODO SUMMARY
-	
-	\textbf{Keywords:}
+	% So I read that acronyms are not allowed in abstracts and I should write the full name. At the same time, the official ebpf page says it is not an acronym anymore...
+
+eBPF is a technology introduced in the 3.18 version of the Linux kernel that allows running code in the kernel without the need of loading a kernel module. Although originally intended for filtering packets, eBPF programs can be used for network monitoring, accessing kernel-exclusive resources and tracing activities at the user and kernel space. This has positioned eBPF as a leading environment for the development of network, security and observability tools. During the last years, however, eBPF has been found to be at the heart of the latest innovation on the development of rootkits.
+
+This work identifies the offensive capabilities of eBPF that could be weaponized by a threat actor. Based on them, we have developed an 
+eBPF-based rootkit that uses these capabilities to showcase multiple malicious use cases. Our rootkit, named TripleCross, incorporates (1) a
+library injection module to execute malicious code by writing at processes virtual memory; (2) an execution hijacking module that modifies data passed to the kernel to execute malicious programs; (3) a local privilege escalation module that allows for running malicious programs with root privileges; (4) a backdoor with C2 capabilities that can monitor the network and execute commands sent from a remote rootkit client, incorporating multiple backdoor triggers so that these actions are transmitted with stealth in mind; (5) a rootkit client program that allows an attacker to establish 3 different types of shell-like connections for sending commands and actions that control the rootkit state
+remotely; (6) a persistence module that ensures the
+rootkit remains installed maintaining full privileges even after a reboot event; and (7) a stealth module that hides rootkit-related files and directories from the user.
+
+TripleCross demonstrates the existing danger when running eBPF programs, a
+technology also available by default in most distributions. It is intended for being used in pentesting and red teaming exercises.
+
+%Apparently I must not repeat those appearing in the title
+	\textbf{Keywords: Backdoor; Berkeley Packet Filter; Implant; Command and Control; Linux kernel; Malware; Computer security}
 	% TODO KEYWORDS
 	
 	\vfill
@@ -242,29 +273,15 @@ hmargin=3cm
 	\newpage
 	\thispagestyle{empty}
 	\mbox{}
-
-
+	
+	
 %----------
 %	DEDICATION
 %----------	
 \chapter*{Dedication}
 
 \setcounter{page}{5}
-	
-	% TODO DEDICATION	
-		
-	\vfill
-	
-	\newpage
-	\thispagestyle{empty}
-	\mbox{}
-	
-\chapter*{Abstract}
-
-\setcounter{page}{5}
-	
-	% TODO ABSTRACT	
-		
+	\thispagestyle{plainnofancy}
 	\vfill
 	
 	\newpage
@@ -280,7 +297,8 @@ hmargin=3cm
 %General indexes
 %-
 \tableofcontents
-\thispagestyle{fancy}
+
+
 
 \newpage
 \thispagestyle{empty}
@@ -306,16 +324,15 @@ hmargin=3cm
 \thispagestyle{empty}
 \mbox{}
 
-
 %----------
 %	INTRODUCTION
 %----------	
+
 \clearpage
 \pagenumbering{arabic}
 
 % This prevents the underscores going out of the margins
 \renewcommand\_{\textunderscore\allowbreak}
-
 \input{chapters/chapter1}
 \input{chapters/chapter2}
 \input{chapters/chapter3}
@@ -324,8 +341,6 @@ hmargin=3cm
 \input{chapters/chapter6}
 \input{chapters/chapter7}
 \input{chapters/chapter8}
-
-
 
 
 

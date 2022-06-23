@@ -5,7 +5,7 @@ invested on research, development and documentation writing, along with
 other indirect costs associated to the project activities.
 
 \section{Gantt chart}
-Figure \ref{gantt_chart} shows a Gantt presenting the different stages of the project and the distribution of time between them. As we can observe in the figure, the project can be divided into three main sections:
+Figure \ref{fig:gantt_chart} shows a Gantt presenting the different stages of the project and the distribution of time between them. As we can observe in the figure, the project can be divided into three main sections:
 \begin{itemize}
 \item Preliminary research on previous work.
 \item Development of each rootkit module.
@@ -14,13 +14,17 @@ Figure \ref{gantt_chart} shows a Gantt presenting the different stages of the pr
 
 It is relevant to note that in this research work, because of the complexity and variety of functionalities of the eBPF system, each of the offensive capabilities of eBPF has been discovered and implemented as a rootkit module individually. Therefore, there has not existed a single iteration of analysis, design and implementation, but rather multiple iterations have been made to develop each module. This is the reason why, if we focus our view in the development stages, each consists on at least one analysis and multiple design and implementation activities.
 
-
+\newgeometry{hmargin=3cm,vmargin=2cm}
+\thispagestyle{lscape}
+\begin{landscape}
 \begin{figure}[htbp]
 	\centering
-	\includegraphics[width=15.4cm]{gantt_chart.jpg}
+	\includegraphics[width=21cm]{gantt_chart.jpg}
 	\caption{Gantt chart of the project.}
 	\label{fig:gantt_chart}
 \end{figure}
+\end{landscape}
+\restoregeometry
 
 \section{Estimated costs}
 This section presents an estimation of the costs associated with the  personnel conducting the activities described in the Gantt chart in addition to all costs derived from the development of this work.
@@ -52,7 +56,7 @@ Project manager & 40,000 € & 19.23 € \\
 \label{table:salary_personnel}
 \end{table}
 
-Given the different responsabilities of the team members on the project, table \ref{table:hours_personnel} shows the number of hours which each person dedicates daily  to the project in average when perfoming each of the tasks (that is, the length of a working day when assigned to each task). 
+Given the different responsabilities of the team members on the project, Table \ref{table:hours_personnel} shows the number of hours which each person dedicates daily  to the project in average when perfoming each of the tasks (that is, the length of a working day when assigned to each task). 
 
 Also, note that our own RawTCP\_Lib library is a relevant part of this project but it has been developed outside of the scope of this research. Therefore, we will consider it as an estimated 20-days long 4 hours/day development by the programmer.
 

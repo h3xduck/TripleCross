@@ -135,12 +135,12 @@ possibility of overwriting the memory of a running process and executing
 arbitrary code on it.
 %
 Subsequent talks on 2021 by Pat Hogan at DEFCON 29 \cite{bad_ebpf}, and by
-Guillaume Fournier and Sylvain Afchainthe from Datadog at DEFCON 29
+Guillaume Fournier and Sylvain Afchain from Datadog at DEFCON 29
 \cite{ebpf_friends}, research deeper on eBPF's ability to support rootkit
 capabilities. In particular, Hogan shows how eBPF can be used to hide the
 rootkit's presence from the user and to modify data at system calls, while
-Fournier and Afchainthe built the first instance of an eBPF-based backdoor
-with command-and-control(C2) capabilities, enabling to communicate with
+Fournier and Afchain built the first instance of an eBPF-based backdoor
+with command-and-control (C2) capabilities, enabling to communicate with
 the malicious eBPF program by sending network packets to the compromised
 machine.
 
@@ -272,7 +272,7 @@ on each of these pillars relevant in our context:
 	\end{itemize}
 \item With respect to the 'Protect' pillar, it describes the need for Identify Management, Authentication and Access Control, together with the use of Protective Technologies, between others:
 	\begin{itemize}
-	\item With respect to Identify Management, Authentication and Access Control, the framework describes the need to use the principle of least privilege and management of access permissions, that is, assigning the least permissions possible to each system component. In the case of our rootkit, this is particularly relevant given that it needs to be executed as root or by an user with specific capabilities, as we will explain in section \ref{section:ebpf_security}.
+	\item With respect to Identify Management, Authentication and Access Control, the framework describes the need to use the principle of least privilege and management of access permissions, that is, assigning the least permissions possible to each system component. In the case of our rootkit, this is particularly relevant given that it needs to be executed as root or by an user with specific capabilities, as we will explain in Section \ref{section:ebpf_security}.
 	\item Protective Techniques are solutions with the aim of managing the security of systems and organization assets. In this category we can find the storage of log records about activity on the system, and the protection of communication in the organization network. In the case of our rootkit, maintaining logs and non-plaintext connection means the rootkit shall increase its complexity and invest some resources into stealth functionalities.
 	\end{itemize}
 \item With respect to the 'Detection' pillar, the framework describes the need for an Anomalies and Events policy and Security Continuous Monitoring, between others.
@@ -293,7 +293,7 @@ on each of these pillars relevant in our context:
 
 
 \subsection{MITRE ATT\&CK}
-MITRE Adversarial Tactics, Techniques, and Common Knowledge (MITRE ATT\&CK) is a framework collecting knowledge about adversarial techniques, that is, techniques, methodologies and offensive actions followed by threat actors that can be used against computer systems. This is an useful framework for red teaming or pentesting activities performing adversary emulation exercises, since it details adversary behaviours and the techniques being used, which can help to build multiple attack scenarios. Moreover, it is also relevant for professionals in charge of defending a system, since they can prepare and design mitigations for the techniques described in the framework \cite{mitre_blog}\cite{mitre_blog_2}.
+MITRE Adversarial Tactics, Techniques, and Common Knowledge (MITRE ATT\&CK) is a framework collecting knowledge about adversarial techniques, that is, techniques, methodologies and offensive actions followed by threat actors that can be used against computer systems. This is an useful framework for red teaming or pentesting activities performing adversary emulation exercises, since it details adversary behaviours and the techniques being used, which can help to build multiple attack scenarios. Moreover, it is also relevant for professionals in charge of defending a system, since they can prepare and design mitigations for the techniques described in the framework \cite{mitre_blog} \cite{mitre_blog_2}.
 
 A relevant aspect of the MITRE ATT\&CK framework is the MITRE ATT\&CK Matrix, which contains all the adversarial techniques organized as 'tactics'. These tactics are the objective of the adversary, which it aims to achieve by using each corresponding technique. Therefore, the MITRE ATT\&CK Matrix shows a list of columns, where each column is one tactic (one adversary objective), and each row on that column shows the techniques associated to that tactic, explaining how that objective can be achieved. Additionally, different matrices exist depending on the platform. In this project, we will consider the Linux Matrix \cite{mitre_matrix_linux}.
 
@@ -342,7 +342,7 @@ This section details the structure of this document and the contents of each cha
 
 \section{Code availability}
 %Is it ok to reference the repo as a cite? Maybe it's better writing the link directly?
-All the source code belonging to the rootkit development can be visited publicly at the GitHub repository \cite{triplecross_github}. The most important folders and files of this repository are described in Table \ref{table:triplecross_dirs}.
+All the source code belonging to the rootkit development can be visited publicly at the GitHub repository \url{https://github.com/h3xduck/TripleCross} \cite{triplecross_github}. The most important folders and files of this repository are described in Table \ref{table:triplecross_dirs}.
 
 %I can go with more detail if needed. Is it needed?
 \begin{table}[htbp]
@@ -372,5 +372,5 @@ src/vmlinux & Headers containing the definition of kernel data structures (this 
 \label{table:triplecross_dirs}
 \end{table} 
 
-Additionally, the source code of the RawTCP\_Lib library can be visited publicly at its own GitHub directory \cite{rawtcp_lib}.
+Additionally, the source code of the RawTCP\_Lib library can be visited publicly at its own GitHub directory \url{https://github.com/h3xduck/RawTCP_Lib} \cite{rawtcp_lib}.
 

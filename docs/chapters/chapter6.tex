@@ -57,7 +57,7 @@ In its later version, Jynx2 \cite{jynx2_github}, the rootkit incorporated
 other mechanisms focused on hiding the rootkit activity
 \cite{jynx2_infosecinstitute}. This included hiding Jynx's connections by
 hooking read calls at the \textit{/proc} filesystem (which we covered in
-section \ref{section:proc_filesystem} so that processes related with the
+Section \ref{section:proc_filesystem} so that processes related with the
 rootkit activity remain undisclosed. Other functionalities include file
 hiding, privilege escalation, or multi-factor authentication in the rootkit
 backdoor.
@@ -235,7 +235,7 @@ advancements, the capabilities of eBPF helpers, such as
 bpf\_probe\_write\_user() or the possibility of hooking and modifying
 syscalls, were first discussed in the CCC presentation. On the other
 hand, the work presented at DEFCON 27 introduces the ROP technique for
-achieving library injection, which we have discussed in section
+achieving library injection, which we have discussed in Section
 \ref{subsection:rop_ebpf}. NCC Group has made publicly available a set of
 programs developed in BCC showing a proof of concept for this technique
 \cite{evil_ebpf_github}.
@@ -263,9 +263,9 @@ The work of Fournier and Afchainte is developed around the three
 fundamental pillars on which eBPF programs operate: the network, the user
 space and the kernel space.
 \begin{itemize}
-\item In the network, ebpfkit incorporates the first eBPF backdoor with C2 capabilities powered by an XDP and TC program. It presents for the first time the TCP retransmissions technique we explained in section \ref{subsection:tcp} for sending new packets from the backdoor. It also incorporates a network scanning functionality based on this technique.
-%TODO note that the chapter 3 needs to be modified to explain the technique a bit.
-\item In the kernel space, ebpfkit incorporates hooks at open and read syscalls, with the purpose of hiding the rootkit (such as hiding the PID at the proc filesystem) or adding custom ssh keys when the keys file is read by the sshd process. Most importantly, it incorporates the first technique to hide the warning log messages shown in the kernel log buffer, which we mentioned in section \ref{subsection:bpf_probe_write_apps}. This technique works by hooking sys\_read calls during the attachment process, during which the eBPF program will indicate the kernel that nothing is available to be read from the buffer by means of bpf\_override\_return(), followed by overwritting the warning messages using bpf\_probe\_write\_user().
+\item In the network, ebpfkit incorporates the first eBPF backdoor with C2 capabilities powered by an XDP and TC program. It presents for the first time the TCP retransmissions technique we explained in Section \ref{subsection:tcp} for sending new packets from the backdoor. It also incorporates a network scanning functionality based on this technique.
+
+\item In the kernel space, ebpfkit incorporates hooks at open and read syscalls, with the purpose of hiding the rootkit (such as hiding the PID at the proc filesystem) or adding custom ssh keys when the keys file is read by the sshd process. Most importantly, it incorporates the first technique to hide the warning log messages shown in the kernel log buffer, which we mentioned in Section \ref{subsection:bpf_probe_write_apps}. This technique works by hooking sys\_read calls during the attachment process, during which the eBPF program will indicate the kernel that nothing is available to be read from the buffer by means of bpf\_override\_return(), followed by overwritting the warning messages using bpf\_probe\_write\_user().
 \item At user space, ebpfkit incorporates multiple techniques to target specific versions of common software by hooking their function calls using uprobes and modifying its arguments. An example of this is bypassing the protection of Runtime Application Self Protection (RASP) software \cite{rasps}, which are programs oriented towards monitoring the data in a program to prevent malicious data input by an attacker, so that a SQL injection attack \cite{sql_injection} could take place.
 \end{itemize}
 
@@ -334,3 +334,38 @@ It must also be noted that, although the ability to modify outgoing traffic and 
 
 In summary, TripleCross offers new techniques and modifies others presented in previous research work, while at the same time takes as a basis both well-known techniques in rootkit development and also those already presented in previous eBPF rootkits which are key for certain functionalities, such as ebpfkit's TCP retransmissions for duplicating packets.
 
+
+\section{Rootkit features comparison}
+This chapter compares the overall features and capabilities of the rootkits described in this chapter. Table \ref{table:rootkit_comparison} shows this comparison.
+
+\newgeometry{hmargin=3cm,vmargin=2cm}
+\thispagestyle{lscape}
+\begin{landscape}
+\begin{table}[htbp]
+\begin{tabular}{|>{\centering\arraybackslash}p{3cm}|>{\centering\arraybackslash}p{3cm}|>{\centering\arraybackslash}p{3cm}|>{\centering\arraybackslash}p{3cm}|>{\centering\arraybackslash}p{3cm}|>{\centering\arraybackslash}p{3cm}|>{\centering\arraybackslash}p{3cm}|>{\centering\arraybackslash}p{3cm}|}
+\hline
+\textbf{ROOTKIT AND TYPE} & \textbf{BACKDOOR \& C2} & \textbf{CODE EXECUTION} & \textbf{DATA MANIPULATION} & \textbf{STEALTH} & \textbf{PRIVILEGE ESCALATION} & \textbf{PERSISTENCE}\\
+\hline
+\hline
+Jynx2 (LD\_PRELOAD) & accept() hijacking & LD\_PRELOAD & User space & Files hiding. Process hiding. & Yes & No\\
+\hline
+Azazel (LD\_PRELOAD) & accept() hijacking & LD\_PRELOAD & User space & Files hiding. Process hiding. & Yes & No\\
+\hline
+SucKIT (/dev/kmem) & Magic packet trigger & Syscall table hijack with /dev/kmem & User and kernel space & No & No & /sbin/init hijack\\
+\hline
+Diamorphine (LKM) & Local, via kill signals & At kernel Kprobes & Kernel space (kprobes) & Files hiding. LKM hiding. & Yes & No\\
+\hline
+Reptile (LKM) & Port-knocking & At kernel Kprobes & User space (files) and kernel space (kprobes) & Files hiding. LKM hiding. Process hiding. & Yes & Yes\\
+\hline
+Ebpfkit (eBPF) & Port filtering. Data exfiltration. Network scans. & At eBPF programs only & User space (files, uprobes) Kernel space (kprobes) & BPF hiding. Files hiding. & No & Init system\\
+\hline
+boopkit (eBPF) & Command execution. Boop vectors. Remote shell. & User program and eBPF programs. & No & BPF process hiding. & No & No\\
+\hline
+TripleCross (eBPF) & Command execution. Pattern \& Multi packet trigger. Remote shells. & User and eBPF programs. Library injection and execution hijacking. & User space (files, uprobes) Kernel space (tracepoints). & Files hiding. Packet payload hiding. & Yes & Cron and sudo\\
+\hline
+\end{tabular}
+\caption{Overall rootkit features comparison.}
+\label{table:rootkit_comparison}
+\end{table}
+\end{landscape}
+\restoregeometry
