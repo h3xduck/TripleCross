@@ -3,6 +3,7 @@ bibliography/texput.log
 !.gitignore
 document.pdf
 !document.tex
+!*.xmpdata
 !Makefile
 !original_template/
 !images/

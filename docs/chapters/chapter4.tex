@@ -310,13 +310,13 @@ Once we know the address of the functions we want our shellcode to call, we can 
 \item Restore the original value of the registers, and jump back to the original system call which the glibc function intended to call.
 \end{enumerate}
 
-The complete developed shellcode and its opcodes can be found in Appendix \ref{annex:shellcode}.
+The complete developed shellcode and its opcodes can be found in \nameref{annex:shellcode}.
 
 
 \textbf{Stage 3: Injecting shellcode in a code cave}\\
 Once we have developed our shellcode, and before overwriting the value of GOT, we need to find a memory section where to write our shellcode, so that we can executing the necessary instructions to inject our malicious library. This area must be large enough to fit our shellcode, and it must be marked as executable. 
 
-Because of DEP/NX, we cannot use the stack for executing code. On top of that, as we can observe in the section header dump at Appendix \ref{annexsec:readelf_sec_headers}, for security reasons all sections are nowadays marked either writeable or executable, but never both simultaneously.
+Because of DEP/NX, we cannot use the stack for executing code. On top of that, as we can observe in the section header dump at \nameref{annex:readelf_commands}, for security reasons all sections are nowadays marked either writeable or executable, but never both simultaneously.
 
 Therefore, we will use the proc filesystem which we introduced in Section \ref{section:proc_filesystem}. By using the file under \textit{/proc/<pid>/maps}, we will easily identify the address range of those memory sections marked as executable, and by using the file \textit{/proc/<pid>/mem}, we will write our shellcode into that memory section, bypassing the absence of a write flag.
 
@@ -1470,6 +1470,8 @@ SECRETDIR & DT\_REG (4) & Secret directory where the rootkit hides its files.\\
 % Just ran out of time to implement this case properly, realized too late this was a thing. Still mentioning it here
 Also, it is of interest to study what would happen if the directory entry to hide was not in the middle of the buffer, but rather it was the first one to be written. In this case, we cannot modify the d\_reclen of the previous entry to trick the user into skipping an entry. In order to illustrate this case, we are providing another technique (although this functionality is not available in the rootkit currently). Figure \ref{fig:getdents_firstentry} illustrates this alternative process.
 
+As we can observe in the figure, this technique is based on removing the directory entry completely and overwriting it with all of the subsequent entries. After this change, only the return value of the system call would need to be changed (since now the buffer is shorter).
+
 \begin{figure}[htbp]
 	\centering
 	\includegraphics[width=15cm]{getdents_firstentry.png}
@@ -1477,5 +1479,5 @@ Also, it is of interest to study what would happen if the directory entry to hid
 	\label{fig:getdents_firstentry}
 \end{figure}
 
-As we can observe in the figure, this technique is based on removing the directory entry completely and overwriting it with all of the subsequent entries. After this change, only the return value of the system call would need to be changed (since now the buffer is shorter),
+
 

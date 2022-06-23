@@ -352,7 +352,7 @@ BPF\_PROG\_TYPE\_XDP & Program to filter, redirect and monitor network events fr
 BPF\_PROG\_TYPE\_SCHED\_CLS & Program to filter, redirect and monitor events using the Traffic Control classifier\\
 \hline
 \end{tabular}
-\caption{Types of eBPF programs. Only those relevant to our research are shown. The full list and attribute details can be consulted in the man page \cite{bpf_syscall}.}
+\caption{Relevant types of eBPF programs. Full list and attribute details can be consulted in the man page \cite{bpf_syscall}.}
 \label{table:ebpf_prog_types}
 \end{table}
 
@@ -396,7 +396,7 @@ bpf\_ringbuf\_submit() & Submit data to an specific eBPF ring buffer, and notify
 bpf\_tail\_call() & Jump to another eBPF program preserving the current stack\\
 \hline
 \end{tabular}
-\caption{Relevant common eBPF helpers. Those helpers exclusive to an specific program type are not listed. Full list and attribute details can be consulted in the man page \cite{ebpf_helpers}.}
+\caption{Relevant common eBPF helpers. Helpers exclusive to an specific program type are not listed. Full list and attribute details can be consulted in the man page \cite{ebpf_helpers}.}
 \label{table:ebpf_helpers}
 \end{table}
 
@@ -625,25 +625,25 @@ As we have shown in Section \ref{section:modern_ebpf}, eBPF has been an active p
 \textbf{FLAG} & \textbf{VALUE} & \textbf{DESCRIPTION}\\
 \hline
 \hline
-\multicolumn{1}{|c|}{CONFIG\_BPF} & \multicolumn{1}{|c|}{y} & \multirow{2}{*}{Basic BPF compilation (mandatory)}\\
+\multicolumn{1}{|c|}{CONFIG\_BPF} & \multicolumn{1}{c|}{y} & \multirow{2}{*}{Basic BPF compilation (mandatory)}\\
 \cline{1-2}
-\multicolumn{1}{|c|}{CONFIG\_BPF\_SYSCALL} & \multicolumn{1}{|c|}{m} & \\
+\multicolumn{1}{|c|}{CONFIG\_BPF\_SYSCALL} & \multicolumn{1}{c|}{m} & \\
 \hline
-\multicolumn{1}{|c|}{CONFIG\_NET\_ACT\_BPF} & \multicolumn{1}{|c|}{m} & \multirow{2}{*}{Traffic Control functionality}\\
+\multicolumn{1}{|c|}{CONFIG\_NET\_ACT\_BPF} & \multicolumn{1}{c|}{m} & \multirow{2}{*}{Traffic Control functionality}\\
 \cline{1-2}
-\multicolumn{1}{|c|}{CONFIG\_NET\_CLS\_BPF} & \multicolumn{1}{|c|}{y} & \\
+\multicolumn{1}{|c|}{CONFIG\_NET\_CLS\_BPF} & \multicolumn{1}{c|}{y} & \\
 \hline
-\multicolumn{1}{|c|}{CONFIG\_BPF\_JIT} & \multicolumn{1}{|c|}{y} & \multirow{2}{*}{Enable JIT compliation}\\
+\multicolumn{1}{|c|}{CONFIG\_BPF\_JIT} & \multicolumn{1}{c|}{y} & \multirow{2}{*}{Enable JIT compliation}\\
 \cline{1-2}
-\multicolumn{1}{|c|}{CONFIG\_HAVE\_BPF\_JIT} & \multicolumn{1}{|c|}{y} & \\
+\multicolumn{1}{|c|}{CONFIG\_HAVE\_BPF\_JIT} & \multicolumn{1}{c|}{y} & \\
 \hline
-\multicolumn{1}{|c|}{CONFIG\_BPF\_EVENTS} & \multicolumn{1}{|c|}{y} & \multirow{4}{*}{Enable kprobes, uprobes and tracepoints}\\
+\multicolumn{1}{|c|}{CONFIG\_BPF\_EVENTS} & \multicolumn{1}{c|}{y} & \multirow{4}{*}{Enable kprobes, uprobes and tracepoints}\\
 \cline{1-2}
-\multicolumn{1}{|c|}{CONFIG\_KPROBE\_EVENTS} & \multicolumn{1}{|c|}{y} & \\
+\multicolumn{1}{|c|}{CONFIG\_KPROBE\_EVENTS} & \multicolumn{1}{c|}{y} & \\
 \cline{1-2}
-\multicolumn{1}{|c|}{CONFIG\_UPROBE\_EVENTS} & \multicolumn{1}{|c|}{y} & \\
+\multicolumn{1}{|c|}{CONFIG\_UPROBE\_EVENTS} & \multicolumn{1}{c|}{y} & \\
 \cline{1-2}
-\multicolumn{1}{|c|}{CONFIG\_TRACING} & \multicolumn{1}{|c|}{y} & \\
+\multicolumn{1}{|c|}{CONFIG\_TRACING} & \multicolumn{1}{c|}{y} & \\
 \hline
 CONFIG\_XDP\_SOCKETS & y & Enable XDP\\
 \hline
@@ -652,7 +652,7 @@ CONFIG\_XDP\_SOCKETS & y & Enable XDP\\
 \label{table:ebpf_kernel_flags}
 \end{table}
 
-Table \ref{table:ebpf_kernel_flags} is based on BCC's documentation, but the full list of eBPF-related flags can be extracted in a live system via bpftool, as detailed in Annex \ref{annex:bpftool_flags_kernel}. Nowadays, all mainstream Linux distributions include kernels with full support for eBPF.
+Table \ref{table:ebpf_kernel_flags} is based on BCC's documentation, but the full list of eBPF-related flags can be extracted in a live system via bpftool, as detailed in \nameref{annex:bpftool_flags_kernel}. Nowadays, all mainstream Linux distributions include kernels with full support for eBPF.
 
 
 \subsection{Access control} \label{subsection:access_control}
@@ -1066,7 +1066,7 @@ GDB-peda & The Python Exploit Development Assistance for GDB, allows for multipl
 
 Firstly, we will analyse the main sections we can find in an ELF executable. We will approach this study using a sample program that has been compiled using Clang/LLVM, and that consists on a simple timer that counts twice up to number 3, available at our repository \cite{repo_simple_timer}.
 
-The commands used for this analysis and complete list of headers can be found in Annex \ref{annexsec:readelf_sec_headers}. The most relevant sections we found at the program are described in Table \ref{table:elf_sec_headers}:
+The commands used for this analysis and complete list of headers can be found in \nameref{annex:readelf_commands}. The most relevant sections we found at the program are described in Table \ref{table:elf_sec_headers}:
 
 \begin{table}[htbp]
 \begin{tabular}{|>{\centering\arraybackslash}p{1cm}|>{\centering\arraybackslash}p{9cm}|>{\centering\arraybackslash}p{2cm}|}

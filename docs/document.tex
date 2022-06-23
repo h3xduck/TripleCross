@@ -47,15 +47,23 @@ hmargin=3cm
 
 \usepackage{fancyhdr}
 \usepackage{tikz}
+
 % FOOTER
-\pagestyle{fancy}
+\fancypagestyle{fancy}{
 \fancyhf{}
 \renewcommand{\headrulewidth}{1pt}
 \fancyhead{}         
 \fancyhead[LO]{CHAPTER \thechapter}     
 \fancyhead[RO]{\rightmark}  
 \rfoot{\thepage}
-\fancypagestyle{plain}{\pagestyle{fancy}}
+}
+
+\fancypagestyle{plain}{
+	%\fancyhf{}
+	\pagestyle{plainnofancy}
+	%\renewcommand{\headrulewidth}{0pt}
+}
+
 \fancypagestyle{plainnofancy}%
 {%
 \fancyhf{}
@@ -72,6 +80,14 @@ hmargin=3cm
 \renewcommand{\headrulewidth}{0pt} 
 \renewcommand{\footrulewidth}{0pt}
 }
+
+
+
+
+%%
+\pagestyle{plainnofancy}
+
+
 
 % TITLES
 \usepackage{titlesec}
@@ -189,7 +205,7 @@ hmargin=3cm
 \renewcommand{\lstlistingname}{\uppercase{Code}}
 
 % IEEE BIBLIOGRAPHY
-\usepackage[backend=biber, style=ieee, isbn=false,sortcites, maxbibnames=5, minbibnames=1]{biblatex}
+\usepackage[backend=biber, style=ieee, isbn=false,sortcites, maxbibnames=5, minbibnames=1 ]{biblatex}
 
 \addbibresource{bibliography/bibliography.bib}
 
@@ -279,9 +295,20 @@ technology also available by default in most distributions. It is intended for b
 %	DEDICATION
 %----------	
 \chapter*{Dedication}
-
+\thispagestyle{plainnofancy}
 \setcounter{page}{5}
-	\thispagestyle{plainnofancy}
+
+	
+These lines are dedicated to those who have stayed by my side not only during the development of this thesis, but also during these last four years. 
+	
+I would like to thank my mother, father and sister. Without you any of this would have been ever possible. Thank you for teaching me the value of hard work and continuing to do so every day. Your patience, love and support are undoubtedly invaluable.
+
+Thanks, too, to all with whom I have shared part of this long journey. Brandon, Carlos, Miguel and the rest, it would definitely have been different without you.
+
+Finally, my special appreciation goes to my thesis supervisor Dr. Estévez Tapiador. I could not have had a project I was more excited about. Thank you for trusting me with this opportunity, and thanks for your commitment these months.
+
+	
+	
 	\vfill
 	
 	\newpage
@@ -296,9 +323,10 @@ technology also available by default in most distributions. It is intended for b
 %--
 %General indexes
 %-
+
 \tableofcontents
-
-
+\clearpage
+%\pagestyle{fancy}
 
 \newpage
 \thispagestyle{empty}
@@ -308,7 +336,7 @@ technology also available by default in most distributions. It is intended for b
 % List of figures
 %-
 \listoffigures
-\thispagestyle{fancy}
+
 
 \newpage
 \thispagestyle{empty}
@@ -318,7 +346,6 @@ technology also available by default in most distributions. It is intended for b
 % List of tables
 %-
 \listoftables
-\thispagestyle{fancy}
 
 \newpage % página en blanco o de cortesía
 \thispagestyle{empty}
@@ -327,9 +354,9 @@ technology also available by default in most distributions. It is intended for b
 %----------
 %	INTRODUCTION
 %----------	
-
 \clearpage
 \pagenumbering{arabic}
+\pagestyle{fancy}
 
 % This prevents the underscores going out of the margins
 \renewcommand\_{\textunderscore\allowbreak}
@@ -356,8 +383,10 @@ technology also available by default in most distributions. It is intended for b
 %\nocite{*} % Si quieres que aparezcan en la bibliografía todos los documentos que la componen (también los que no estén citados en el texto) descomenta está lína
 
 \clearpage
+\pagestyle{plainnofancy}
 \addcontentsline{toc}{chapter}{Bibliography}
 
+\sloppy
 \printbibliography
 
 

@@ -5,10 +5,9 @@
 %
 
 %Including bpftool commands here to be referenced. Is it a good idea?
-
-\chapter* {Appendix A - Bpftool commands} \label{annex:bpftool_flags_kernel}
+\appendix
+\chapter* {Appendix A - eBPF-related kernel compilation flags} \label{annex:bpftool_flags_kernel}
 \pagenumbering{gobble} % Las páginas de los anexos no se numeran
-\section*{eBPF-related kernel compilation flags} 
 \begin{lstlisting}[language=bash]
 $ bpftool feature
 \end{lstlisting}
@@ -50,9 +49,8 @@ CONFIG_HZ is set to 250
 \end{verbatim}
 
 
-\chapter* {Appendix B - Readelf commands} \label{annex:readelf_commands}
+\chapter* {Appendix B - Section headers in ELF file} \label{annex:readelf_commands}
 \pagenumbering{gobble} % Las páginas de los anexos no se numeran
-\section*{Section headers in ELF file} \label{annexsec:readelf_sec_headers}
 \begin{lstlisting}[language=bash, caption={List of ELF section headers with readelf tool of a program compiled with GCC.}, label={code:elf_sections}]
 $ readelf -S simple_timer
 There are 36 section headers, starting at offset 0x4120:
