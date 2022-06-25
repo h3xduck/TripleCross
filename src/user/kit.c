@@ -279,14 +279,6 @@ int main(int argc, char**argv){
 	struct bpf_map_info info = {0};
     __u32 err;
 
-	//Ready to be used
-	/*for (int arg = 1; arg < argc; arg++) {
-		if (load_fd_kmsg(argv[arg])) {
-			fprintf(stderr, "%s.\n", strerror(errno));
-			return EXIT_FAILURE;
-		}
-	}*/
-
 	/* Parse command line arguments */
 	int opt;
 	while ((opt = getopt(argc, argv, ":t:vh")) != -1) {

@@ -1,4 +1,0 @@
-readelf -s <>
-readelf -S <>
-
-fn symbol offset = fn symbol VA - .text VA + .text offset

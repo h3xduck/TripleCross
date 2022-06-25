@@ -1,0 +1,15 @@
+src/vmlinux/newvmlinux.h
+src/user/bootstrap.c
+src/user/minimal.c
+src/user/include/utils/strings
+src/user/include/utils/structures
+src/user/include/utils/files
+src/user/include/utils/structures
+src/user/include/bootstrap.h
+src/.output
+.vscode
+
+resources
+figures
+
+src/helpers/execve_hijack.asm

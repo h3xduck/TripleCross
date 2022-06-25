@@ -128,8 +128,5 @@ struct fs_priv_dir_log{ //Map
 	__type(value, struct fs_dir_log_data);
 } fs_dir_log SEC(".maps");
 
-/*PROTECTED MAPS*/
-//Any attempt to access these maps will be blocked by the rootkit if the program is not whitelisted
-//Located at /src/map_prot.h
 
 #endif
