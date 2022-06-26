@@ -11,5 +11,6 @@ src/.output
 
 resources
 figures
+external
 
 src/helpers/execve_hijack.asm
