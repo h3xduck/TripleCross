@@ -6,6 +6,11 @@
 
 TripleCross is a Linux eBPF rootkit that demonstrates the offensive capabilities of the eBPF technology.
 
+TripleCross is inspired by previous implant designs in this area, notably the works of Jeff Dileo at DEFCON 27[^1], Pat Hogan at DEFCON 29[^2], and Guillaume Fournier and Sylvain Afchain also at DEFCON 29[^3]. We reuse and extend some of the techniques pioneered by these previous explorations of the offensive capabilities of eBPF technology.
+
+This rootkit was created for my Bachelor's Thesis at UC3M. More details about its design is provided in the [thesis document](https://github.com/h3xduck/TripleCross/blob/master/docs/ebpf_offensive_rootkit_tfg.pdf).
+
+
 ## Features
 1. A **library injection** module to execute malicious code by writing at a process' virtual memory.
 2. An **execution hijacking** module that modifies data passed to the kernel to execute malicious programs.
@@ -15,7 +20,6 @@ TripleCross is a Linux eBPF rootkit that demonstrates the offensive capabilities
 6. A **persistence** module that ensures the rootkit remains installed maintaining full privileges even after a reboot event.
 7. A **stealth** module that hides rootkit-related files and directories from the user.
 
-TripleCross is inspired by previous implant designs in this area, notably the works of Jeff Dileo at DEFCON 27[^1], Pat Hogan at DEFCON 29[^2], and Guillaume Fournier and Sylvain Afchain also at DEFCON 29[^3]. We reuse and extend some of the techniques pioneered by these previous explorations of the offensive capabilities of eBPF technology.
 
 [^1]: J. Dileo. Evil eBPF: Practical Abuses of an In-Kernel Bytecode Runtime. DEFCON 27. [slides](https://raw.githubusercontent.com/nccgroup/ebpf/master/talks/Evil_eBPF-DC27-v2.pdf)
 [^2]: P. Hogan. Warping Reality: Creating and Countering the Next Generation of Linux Rootkits using eBPF. DEFCON 27. [presentation](https://www.youtube.com/watch?v=g6SKWT7sROQ)
@@ -23,13 +27,11 @@ TripleCross is inspired by previous implant designs in this area, notably the wo
 
 
 ## TripleCross overview
-The following image illustrates the architecture of the TripleCross system and its modules.
+The following figure shows the architecture of TripleCross and its modules.
 
 <img src="docs/images/rootkit.png" float="left">
 
-This rootkit has been created for my bachelor thesis work. Comprehensive information about the rootkit functionality and sources can be visited at the [original document](https://github.com/h3xduck/TripleCross/blob/master/docs/ebpf_offensive_rootkit_tfg.pdf).
-
-The raw sockets library RawTCP_Lib used for rootkit transmissions is of my authorship and can be visited at [its own repository](https://github.com/h3xduck/RawTCP_Lib).
+The raw sockets library RawTCP_Lib used for rootkit transmissions is of my authorship and has [its own repository](https://github.com/h3xduck/RawTCP_Lib).
 
 The following table describes the main source code files and directories to ease its navigation:
 | MAKEFILE  | COMMAND |
