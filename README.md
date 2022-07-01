@@ -7,17 +7,15 @@
 TripleCross is an eBPF rootkit for Linux that demonstrates the offensive capabilities of the eBPF technology.
 
 ## Features
-* A **library injection** module to execute malicious code by writing at a process' virtual memory.
-* An **execution hijacking** module that modifies data passed to the kernel to execute malicious programs.
-* A **local privilege escalation** module that allows for running malicious programs with root privileges.
-* A **backdoor with C2** capabilities that can monitor the network and execute commands sent from a remote rootkit client. It incorporates multiple activation triggers so that these actions are transmitted stealthy.
-* A **rootkit client** that allows an attacker to establish 3 different types of shell-like connections to send commands and actions that control the rootkit state remotely.
-* A **persistence** module that ensures the rootkit remains installed maintaining full privileges even after a reboot event.
-* A **stealth** module that hides rootkit-related files and directories from the user.
-
+1. A **library injection** module to execute malicious code by writing at a process' virtual memory.
+2. An **execution hijacking** module that modifies data passed to the kernel to execute malicious programs.
+3. A **local privilege escalation** module that allows for running malicious programs with root privileges.
+4. A **backdoor with C2** capabilities that can monitor the network and execute commands sent from a remote rootkit client. It incorporates multiple activation triggers so that these actions are transmitted stealthy.
+5. A **rootkit client** that allows an attacker to establish 3 different types of shell-like connections to send commands and actions that control the rootkit state remotely.
+6. A **persistence** module that ensures the rootkit remains installed maintaining full privileges even after a reboot event.
+7. A **stealth** module that hides rootkit-related files and directories from the user.
 
 TripleCross is inspired by previous implant designs in this area, notably the works of Jeff Dileo at DEFCON 27, Pat Hogan at DEFCON 29, and Guillaume Fournier and Sylvain Afchain also at DEFCON 29. [tbd links to previous refs] We reuse and extend some of the techniques pioneered by these previous explorations of the offensive capabilities of eBPF technology.
-
 
 ## TripleCross overview
 The following image illustrates the architecture of the TripleCross system and its modules.
