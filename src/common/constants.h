@@ -22,7 +22,6 @@
 #define SECRET_FILE_PERSISTENCE_NAME "ebpfbackdoor"
 
 //EXECUTION HIJACKING
-
 #define PATH_EXECUTION_HIJACK_PROGRAM "/home/osboxes/TFG/src/helpers/execve_hijack\0"
 #define EXEC_HIJACK_ACTIVE 0 //0 Deactivated, 1 active
 #define TASK_COMM_NAME_RESTRICT_HIJACK "bash"

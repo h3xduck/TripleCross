@@ -9,6 +9,9 @@ src/user/include/bootstrap.h
 src/.output
 .vscode
 
+src/ebpf/bootstrap.bpf.c
+src/ebpf/minimal.bpf.c
+
 resources
 figures
 external
