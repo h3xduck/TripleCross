@@ -141,7 +141,7 @@ hmargin=3cm
 \DeclareCaptionFormat{upper}{#1#2\uppercase{#3}\par}
 
 \captionsetup[table]{
-	%format=upper,  UPPER??? Set by the template, but it looks really weird, I got this off
+	%format=upper,  Set by the template, but it looks really weird, I got this off
 	justification=centering,
 	labelsep=period,
 	width=.75\linewidth,
@@ -161,7 +161,7 @@ hmargin=3cm
 	labelsep=period,
 	labelfont=small,
 	font=small,
-	%THE FOLLOWING WAS ADDED BY ME, is this ok? I think it was missed on the template
+	%I added the following, I think it was missed on the template
 	justification=centering		
 }
 
@@ -267,7 +267,6 @@ hmargin=3cm
 \thispagestyle{plainnofancy}
 \setcounter{page}{3}
 	
-	% So I read that acronyms are not allowed in abstracts and I should write the full name. At the same time, the official ebpf page says it is not an acronym anymore...
 
 eBPF is a technology introduced in the 3.18 version of the Linux kernel that allows running code in the kernel without the need of loading a kernel module. Although originally intended for filtering packets, eBPF programs can be used for network monitoring, accessing kernel-exclusive resources and tracing activities at the user and kernel space. This has positioned eBPF as a leading environment for the development of network, security and observability tools. During the last years, however, eBPF has been found to be at the heart of the latest innovation on the development of rootkits.
 

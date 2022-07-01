@@ -150,7 +150,6 @@ In our rootkit, we will choose the first option, scanning the process virtual me
 \textbf{ASLR}\\
 In order to bypass ASLR, attackers must take into account that, although the address at which, for instance, a library is loaded is random, the internal structure of the library remains unchanged, with all symbols in the same relative position, as Figure \ref{fig:aslr_offset} shows.
 
-%TODO Add the .data section here
 \begin{figure}[htbp]
 	\centering
 	\includegraphics[width=13cm]{aslr_offset.jpg}
@@ -345,7 +344,6 @@ Therefore, our rootkit will modify GOT using bpf\_probe\_write\_user() with the 
 \textbf{Stage 5: Second syscall, execution of the library}\\
 Once we have overwriten GOT with the address of our code cave, the next time the same syscall is called, the PLT stub will jump to our code cave and execute our shellcode. As instructed by it, the malicious library will be loaded and afterwards the flow of execution jumps back to the original glibc function.
 
-%Explain reverse shell?
 With respect to the malicious library, it forks the process (to keep the malicious execution in the background) and spawns a simple reverse shell which the attacker can use to execute remote commands.
 
 
@@ -704,7 +702,7 @@ This type of trigger has not been implemented in our rootkit, although it has be
 \textbf{Advanced pattern-based triggers}\\
 One of the main issues with keyword-based triggers is that, upon inspection of the packet, the trigger is easily recognizable (the payload contains a plaintext string) and this can lead to firewalls and IDSs flagging it as suspicious. 
 
-We can, however, work on top of the idea of building a pattern that can be recognized by the backdoor, but at the same time seems random enough for an external network supervisor. This is the basis of some of the triggers we can find in real-world rootkit, such is the case of the rootkit Bvp47 \cite{bvp47_report}. %TODO the link is too slow, should we put our repository as a source?
+We can, however, work on top of the idea of building a pattern that can be recognized by the backdoor, but at the same time seems random enough for an external network supervisor. This is the basis of some of the triggers we can find in real-world rootkit, such is the case of the rootkit Bvp47 \cite{bvp47_report}. 
 
 Bvp47 is a rootkit with C2 capabilities built as a Linux kernel module developed by the NSA Equation Group and discovered by the research laboratory Pangu Lab \cite{pangu_lab}. One of its capabilities is communicating with a backdoor via pattern-based triggers. These triggers are seemingly random, but they follow a hidden pattern that only the entity who knows it will be able to detect it, acting as a "key". The triggers used in the Bvp47 rootkit consist of a TCP packet whose payload has been filled with random memory, with the exception of a selection of bits which are the result of certain XOR operations \cite{bvp47_report_p49}.
 
@@ -831,8 +829,6 @@ By using the previous maps, the XDP program will first wait until 3 (or 6) packe
 If the previous checks do not fail, it means the packet stream was a multi-stream trigger and the XDP program proceeds to execute the action corresponding to K3.
 
 
-
-%TODO INTRODUCE IMAGES OF SHELLS
 \subsection{Command and Control} \label{subsection:c2}
 This section details the C2 capabilities incorporated in our rootkit, that is, mechanisms that enable the attacker to introduce rootkit commands (not to be confused with Linux commands in a shell) from the remote rootkit client and to be executed in the infected machine, returning the output of the command (if any) back to the client. These rootkit commands can be instructed by sending a backdoor trigger, which as we mentioned, depending on the value of K3 in the trigger, a different rootkit action will be executed by the backdoor (available values are displayed in Table \ref{table:k3_values}).
 
@@ -1467,7 +1463,6 @@ SECRETDIR & DT\_REG (4) & Secret directory where the rootkit hides its files.\\
 \label{table:dtype_dirent}
 \end{table}
 
-% Just ran out of time to implement this case properly, realized too late this was a thing. Still mentioning it here
 Also, it is of interest to study what would happen if the directory entry to hide was not in the middle of the buffer, but rather it was the first one to be written. In this case, we cannot modify the d\_reclen of the previous entry to trick the user into skipping an entry. In order to illustrate this case, we are providing another technique (although this functionality is not available in the rootkit currently). Figure \ref{fig:getdents_firstentry} illustrates this alternative process.
 
 As we can observe in the figure, this technique is based on removing the directory entry completely and overwriting it with all of the subsequent entries. After this change, only the return value of the system call would need to be changed (since now the buffer is shorter).

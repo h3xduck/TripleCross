@@ -125,7 +125,7 @@ including proof of concepts (PoC) showing specific features, and also by
 building a realistic rootkit system which leverages these PoCs and
 integrates them into a fully operational implant.
 
-%According to the library guide, previous research should be around here. %Is it the best place tho?
+%According to the library guide, previous research should be around here.
 Before narrowing down our objectives and selecting a specific list of
 rootkit capabilities to provide using eBPF, we analyze previous research in
 this area. The work by Jeff Dileo from NCC Group at DEFCON 27
@@ -179,7 +179,7 @@ The rootkit will work in a fresh-install of a Linux system with the following ch
 
 \subsection{Social and economic environment}\label{sec:social_econ_env}
 %M-> Mentioned talking about community outreach and its role under pentesting
-%TODO Talk about the difference between having always on BPF and always on kernel modules, BPF is consider "safe" in production while it's almost as dangerous (I think this might fit here)
+%Talk about the difference between having always on BPF and always on kernel modules, BPF is consider "safe" in production while it's almost as dangerous 
 
 Our world has a growing dependency on digital systems. From the use of
 increasingly complex computer systems and networks in business environments
@@ -318,7 +318,6 @@ Finally, it must be noted that this project uses the libbpf library
 \cite{libbpf_github}, as described in Section \ref{subsection:libbpf}, for
 the development of our eBPF rootkit. This library is licensed under dual
 BSD 2-clause license and GNU LGPL v2.1 license. 
-%Should I say something else? I usually license my own projects under GPLv3 because I don't like corporations taking the code, but I guess I am restricted to use the Creative Commons license.
 
 
 \section{Structure of the document}
@@ -341,10 +340,8 @@ This section details the structure of this document and the contents of each cha
 \textbf{Chapter 8: Conclusions and future work} revisits the project objectives, discusses the work presented in this document, and describes possible future research lines.
 
 \section{Code availability}
-%Is it ok to reference the repo as a cite? Maybe it's better writing the link directly?
 All the source code belonging to the rootkit development can be visited publicly at the GitHub repository \url{https://github.com/h3xduck/TripleCross} \cite{triplecross_github}. The most important folders and files of this repository are described in Table \ref{table:triplecross_dirs}.
 
-%I can go with more detail if needed. Is it needed?
 \begin{table}[htbp]
 \begin{tabular}{|>{\centering\arraybackslash}p{4cm}|>{\centering\arraybackslash}p{10cm}|}
 \hline

@@ -310,7 +310,6 @@ BPF\_MAP\_TYPE\_PROG\_ARRAY & Stores descriptors of eBPF programs\\
 \subsection{The eBPF ring buffer} \label{subsection:bpf_ring_buf}
 eBPF ring buffers are a special kind of eBPF maps, providing a one-way directional communication system, going from an eBPF program in the kernel to a user space program that subscribes to its events.
 
-%TODO DIAGRAM OF A TYPICAL RING BUFFER
 
 \subsection{The bpf() syscall} \label{subsection:bpf_syscall}
 The bpf() syscall is used to issue commands from user space to kernel space in eBPF programs. This syscall is multiplexor, meaning that it can perform a great range of actions, changing its behaviour depending on the parameters.
@@ -519,8 +518,6 @@ bpf\_skb\_change\_tail() & Enlarges or reduces the extension of a packet, by mov
 \label{table:tc_helpers}
 \end{table}
 
-
-%TODO This section might benefit from some diagrams, maybe. It was a bit to extense already, so skipping it from now
 \subsection{Tracepoints} \label{subsection:tracepoints}
 Tracepoints are a technology in the Linux kernel that allows to hook functions in the kernel, connecting a 'probe': a function that is executed every time the hooked function is called \cite{tp_kernel}. These tracepoints are set statically during kernel development, meaning that for a function to be hooked, it needs to have been previously marked with a tracepoint statement indicating its traceability. At the same time, this limits the number of tracepoints available.
 
@@ -555,7 +552,6 @@ Similarly to kprobes, uprobes have access to the parameters received by the hook
 
 In eBPF, programs can issue a bpf() syscall with the command BPF\_PROG\_LOAD and the program type BPF\_PROG\_TYPE\_UPROBE, specifying the function with the uprobe to attach to and an arbitrary function probe to call when it is hit. This function probe is also defined by the user in the eBPF program submitted to the kernel.
 
-% Is this the best title?
 \section{Developing eBPF programs}
 In Section \ref{section:modern_ebpf}, we discussed the overall architecture of the eBPF system which is now an integral part of the Linux kernel. We also studied the process which a piece of eBPF bytecode follows in order to be accepted in the kernel. However, for an eBPF developer, programming bytecode and working with bpf() calls natively is not an easy task, therefore an additional layer of abstraction was needed. 
 
@@ -583,7 +579,6 @@ Libbpf \cite{libbpf_github} is a library for loading and interacting with eBPF p
 
 As we discussed in Section \ref{section:modern_ebpf}, eBPF programs are composed of both the eBPF code in the kernel and a user space program that can interact with it. With libbpf, the eBPF kernel program is developed in C (a real program, not a string later compiled as with BCC), while user programs are usually developed in C, Rust or GO. For our project, we will use the C version of libbpf, so both the user and kernel side of our rootkit will be developed in this language.
 
-% Cites in the following paragraph?
 When using libbpf with the C language, both the user-side and kernel eBPF program are compiled together using the Clang/LLVM compiler, translating C instructions into eBPF bytecode. As a clarification, Clang is the front-end of the compiler, translating C instructions into an intermediate form understandable by LLVM, whilst LLVM is the back end compiling the intermediate code into eBPF bytecode. As it can be observed in Figure \ref{fig:libbpf}, the result of the compilation is a single program, comprising the user-side which will launch a user process, the eBPF bytecode to be run in the kernel, and other structures libbpf generates about eBPF maps and other meta data. This program is encapsulated as an ELF file (a common executable format).
 
 \begin{figure}[htbp]
@@ -661,7 +656,7 @@ Table \ref{table:ebpf_kernel_flags} is based on BCC's documentation, but the ful
 
 \subsection{Access control} \label{subsection:access_control}
 It must be noted that, similarly to kernel modules, loading an eBPF program requires privileged access in the system. In old kernel versions, this means either a user having full root permissions, or having the Linux capability \cite{ubuntu_caps} CAP\_SYS\_ADMIN. Therefore, there existed two main options:
-%TODO some words about capabilities
+
 \begin{itemize}
 \item \textbf{Privileged users} can load any kind of eBPF program and use any functionality.
 \item \textbf{Unprivileged users} can only load and attach eBPF programs of type BPF\_PROG\_TYPE\_SOCKET\_FILTER \cite{evil_ebpf_p9}, offering the very limited functionality of filtering packets received on a socket.
