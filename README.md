@@ -11,6 +11,8 @@ TripleCross is an eBPF rootkit for Linux featuring the following capabilities:
 6. A persistence module that ensures the rootkit remains installed maintaining full privileges even after a reboot event.
 7. A stealth module that hides rootkit-related files and directories from the user.
 
+TripleCross is inspired by previous implant designs in this area, notably the works of Jeff Dileo at DEFCON 27, Pat Hogan at DEFCON 29, and Guillaume Fournier and Sylvain Afchain also at DEFCON 29. [tbd links to previous refs] We reuse and extend some of the techniques pioneered by these previous explorations of the offensive capabilities of eBPF technology.
+
 
 <!---
 ## Build and run
