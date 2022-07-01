@@ -1,6 +1,17 @@
 # TripleCross
 Instructions soon!
 For now, you can read the paper at docs/ebpf_offensive_rootkit
+
+TripleCross is an eBPF rootkit for Linux featuring the following capabilities:
+1. A library injection module to execute malicious code by writing at a process' virtual memory.
+2. An execution hijacking module that modifies data passed to the kernel to execute malicious programs.
+3. A local privilege escalation module that allows for running malicious programs with root privileges.
+4. A backdoor with C2 capabilities that can monitor the network and execute commands sent from a remote rootkit client. It incorporates multiple activation triggers so that these actions are transmitted stealthy.
+5. A rootkit client that allows an attacker to establish 3 different types of shell-like connections to send commands and actions that control the rootkit state remotely.
+6. A persistence module that ensures the rootkit remains installed maintaining full privileges even after a reboot event.
+7. A stealth module that hides rootkit-related files and directories from the user.
+
+
 <!---
 ## Build and run
 ```bash
