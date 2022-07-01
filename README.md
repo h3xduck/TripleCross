@@ -15,7 +15,12 @@ TripleCross is an eBPF rootkit for Linux that demonstrates the offensive capabil
 6. A **persistence** module that ensures the rootkit remains installed maintaining full privileges even after a reboot event.
 7. A **stealth** module that hides rootkit-related files and directories from the user.
 
-TripleCross is inspired by previous implant designs in this area, notably the works of Jeff Dileo at DEFCON 27, Pat Hogan at DEFCON 29, and Guillaume Fournier and Sylvain Afchain also at DEFCON 29. [tbd links to previous refs] We reuse and extend some of the techniques pioneered by these previous explorations of the offensive capabilities of eBPF technology.
+TripleCross is inspired by previous implant designs in this area, notably the works of Jeff Dileo at DEFCON 27[^1], Pat Hogan at DEFCON 29[^2], and Guillaume Fournier and Sylvain Afchain also at DEFCON 29[^3]. We reuse and extend some of the techniques pioneered by these previous explorations of the offensive capabilities of eBPF technology.
+
+[^1]: J. Dileo. Evil eBPF: Practical Abuses of an In-Kernel Bytecode Runtime. DEFCON 27. [slides](https://raw.githubusercontent.com/nccgroup/ebpf/master/talks/Evil_eBPF-DC27-v2.pdf)
+[^2]: P. Hogan. Warping Reality: Creating and Countering the Next Generation of Linux Rootkits using eBPF. DEFCON 27. [presentation](https://www.youtube.com/watch?v=g6SKWT7sROQ)
+[^3]: G. Fournier and S. Afchain. eBPF, I thought we were friends! DEFCON 29. [slides](https://media.defcon.org/DEF%20CON%2029/DEF%20CON%2029%20presentations/Guillaume%20Fournier%20Sylvain%20Afchain%20Sylvain%20Baubeau%20-%20eBPF%2C%20I%20thought%20we%20were%20friends.pdf)
+
 
 ## TripleCross overview
 The following image illustrates the architecture of the TripleCross system and its modules.
