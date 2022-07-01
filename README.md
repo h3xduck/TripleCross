@@ -4,7 +4,7 @@
 ![Maintainability](https://img.shields.io/static/v1?label=maintainability&message=B&color=green)
 ![GitHub last commit](https://img.shields.io/github/last-commit/h3xduck/TripleCross)
 
-TripleCross is an eBPF rootkit for Linux that demonstrates the offensive capabilities of the eBPF technology.
+TripleCross is a Linux eBPF rootkit that demonstrates the offensive capabilities of the eBPF technology.
 
 ## Features
 1. A **library injection** module to execute malicious code by writing at a process' virtual memory.
