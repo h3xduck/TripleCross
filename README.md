@@ -104,7 +104,7 @@ These scripts must first be configurated with the following parameters for the p
 | src/helpers/deployer.sh | SUDO_PERSIST | Sudo entry to grant password-less privileges |
 
 ## Library injection module
-The rootkit can hijack the execution of processes that call the *sys_timerfd_settime* or *sys_openat* system calls. This is done by overwriting the Global Offset Table (GOT) section of the process making the call. This leads to a malicious library (*src/helpers/injection_lib.c*) being executed. The library will spawn a simple reverse shell to which the attacker machine can be listening, and then returns the flow of execution to the original function without crashing the process.
+The rootkit can hijack the execution of processes that call the *sys_timerfd_settime* or *sys_openat* system calls. This is achieved by overwriting the Global Offset Table (GOT) section at the virtual memory of the process making the call. This leads to a malicious library (*src/helpers/injection_lib.c*) being executed. The library will spawn a reverse shell to which the attacker machine can be listening, and then returns the flow of execution to the original function without crashing the process.
 
 TripleCross is prepared to bypass common ELF hardening techniques, including:
 * ASLR
@@ -134,20 +134,27 @@ nc -nlvp <ATTACKER_PORT>
 The technique incorporated in TripleCross consists of 5 stages:
 
 #### Locating GOT and the return address
-Two techniques for achieving this have been incorporated:
-* With sys_timerfd_settime, the eBPF program scans forward in the scan using the syscall arguments.
-* With sys_openat, the eBPF program scans uses the data at tracepoints' *pt_regs* struct for scanning the return address.
-<img src="docs/images/lib_injection-s1.png" float="left">
+The rootkit hooks the system call using a tracepoint program. From there, it locates the address at the GOT section which the PLT stub used to make the call to the glibc function responsible of the syscall. 
 
-Note that:
-* The .text makes a *call* to the .plt, so *rip* is saved as *ret*.
+In order to reach the GOT section, the eBPF program uses the return address stored at the stack. Note that:
+* The .text makes a *call* to the .plt, so *rip* is saved as *ret* in the stack.
 * The .plt makes a *jump* to glibc using .got, so no other *rip* is saved. It also does not modify or save the value of *rbp*.
 * Glibc makes a *syscall*, which does not save *rip* in the stack, but rather saves it in *rcx*. 
 
-Therefore in order to check from eBPF that an address in the stack is the return address we are looking for, we must check that it is the return address of the .plt stub that uses the .got address that jumps to the glibc function making the system call we hooked from eBPF.
+<img src="docs/images/plt_got_glibc_flow.jpg" float="left">
+
+Therefore in order to check from eBPF that an address in the stack is the return address that will lead us to the correct GOT, we must check that it is the return address of the PLT stub that uses the GOT address that jumps to the glibc function making the system call we hooked from eBPF.
+
+Two techniques for finding the return address have been incorporated:
+* With sys_timerfd_settime, the eBPF program scans forward in the scan using the syscall arguments.
+* With sys_openat, the eBPF program scans uses the data at tracepoints' *pt_regs* struct for scanning the return address.
+
+<img src="docs/images/lib_injection-s1.png" float="left">
+
 
 #### Locating key functions for shellcode
 The shellcode must be generated dynamically to bypass ASLR and PIE, which change the address of functions such as dlopen() on each program execution.
+
 <img src="docs/images/lib_injection-s2.png" float="left">
 
 
@@ -158,6 +165,7 @@ A code cave can be found by reverse engineering an ELF if ASLR and PIE are off, 
 
 #### Overwriting the GOT section
 Depending on whether Partial or Full RELRO are active on the executable, the eBPF program overwrites the GOT section directly or with the /proc filesystem.
+
 <img src="docs/images/lib_injection-s4.png" float="left">
 
 #### Waiting for the next system call
@@ -224,6 +232,7 @@ This shell is generated after a successful run of the execution hijacking module
 An encrypted pseudo-shell can be requested by the rootkit client at any time, consisting of a TLS connection between the rootkit and the rootkit client. Inside the encrypted connection, a transmission protocol is followed to communicate commands and information, similar to that in plaintext pseudo-shells.
 
 Spawning an encrypted pseudo-shell requires the backdoor to listen for triggers, which accepts either pattern-based triggers or both types of multi-packet trigger:
+
 <img src="docs/images/sch_sc_eps_srcport.png" float="left">
 <img src="docs/images/sch_sc_eps_rc.png" float="right">
 
@@ -248,8 +257,7 @@ Although in principle an eBPF program cannot start the execution of a program by
 * Be transparent to the user space, that is, if we hijack the execution of a program so
 that another is run, the original program should be executed too with the least delay-
 
-This module hijacks the sys_execve syscall, modifying its arguments so that a malicious
-program (*src/helpers/execve_hijack.c*) is run instead. This modification is made in such a way that the malicious program can then execute the original program with the original arguments to avoid raising concerns in the user space. The following diagram summarizes the overall functionality:
+This module hijacks the sys_execve syscall, modifying its arguments so that a malicious program (*src/helpers/execve_hijack.c*) is run instead. This modification is made in such a way that the malicious program can then execute the original program with the original arguments to avoid raising concerns in the user space. The following diagram summarizes the overall functionality:
 
 <img src="docs/images/summ_execve_hijack.png" float="left">
 
