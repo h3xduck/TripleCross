@@ -104,11 +104,16 @@ These scripts must first be configurated with the following parameters for the p
 | src/helpers/deployer.sh | SUDO_PERSIST | Sudo entry to grant password-less privileges |
 
 ## Library injection module
-The rootkit can hijack the execution of processes that call the *sys_timerfd_settime* or *sys_openat* system calls. This is done by overwriting the value of the .GOT section of the process making the call.
+The rootkit can hijack the execution of processes that call the *sys_timerfd_settime* or *sys_openat* system calls. This is done by overwriting the Global Offset Table (GOT) section of the process making the call. This leads to a malicious library (*src/helpers/injection_lib.c*) being executed. The library will spawn a simple reverse shell to which the attacker machine can be listening, and then returns the flow of execution to the original function without crashing the process.
 
-The malicious library (*src/helpers/injection_lib.c*) will be injected and aftwerwards the flow of execution returns to the original function. The library will spawn a simple reverse shell to which the attacker machine can be listening.
+TripleCross is prepared to bypass common ELF hardening techniques, including:
+* ASLR
+* Stack canaries
+* DEP/NX
+* PIE
+* Full RELRO
 
-You can check this functionality with two test programs *src/helpers/simple_timer.c* and *src/helpers/simple_open.c*. Alternatively you may attempt to hijack any system process (tested and working with systemd).
+The module functionality can be checked using two test programs *src/helpers/simple_timer.c* and *src/helpers/simple_open.c*. Alternatively you may attempt to hijack any system process (tested and working with systemd).
 
 The module configuration is set via the following constants:
 
@@ -122,6 +127,43 @@ Receiving a reverse shell from the attacker machine can be done with netcat:
 ```
 nc -nlvp <ATTACKER_PORT>
 ```
+
+### The library injection via GOT hijacking technique
+The technique incorporated in TripleCross consists of 5 stages:
+
+#### Locating GOT and the return address
+Two techniques for achieving this have been incorporated:
+* With sys_timerfd_settime, the eBPF program scans forward in the scan using the syscall arguments.
+* With sys_openat, the eBPF program scans uses the data at tracepoints' *pt_regs* struct for scanning the return address.
+<img src="docs/images/lib_injection-s1.png" float="left">
+
+Note that:
+* The .text makes a *call* to the .plt, so *rip* is saved as *ret*.
+* The .plt makes a *jump* to glibc using .got, so no other *rip* is saved. It also does not modify or save the value of *rbp*.
+* Glibc makes a *syscall*, which does not save *rip* in the stack, but rather saves it in *rcx*. 
+
+Therefore in order to check from eBPF that an address in the stack is the return address we are looking for, we must check that it is the return address of the .plt stub that uses the .got address that jumps to the glibc function making the system call.
+
+#### Locating key functions for shellcode
+The shellcode must be generated dynamically to bypass ASLR and PIE, which change the address of functions such as dlopen() on each program execution.
+<img src="docs/images/lib_injection-s2.png" float="left">
+
+
+#### Injecting shellcode in a code cave
+A code cave can be found by reverse engineering an ELF if ASLR and PIE are off, but usually that is not possible. The eBPF program issues a request to an user space rootkit program that uses the /proc filesystem to locate and write into a code cave at the .text (executable) section.
+
+<img src="docs/images/lib_injection-s3.png" float="left">
+
+#### Overwriting the GOT section
+Depending on whether Partial or Full RELRO are active on the executable, the eBPF program overwrites the GOT section directly or with the /proc filesystem.
+<img src="docs/images/lib_injection-s4.png" float="left">
+
+#### Waiting for the next system call
+When the next syscall is issued in the hijacked program, the PLT section uses the modified GOT section, hijacking the flow of execution which gets redirected to the shellcode at the code cave. The shellcode is prepared to keep the program from crashing, and calls the malicious library (*src/helpers/lib_injection.so*). This library issues a fork() and spawns a reverse shell with the attacker machine. Afterwards the flow of execution is restored.
+
+<img src="docs/images/lib_injection-s5.png" float="left">
+
+
 
 ## Backdoor and C2
 The backdoor works out of the box without any configuration needed. The backdoor can be controlled remotely using the rootkit client program:
