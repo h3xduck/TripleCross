@@ -34,7 +34,7 @@ The following figure shows the architecture of TripleCross and its modules.
 The raw sockets library RawTCP_Lib used for rootkit transmissions is of my authorship and has [its own repository](https://github.com/h3xduck/RawTCP_Lib).
 
 The following table describes the main source code files and directories to ease its navigation:
-| MAKEFILE  | COMMAND |
+| DIRECTORY  | COMMAND |
 | ------------- | ------------- |
 | docs  | Original thesis document |
 | src/client | Source code of rootkit client |
@@ -106,7 +106,7 @@ These scripts must first be configurated with the following parameters for the p
 ## Library injection module
 The rootkit can hijack the execution of processes that call the *sys_timerfd_settime* or *sys_openat* system calls. This is done by overwriting the value of the .GOT section of the process making the call.
 
-The malicious library (src/helpers/injection_lib) will be run and aftwerwards the flow of execution returns to the original function. The library will spawn a simple reverse shell to which the attacker machine can be listening.
+The malicious library (*src/helpers/injection_lib.c*) will be injected and aftwerwards the flow of execution returns to the original function. The library will spawn a simple reverse shell to which the attacker machine can be listening.
 
 You can check this functionality with two test programs *src/helpers/simple_timer.c* and *src/helpers/simple_open.c*. Alternatively you may attempt to hijack any system process (tested and working with systemd).
 
@@ -168,7 +168,7 @@ And on the TCP source port:
 <img src="docs/images/packet_examples_hive_srcport.png" float="left">
 
 ### Backdoor pseudo-shells
-The client can establish rootkit pseudo-shells, a special rootkit-to-rootkit client connections which simulate a shell program, enabling the attacker to execute Linux commands remotely and get the results as if it was executing them directly in the infected machine.
+The client can establish rootkit pseudo-shells, a special rootkit-to-rootkit client connection which simulates a shell program, enabling the attacker to execute Linux commands remotely and get the results as if it was executing them directly in the infected machine. Multiple pseudo-shells are incorporated in our rootkit:
 
 #### Plaintext pseudo-shell
 This shell is generated after a successful run of the execution hijacking module, which will execute a malicious file that establishes a connection with the rootkit client as follows:
@@ -182,16 +182,86 @@ An encrypted pseudo-shell can be requested by the rootkit client at any time. It
 <img src="docs/images/sch_sc_eps_rc.png" float="right">
 
 #### Phantom shell
-A phantom shell uses a combination of XDP and TC programs to overcome eBPF limitations at the network (it cannot generate new packets) to modify existing traffic so that it fits the C2 functionality using the following protocol (without losing original packets):
+A phantom shell uses a combination of XDP and TC programs to overcome eBPF limitations at the network, specifically that it cannot generate new packets. For this, the backdoor modifies existing traffic, overwriting the payload with the data of the C2 transmission. The original packets are not lost since TCP retransmissions send the original packet (without modifications) again after a short time.
+
+The following protocol illustrates the traffic during the execution of a command using a phantom shell:
 <img src="docs/images/c2_summ_example.png" float="left">
 
-Therefore phantom shell is requested by the rootkit client which issues a command to be executed by the backdoor:
+A phantom shell is requested by the rootkit client which issues a command to be executed by the backdoor:
 
 <img src="docs/images/sch_sc_phantom_1.png" float="left">
 
 After the infected machine sends any TCP packet, the backdoor overwrites it and the client shows the response:
 
 <img src="docs/images/sch_sc_phantom_2.png" float="left">
+
+
+## Execution hijacking module
+Although in principle an eBPF program cannot start the execution of a program by itself, this module shows how a malicious rootkit may take advantage of benign programs in order to execute malicious code at the user space. This module achieves two goals:
+* Execute a malicious user program taking advantage of other program’s execution.
+* Be transparent to the user space, that is, if we hijack the execution of a program so
+that another is run, the original program should be executed too with the least delay-
+
+This module hijacks the sys_execve syscall, modifying its arguments so that a malicious
+program (*src/helpers/execve_hijack.c*) is run instead. This modification is made in such a way that the malicious program can then execute the original program with the original arguments to avoid raising concerns in the user space. The following diagram summarizes the overall functionality:
+
+<img src="docs/images/summ_execve_hijack.png" float="left">
+
+As we mentioned, the arguments of the original sys_execve call are modified in such a way that the original arguments are not lost (by taking advantage of argv[0]) so that the original program can be executed after the malicious one:
+
+<img src="docs/images/execve_hijack_overall_malware.png" float="left">
+
+We have incorporated a sample test program (*src/helpers/simple_execve.c*) for testing the execution hijacking module. The module can also hijack any call in the system, depending on the configuration:
+
+| FILENAME | CONSTANT | DESCRIPTION |
+| ------------- | ------------- | ------------- |
+| src/common/constants.h | PATH_EXECUTION_HIJACK_PROGRAM | Location of the malicious program to be executed upon succeeding to execute a sys_execve call |
+| src/common/constants.h | EXEC_HIJACK_ACTIVE | Deactivate (0) or activate (1) the execution hijacking module |
+| src/common/constants.h | TASK_COMM_RESTRICT_HIJACK_ACTIVE | Hijack any sys_execve call (0) or only those indicated in TASK_COMM_NAME_RESTRICT_HIJACK (1) |
+| src/common/constants.h | TASK_COMM_NAME_RESTRICT_HIJACK | Name of the program from which to hijack sys_execve calls |
+
+After a successful hijack, the module will stop itself. The malicious program *execve_hijack* will listen for requests of a plaintext pseudo-shell from the rootkit client.
+
+## Rootkit persistence
+After the infected machine is rebooted, all eBPF programs will be unloaded from the kernel, and the user space rootkit program will be killed. Moreover, even if they could be run again automatically, they would no longer dispose of the root privileges needed for attaching the eBPF programs again. Therefore, the rootkit persistence module aims to tackle these two challenges:
+* Execute the rootkit automatically and without user interaction after a machine re-
+boot event.
+* Once the rootkit has acquired root privileges the first time it is executed in the
+machine, it must keep them including after a reboot.
+
+For this functionality, two secret files are created under *cron.d* and *sudoers.d*. These entries ensure that the rootkit is loaded automatically and with full privilege after a reboot. These files are created and managed by the *deployer&#46;sh* script:
+
+<img src="docs/images/persistence_before.png" float="left">
+<img src="docs/images/persistence_after.png" float="right">
+
+The script contains two constants that must be configured for the user to infect on the target system:
+
+| SCRIPT | CONSTANT | DESCRIPTION |
+| ------------- | ------------- | ------------- |
+| src/helpers/deployer.sh | CRON_PERSIST | Cron job to execute after reboot |
+| src/helpers/deployer.sh | SUDO_PERSIST | Sudo entry to grant password-less privileges |
+
+## Rootkit stealth
+Since the persistence module is based on creating additional files, they may get eventually found by the system owner or by some software tool, so there
+exists a risk on leaving them in the system. Additionally, the rootkit files will need to be stored at some location, in which they may get discovered.
+
+Taing the above into account, the stealth module provides the following functionality:
+* Hide a directory completely from the user (so that we can hide all rootkit files inside).
+* Hide specific files in a directory (we need to hide the persistence files, but we cannot hide the *sudoers.d* or *cron.d* directories completely, since they belong to the normal system functioning).
+
+The files and directories hidden by the rootkit can be customized by the following configuration constants:
+
+| FILENAME | CONSTANT | DESCRIPTION |
+| ------------- | ------------- | ------------- |
+| src/common/constants.h | SECRET_DIRECTORY_NAME_HIDE | Name of directory to hide |
+| src/common/constants.h | SECRET_FILE_PERSISTENCE_NAME | Name of the file to hide |
+
+By default, Triplecross will hide any files called "*ebpfbackdoor*" and a directory named "*SECRETDIR*". This module is activated automatically after the rootkit installation.
+
+The technique used for achieving this functionality consists on tampering with the arguments of the sys_getdents system call:
+
+<img src="docs/images/getdents_technique.png" float="left">
+
 
 
 ## License
