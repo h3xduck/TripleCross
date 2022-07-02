@@ -15,7 +15,7 @@ This rootkit was created for my Bachelor's Thesis at UC3M. More details about it
 1. A **library injection** module to execute malicious code by writing at a process' virtual memory.
 2. An **execution hijacking** module that modifies data passed to the kernel to execute malicious programs.
 3. A **local privilege escalation** module that allows for running malicious programs with root privileges.
-4. A **backdoor with C2** capabilities that can monitor the network and execute commands sent from a remote rootkit client. It incorporates multiple activation triggers so that these actions are transmitted stealthy.
+4. A **backdoor with C2** capabilities that can monitor the network and execute commands sent from a remote rootkit client. It incorporates multiple activation triggers so that these actions are transmitted stealthily.
 5. A **rootkit client** that allows an attacker to establish 3 different types of shell-like connections to send commands and actions that control the rootkit state remotely.
 6. A **persistence** module that ensures the rootkit remains installed maintaining full privileges even after a reboot event.
 7. A **stealth** module that hides rootkit-related files and directories from the user.
@@ -113,6 +113,8 @@ TripleCross is prepared to bypass common ELF hardening techniques, including:
 * PIE
 * Full RELRO
 
+It is also prepared to work with Intel CET-compatible code.
+
 The module functionality can be checked using two test programs *src/helpers/simple_timer.c* and *src/helpers/simple_open.c*. Alternatively you may attempt to hijack any system process (tested and working with systemd).
 
 The module configuration is set via the following constants:
@@ -128,7 +130,7 @@ Receiving a reverse shell from the attacker machine can be done with netcat:
 nc -nlvp <ATTACKER_PORT>
 ```
 
-### The library injection via GOT hijacking technique
+### Library injection via GOT hijacking technique
 The technique incorporated in TripleCross consists of 5 stages:
 
 #### Locating GOT and the return address
@@ -142,7 +144,7 @@ Note that:
 * The .plt makes a *jump* to glibc using .got, so no other *rip* is saved. It also does not modify or save the value of *rbp*.
 * Glibc makes a *syscall*, which does not save *rip* in the stack, but rather saves it in *rcx*. 
 
-Therefore in order to check from eBPF that an address in the stack is the return address we are looking for, we must check that it is the return address of the .plt stub that uses the .got address that jumps to the glibc function making the system call.
+Therefore in order to check from eBPF that an address in the stack is the return address we are looking for, we must check that it is the return address of the .plt stub that uses the .got address that jumps to the glibc function making the system call we hooked from eBPF.
 
 #### Locating key functions for shellcode
 The shellcode must be generated dynamically to bypass ASLR and PIE, which change the address of functions such as dlopen() on each program execution.
@@ -150,7 +152,7 @@ The shellcode must be generated dynamically to bypass ASLR and PIE, which change
 
 
 #### Injecting shellcode in a code cave
-A code cave can be found by reverse engineering an ELF if ASLR and PIE are off, but usually that is not possible. The eBPF program issues a request to an user space rootkit program that uses the /proc filesystem to locate and write into a code cave at the .text (executable) section.
+A code cave can be found by reverse engineering an ELF if ASLR and PIE are off, but usually that is not the case. The eBPF program issues a request to an user space rootkit program that uses the /proc filesystem to locate and write into a code cave at the .text (executable) section.
 
 <img src="docs/images/lib_injection-s3.png" float="left">
 
@@ -176,7 +178,7 @@ The backdoor works out of the box without any configuration needed. The backdoor
 ./injector -p \<Victim IP\> | Spawns a phantom shell by commanding the backdoor with a pattern-based trigger |
 ./injector -a \<Victim IP\> | Orders the rootkit to activate all eBPF programs |
 ./injector -u \<Victim IP\> | Orders the rootkit to detach all of its eBPF programs |
-./injector -S \<Victim IP\> | (Simple PoC) Showcases how the backdoor can hide a message from the kernel |
+./injector -S \<Victim IP\> | Showcases how the backdoor can hide a message from the kernel (Simple PoC) |
 | ./injector -h | Displays help |
 
 ### Backdoor triggers
@@ -219,7 +221,9 @@ This shell is generated after a successful run of the execution hijacking module
 <img src="docs/images/sch_sc_execution_hijack_simple_execve_rc.png" float="right">
 
 #### Encrypted pseudo-shell
-An encrypted pseudo-shell can be requested by the rootkit client at any time. It is managed by the backdoor, and accepts either pattern-based triggers or both types of multi-packet trigger:
+An encrypted pseudo-shell can be requested by the rootkit client at any time, consisting of a TLS connection between the rootkit and the rootkit client. Inside the encrypted connection, a transmission protocol is followed to communicate commands and information, similar to that in plaintext pseudo-shells.
+
+Spawning an encrypted pseudo-shell requires the backdoor to listen for triggers, which accepts either pattern-based triggers or both types of multi-packet trigger:
 <img src="docs/images/sch_sc_eps_srcport.png" float="left">
 <img src="docs/images/sch_sc_eps_rc.png" float="right">
 
@@ -265,11 +269,9 @@ We have incorporated a sample test program (*src/helpers/simple_execve.c*) for t
 After a successful hijack, the module will stop itself. The malicious program *execve_hijack* will listen for requests of a plaintext pseudo-shell from the rootkit client.
 
 ## Rootkit persistence
-After the infected machine is rebooted, all eBPF programs will be unloaded from the kernel, and the user space rootkit program will be killed. Moreover, even if they could be run again automatically, they would no longer dispose of the root privileges needed for attaching the eBPF programs again. Therefore, the rootkit persistence module aims to tackle these two challenges:
-* Execute the rootkit automatically and without user interaction after a machine re-
-boot event.
-* Once the rootkit has acquired root privileges the first time it is executed in the
-machine, it must keep them including after a reboot.
+After the infected machine is rebooted, all eBPF programs will be unloaded from the kernel, and the user space rootkit program will be killed. Moreover, even if the rootkit could be run again automatically, it would no longer dispose of the root privileges needed for attaching the eBPF programs again. Therefore, the rootkit persistence module aims to tackle these two challenges:
+* Execute the rootkit automatically and without user interaction after a machine re-boot event.
+* Once the rootkit has acquired root privileges the first time it is executed in the machine, it must keep them including after a reboot.
 
 For this functionality, two secret files are created under *cron.d* and *sudoers.d*. These entries ensure that the rootkit is loaded automatically and with full privilege after a reboot. These files are created and managed by the *deployer&#46;sh* script:
 
@@ -284,10 +286,10 @@ The script contains two constants that must be configured for the user to infect
 | src/helpers/deployer.sh | SUDO_PERSIST | Sudo entry to grant password-less privileges |
 
 ## Rootkit stealth
-Since the persistence module is based on creating additional files, they may get eventually found by the system owner or by some software tool, so there
+The persistence module is based on creating additional files, but they may get eventually found by the system owner or by some software tool, so there
 exists a risk on leaving them in the system. Additionally, the rootkit files will need to be stored at some location, in which they may get discovered.
 
-Taing the above into account, the stealth module provides the following functionality:
+Taking the above into account, the stealth module provides the following functionality:
 * Hide a directory completely from the user (so that we can hide all rootkit files inside).
 * Hide specific files in a directory (we need to hide the persistence files, but we cannot hide the *sudoers.d* or *cron.d* directories completely, since they belong to the normal system functioning).
 
