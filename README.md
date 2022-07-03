@@ -10,6 +10,21 @@ TripleCross is inspired by previous implant designs in this area, notably the wo
 
 This rootkit was created for my Bachelor's Thesis at UC3M. More details about its design is provided in the [thesis document](https://github.com/h3xduck/TripleCross/blob/master/docs/ebpf_offensive_rootkit_tfg.pdf).
 
+#### Disclaimer
+This rookit is **purely for educational and academic purposes**. The software is provided "as is" and the authors are not responsible for any damage or mishaps that may occur during its use.
+
+Do not attempt to use TripleCross to violate the law. Misuse of the provided software and information may result in criminal charges.
+
+## Contents
+1. [Features](#features)
+2. [TripleCross Overview](#triplecross-overview)
+3. [Build and Install](#build-and-install)
+4. [Library injection module](#library-injection-module)
+5. [Backdoor and C2](#backdoor-and-c2)
+6. [Execution hijacking module](#execution-hijacking-module)
+7. [Rootkit persistence](#rootkit-persistence)
+8. [Rootkit stealth](#rootkit-stealth)
+
 
 ## Features
 1. A **library injection** module to execute malicious code by writing at a process' virtual memory.
@@ -46,19 +61,6 @@ The following table describes the main source code files and directories to ease
 | src/user | Source code of the user land programs used by the rootkits|
 | src/vmlinux |  Headers containing the definition of kernel data structures (this is the recommended method when using libbpf) |
 
-
-## Disclaimer
-This rookit is **purely for educational and academic purposes**. The software is provided "as is" and the authors are not responsible for any damage or mishaps that may occur during its use.
-
-Do not attempt to use TripleCross to violate the law. Misuse of the provided software and information may result in criminal charges.
-
-## Table of Contents
-1. [Build and Install](#build-and-install)
-2. [Library injection module](#library-injection-module)
-3. [Backdoor and C2](#backdoor-and-c2)
-4. [Execution hijacking module](#execution-hijacking-module)
-5. [Rootkit persistence](#rootkit-persistence)
-6. [Rootkit stealth](#rootkit-stealth)
 
 ### Build and Install
 #### Compilation
