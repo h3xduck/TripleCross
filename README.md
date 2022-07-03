@@ -52,13 +52,13 @@ The following table describes the main source code files and directories to ease
 | DIRECTORY  | COMMAND |
 | ------------- | ------------- |
 | docs  | Original thesis document |
-| src/client | Source code of rootkit client |
+| src/client | Source code of the rootkit client |
 | src/client/lib | RawTCP_Lib shared library |
 | src/common | Constants and configuration for the rootkit. It also includes the implementation of elements common to the eBPF and user space side of the rootkit, such as the ring buffer |
 | src/ebpf | Source code of the eBPF programs used by the rootkit |
-| src/helpers | Includes programs for testing rootkit modules functionality, and the malicious program and library used at the execution hijacking and library injection modules respectively |
-| src/libbpf | Contains the libbpf library, integrated with the rootkit|
-| src/user | Source code of the user land programs used by the rootkits|
+| src/helpers | Includes programs for testing the functionality of several rootkit modules, and also the malicious program and library used at the execution hijacking and library injection modules, respectively |
+| src/libbpf | Contains the libbpf library integrated with the rootkit|
+| src/user | Source code of the userland programs used by the rootkits|
 | src/vmlinux |  Headers containing the definition of kernel data structures (this is the recommended method when using libbpf) |
 
 
