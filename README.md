@@ -10,7 +10,7 @@ TripleCross is inspired by previous implant designs in this area, notably the wo
 
 This rootkit was created for my Bachelor's Thesis at UC3M. More details about its design is provided in the [thesis document](https://github.com/h3xduck/TripleCross/blob/master/docs/ebpf_offensive_rootkit_tfg.pdf).
 
-#### Disclaimer
+### Disclaimer
 This rookit is **purely for educational and academic purposes**. The software is provided "as is" and the authors are not responsible for any damage or mishaps that may occur during its use.
 
 Do not attempt to use TripleCross to violate the law. Misuse of the provided software and information may result in criminal charges.
