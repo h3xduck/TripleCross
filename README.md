@@ -8,7 +8,7 @@ TripleCross is a Linux eBPF rootkit that demonstrates the offensive capabilities
 
 TripleCross is inspired by previous implant designs in this area, notably the works of Jeff Dileo at DEFCON 27[^1], Pat Hogan at DEFCON 29[^2], and Guillaume Fournier and Sylvain Afchain also at DEFCON 29[^3]. We reuse and extend some of the techniques pioneered by these previous explorations of the offensive capabilities of eBPF technology.
 
-This rootkit was created for my Bachelor's Thesis at UC3M. More details about its design is provided in the [thesis document](https://github.com/h3xduck/TripleCross/blob/master/docs/ebpf_offensive_rootkit_tfg.pdf).
+This rootkit was created for my Bachelor's Thesis at UC3M. More details about its design are provided in the [thesis document](https://github.com/h3xduck/TripleCross/blob/master/docs/ebpf_offensive_rootkit_tfg.pdf).
 
 ### Disclaimer
 This rookit is **purely for educational and academic purposes**. The software is provided "as is" and the authors are not responsible for any damage or mishaps that may occur during its use.
