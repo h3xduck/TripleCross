@@ -17,8 +17,8 @@ Do not attempt to use TripleCross to violate the law. Misuse of the provided sof
 
 ## Contents
 1. [Features](#features)
-2. [TripleCross Overview](#triplecross-overview)
-3. [Build and Install](#build-and-install)
+2. [TripleCross overview](#triplecross-overview)
+3. [Build and install](#build-and-install)
 4. [Library injection module](#library-injection-module)
 5. [Backdoor and C2](#backdoor-and-c2)
 6. [Execution hijacking module](#execution-hijacking-module)
