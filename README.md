@@ -6,7 +6,7 @@
 
 TripleCross is a Linux eBPF rootkit that demonstrates the offensive capabilities of the eBPF technology.
 
-TripleCross is inspired by previous implant designs in this area, notably the works of Jeff Dileo at DEFCON 27[^1], Pat Hogan at DEFCON 29[^2], and Guillaume Fournier and Sylvain Afchain also at DEFCON 29[^3]. We reuse and extend some of the techniques pioneered by these previous explorations of the offensive capabilities of eBPF technology.
+TripleCross is inspired by previous implant designs in this area, notably the works of Jeff Dileo at DEFCON 27[^1], Pat Hogan at DEFCON 29[^2], Guillaume Fournier and Sylvain Afchain also at DEFCON 29[^3], and Kris Nóva's Boopkit[^4]. We reuse and extend some of the techniques pioneered by these previous explorations of the offensive capabilities of eBPF technology.
 
 This rootkit was created for my Bachelor's Thesis at UC3M. More details about its design are provided in the [thesis document](https://github.com/h3xduck/TripleCross/blob/master/docs/ebpf_offensive_rootkit_tfg.pdf).
 
@@ -40,7 +40,7 @@ Do not attempt to use TripleCross to violate the law. Misuse of the provided sof
 [^1]: J. Dileo. Evil eBPF: Practical Abuses of an In-Kernel Bytecode Runtime. DEFCON 27. [slides](https://raw.githubusercontent.com/nccgroup/ebpf/master/talks/Evil_eBPF-DC27-v2.pdf)
 [^2]: P. Hogan. Warping Reality: Creating and Countering the Next Generation of Linux Rootkits using eBPF. DEFCON 27. [presentation](https://www.youtube.com/watch?v=g6SKWT7sROQ)
 [^3]: G. Fournier and S. Afchain. eBPF, I thought we were friends! DEFCON 29. [slides](https://media.defcon.org/DEF%20CON%2029/DEF%20CON%2029%20presentations/Guillaume%20Fournier%20Sylvain%20Afchain%20Sylvain%20Baubeau%20-%20eBPF%2C%20I%20thought%20we%20were%20friends.pdf)
-
+[^4]: Kris Nóva. Bootkit. [github](https://github.com/kris-nova/boopkit)
 
 ## TripleCross overview
 The following figure shows the architecture of TripleCross and its modules.
