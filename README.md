@@ -40,7 +40,7 @@ Do not attempt to use TripleCross to violate the law. Misuse of the provided sof
 [^1]: J. Dileo. Evil eBPF: Practical Abuses of an In-Kernel Bytecode Runtime. DEFCON 27. [slides](https://raw.githubusercontent.com/nccgroup/ebpf/master/talks/Evil_eBPF-DC27-v2.pdf)
 [^2]: P. Hogan. Warping Reality: Creating and Countering the Next Generation of Linux Rootkits using eBPF. DEFCON 27. [presentation](https://www.youtube.com/watch?v=g6SKWT7sROQ)
 [^3]: G. Fournier and S. Afchain. eBPF, I thought we were friends! DEFCON 29. [slides](https://media.defcon.org/DEF%20CON%2029/DEF%20CON%2029%20presentations/Guillaume%20Fournier%20Sylvain%20Afchain%20Sylvain%20Baubeau%20-%20eBPF%2C%20I%20thought%20we%20were%20friends.pdf)
-[^4]: Kris Nóva. Bootkit. [github](https://github.com/kris-nova/boopkit)
+[^4]: Kris Nóva. Boopkit. [github](https://github.com/kris-nova/boopkit)
 
 ## TripleCross overview
 The following figure shows the architecture of TripleCross and its modules.
