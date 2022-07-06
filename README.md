@@ -6,9 +6,25 @@
 
 TripleCross is a Linux eBPF rootkit that demonstrates the offensive capabilities of the eBPF technology.
 
-TripleCross is inspired by previous implant designs in this area, notably the works of Jeff Dileo at DEFCON 27[^1], Pat Hogan at DEFCON 29[^2], and Guillaume Fournier and Sylvain Afchain also at DEFCON 29[^3]. We reuse and extend some of the techniques pioneered by these previous explorations of the offensive capabilities of eBPF technology.
+TripleCross is inspired by previous implant designs in this area, notably the works of Jeff Dileo at DEFCON 27[^1], Pat Hogan at DEFCON 29[^2], Guillaume Fournier and Sylvain Afchain also at DEFCON 29[^3], and Kris Nóva's Boopkit[^4]. We reuse and extend some of the techniques pioneered by these previous explorations of the offensive capabilities of eBPF technology.
 
-This rootkit was created for my Bachelor's Thesis at UC3M. More details about its design is provided in the [thesis document](https://github.com/h3xduck/TripleCross/blob/master/docs/ebpf_offensive_rootkit_tfg.pdf).
+This rootkit was created for my Bachelor's Thesis at UC3M. More details about its design are provided in the [thesis document](https://github.com/h3xduck/TripleCross/blob/master/docs/ebpf_offensive_rootkit_tfg.pdf).
+
+### Disclaimer
+This rookit is **purely for educational and academic purposes**. The software is provided "as is" and the authors are not responsible for any damage or mishaps that may occur during its use.
+
+Do not attempt to use TripleCross to violate the law. Misuse of the provided software and information may result in criminal charges.
+
+## Contents
+1. [Features](#features)
+2. [TripleCross overview](#triplecross-overview)
+3. [Build and install](#build-and-install)
+4. [Library injection module](#library-injection-module)
+5. [Backdoor and C2](#backdoor-and-c2)
+6. [Execution hijacking module](#execution-hijacking-module)
+7. [Rootkit persistence](#rootkit-persistence)
+8. [Rootkit stealth](#rootkit-stealth)
+9. [License](#license)
 
 
 ## Features
@@ -24,7 +40,7 @@ This rootkit was created for my Bachelor's Thesis at UC3M. More details about it
 [^1]: J. Dileo. Evil eBPF: Practical Abuses of an In-Kernel Bytecode Runtime. DEFCON 27. [slides](https://raw.githubusercontent.com/nccgroup/ebpf/master/talks/Evil_eBPF-DC27-v2.pdf)
 [^2]: P. Hogan. Warping Reality: Creating and Countering the Next Generation of Linux Rootkits using eBPF. DEFCON 27. [presentation](https://www.youtube.com/watch?v=g6SKWT7sROQ)
 [^3]: G. Fournier and S. Afchain. eBPF, I thought we were friends! DEFCON 29. [slides](https://media.defcon.org/DEF%20CON%2029/DEF%20CON%2029%20presentations/Guillaume%20Fournier%20Sylvain%20Afchain%20Sylvain%20Baubeau%20-%20eBPF%2C%20I%20thought%20we%20were%20friends.pdf)
-
+[^4]: Kris Nóva. Boopkit. [github](https://github.com/kris-nova/boopkit)
 
 ## TripleCross overview
 The following figure shows the architecture of TripleCross and its modules.
@@ -37,28 +53,15 @@ The following table describes the main source code files and directories to ease
 | DIRECTORY  | COMMAND |
 | ------------- | ------------- |
 | docs  | Original thesis document |
-| src/client | Source code of rootkit client |
+| src/client | Source code of the rootkit client |
 | src/client/lib | RawTCP_Lib shared library |
 | src/common | Constants and configuration for the rootkit. It also includes the implementation of elements common to the eBPF and user space side of the rootkit, such as the ring buffer |
 | src/ebpf | Source code of the eBPF programs used by the rootkit |
-| src/helpers | Includes programs for testing rootkit modules functionality, and the malicious program and library used at the execution hijacking and library injection modules respectively |
-| src/libbpf | Contains the libbpf library, integrated with the rootkit|
-| src/user | Source code of the user land programs used by the rootkits|
+| src/helpers | Includes programs for testing the functionality of several rootkit modules, and also the malicious program and library used at the execution hijacking and library injection modules, respectively |
+| src/libbpf | Contains the libbpf library integrated with the rootkit|
+| src/user | Source code of the userland programs used by the rootkits|
 | src/vmlinux |  Headers containing the definition of kernel data structures (this is the recommended method when using libbpf) |
 
-
-## Disclaimer
-This rookit is **purely for educational and academic purposes**. The software is provided "as is" and the authors are not responsible for any damage or mishaps that may occur during its use.
-
-Do not attempt to use TripleCross to violate the law. Misuse of the provided software and information may result in criminal charges.
-
-## Table of Contents
-1. [Build and Install](#build-and-install)
-2. [Library injection module](#library-injection-module)
-3. [Backdoor and C2](#backdoor-and-c2)
-4. [Execution hijacking module](#execution-hijacking-module)
-5. [Rootkit persistence](#rootkit-persistence)
-6. [Rootkit stealth](#rootkit-stealth)
 
 ### Build and Install
 #### Compilation
@@ -76,12 +79,12 @@ The following table describes the purpose of each Makefile in detail:
 | MAKEFILE  | COMMAND | DESCRIPTION | RESULTING FILES |
 | ------------- | ------------- | ------------- | ------------- |
 | src/client/Makefile  | make  | Compilation of the rootkit client | src/client/injector |
-| src/Makefile  | make help  | Compilation of programs for testing rootkit functionalities, and the malicious program and library of the execution hijacking and library injection modules respectively | src/helpers/simple_timer, src/helpers/simple_open, src/helpers/simple_execve, src/helpers/lib_injection.so, src/helpers/execve_hijack |
+| src/Makefile  | make help  | Compilation of programs for testing rootkit capabilities, and the malicious program and library of the execution hijacking and library injection modules, respectively | src/helpers/simple_timer, src/helpers/simple_open, src/helpers/simple_execve, src/helpers/lib_injection.so, src/helpers/execve_hijack |
 | src/Makefile | make kit | Compilation of the rootkit using the libbpf library | src/bin/kit |
 | src/Makefile | make tckit | Compilation of the rootkit TC egress program | src/bin/tc.o |
 
 ### Installation
-Once the rootkit files are generated under src/bin/, the *tc.o* and *kit* programs must be loaded orderly. In the following example the rootkit backdoor will operate in the network interface *enp0s3*:
+Once the rootkit files are generated under src/bin/, the *tc.o* and *kit* programs must be loaded in order. In the following example, the rootkit backdoor will operate in the network interface *enp0s3*:
 ```
 // TC egress program
 sudo tc qdisc add dev enp0s3 clsact
@@ -91,20 +94,20 @@ sudo ./bin/kit -t enp0s3
 ```
 
 ### Attack scenario scripts
-There exist two scripts *packager&#46;sh* and *deployer&#46;sh* that compile and install the rootkit automatically, just as an attacker would do in a real attack scenario. 
+There are two scripts, *packager&#46;sh* and *deployer&#46;sh*, that compile and install the rootkit automatically, just as an attacker would do in a real attack scenario. 
 
 * Executing packager&#46;sh will generate all rootkit files under the *apps/* directory.
 
 * Executing deployer&#46;sh will install the rootkit and create the persistence files.
 
-These scripts must first be configurated with the following parameters for the proper functioning of the persistence module:
+These scripts must first be configured with the following parameters for the proper functioning of the persistence module:
 | SCRIPT | CONSTANT | DESCRIPTION |
 | ------------- | ------------- | ------------- |
 | src/helpers/deployer.sh | CRON_PERSIST | Cron job to execute after reboot |
 | src/helpers/deployer.sh | SUDO_PERSIST | Sudo entry to grant password-less privileges |
 
 ## Library injection module
-The rootkit can hijack the execution of processes that call the *sys_timerfd_settime* or *sys_openat* system calls. This is achieved by overwriting the Global Offset Table (GOT) section at the virtual memory of the process making the call. This leads to a malicious library (*src/helpers/injection_lib.c*) being executed. The library will spawn a reverse shell to which the attacker machine can be listening, and then returns the flow of execution to the original function without crashing the process.
+The rootkit can hijack the execution of processes that call the *sys_timerfd_settime* or *sys_openat* system calls. This is achieved by overwriting the Global Offset Table (GOT) section at the virtual memory of the process making the call. This leads to a malicious library (*src/helpers/injection_lib.c*) being executed. The library will spawn a reverse shell to the attacker machine, and then returns the flow of execution to the original function without crashing the process.
 
 TripleCross is prepared to bypass common ELF hardening techniques, including:
 * ASLR
@@ -121,9 +124,9 @@ The module configuration is set via the following constants:
 
 | FILENAME | CONSTANT | DESCRIPTION |
 | ------------- | ------------- | ------------- |
-| src/common/constants.h | TASK_COMM_NAME_INJECTION_<br>TARGET_TIMERFD_SETTIME | Name of process to hijack at syscall sys_timerfd_settime |
-| src/common/constants.h | TASK_COMM_NAME_INJECTION_<br>TARGET_OPEN | Name of process to hijack at syscall sys_openat |
-| src/helpers/injection_lib.c| ATTACKER_IP & ATTACKER_PORT| IP address and port of attacker machine|
+| src/common/constants.h | TASK_COMM_NAME_INJECTION_<br>TARGET_TIMERFD_SETTIME | Name of the process to hijack at syscall sys_timerfd_settime |
+| src/common/constants.h | TASK_COMM_NAME_INJECTION_<br>TARGET_OPEN | Name of the process to hijack at syscall sys_openat |
+| src/helpers/injection_lib.c| ATTACKER_IP & ATTACKER_PORT| IP address and port of the attacker machine|
 
 Receiving a reverse shell from the attacker machine can be done with netcat:
 ```
@@ -202,12 +205,12 @@ Actions are sent to the backdoor using backdoor triggers, which indicate the bac
 
 
 #### Pattern-based trigger
-This trigger hides the command and client information so that it can be recognized by the backdoor, but at the same time seems random enough for an external network supervisor. It is based on the trigger used by the NSA rootkit [Bvp47](https://www.pangulab.cn/files/The_Bvp47_a_top-tier_backdoor_of_us_nsa_equation_group.en.pdf).
+This trigger hides the command and client information so that it can be recognized by the backdoor, but at the same time seems random enough for an external network supervisor. It is based on the trigger used by the recently discovered NSA rootkit [Bvp47](https://www.pangulab.cn/files/The_Bvp47_a_top-tier_backdoor_of_us_nsa_equation_group.en.pdf).
 
 <img src="docs/images/packet_examples_bvp47_trigger.png" float="left">
 
 #### Multi-packet trigger
-This trigger consists of multiple TCP packets on which the backdoor payload is hidden in the packet headers. This is based on the [Hive](https://wikileaks.org/vault7/document/hive-DevelopersGuide/hive-DevelopersGuide.pdf) implant leaked by WikiLeaks. The following payload is used:
+This trigger consists of multiple TCP packets on which the backdoor payload is hidden in the packet headers. This design is based on the CIA [Hive](https://wikileaks.org/vault7/document/hive-DevelopersGuide/hive-DevelopersGuide.pdf) implant described in the Vault 7 leak. The following payload is used:
 
 <img src="docs/images/packet_examples_hive_data.png" float="left">
 
@@ -252,16 +255,15 @@ After the infected machine sends any TCP packet, the backdoor overwrites it and 
 
 
 ## Execution hijacking module
-Although in principle an eBPF program cannot start the execution of a program by itself, this module shows how a malicious rootkit may take advantage of benign programs in order to execute malicious code at the user space. This module achieves two goals:
-* Execute a malicious user program taking advantage of other program’s execution.
-* Be transparent to the user space, that is, if we hijack the execution of a program so
-that another is run, the original program should be executed too with the least delay-
+In principle, an eBPF program cannot start the execution of a program by itself. This module shows how a malicious rootkit may take advantage of benign programs in order to execute malicious code at the user space. This module achieves two goals:
+* Execute a malicious user program taking advantage of other program's execution.
+* Be transparent to the user space, that is, if we hijack the execution of a program so that another is run, the original program should be executed too with the least delay.
 
-This module hijacks the sys_execve syscall, modifying its arguments so that a malicious program (*src/helpers/execve_hijack.c*) is run instead. This modification is made in such a way that the malicious program can then execute the original program with the original arguments to avoid raising concerns in the user space. The following diagram summarizes the overall functionality:
+This module works by hijacking the sys_execve() syscall, modifying its arguments so that a malicious program (*src/helpers/execve_hijack.c*) is run instead. This modification is made in such a way that the malicious program can then execute the original program with the original arguments to avoid raising concerns in the user space. The following diagram summarizes the overall functionality:
 
 <img src="docs/images/summ_execve_hijack.png" float="left">
 
-As we mentioned, the arguments of the original sys_execve call are modified in such a way that the original arguments are not lost (by taking advantage of argv[0]) so that the original program can be executed after the malicious one:
+The arguments of the original sys_execve() call are modified in such a way that the original arguments are not lost (using argv[0]) so that the original program can be executed after the malicious one:
 
 <img src="docs/images/execve_hijack_overall_malware.png" float="left">
 
@@ -277,11 +279,11 @@ We have incorporated a sample test program (*src/helpers/simple_execve.c*) for t
 After a successful hijack, the module will stop itself. The malicious program *execve_hijack* will listen for requests of a plaintext pseudo-shell from the rootkit client.
 
 ## Rootkit persistence
-After the infected machine is rebooted, all eBPF programs will be unloaded from the kernel, and the user space rootkit program will be killed. Moreover, even if the rootkit could be run again automatically, it would no longer dispose of the root privileges needed for attaching the eBPF programs again. Therefore, the rootkit persistence module aims to tackle these two challenges:
-* Execute the rootkit automatically and without user interaction after a machine re-boot event.
-* Once the rootkit has acquired root privileges the first time it is executed in the machine, it must keep them including after a reboot.
+After the infected machine is rebooted, all eBPF programs will be unloaded from the kernel and the userland rootkit program will be killed. Moreover, even if the rootkit could be run again automatically, it would no longer enjoy the root privileges needed for attaching the eBPF programs again. The rootkit persistence module aims to tackle these two challenges:
+* Execute the rootkit automatically and without user interaction after a machine reboot event.
+* Once the rootkit has acquired root privileges the first time it is executed in the machine, it must keep them even after a reboot.
 
-For this functionality, two secret files are created under *cron.d* and *sudoers.d*. These entries ensure that the rootkit is loaded automatically and with full privilege after a reboot. These files are created and managed by the *deployer&#46;sh* script:
+TripleCross uses two secret files, created under *cron.d* and *sudoers.d*, to implement this functionality. These entries ensure that the rootkit is loaded automatically and with full privilege after a reboot. These files are created and managed by the *deployer&#46;sh* script:
 
 <img src="docs/images/persistence_before.png" float="left">
 <img src="docs/images/persistence_after.png" float="right">
@@ -308,9 +310,9 @@ The files and directories hidden by the rootkit can be customized by the followi
 | src/common/constants.h | SECRET_DIRECTORY_NAME_HIDE | Name of directory to hide |
 | src/common/constants.h | SECRET_FILE_PERSISTENCE_NAME | Name of the file to hide |
 
-By default, Triplecross will hide any files called "*ebpfbackdoor*" and a directory named "*SECRETDIR*". This module is activated automatically after the rootkit installation.
+By default, TripleCross will hide any files called "*ebpfbackdoor*" and a directory named "*SECRETDIR*". This module is activated automatically after the rootkit installation.
 
-The technique used for achieving this functionality consists on tampering with the arguments of the sys_getdents system call:
+The technique used for achieving this functionality consists of tampering with the arguments of the sys_getdents() system call:
 
 <img src="docs/images/getdents_technique.png" float="left">
 
