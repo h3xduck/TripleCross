@@ -85,7 +85,7 @@ Once the rootkit files are generated under src/bin/, the *tc.o* and *kit* progra
 ```
 // TC egress program
 sudo tc qdisc add dev enp0s3 clsact
-sudo tc filter add dev enp0s3 egress bpf direct - action obj bin/tc.o sec classifier/egress
+sudo tc filter add dev enp0s3 egress bpf direct-action obj bin/tc.o sec classifier/egress
 // Libbpf-powered rootkit
 sudo ./bin/kit -t enp0s3
 ```
