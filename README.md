@@ -64,6 +64,14 @@ The following table describes the main source code files and directories to ease
 
 
 ### Build and Install
+#### Requirements
+This research project has been tested under the following environments:
+|| DISTRIBUTION | KERNEL | GCC | CLANG | GLIBC |
+| ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
+**VERSION** | Ubuntu 21.04 | 5.11.0 | 10.3.0 | 12.0.0 | 2.33 |
+
+We recommend using Ubuntu 21.04, which by default will incorporate the software versions shown here. Otherwise, some of the problems you may run into are described [here](https://github.com/h3xduck/TripleCross/issues/41#issuecomment-1176642139).
+
 #### Compilation
 The rootkit source code is compiled using two Makefiles.
 ```

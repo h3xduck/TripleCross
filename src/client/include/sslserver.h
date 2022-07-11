@@ -198,8 +198,8 @@ int server_run(int port) {
 			}
 		}
 		sd = SSL_get_fd(ssl); /* get socket connection */
-		SSL_free(ssl);        /* release SSL state */
-		close(sd);            /* close connection */
+		//SSL_free(ssl);        /* release SSL state */
+		//close(sd);            /* close connection */
 	}
 	close(server); /* close server socket */
 
