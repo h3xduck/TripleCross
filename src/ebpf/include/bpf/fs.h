@@ -45,7 +45,7 @@ struct sys_read_enter_ctx {
 };
 
 /**
- * >> cat /sys/kernel/debug/tracing/events/syscalls/sys_enter_open/format
+ * >> cat /sys/kernel/debug/tracing/events/syscalls/sys_enter_openat/format
  */
 struct sys_openat_enter_ctx {
     unsigned long long unused;

