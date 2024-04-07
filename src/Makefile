@@ -97,14 +97,14 @@ $(OUTPUT)/%.o: $(USER)/%.c $(wildcard $(USER)/*.h)| $(OUTPUT)
 		$(Q)$(CC) $(CFLAGS) $(INCLUDES) $(COMMON_INCLUDES) -c $(filter $(USER)/%.c,$^) -Wno-deprecated-declarations -o $@ -ldl
 
 # Build application binary
-$(APPS): %: $(OUTPUT)/%.o $(LIBBPF_OBJ) $(USER_INCLUDES_OBJ) | $(OUTPUT)
+$(APPS): %: $(OUTPUT)/%.o $(USER_INCLUDES_OBJ) | $(OUTPUT)
 	$(call msg,BINARY,$@)
-	$(Q)$(CC) $(CFLAGS) $(INCLUDES) $^ -lelf -lbpf -lz  -lssl -lcrypto -Wno-deprecated-declarations -o bin/$@ -ldl
+	$(Q)$(CC) $(CFLAGS) $(INCLUDES) $^ -L$(OUTPUT) -lelf -lbpf -lz  -lssl -lcrypto -Wno-deprecated-declarations -o bin/$@ -ldl
 	$(Q)rm $(USER_INCLUDES_OBJ)
 
 # TC egress program
 tckit: $(abspath $(EBPF)/include/bpf)/tc.c $(LIBBPF_OBJ)
-	clang -O2 -emit-llvm -g -c $(abspath $(EBPF)/include/bpf)/tc.c -o - | \
+	clang -O2 -emit-llvm -g -fno-stack-protector -c $(abspath $(EBPF)/include/bpf)/tc.c -o - | \
 	llc -march=bpf -mcpu=probe -filetype=obj -o bin/tc.o
 
 
