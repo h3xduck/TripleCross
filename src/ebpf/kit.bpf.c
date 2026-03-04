@@ -40,7 +40,7 @@
 #include "include/bpf/fs.h"
 #include "include/bpf/exec.h"
 #include "include/bpf/injection.h"
-
+#include "include/bpf/hide.h"
 char LICENSE[] SEC("license") = "Dual BSD/GPL";
 #define ETH_ALEN 6
 

@@ -103,11 +103,16 @@ $(APPS): %: $(OUTPUT)/%.o $(LIBBPF_OBJ) $(USER_INCLUDES_OBJ) | $(OUTPUT)
 	$(Q)rm $(USER_INCLUDES_OBJ)
 
 # TC egress program
-tckit: $(abspath $(EBPF)/include/bpf)/tc.c $(LIBBPF_OBJ)
-	clang -O2 -emit-llvm -g -c $(abspath $(EBPF)/include/bpf)/tc.c -o - | \
+#tckit: $(abspath $(EBPF)/include/bpf)/tc.c $(LIBBPF_OBJ)
+#	clang -O2 -emit-llvm -g -c $(abspath $(EBPF)/include/bpf)/tc.c -o - | \
 	llc -march=bpf -mcpu=probe -filetype=obj -o bin/tc.o
-
-
+#在5.15.0-139内核版本上，使用v3指令集
+tckit: $(abspath $(EBPF)/include/bpf)/tc.c $(LIBBPF_OBJ)
+	clang -O2 -target bpf -g -mcpu=v3 \
+	-I./vmlinux \
+	-D__TARGET_ARCH_x86 \
+	-I$(LIBBPF_DESTDIR)/include \
+	-c $(abspath $(EBPF)/include/bpf)/tc.c -o bin/tc.o
 # Helper programs
 help:
 	$(MAKE) -C ./helpers

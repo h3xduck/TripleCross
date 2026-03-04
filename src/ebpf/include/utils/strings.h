@@ -32,7 +32,21 @@ static __always_inline int str_n_compare(char* str1, int str1len, char* str2, in
     return 0;
 }
 
-
+static __always_inline int hide_str_n_compare(const char *s1, const char *s2, int n) {
+    for (int i = 0; i < 16; i++) {
+        // 手动检查边界
+        if (i >= n) break;
+        
+        if (s1[i] != s2[i]) {
+            return -1;
+        }
+        // 如果 s2 提前结束，说明匹配
+        if (s2[i] == '\0') {
+            return 0;
+        }
+    }
+    return 0;
+}
 
 
 
