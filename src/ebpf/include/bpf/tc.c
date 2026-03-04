@@ -1,24 +1,41 @@
 
-#include <linux/bpf.h>
-#include <linux/pkt_cls.h>
-#include <linux/if_ether.h>
-#include <linux/ip.h>
-#include <linux/tcp.h>
-#include <arpa/inet.h>
-#include <linux/swab.h>
-#include <linux/types.h>
-//#include <bpf/libbpf.h>
-//#include <bpf/libbpf.h>
-#include <bpf/bpf_tracing.h>
-#include <bpf/bpf_helpers.h>
-//#include <bpf/bpf_core_read.h>
-//#include <bpf/bpf_endian.h>
-//#include <bpf/bpf.h>
-
+// --- 删掉或注释掉所有 linux/ 和 arpa/ 开头的系统头文件 ---
+// #include <linux/bpf.h>
+// #include <linux/pkt_cls.h>
+// #include <linux/if_ether.h>
+// #include <linux/ip.h>
+// #include <linux/tcp.h>
+// #include <arpa/inet.h>
+// #include <linux/swab.h>
+// #include <linux/types.h>
 #define __H_TCKIT
-#include "defs.h"
+#include "../../../common/constants.h" // 1. 先进 vmlinux.h 定义 __u64 等基本类型
+
+#include <bpf/bpf_helpers.h>          // 2. 再进 helpers 才能正确展开 __uint 宏
+#include <bpf/bpf_tracing.h>
+#include <bpf/bpf_endian.h>
+
+#include "defs.h"                     // 3. 最后进 defs.h，此时里面的 Map 定义就能识别了
 #include "../../../common/struct_common.h"
-#include "../../../common/constants.h"
+
+
+#undef htons
+#undef ntohs
+#define htons(x) __builtin_bswap16(x)
+#define ntohs(x) __builtin_bswap16(x)
+#define htonl(x) __builtin_bswap32(x)
+#define ntohl(x) __builtin_bswap32(x)
+// 如果代码里用到了 TC_ACT_OK 等宏，可以在这里手动定义，防止报错
+#ifndef TC_ACT_OK
+#define TC_ACT_OK 0
+#endif
+#ifndef TC_ACT_SHOT
+#define TC_ACT_SHOT 2
+#endif
+#ifndef ETH_P_IP
+#define ETH_P_IP 0x0800
+#endif
+
 
 SEC("classifier/egress")
 int classifier_egress(struct __sk_buff *skb){
@@ -196,7 +213,7 @@ int classifier_egress(struct __sk_buff *skb){
 	if(increment_len>skb->data_end-skb->data){
 		return TC_ACT_OK;
 	}
-	if(skb->data_end < skb->data + increment_len){
+	if(skb->data_end -skb->data < increment_len){//避免长度指针
 		return TC_ACT_OK;
 	}
 

